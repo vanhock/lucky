@@ -1,0 +1,266 @@
+{
+    "children": [
+      {
+        "type": "group",
+        "visible": true,
+        "opacity": 1,
+        "blendingMode": "normal",
+        "name": "header",
+        "left": -1,
+        "right": 1367,
+        "top": -3,
+        "bottom": 89,
+        "height": 92,
+        "width": 1368,
+        "children": [
+          {
+            "type": "group",
+            "visible": true,
+            "opacity": 1,
+            "blendingMode": "normal",
+            "name": "sign-in",
+            "left": 1240,
+            "right": 1366,
+            "top": -3,
+            "bottom": 88,
+            "height": 91,
+            "width": 126,
+            "children": [
+              {
+                "type": "layer",
+                "visible": true,
+                "opacity": 1,
+                "blendingMode": "normal",
+                "name": "Sign in",
+                "left": 1277,
+                "right": 1330,
+                "top": 39,
+                "bottom": 54,
+                "height": 15,
+                "width": 53,
+                "mask": {},
+                "text": {
+                  "value": "Sign in",
+                  "font": {
+                    "name": "ArialMT\u0000",
+                    "sizes": [
+                      16,
+                      16
+                    ],
+                    "colors": [
+                      [
+                        245,
+                        245,
+                        245,
+                        255
+                      ],
+                      [
+                        245,
+                        245,
+                        245,
+                        255
+                      ]
+                    ],
+                    "alignment": [
+                      "left"
+                    ]
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "transform": {
+                    "xx": 1,
+                    "xy": 0,
+                    "yx": 0,
+                    "yy": 1,
+                    "tx": 1277.0351262349068,
+                    "ty": 50.91387559808612
+                  }
+                },
+                "image": {}
+              },
+              {
+                "type": "layer",
+                "visible": true,
+                "opacity": 1,
+                "blendingMode": "normal",
+                "name": "sign-in-block",
+                "left": 1240,
+                "right": 1366,
+                "top": -3,
+                "bottom": 88,
+                "height": 91,
+                "width": 126,
+                "mask": {},
+                "image": {}
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "visible": true,
+            "opacity": 1,
+            "blendingMode": "normal",
+            "name": "menu",
+            "left": 97,
+            "right": 279,
+            "top": 39,
+            "bottom": 51,
+            "height": 12,
+            "width": 182,
+            "children": [
+              {
+                "type": "layer",
+                "visible": true,
+                "opacity": 1,
+                "blendingMode": "normal",
+                "name": "other page",
+                "left": 169,
+                "right": 279,
+                "top": 39,
+                "bottom": 51,
+                "height": 12,
+                "width": 110,
+                "mask": {},
+                "text": {
+                  "value": "other page",
+                  "font": {
+                    "name": "ArialMT\u0000",
+                    "sizes": [
+                      16
+                    ],
+                    "colors": [
+                      [
+                        245,
+                        245,
+                        245,
+                        255
+                      ]
+                    ],
+                    "alignment": [
+                      "left"
+                    ]
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "transform": {
+                    "xx": 0.9986453145465755,
+                    "xy": 0,
+                    "yx": 0,
+                    "yy": 0.9999999999999976,
+                    "tx": 168.9024626473535,
+                    "ty": 50.99999999999999
+                  }
+                },
+                "image": {}
+              },
+              {
+                "type": "layer",
+                "visible": true,
+                "opacity": 1,
+                "blendingMode": "normal",
+                "name": "Home",
+                "left": 97,
+                "right": 146,
+                "top": 39,
+                "bottom": 51,
+                "height": 12,
+                "width": 49,
+                "mask": {},
+                "text": {
+                  "value": "Home",
+                  "font": {
+                    "name": "﻿ArialMT\u0000",
+                    "sizes": [
+                      16
+                    ],
+                    "colors": [
+                      [
+                        245,
+                        245,
+                        245,
+                        255
+                      ]
+                    ],
+                    "alignment": [
+                      "left"
+                    ]
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "right": 0,
+                  "bottom": 0,
+                  "transform": {
+                    "xx": 0.9986453145465755,
+                    "xy": 0,
+                    "yx": 0,
+                    "yy": 0.9999999999999976,
+                    "tx": 96.00135468545344,
+                    "ty": 50.999999999999964
+                  }
+                },
+                "image": {}
+              }
+            ]
+          },
+          {
+            "type": "layer",
+            "visible": true,
+            "opacity": 1,
+            "blendingMode": "normal",
+            "name": "logo",
+            "left": 648,
+            "right": 718,
+            "top": 13,
+            "bottom": 73,
+            "height": 60,
+            "width": 70,
+            "mask": {},
+            "image": {}
+          },
+          {
+            "type": "layer",
+            "visible": true,
+            "opacity": 1,
+            "blendingMode": "normal",
+            "name": "header-bg",
+            "left": -1,
+            "right": 1367,
+            "top": -3,
+            "bottom": 89,
+            "height": 92,
+            "width": 1368,
+            "mask": {},
+            "image": {}
+          }
+        ]
+      },
+      {
+        "type": "layer",
+        "visible": true,
+        "opacity": 1,
+        "blendingMode": "normal",
+        "name": "Фон",
+        "left": 0,
+        "right": 1366,
+        "top": 0,
+        "bottom": 626,
+        "height": 626,
+        "width": 1366,
+        "mask": {},
+        "image": {}
+      }
+    ],
+    "document": {
+      "width": 1366,
+      "height": 626,
+      "resources": {
+        "layerComps": [],
+        "guides": [],
+        "slices": []
+      }
+    }
+  }
