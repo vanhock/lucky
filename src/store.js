@@ -9,7 +9,7 @@ export default new Vuex.Store({
   },
   getters: {
     designMarkup: state => {
-      return state.designMarkup;
+      return getParentAndChild(state.designMarkup.children);
     }
   },
   mutations: {
@@ -23,3 +23,16 @@ export default new Vuex.Store({
     }
   }
 });
+
+function getPairsForNode(node) {
+  if (node.children)
+    return node.children
+      .map(child => getPairsForNode(child))
+      .concat(node.children)
+      .reduce((arr1, arr2) => arr1.concat(arr2));
+  else return [];
+}
+
+function getParentAndChild(list) {
+  return list.map(getPairsForNode).reduce((arr1, arr2) => arr1.concat(arr2));
+}

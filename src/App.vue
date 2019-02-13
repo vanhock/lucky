@@ -74,9 +74,10 @@ body {
   position: absolute;
   display: flex;
   align-items: center;
-  justify-content: center;  
+  justify-content: center;
   width: 124px;
-  height: 89px;
+  //height: 89px;
+  height: 100%;
   right: 0;
   top: 0;
   background-color: $color-4;

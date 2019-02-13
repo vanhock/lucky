@@ -1,11 +1,8 @@
 <template>
-  <div class="home">
-    <a href="TestDesign.psd">PSD huev</a>
-  </div>
+  <div class="home"></div>
 </template>
 
 <script>
-
 export default {
   name: "home"
 };
