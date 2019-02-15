@@ -1,0 +1,19 @@
+{
+  "name": "perfectpixel",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ivan Sinyavin",
+  "license": "ISC",
+  "devDependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "formidable": "^1.2.1",
+    "mongodb": "^3.1.13",
+    "nodemon": "^1.18.10",
+    "prettier": "^1.16.4"
+  }
+}
