@@ -1,6 +1,9 @@
 <template>
   <div class="design-uploader">
-    <input type="file" ref="file" @change="upload" />
+    <label for="file" class="drag-area"
+      >Drag the design or click for upload</label
+    >
+    <input id="file" type="file" ref="file" @change="upload" hidden />
   </div>
 </template>
 
@@ -36,4 +39,18 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.design-uploader {
+  .drag-area {
+    background-color: $color-bg2;
+    border: 1px dashed $color-w1;
+    border-radius: 7px;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+}
+</style>

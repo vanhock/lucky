@@ -1,0 +1,236 @@
+// =============================================================================
+// String Replace
+// =============================================================================
+
+@function str-replace($string, $search, $replace: "") {
+  $index: str-index($string, $search);
+
+  @if $index {
+	@return str-slice($string, 1, $index - 1) + $replace +
+      str-replace(
+        str-slice($string, $index + str-length($search)),
+        $search,
+        $replace
+      );
+  }
+
+  @return $string;
+}
+
+// =============================================================================
+// Font Face
+// =============================================================================
+
+@mixin font-face(
+  $name,
+  $path,
+  $weight: null,
+  $style: null,
+  $exts: eot woff2 woff ttf svg
+) {
+  $src: null;
+
+  $extmods: (
+		  eot: "?",
+		  svg: "#" + str-replace($name, " ", "_")
+  );
+
+  $formats: (
+		  otf: "opentype",
+		  ttf: "truetype"
+  );
+
+  @each $ext in $exts {
+	$extmod: if(
+					map-has-key($extmods, $ext),
+					$ext + map-get($extmods, $ext),
+					$ext
+	);
+	$format: if(map-has-key($formats, $ext), map-get($formats, $ext), $ext);
+	$src: append(
+					$src,
+					url(quote($path + "." + $extmod)) format(quote($format)),
+					comma
+	);
+  }
+
+  @font-face {
+	font-family: quote($name);
+	font-style: $style;
+	font-weight: $weight;
+	src: $src;
+  }
+}
+
+// =============================================================================
+// Font weight
+// =============================================================================
+@mixin font-style($style) {
+  font-family: $style;
+  font-style: normal;
+}
+
+@mixin deco-line($inverse) {
+  display: table;
+  white-space: nowrap;
+  height: auto;
+  line-height: 1;
+  text-align: center;
+
+  @if $inverse == "inverse" {
+	&:before,
+	&:after {
+	  content: "";
+	  display: table-cell;
+	  position: relative;
+	  top: 50%;
+	  width: 50%;
+	  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABaAAAAACCAYAAACuTHuKAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyFpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1OThBRDY4OUNDMTYxMUU0OUE3NUVGOEJDMzMzMjE2NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1OThBRDY4QUNDMTYxMUU0OUE3NUVGOEJDMzMzMjE2NyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjU5OEFENjg3Q0MxNjExRTQ5QTc1RUY4QkMzMzMyMTY3IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU5OEFENjg4Q0MxNjExRTQ5QTc1RUY4QkMzMzMyMTY3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+VU513gAAADVJREFUeNrs0DENACAQBDBIWLGBJQby/mUcJn5sJXQmOQMAAAAAAJqt+2prAAAAAACg2xdgANk6BEVuJgyMAAAAAElFTkSuQmCC)
+	  no-repeat;
+	}
+	&:before {
+	  background-position: right 7px top 60%;
+	}
+	&:after {
+	  background-position: left 7px top 60%;
+	}
+  }
+}
+
+@mixin clearfix() {
+  &:after {
+	content: "";
+	display: block;
+	clear: both;
+  }
+}
+
+@mixin valign() {
+  top: 50%;
+  -webkit-transform: translate(0, -50%);
+  -moz-transform: translate(0, -50%);
+  -ms-transform: translate(0, -50%);
+  -o-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+}
+
+@mixin align() {
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+@mixin galign() {
+  left: 50%;
+  -webkit-transform: translate(-50%, 0);
+  -moz-transform: translate(-50%, 0);
+  -ms-transform: translate(-50%, 0);
+  -o-transform: translate(-50%, 0);
+  transform: translate(-50%, 0);
+}
+
+@mixin scroll($opacity: 0) {
+  &::-webkit-scrollbar {
+	width: 13px;
+	height: 13px;
+	background: rgba(255, 255, 255, 0.2);
+	cursor: pointer;
+  }
+  &::-webkit-scrollbar-corner {
+	background: 0 0;
+  }
+  &::-webkit-scrollbar-thumb {
+	min-height: 20px;
+	border: 3px solid transparent;
+	background-clip: content-box;
+	border-radius: 5px;
+	box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.1 + $opacity);
+
+	&:hover {
+	  box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.3 + $opacity);
+	  cursor: pointer;
+	}
+  }
+}
+
+@mixin box-shadow($intense: null) {
+  @if $intense == "deep" {
+	box-shadow: 0 2px 20px rgba(0, 0, 0, 0.22);
+  }
+  @if $intense == "normal" {
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  @if $intense == "medium" {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+  }
+  @if $intense == "very-deep" {
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 1px 0 rgba(0, 20, 51, 0.4);
+  }
+}
+
+@mixin blur() {
+  $blur: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='blur-svg'%3E%3Cdefs%3E%3Cfilter id='blur-filter'%3E%3CfeGaussianBlur stdDeviation='3'/%3E%3C/filter%3E%3C/defs%3E%3C/svg%3E";
+  filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='3');
+  -webkit-filter: url($blur);
+  filter: url($blur);
+  -webkit-filter: blur(3px);
+  filter: blur(3px);
+}
+
+@mixin spinner($name: null, $color: #000) {
+  @if $name == "circle" {
+	width: 40px;
+	height: 40px;
+	margin: 100px auto;
+	background-color: $color;
+
+	border-radius: 100%;
+	-webkit-animation: sk-scaleout 1s infinite ease-in-out;
+	animation: sk-scaleout 1s infinite ease-in-out;
+
+	@-webkit-keyframes sk-scaleout {
+	  0% {
+		-webkit-transform: scale(0);
+	  }
+	  100% {
+		-webkit-transform: scale(1);
+		opacity: 0;
+	  }
+	}
+
+	@keyframes sk-scaleout {
+	  0% {
+		-webkit-transform: scale(0);
+		transform: scale(0);
+	  }
+	  100% {
+		-webkit-transform: scale(1);
+		transform: scale(1);
+		opacity: 0;
+	  }
+	}
+  }
+}
+
+@mixin hideZone() {
+  background: -moz-linear-gradient(
+				  top,
+				  rgba(255, 255, 255, 0) 0%,
+				  rgba(255, 255, 255, 1) 100%
+  ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(
+				  top,
+				  rgba(255, 255, 255, 0) 0%,
+				  rgba(255, 255, 255, 1) 100%
+  ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(
+				  to bottom,
+				  rgba(255, 255, 255, 0) 0%,
+				  rgba(255, 255, 255, 1) 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+}
