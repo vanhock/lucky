@@ -1,5 +1,3 @@
-
-
 export const hasClass = function(el, className) {
   return (" " + el.className + " ").indexOf(" " + className + " ") > -1;
 };
@@ -340,4 +338,25 @@ export const data2blob = function(dataURI) {
     ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ia], { type: mimeString });
+};
+
+export const isSiteOnline = function(url, callback) {
+  // try to load favicon
+  const timer = setTimeout(function() {
+    // timeout after 5 seconds
+    callback(false);
+  }, 5000);
+
+  const img = document.createElement("img");
+  img.onload = function() {
+    clearTimeout(timer);
+    callback(true);
+  };
+
+  img.onerror = function() {
+    clearTimeout(timer);
+    callback(false);
+  };
+
+  img.src = url + "/favicon.ico";
 };

@@ -10,10 +10,23 @@
   "license": "ISC",
   "devDependencies": {
     "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.2",
+    "coffeescript-module": "^0.2.1",
+    "cors-anywhere": "^0.4.1",
     "express": "^4.16.4",
+    "find-free-port": "^2.0.0",
     "formidable": "^1.2.1",
+    "http-proxy": "^1.17.0",
+    "is-url": "^1.2.4",
+    "jspack": "^0.0.4",
     "mongodb": "^3.1.13",
+    "node-cache": "^4.2.0",
     "nodemon": "^1.18.10",
-    "prettier": "^1.16.4"
-  }
+    "parse-engine-data": "^0.1.2",
+    "pngjs": "^3.3.3",
+    "prettier": "^1.16.4",
+    "request-promise": "^4.2.4",
+    "rsvp": "^4.8.4"
+  },
+  "dependencies": {}
 }

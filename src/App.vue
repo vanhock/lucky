@@ -5,12 +5,7 @@
 </template>
 
 <script>
-import PsdMixin from "./mixins/PsdMixin.vue";
-import RecomendMixin from "./mixins/RecommendMixin";
-
-export default {
-  mixins: [RecomendMixin]
-};
+export default {};
 </script>
 
 <style lang="scss">

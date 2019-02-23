@@ -15,6 +15,7 @@
         :name="name"
         :placeholder="placeholder"
         @keyup="$emit('onchange')"
+        @past="$emit('onchange')"
         v-bind="$props"
         :disabled="disabled"
       />
@@ -50,7 +51,7 @@ export default {
     width: 100%;
     font-size: 24px;
     input {
-      width: calc(100% - 20px);
+      width: calc(100% - 10px);
       padding: 3px 10px 3px 0;
       border: 0;
       border-bottom: 2px solid;

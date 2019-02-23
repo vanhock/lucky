@@ -10,7 +10,6 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "psd": "^3.2.0",
     "vue": "^2.5.22",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
@@ -23,13 +22,16 @@
     "@vue/cli-service": "^3.4.0",
     "@vue/eslint-config-prettier": "^4.0.1",
     "@vue/test-utils": "^1.0.0-beta.20",
+    "@wildpeaks/snapshot-dom": "^1.2.1",
     "axios": "^0.18.0",
     "babel-eslint": "^10.0.1",
     "chai": "^4.1.2",
     "coffee-loader": "^0.9.0",
     "coffeescript": "^2.3.2",
+    "domjson": "^0.1.2",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
+    "flatted": "^2.0.0",
     "inputmask": "^4.0.6",
     "lint-staged": "^8.1.0",
     "module": "^1.2.5",

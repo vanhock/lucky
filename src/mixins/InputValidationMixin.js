@@ -8,6 +8,8 @@ export default {
           return /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
         case "phone":
           return /^(\+7|7|8)?[\s-]?\(?[489][0-9]{2}\)?[\s-]?[0-9]{3}[\s-]?[0-9]{2}[\s-]?[0-9]{2}$/gm;
+        case "url":
+          return /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=]+$/gm;
         default:
           return null;
       }
@@ -15,7 +17,7 @@ export default {
     valid() {
       const rule =
         this.rule || (this.validationRule && new RegExp(this.validationRule));
-      if (!this.inputValue || this.inputValue === "") {
+      if (!this.inputValue) {
         return false;
       }
       return rule

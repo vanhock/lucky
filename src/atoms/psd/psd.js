@@ -62,7 +62,7 @@ module.exports = {
     this.fromEvent = function(e) {
       return new RSVP.Promise(function(resolve, reject) {
         var file, reader;
-        file = e.dataTransfer.files[0];
+        file = e.dataTransfer && e.dataTransfer.files[0] || e.target.files;
         reader = new FileReader();
         reader.onload = function(e) {
           var psd;
