@@ -20,6 +20,7 @@
 import axios from "axios";
 import config from "../config";
 import { getErrors } from "../api";
+import { getElementOffset } from "../atoms/utils";
 import { mapGetters } from "vuex";
 import { addClass, removeClass } from "../atoms/utils";
 import RecognizeMixin from "../mixins/RecognizeMixin.vue";
@@ -127,21 +128,20 @@ export default {
       </div>`;
       this.currentFrameBody.appendChild(point);
       const pointElem = point.querySelector(".lky-point");
-      const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
-      pointElem.onmouseover = () => {
+      pointElem.onmouseenter = () => {
         addClass(point, "active");
         self.elementHighlight(node);
       };
-      pointElem.onmouseout = () => {
+      pointElem.onmouseleave = () => {
         removeClass(point, "active");
         self.removeHighlight();
       };
-      this.setTipPopupPosition(node, point, this.currentFrameDocument);
+      this.setTipPopupPosition(node, point);
     },
     errorTipEffects() {
       const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
       allTips.forEach(t => {
-        t.onmouseover = () => {
+        t.querySelector(".lky-point").onmouseover = () => {
           allTips.forEach(c => {
             addClass(c, "hover");
           });
@@ -153,93 +153,99 @@ export default {
         };
       });
     },
-    setTipPopupPosition(node, tip, document) {
+    setTipPopupPosition(node, tip) {
+      const popup = tip.querySelector(".lky-popup");
       const gutter = 30;
       const documentDim = {
-        width: document.clientWidth,
-        height: document.clientHeight
+        width: this.iframeParams.width,
+        height: window.innerHeight
       };
       const nodeDim = {
         width: node.clientWidth,
         height: node.clientHeight,
-        left: node.offsetLeft,
-        top: node.offsetTop
+        ...getElementOffset(node, this.currentFrame.contentWindow)
       };
-      const tipDim = {
-        width: tip.clientWidth,
-        height: tip.clientHeight
+      const popupDim = {
+        width: popup.clientWidth,
+        height: popup.clientHeight
       };
       const right = () => {
         return (
-          documentDim.width - nodeDim.width + nodeDim.left + gutter <=
-          tipDim.width
+          documentDim.width - nodeDim.width + nodeDim.left + gutter >=
+          popupDim.width
         );
       };
       const bottom = () => {
         return (
-          documentDim.height - nodeDim.height + nodeDim.top + gutter <=
-          tipDim.height
+          documentDim.height - nodeDim.height + nodeDim.top + gutter >=
+          popupDim.height
         );
       };
       const left = () => {
-        return nodeDim.left + gutter <= tipDim.width;
+        return nodeDim.left + gutter >= popupDim.width;
       };
 
       const top = () => {
-        return nodeDim.top + gutter <= tipDim.height;
+        return nodeDim.top + gutter >= popupDim.height;
       };
 
       const halfTop = () => {
-        return nodeDim.top + nodeDim.height / 2 - gutter >= tipDim.height / 2;
+        return nodeDim.top + nodeDim.height / 2 >= popupDim.height / 2;
       };
       const halfBottom = () => {
         return (
-          documentDim.height - (nodeDim.top + nodeDim.height / 2 + gutter) <=
-          tipDim.height / 2
+          documentDim.height - (nodeDim.top + nodeDim.height / 2) >=
+          popupDim.height / 2
         );
       };
       const halfLeft = () => {
-        return nodeDim.left + nodeDim.width / 2 - gutter >= tipDim.width / 2;
+        return nodeDim.left + nodeDim.width / 2 >= popupDim.width / 2;
       };
       const halfRight = () => {
         return (
-          documentDim.width - (nodeDim.left + nodeDim.width / 2 + gutter) <=
-          tipDim.width / 2
+          documentDim.width - (nodeDim.left + nodeDim.width / 2) >=
+          popupDim.width / 2
         );
       };
 
       const rightCenter = () => {
-        return right && halfBottom && halfTop;
+        return right() && halfBottom() && halfTop();
       };
       const leftCenter = () => {
-        return left && halfBottom && halfTop;
+        return left() && halfBottom() && halfTop();
       };
       const topCenter = () => {
-        return top && halfLeft && halfRight;
+        return top() && halfLeft() && halfRight();
       };
       const bottomCenter = () => {
-        return bottom && halfLeft && halfRight;
+        return bottom() && halfLeft() && halfRight();
       };
 
-      if (rightCenter) {
+      //BottomCenter as default
+      tip.style.top = nodeDim.top + nodeDim.height + "px";
+      tip.style.left = nodeDim.left + nodeDim.width / 2 + "px";
+      if (rightCenter()) {
         tip.style.top =
           nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
-        tip.style.left = nodeDim.left + nodeDim.width + gutter + "px";
-      } else if (bottomCenter) {
-        tip.style.top = nodeDim.top + nodeDim.height + gutter + "px";
-        tip.style.left =
-          nodeDim.left + nodeDim.width / 2 - tipDim.width / 2 + "px";
-      } else if (leftCenter) {
+        tip.style.left = nodeDim.left + nodeDim.width + "px";
+        addClass(popup, "right");
+      } else if (bottomCenter()) {
+        addClass(popup, "bottom");
+      } else if (leftCenter()) {
         tip.style.top =
           nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
-        tip.style.left = nodeDim.left - gutter + "px";
-      } else if (topCenter) {
-        tip.style.top = nodeDim.top - gutter + "px";
+        tip.style.left = nodeDim.left + "px";
+        addClass(popup, "left");
+      } else if (topCenter()) {
+        tip.style.top = nodeDim.top + "px";
         tip.style.left =
-          nodeDim.left + nodeDim.width / 2 - tipDim.width / 2 + "px";
+          nodeDim.left + nodeDim.width / 2 - popupDim.width / 2 + "px";
+        addClass(popup, "top");
       } else {
         addClass(tip, "no-popup");
+        addClass(popup, "bottom");
       }
+      popup.style.position = "absolute";
     },
     elementHighlight(node) {
       if (!node) {
@@ -371,14 +377,11 @@ export default {
     },
     renderStyles(d) {
       const css = `.lky-error-tip {
-        position: absolute;
-        z-index: 999999;
+       position: absolute;
+       z-index: 999999;
       }
       .lky-error-tip .lky-point {
         position: absolute;
-        left: 50%;
-        top: 0;
-        transform: translate(-50%, 0);
         width: 25px;
         height: 25px;
         background-color: red;
@@ -387,17 +390,35 @@ export default {
         z-index: 999;
       }
       .lky-error-tip .lky-popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         background-color: #fff;
         padding: 20px;
-        width: 0;
         border-radius: 5px;
         visibility: hidden;
         z-index: 99999999;
         box-shadow: 0 2px 170px rgba(0, 0, 0, 0.5);
+      }
+      .lky-popup.left, .lky-popup.right, .lky-popup.top, .lky-popup.bottom  {
+        position: absolute
+      }
+      .lky-popup.left {
+        right: calc(100% + 30px);
+        top: 50%;
+        transform: translate(0, -50%);
+      }
+      .lky-popup.right {
+        left: calc(100% + 30px);
+        top: 50%;
+        transform: translate(0, -50%);
+      }
+      .lky-popup.top {
+        bottom: calc(100% + 30px);
+        left: 50%;
+        transform: translate(-50%, 0);
+      }
+      .lky-popup.bottom {
+        top: calc(100% + 30px);
+        left: 50%;
+        transform: translate(-50%, 0);
       }
       .lky-error-tip.active .lky-popup {
         visibility: visible;

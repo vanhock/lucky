@@ -360,3 +360,12 @@ export const isSiteOnline = function(url, callback) {
 
   img.src = url + "/favicon.ico";
 };
+
+export const getElementOffset = function(el, currentWindow) {
+  const rect = el.getBoundingClientRect();
+
+  return {
+    top: rect.top + currentWindow.pageYOffset,
+    left: rect.left + currentWindow.pageXOffset
+  };
+};
