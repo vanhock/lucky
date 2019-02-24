@@ -23,16 +23,18 @@ export default {
       this.$store.dispatch("setDesignMarkup", PSD);
     },
     testPage(design, nodes) {
+      const _nodes = [...nodes];
       design.forEach(item => {
-        for (let i = 0, max = nodes.length; i < max; i++) {
-          if (this.searchByParams(nodes[i], item)) {
-            const errors = this.testNode(nodes[i], item);
+        for (let i = 0, max = _nodes.length; i < max; i++) {
+          if (this.searchByParams(_nodes[i], item)) {
+            const errors = this.testNode(_nodes[i], item);
             this.foundBlocks.push({
               design: item,
-              node: nodes[i],
+              node: _nodes[i],
               errors: errors
             });
-            this.displayErrorTip(nodes[i], errors);
+            this.displayErrorTip(_nodes[i], errors);
+            _nodes.splice(i,1);
             break;
           }
         }

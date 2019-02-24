@@ -158,7 +158,7 @@ export default {
       const gutter = 30;
       const documentDim = {
         width: this.iframeParams.width,
-        height: window.innerHeight
+        height: this.currentFrameBody.clientHeight
       };
       const nodeDim = {
         width: node.clientWidth,
@@ -171,13 +171,12 @@ export default {
       };
       const right = () => {
         return (
-          documentDim.width - nodeDim.width + nodeDim.left + gutter >=
-          popupDim.width
+          documentDim.width - (nodeDim.width + nodeDim.left + gutter) >= popupDim.width
         );
       };
       const bottom = () => {
         return (
-          documentDim.height - nodeDim.height + nodeDim.top + gutter >=
+          documentDim.height - (nodeDim.height + nodeDim.top + gutter) >=
           popupDim.height
         );
       };
@@ -190,7 +189,7 @@ export default {
       };
 
       const halfTop = () => {
-        return nodeDim.top + nodeDim.height / 2 >= popupDim.height / 2;
+        return nodeDim.top + (nodeDim.height / 2) >= popupDim.height / 2;
       };
       const halfBottom = () => {
         return (
@@ -199,7 +198,7 @@ export default {
         );
       };
       const halfLeft = () => {
-        return nodeDim.left + nodeDim.width / 2 >= popupDim.width / 2;
+        return nodeDim.left + (nodeDim.width / 2) >= popupDim.width / 2;
       };
       const halfRight = () => {
         return (
@@ -237,9 +236,9 @@ export default {
         tip.style.left = nodeDim.left + "px";
         addClass(popup, "left");
       } else if (topCenter()) {
-        tip.style.top = nodeDim.top + "px";
+        tip.style.top = nodeDim.top - gutter + "px";
         tip.style.left =
-          nodeDim.left + nodeDim.width / 2 - popupDim.width / 2 + "px";
+          nodeDim.left + nodeDim.width / 2 + "px";
         addClass(popup, "top");
       } else {
         addClass(tip, "no-popup");
@@ -284,6 +283,7 @@ export default {
           if (frameDocument.readyState !== "complete") {
             return;
           }
+          self.applyFrameAdditionalStyles();
           self.getErrorsFromApi();
         };
       });
@@ -420,6 +420,45 @@ export default {
         left: 50%;
         transform: translate(-50%, 0);
       }
+      .lky-popup:before {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+      }
+      .lky-popup.top:before {
+        bottom: -5px;
+        left: 50%;
+        transform: translate(-50%, 0);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #fff;
+
+      }
+      .lky-popup.bottom:before {
+        top: -5px;
+        left: 50%;
+        transform: translate(-50%, 0);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 5px solid #fff;
+      }
+      .lky-popup.left:before {
+      top: 50%;
+        right: -5px;
+        transform: translate(0, -50%);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid #fff;
+      }
+      .lky-popup.right:before {
+        top: 50%;
+        left: -5px;
+        transform: translate(0, -50%);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-right: 5px solid #fff;
+      }
       .lky-error-tip.active .lky-popup {
         visibility: visible;
         width: 250px;
@@ -451,6 +490,9 @@ export default {
         style.appendChild(d.createTextNode(css));
       }
       return style;
+    },
+    applyFrameAdditionalStyles() {
+      this.currentFrameBody.style.overflowX = "hidden"
     }
   }
 };
