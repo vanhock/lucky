@@ -29,16 +29,20 @@ export default {
           if (this.searchByParams(_nodes[i], item)) {
             const errors = this.testNode(_nodes[i], item);
             this.foundBlocks.push({
+              name: this.setIssueName(_nodes[i]),
               design: item,
               node: _nodes[i],
               errors: errors
             });
             this.displayErrorTip(_nodes[i], errors);
-            _nodes.splice(i,1);
+            _nodes.splice(i, 1);
             break;
           }
         }
       });
+      this.$store.dispatch("setFoundIssues", this.foundBlocks);
+      this.errorTipEffects();
+      localStorage.setItem("savedDesign", JSON.stringify(this.foundBlocks));
     },
     searchByParams(node, block) {
       if (!node || !block) {
@@ -91,6 +95,16 @@ export default {
         Math.abs(block.top - node.offsetTop) <= gutter &&
         Math.abs(block.left - node.offsetLeft) <= gutter
       );
+    },
+    setIssueName(node) {
+      if (!node) {
+        return;
+      }
+      return (
+        node.id ||
+        ((node.className && "." + node.className.replace(" ", ".")) ||
+          node.nodeName)
+      ).toUpperCase();
     }
   }
 };

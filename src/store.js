@@ -9,7 +9,7 @@ export default new Vuex.Store({
     design: null,
     iframeParams: null,
     siteUrl: null,
-    errors: null
+    foundIssues: null
   },
   getters: {
     design: state => state.design,
@@ -21,7 +21,7 @@ export default new Vuex.Store({
     viewerReady: state => {
       return state.design && state.siteUrl;
     },
-    errors: state => state.errors
+    foundIssues: state => state.foundIssues
   },
   mutations: {
     SET_DESIGN(state, payload) {
@@ -45,8 +45,8 @@ export default new Vuex.Store({
     SET_SITE_URL(state, payload) {
       state.siteUrl = payload;
     },
-    SET_ERRORS(state, payload) {
-      state.errors = payload;
+    SET_FOUND_ISSUES(state, payload) {
+      state.foundIssues = payload;
     }
   },
   actions: {
@@ -64,8 +64,8 @@ export default new Vuex.Store({
     setIframeParams({ commit }, payload) {
       commit("SET_IFRAME_PARAMS", payload);
     },
-    setErrors({ commit }, payload) {
-      commit("SET_ERRORS", payload);
+    setFoundIssues({ commit }, payload) {
+      commit("SET_FOUND_ISSUES", payload);
     }
   }
 });

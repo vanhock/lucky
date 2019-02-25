@@ -10,7 +10,7 @@
     <iframe
       data-perfect-pixel
       :width="iframeParams.width || '100%'"
-      height="99%"
+      :height="windowDim.height - 54 + 'px'"
       sandbox="allow-same-origin allow-scripts"
     ></iframe>
   </div>
@@ -19,6 +19,7 @@
 <script>
 import axios from "axios";
 import config from "../config";
+import Hub from "../atoms/hub"
 import { getErrors } from "../api";
 import { getElementOffset } from "../atoms/utils";
 import { mapGetters } from "vuex";
@@ -28,6 +29,7 @@ export default {
   name: "SiteViewer",
   mixins: [RecognizeMixin],
   mounted() {
+    const self = this;
     !this.viewerReady && this.$router.push({ name: "home" });
     this.init();
   },
@@ -65,9 +67,32 @@ export default {
     },
     currentFrameBody() {
       return this.currentFrameDocument.body;
+    },
+    windowDim() {
+      return {width: window.innerWidth, height: window.innerHeight}
     }
   },
   methods: {
+    init() {
+      const self = this;
+      this.initIframe().then(() => {
+        const frameDocument = document.querySelector(
+          "iframe[data-perfect-pixel]"
+        ).contentWindow.document;
+        frameDocument.onreadystatechange = () => {
+          if (frameDocument.readyState !== "complete") {
+            return;
+          }
+          self.applyFrameAdditionalStyles();
+          //const savedDesign = localStorage.getItem("savedDesign");
+          /*if (savedDesign) {
+            const saved = JSON.parse(savedDesign);
+            self.displayErrors(saved);
+          }*/
+          self.getErrorsFromApi();
+        };
+      });
+    },
     getErrorsFromApi() {
       const self = this;
       const requiredParams = [
@@ -80,213 +105,7 @@ export default {
       const resNodes = [...this.frameNodes].filter(item => {
         return requiredParams.every(p => item[p]);
       });
-
       this.testPage(this.design, resNodes);
-      this.errorTipEffects();
-      /*getErrors(this.design, resNodes, errors => {
-        if (!errors || !Array.isArray(errors.data)) {
-          return;
-        }
-        self.$store.dispatch("setErrors", errors.data);
-        this.displayErrors(errors.data);
-      });*/
-    },
-    displayErrors(errors) {
-      errors.forEach(error => {
-        this.displayErrorTip(error.node, error.errors);
-      });
-    },
-    displayErrorTip(node, errors) {
-      if (!node || !errors || !errors.length) {
-        return;
-      }
-      const self = this;
-      const left = node.offsetLeft + node.clientWidth / 2;
-      const top = node.offsetTop + node.clientHeight - 7;
-      const point = this.currentFrameDocument.createElement("div");
-      const renderErrors = () => {
-        let errorsHtml = "";
-        errors.forEach(error => {
-          errorsHtml += `
-          <li>
-            <b class="title">${error.name}: </b>
-            <span class="node">${error.nodeValue}px</span>
-            <span class="design">${error.designValue}px</span>
-          </li>`;
-        });
-        return errorsHtml;
-      };
-      point.setAttribute("class", "lky-error-tip");
-      point.setAttribute("style", `left: ${left}px; top: ${top}px`);
-      point.innerHTML = `
-      <div class="lky-point"></div>
-        <div class="lky-popup">
-          ${
-            this.text.errorsFound
-          }: <ul class="lky-errors">${renderErrors()}</ul>
-        </div>
-      </div>`;
-      this.currentFrameBody.appendChild(point);
-      const pointElem = point.querySelector(".lky-point");
-      pointElem.onmouseenter = () => {
-        addClass(point, "active");
-        self.elementHighlight(node);
-      };
-      pointElem.onmouseleave = () => {
-        removeClass(point, "active");
-        self.removeHighlight();
-      };
-      this.setTipPopupPosition(node, point);
-    },
-    errorTipEffects() {
-      const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
-      allTips.forEach(t => {
-        t.querySelector(".lky-point").onmouseover = () => {
-          allTips.forEach(c => {
-            addClass(c, "hover");
-          });
-        };
-        t.onmouseleave = () => {
-          allTips.forEach(c => {
-            removeClass(c, "hover");
-          });
-        };
-      });
-    },
-    setTipPopupPosition(node, tip) {
-      const popup = tip.querySelector(".lky-popup");
-      const gutter = 30;
-      const documentDim = {
-        width: this.iframeParams.width,
-        height: this.currentFrameBody.clientHeight
-      };
-      const nodeDim = {
-        width: node.clientWidth,
-        height: node.clientHeight,
-        ...getElementOffset(node, this.currentFrame.contentWindow)
-      };
-      const popupDim = {
-        width: popup.clientWidth,
-        height: popup.clientHeight
-      };
-      const right = () => {
-        return (
-          documentDim.width - (nodeDim.width + nodeDim.left + gutter) >= popupDim.width
-        );
-      };
-      const bottom = () => {
-        return (
-          documentDim.height - (nodeDim.height + nodeDim.top + gutter) >=
-          popupDim.height
-        );
-      };
-      const left = () => {
-        return nodeDim.left + gutter >= popupDim.width;
-      };
-
-      const top = () => {
-        return nodeDim.top + gutter >= popupDim.height;
-      };
-
-      const halfTop = () => {
-        return nodeDim.top + (nodeDim.height / 2) >= popupDim.height / 2;
-      };
-      const halfBottom = () => {
-        return (
-          documentDim.height - (nodeDim.top + nodeDim.height / 2) >=
-          popupDim.height / 2
-        );
-      };
-      const halfLeft = () => {
-        return nodeDim.left + (nodeDim.width / 2) >= popupDim.width / 2;
-      };
-      const halfRight = () => {
-        return (
-          documentDim.width - (nodeDim.left + nodeDim.width / 2) >=
-          popupDim.width / 2
-        );
-      };
-
-      const rightCenter = () => {
-        return right() && halfBottom() && halfTop();
-      };
-      const leftCenter = () => {
-        return left() && halfBottom() && halfTop();
-      };
-      const topCenter = () => {
-        return top() && halfLeft() && halfRight();
-      };
-      const bottomCenter = () => {
-        return bottom() && halfLeft() && halfRight();
-      };
-
-      //BottomCenter as default
-      tip.style.top = nodeDim.top + nodeDim.height + "px";
-      tip.style.left = nodeDim.left + nodeDim.width / 2 + "px";
-      if (rightCenter()) {
-        tip.style.top =
-          nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
-        tip.style.left = nodeDim.left + nodeDim.width + "px";
-        addClass(popup, "right");
-      } else if (bottomCenter()) {
-        addClass(popup, "bottom");
-      } else if (leftCenter()) {
-        tip.style.top =
-          nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
-        tip.style.left = nodeDim.left + "px";
-        addClass(popup, "left");
-      } else if (topCenter()) {
-        tip.style.top = nodeDim.top - gutter + "px";
-        tip.style.left =
-          nodeDim.left + nodeDim.width / 2 + "px";
-        addClass(popup, "top");
-      } else {
-        addClass(tip, "no-popup");
-        addClass(popup, "bottom");
-      }
-      popup.style.position = "absolute";
-    },
-    elementHighlight(node) {
-      if (!node) {
-        return;
-      }
-      const styles = node.getBoundingClientRect();
-      let div = this.currentFrameDocument.createElement("div");
-      div.className = "node-highlight";
-      div.style.position = "fixed";
-      div.style.content = "";
-      div.style.height = `${styles.height + "px"}`;
-      div.style.width = `${styles.width + "px"}`;
-      div.style.top = `${styles.top + "px"}`;
-      div.style.right = `${styles.right + "px"}`;
-      div.style.bottom = `${styles.bottom + "px"}`;
-      div.style.left = `${styles.left + "px"}`;
-      div.style.background = "#05f";
-      div.style.opacity = "0.25";
-      this.currentFrameBody.appendChild(div);
-    },
-    removeHighlight() {
-      const elems = this.currentFrameDocument.getElementsByClassName(
-        "node-highlight"
-      );
-      for (let elm of elems) {
-        this.currentFrameBody.removeChild(elm);
-      }
-    },
-    init() {
-      const self = this;
-      this.initIframe().then(() => {
-        const frameDocument = document.querySelector(
-          "iframe[data-perfect-pixel]"
-        ).contentWindow.document;
-        frameDocument.onreadystatechange = () => {
-          if (frameDocument.readyState !== "complete") {
-            return;
-          }
-          self.applyFrameAdditionalStyles();
-          self.getErrorsFromApi();
-        };
-      });
     },
     initIframe() {
       const url = this.siteUrl;
@@ -374,6 +193,201 @@ export default {
             });
         });
       });
+    },
+    displayErrors(errors) {
+      errors.forEach(error => {
+        this.displayErrorTip(error.node, error.errors);
+      });
+    },
+    displayErrorTip(node, errors) {
+      if (!node || !errors || !errors.length) {
+        return;
+      }
+      const self = this;
+      const left = node.offsetLeft + node.clientWidth / 2;
+      const top = node.offsetTop + node.clientHeight - 7;
+      const point = this.currentFrameDocument.createElement("div");
+      const renderErrors = () => {
+        let errorsHtml = "";
+        errors.forEach(error => {
+          errorsHtml += `
+          <li>
+            <b class="title">${error.name}: </b>
+            <span class="node">${error.nodeValue}px</span>
+            <span class="design">${error.designValue}px</span>
+          </li>`;
+        });
+        return errorsHtml;
+      };
+      point.setAttribute("class", "lky-error-tip");
+      point.setAttribute("style", `left: ${left}px; top: ${top}px`);
+      point.innerHTML = `
+      <div class="lky-point" style="pointer-events: auto !important;"></div>
+        <div class="lky-popup">
+          ${
+            this.text.errorsFound
+          }: <ul class="lky-errors">${renderErrors()}</ul>
+        </div>
+      </div>`;
+      this.currentFrameBody.appendChild(point);
+      const pointElem = point.querySelector(".lky-point");
+      pointElem.onmouseenter = () => {
+        addClass(point, "active");
+        self.elementHighlight(node);
+      };
+      pointElem.onclick = () => {
+        addClass(point, "active");
+        self.elementHighlight(node);
+      };
+      pointElem.onmouseleave = () => {
+        removeClass(point, "active");
+        self.removeHighlight();
+      };
+      this.setTipPopupPosition(node, point);
+    },
+    errorTipEffects() {
+      const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
+      const self = this;
+      allTips.forEach(t => {
+        t.querySelector(".lky-point").onmouseover = () => {
+          allTips.forEach(c => {
+            addClass(c, "hover");
+          });
+        };
+        t.onmouseleave = () => {
+          allTips.forEach(c => {
+            removeClass(c, "hover");
+          });
+        };
+      });
+      this.currentFrameBody.onclick = () => {
+        self.removeHighlight();
+        allTips.forEach(c => {
+          removeClass(c, "active");
+          removeClass(c, "hover");
+        });
+      }
+    },
+    setTipPopupPosition(node, tip) {
+      const popup = tip.querySelector(".lky-popup");
+      const gutter = 30;
+      const documentDim = {
+        width: this.iframeParams.width,
+        height: this.currentFrameBody.clientHeight
+      };
+      const nodeDim = {
+        width: node.clientWidth,
+        height: node.clientHeight,
+        ...getElementOffset(node, this.currentFrame.contentWindow)
+      };
+      const popupDim = {
+        width: popup.clientWidth,
+        height: popup.clientHeight
+      };
+      const right = () => {
+        return (
+          documentDim.width - (nodeDim.width + nodeDim.left + gutter) >=
+          popupDim.width
+        );
+      };
+      const bottom = () => {
+        return (
+          documentDim.height - (nodeDim.height + nodeDim.top + gutter) >=
+          popupDim.height
+        );
+      };
+      const left = () => {
+        return nodeDim.left + gutter >= popupDim.width;
+      };
+
+      const top = () => {
+        return nodeDim.top + gutter >= popupDim.height;
+      };
+
+      const halfTop = () => {
+        return nodeDim.top + nodeDim.height / 2 >= popupDim.height / 2;
+      };
+      const halfBottom = () => {
+        return (
+          documentDim.height - (nodeDim.top + nodeDim.height / 2) >=
+          popupDim.height / 2
+        );
+      };
+      const halfLeft = () => {
+        return nodeDim.left + nodeDim.width / 2 >= popupDim.width / 2;
+      };
+      const halfRight = () => {
+        return (
+          documentDim.width - (nodeDim.left + nodeDim.width / 2) >=
+          popupDim.width / 2
+        );
+      };
+
+      const rightCenter = () => {
+        return right() && halfBottom() && halfTop();
+      };
+      const leftCenter = () => {
+        return left() && halfBottom() && halfTop();
+      };
+      const topCenter = () => {
+        return top() && halfLeft() && halfRight();
+      };
+      const bottomCenter = () => {
+        return bottom() && halfLeft() && halfRight();
+      };
+
+      //BottomCenter as default
+      tip.style.top = nodeDim.top + nodeDim.height + "px";
+      tip.style.left = nodeDim.left + nodeDim.width / 2 + "px";
+      if (rightCenter()) {
+        tip.style.top =
+          nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
+        tip.style.left = nodeDim.left + nodeDim.width + "px";
+        addClass(popup, "right");
+      } else if (bottomCenter()) {
+        addClass(popup, "bottom");
+      } else if (leftCenter()) {
+        tip.style.top =
+          nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
+        tip.style.left = nodeDim.left + "px";
+        addClass(popup, "left");
+      } else if (topCenter()) {
+        tip.style.top = nodeDim.top - gutter + "px";
+        tip.style.left = nodeDim.left + nodeDim.width / 2 + "px";
+        addClass(popup, "top");
+      } else {
+        addClass(tip, "no-popup");
+        addClass(popup, "bottom");
+      }
+      popup.style.position = "absolute";
+    },
+    elementHighlight(node) {
+      if (!node) {
+        return;
+      }
+      this.removeHighlight();
+      const styles = node.getBoundingClientRect();
+      let div = this.currentFrameDocument.createElement("div");
+      div.className = "node-highlight";
+      div.style.position = "fixed";
+      div.style.content = "";
+      div.style.height = `${styles.height + "px"}`;
+      div.style.width = `${styles.width + "px"}`;
+      div.style.top = `${styles.top + "px"}`;
+      div.style.right = `${styles.right + "px"}`;
+      div.style.bottom = `${styles.bottom + "px"}`;
+      div.style.left = `${styles.left + "px"}`;
+      div.style.background = "#05f";
+      div.style.opacity = "0.25";
+      this.currentFrameBody.appendChild(div);
+    },
+    removeHighlight() {
+      const elems = this.currentFrameDocument.getElementsByClassName(
+        "node-highlight"
+      );
+      for (let elm of elems) {
+        this.currentFrameBody.removeChild(elm);
+      }
     },
     renderStyles(d) {
       const css = `.lky-error-tip {
@@ -481,6 +495,9 @@ export default {
       }
       .node-highlight {
         z-index: 9999;
+      }
+      body * {
+        pointer-events: none !important;
       }`;
       const style = d.createElement("style");
       if (style.styleSheet) {
@@ -492,7 +509,11 @@ export default {
       return style;
     },
     applyFrameAdditionalStyles() {
-      this.currentFrameBody.style.overflowX = "hidden"
+      this.currentFrameBody.style.setProperty(
+        "overflow-x",
+        "hidden",
+        "important"
+      );
     }
   }
 };
@@ -519,11 +540,8 @@ export default {
   }
 
   iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
     background-color: #fff;
-    z-index: -1;
+    border: 0;
   }
 }
 .node-highlight {
