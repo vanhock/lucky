@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import DesignUploader from "../molecules/DesignUploader";
-import EnterWebsite from "../molecules/EnterWebsite";
+import DesignUploader from "../organisms/DesignUploader";
+import EnterWebsite from "../organisms/EnterWebsite";
 import VButton from "../atoms/Button";
 import { mapGetters } from "vuex";
 export default {

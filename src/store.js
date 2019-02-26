@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import config from "./config";
+import { getParentAndChild } from "./atoms/utils";
 
 Vue.use(Vuex);
 
@@ -9,23 +10,47 @@ export default new Vuex.Store({
     design: null,
     iframeParams: null,
     siteUrl: null,
-    foundIssues: null
+    foundIssues: null,
+    foundNodes: null
   },
   getters: {
     design: state => state.design,
     iframeParams: state => state.iframeParams,
-    siteUrl: state => state.siteUrl,
+    siteUrl: state => {
+      if (
+        !state.iframeParams ||
+        !state.iframeParams.hasOwnProperty("siteUrl")
+      ) {
+        return;
+      }
+      return state.iframeParams.siteUrl;
+    },
     siteUrlProxy: state => {
-      return config.serverUrl + "/proxy/" + state.siteUrl;
+      if (
+        !state.iframeParams ||
+        !state.iframeParams.hasOwnProperty("siteUrl")
+      ) {
+        return;
+      }
+      return config.serverUrl + "/proxy/" + state.iframeParams.siteUrl;
     },
     viewerReady: state => {
-      return state.design && state.siteUrl;
+      return (
+        state.design &&
+        state.iframeParams &&
+        state.iframeParams.hasOwnProperty("siteUrl") &&
+        state.iframeParams.siteUrl
+      );
     },
-    foundIssues: state => state.foundIssues
+    foundIssues: state => state.foundIssues,
+    foundNodes: state => state.foundNodes
   },
   mutations: {
     SET_DESIGN(state, payload) {
-      const design = getParentAndChild(payload.children).map(i => ({
+      if (!payload || !payload.hasOwnProperty("children")) {
+        return;
+      }
+      state.design = getParentAndChild(payload.children).map(i => ({
         //name: i.name,
         //opacity: i.opacity,
         //type: i.type,
@@ -37,16 +62,29 @@ export default new Vuex.Store({
         width: i.width,
         height: i.height
       }));
-      state.design = design;
     },
     SET_IFRAME_PARAMS(state, payload) {
-      state.iframeParams = payload;
-    },
-    SET_SITE_URL(state, payload) {
-      state.siteUrl = payload;
+      if (!payload || typeof payload !== "object") {
+        return;
+      }
+
+      for (let key in payload) {
+        if (!payload.hasOwnProperty(key)) {
+          continue;
+        }
+        if (state.iframeParams && state.iframeParams.hasOwnProperty(key)) {
+          state.iframeParams[key] = payload[key];
+        } else {
+          if (!state.iframeParams) state.iframeParams = {};
+          Vue.set(state.iframeParams, key, payload[key]);
+        }
+      }
     },
     SET_FOUND_ISSUES(state, payload) {
       state.foundIssues = payload;
+    },
+    SET_FOUND_NODES(state, payload) {
+      state.foundNodes = payload;
     }
   },
   actions: {
@@ -57,7 +95,7 @@ export default new Vuex.Store({
       const url =
         "https://" + payload.replace("http://", "").replace("https://", "");
       return new Promise(resolve => {
-        commit("SET_SITE_URL", url);
+        commit("SET_IFRAME_PARAMS", { siteUrl: url });
         resolve(url);
       });
     },
@@ -66,19 +104,9 @@ export default new Vuex.Store({
     },
     setFoundIssues({ commit }, payload) {
       commit("SET_FOUND_ISSUES", payload);
+    },
+    setFoundNodes({ commit }, payload) {
+      commit("SET_FOUND_NODES", payload);
     }
   }
 });
-
-function getPairsForNode(node) {
-  if (node.children)
-    return node.children
-      .map(child => getPairsForNode(child))
-      .concat(node.children)
-      .reduce((arr1, arr2) => arr1.concat(arr2));
-  else return [node];
-}
-
-function getParentAndChild(list) {
-  return list.map(getPairsForNode).reduce((arr1, arr2) => arr1.concat(arr2));
-}

@@ -19,11 +19,14 @@
 <script>
 import axios from "axios";
 import config from "../config";
-import Hub from "../atoms/hub"
-import { getErrors } from "../api";
-import { getElementOffset } from "../atoms/utils";
+
 import { mapGetters } from "vuex";
-import { addClass, removeClass } from "../atoms/utils";
+import {
+  addClass,
+  removeClass,
+  getElementOffset,
+  relToAbs
+} from "../atoms/utils";
 import RecognizeMixin from "../mixins/RecognizeMixin.vue";
 export default {
   name: "SiteViewer",
@@ -69,13 +72,13 @@ export default {
       return this.currentFrameDocument.body;
     },
     windowDim() {
-      return {width: window.innerWidth, height: window.innerHeight}
+      return { width: window.innerWidth, height: window.innerHeight };
     }
   },
   methods: {
     init() {
       const self = this;
-      this.initIframe().then(() => {
+      this.initFrame().then(() => {
         const frameDocument = document.querySelector(
           "iframe[data-perfect-pixel]"
         ).contentWindow.document;
@@ -89,12 +92,11 @@ export default {
             const saved = JSON.parse(savedDesign);
             self.displayErrors(saved);
           }*/
-          self.getErrorsFromApi();
+          self.initTestPage();
         };
       });
     },
-    getErrorsFromApi() {
-      const self = this;
+    initTestPage() {
       const requiredParams = [
         "clientWidth",
         "clientHeight",
@@ -107,77 +109,42 @@ export default {
       });
       this.testPage(this.design, resNodes);
     },
-    initIframe() {
+    initFrame() {
       const url = this.siteUrl;
       const self = this;
       return new Promise((resolve, reject) => {
         this.$nextTick(() => {
-          const iframe = document.getElementsByTagName("iframe")[0];
+          const frame = document.getElementsByTagName("iframe")[0];
           const loadHTML = function(html) {
-            iframe.src = "about:blank";
-            iframe.contentWindow.document.open();
-            iframe.contentWindow.document.write(
+            frame.src = "about:blank";
+            frame.contentWindow.document.open();
+            frame.contentWindow.document.write(
               html.replace(/<head>/i, `<head><base href="${url}">`)
             );
 
-            iframe.contentWindow.document.close();
-            iframe.contentWindow.document.head.prepend(
-              self.renderStyles(iframe.contentWindow.document)
+            frame.contentWindow.document.close();
+            frame.contentWindow.document.head.prepend(
+              self.renderStyles(frame.contentWindow.document)
             );
             setTimeout(() => {
-              const frames = iframe.contentWindow.document.querySelectorAll(
+              const frames = frame.contentWindow.document.querySelectorAll(
                 "iframe"
               );
               for (let i = 0; i < frames.length; i++) {
                 frames[i].remove();
               }
-              const links = iframe.contentWindow.document.querySelectorAll(
+              const links = frame.contentWindow.document.querySelectorAll(
                 "*:not(iframe)"
               );
               for (let i = 0; i < links.length; i++) {
                 if (links[i].tagName === "BASE") continue;
-                links[i].href && replaceUrl(rel_to_abs(links[i].href));
-                links[i].src && replaceUrl(rel_to_abs(links[i].src));
+                links[i].href &&
+                  replaceUrl(relToAbs(links[i].href, config.serverUrl));
+                links[i].src &&
+                  replaceUrl(relToAbs(links[i].src, config.serverUrl));
               }
-
               function replaceUrl(oldUrl) {
                 return oldUrl.replace(url, `${config.serverUrl}/proxy/${url}`);
-              }
-
-              function rel_to_abs(url) {
-                if (
-                  /^(https?|file|ftps?|mailto|javascript|data:image\/[^;]{2,9};):/i.test(
-                    url
-                  )
-                )
-                  return url; //Url is already absolute
-
-                const base_url =
-                  `${config.serverUrl}/proxy/${url}`.match(
-                    /^(.+)\/?(?:#.+)?$/
-                  )[0] + "/";
-                if (url.substring(0, 2) == "//") return location.protocol + url;
-                else if (url.charAt(0) == "/")
-                  return location.protocol + "//" + location.host + url;
-                else if (url.substring(0, 2) == "./") url = "." + url;
-                else if (/^\s*$/.test(url)) return "";
-                //Empty = Return nothing
-                else url = "../" + url;
-
-                url = base_url + url;
-                while (
-                  /\/\.\.\//.test((url = url.replace(/[^\/]+\/+\.\.\//g, "")))
-                );
-
-                /* Escape certain characters to prevent XSS */
-                url = url
-                  .replace(/\.$/, "")
-                  .replace(/\/\./g, "")
-                  .replace(/"/g, "%22")
-                  .replace(/'/g, "%27")
-                  .replace(/</g, "%3C")
-                  .replace(/>/g, "%3E");
-                return url;
               }
             }, 100);
           };
@@ -266,7 +233,7 @@ export default {
           removeClass(c, "active");
           removeClass(c, "hover");
         });
-      }
+      };
     },
     setTipPopupPosition(node, tip) {
       const popup = tip.querySelector(".lky-popup");

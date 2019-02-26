@@ -19,9 +19,6 @@ export default {
     }
   }),
   methods: {
-    setDesignMarkup() {
-      this.$store.dispatch("setDesignMarkup", PSD);
-    },
     testPage(design, nodes) {
       const _nodes = [...nodes];
       design.forEach(item => {

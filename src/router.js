@@ -3,8 +3,6 @@ import Router from "vue-router";
 import Home from "./views/Home.vue";
 import ViewScreen from "./views/ViewScreen.vue";
 
-import TestView from "./views/TestView";
-
 Vue.use(Router);
 
 export default new Router({
@@ -20,11 +18,6 @@ export default new Router({
       path: "/view",
       name: "view",
       component: ViewScreen
-    },
-    {
-      path: "/test-view",
-      name: "test-view",
-      component: TestView
     }
   ]
 });

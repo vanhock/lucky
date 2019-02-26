@@ -363,9 +363,51 @@ export const isSiteOnline = function(url, callback) {
 
 export const getElementOffset = function(el, currentWindow) {
   const rect = el.getBoundingClientRect();
-
   return {
     top: rect.top + currentWindow.pageYOffset,
     left: rect.left + currentWindow.pageXOffset
   };
+};
+
+export const getParentAndChild = function(list) {
+  return list.map(getPairsForNode).reduce((arr1, arr2) => arr1.concat(arr2));
+};
+
+export const getPairsForNode = function(node) {
+  if (node.children)
+    return node.children
+      .map(child => getPairsForNode(child))
+      .concat(node.children)
+      .reduce((arr1, arr2) => arr1.concat(arr2));
+  else return [node];
+};
+
+export const relToAbs = function(url, serverUrl) {
+  if (
+    /^(https?|file|ftps?|mailto|javascript|data:image\/[^;]{2,9};):/i.test(url)
+  )
+    return url; //Url is already absolute
+
+  const base_url =
+    `${serverUrl}/proxy/${url}`.match(/^(.+)\/?(?:#.+)?$/)[0] + "/";
+  if (url.substring(0, 2) == "//") return location.protocol + url;
+  else if (url.charAt(0) == "/")
+    return location.protocol + "//" + location.host + url;
+  else if (url.substring(0, 2) == "./") url = "." + url;
+  else if (/^\s*$/.test(url)) return "";
+  //Empty = Return nothing
+  else url = "../" + url;
+
+  url = base_url + url;
+  while (/\/\.\.\//.test((url = url.replace(/[^\/]+\/+\.\.\//g, ""))));
+
+  /* Escape certain characters to prevent XSS */
+  url = url
+    .replace(/\.$/, "")
+    .replace(/\/\./g, "")
+    .replace(/"/g, "%22")
+    .replace(/'/g, "%27")
+    .replace(/</g, "%3C")
+    .replace(/>/g, "%3E");
+  return url;
 };

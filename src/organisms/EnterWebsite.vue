@@ -11,8 +11,6 @@
 </template>
 
 <script>
-import config from "../config";
-import axios from "axios";
 import { mapGetters } from "vuex";
 import _ from "lodash";
 import FormInput from "../atoms/FormInput";

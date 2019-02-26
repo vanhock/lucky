@@ -25,7 +25,4 @@ export function getTargetView(url, cb) {
   });
 }
 
-function stringif(array) {
-
-}
-
+function stringif(array) {}

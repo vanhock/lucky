@@ -7,8 +7,8 @@
 
 <script>
 import { mapGetters } from "vuex";
-import TopPanel from "../molecules/TopPanel";
-import SiteViewer from "../molecules/SiteViewer";
+import TopPanel from "../organisms/TopPanel";
+import SiteViewer from "../organisms/SiteViewer";
 export default {
   name: "ViewScreen",
   components: { SiteViewer, TopPanel },
@@ -17,5 +17,3 @@ export default {
   }
 };
 </script>
-
-<style scoped></style>
