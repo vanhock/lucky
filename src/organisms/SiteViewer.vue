@@ -19,7 +19,7 @@
 <script>
 import axios from "axios";
 import config from "../config";
-
+import {getFromLocal} from "../atoms/utils";
 import { mapGetters } from "vuex";
 import {
   addClass,
@@ -54,7 +54,10 @@ export default {
       "design",
       "siteUrlProxy",
       "viewerReady",
-      "iframeParams"
+      "iframeParams",
+      "foundNodes",
+      "isFoundNodes",
+      "currentProject"
     ]),
     viewActive() {
       return this.viewerReady && this.$route.name === "view";
@@ -87,11 +90,7 @@ export default {
             return;
           }
           self.applyFrameAdditionalStyles();
-          //const savedDesign = localStorage.getItem("savedDesign");
-          /*if (savedDesign) {
-            const saved = JSON.parse(savedDesign);
-            self.displayErrors(saved);
-          }*/
+          self.preventAllLinks(self.currentFrameDocument);
           self.initTestPage();
         };
       });
@@ -107,84 +106,55 @@ export default {
       const resNodes = [...this.frameNodes].filter(item => {
         return requiredParams.every(p => item[p]);
       });
-      this.testPage(this.design, resNodes);
-    },
-    initFrame() {
-      const url = this.siteUrl;
-      const self = this;
-      return new Promise((resolve, reject) => {
-        this.$nextTick(() => {
-          const frame = document.getElementsByTagName("iframe")[0];
-          const loadHTML = function(html) {
-            frame.src = "about:blank";
-            frame.contentWindow.document.open();
-            frame.contentWindow.document.write(
-              html.replace(/<head>/i, `<head><base href="${url}">`)
-            );
-
-            frame.contentWindow.document.close();
-            frame.contentWindow.document.head.prepend(
-              self.renderStyles(frame.contentWindow.document)
-            );
-            setTimeout(() => {
-              const frames = frame.contentWindow.document.querySelectorAll(
-                "iframe"
-              );
-              for (let i = 0; i < frames.length; i++) {
-                frames[i].remove();
-              }
-              const links = frame.contentWindow.document.querySelectorAll(
-                "*:not(iframe)"
-              );
-              for (let i = 0; i < links.length; i++) {
-                if (links[i].tagName === "BASE") continue;
-                links[i].href &&
-                  replaceUrl(relToAbs(links[i].href, config.serverUrl));
-                links[i].src &&
-                  replaceUrl(relToAbs(links[i].src, config.serverUrl));
-              }
-              function replaceUrl(oldUrl) {
-                return oldUrl.replace(url, `${config.serverUrl}/proxy/${url}`);
-              }
-            }, 100);
-          };
-
-          axios
-            .get(`${config.serverUrl}/proxy/${url}`)
-            .then(r => {
-              loadHTML(r.data);
-              resolve();
-            })
-            .catch(error => {
-              reject(error);
-            });
+      if (this.isFoundNodes) {
+        this.processNodes(this.frameNodes, this.foundNodes);
+      } else {
+        // Will be process in backend =>
+        this.testNodes(this.design, resNodes).then(foundNodes => {
+          if (
+            !foundNodes ||
+            typeof foundNodes !== "object" ||
+            !Object.entries(foundNodes).length
+          ) {
+            return;
+          }
+          this.processNodes(this.frameNodes, foundNodes);
         });
-      });
+      }
     },
-    displayErrors(errors) {
-      errors.forEach(error => {
-        this.displayErrorTip(error.node, error.errors);
+    processNodes(frameNodes, foundNodes) {
+      const self = this;
+      const nodes = [...frameNodes];
+      nodes.forEach((node, index) => {
+        if (foundNodes.hasOwnProperty(index)) {
+          self.processFoundNode(node, foundNodes[index]);
+        }
       });
+      this.errorTipEffects();
     },
-    displayErrorTip(node, errors) {
-      if (!node || !errors || !errors.length) {
+    processFoundNode(node, foundNode) {
+      if (!node || !foundNode) {
         return;
       }
+      this.renderIssueTip(node, foundNode, this.currentFrameDocument);
+      this.addElementHighlight(node);
+    },
+    renderIssueTip(node, foundNode, frameDocument) {
       const self = this;
       const left = node.offsetLeft + node.clientWidth / 2;
       const top = node.offsetTop + node.clientHeight - 7;
-      const point = this.currentFrameDocument.createElement("div");
-      const renderErrors = () => {
-        let errorsHtml = "";
-        errors.forEach(error => {
-          errorsHtml += `
+      const point = frameDocument.createElement("div");
+      const renderIssues = () => {
+        let issueHtml = "";
+        foundNode.issues.forEach(issue => {
+          issueHtml += `
           <li>
-            <b class="title">${error.name}: </b>
-            <span class="node">${error.nodeValue}px</span>
-            <span class="design">${error.designValue}px</span>
+            <b class="title">${issue.name}: </b>
+            <span class="node">${issue.nodeValue}px</span>
+            <span class="design">${issue.designValue}px</span>
           </li>`;
         });
-        return errorsHtml;
+        return issueHtml;
       };
       point.setAttribute("class", "lky-error-tip");
       point.setAttribute("style", `left: ${left}px; top: ${top}px`);
@@ -193,24 +163,58 @@ export default {
         <div class="lky-popup">
           ${
             this.text.errorsFound
-          }: <ul class="lky-errors">${renderErrors()}</ul>
+          }: <ul class="lky-errors">${renderIssues()}</ul>
         </div>
       </div>`;
       this.currentFrameBody.appendChild(point);
+      this.setTipPopupPosition(node, point);
+
       const pointElem = point.querySelector(".lky-point");
       pointElem.onmouseenter = () => {
         addClass(point, "active");
-        self.elementHighlight(node);
+        self.addElementOverlay(node);
       };
       pointElem.onclick = () => {
         addClass(point, "active");
-        self.elementHighlight(node);
+        self.addElementOverlay(node);
       };
       pointElem.onmouseleave = () => {
         removeClass(point, "active");
-        self.removeHighlight();
+        self.removeOverlayForAll();
       };
-      this.setTipPopupPosition(node, point);
+    },
+    addElementHighlight(node) {
+      if (!node) {
+        return;
+      }
+      addClass(node, "lky-hover");
+    },
+    addElementOverlay(node) {
+      if (!node) {
+        return;
+      }
+      const styles = node.getBoundingClientRect();
+      let div = this.currentFrameDocument.createElement("div");
+      div.className = "node-highlight";
+      div.style.position = "fixed";
+      div.style.content = "";
+      div.style.height = `${styles.height + "px"}`;
+      div.style.width = `${styles.width + "px"}`;
+      div.style.top = `${styles.top + "px"}`;
+      div.style.right = `${styles.right + "px"}`;
+      div.style.bottom = `${styles.bottom + "px"}`;
+      div.style.left = `${styles.left + "px"}`;
+      div.style.background = "#05f";
+      div.style.opacity = "0.25";
+      this.currentFrameBody.appendChild(div);
+    },
+    removeOverlayForAll() {
+      const elems = this.currentFrameDocument.getElementsByClassName(
+        "node-highlight"
+      );
+      for (let elm of elems) {
+        this.currentFrameBody.removeChild(elm);
+      }
     },
     errorTipEffects() {
       const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
@@ -328,33 +332,57 @@ export default {
       }
       popup.style.position = "absolute";
     },
-    elementHighlight(node) {
-      if (!node) {
-        return;
-      }
-      this.removeHighlight();
-      const styles = node.getBoundingClientRect();
-      let div = this.currentFrameDocument.createElement("div");
-      div.className = "node-highlight";
-      div.style.position = "fixed";
-      div.style.content = "";
-      div.style.height = `${styles.height + "px"}`;
-      div.style.width = `${styles.width + "px"}`;
-      div.style.top = `${styles.top + "px"}`;
-      div.style.right = `${styles.right + "px"}`;
-      div.style.bottom = `${styles.bottom + "px"}`;
-      div.style.left = `${styles.left + "px"}`;
-      div.style.background = "#05f";
-      div.style.opacity = "0.25";
-      this.currentFrameBody.appendChild(div);
-    },
-    removeHighlight() {
-      const elems = this.currentFrameDocument.getElementsByClassName(
-        "node-highlight"
-      );
-      for (let elm of elems) {
-        this.currentFrameBody.removeChild(elm);
-      }
+    initFrame() {
+      const url = this.siteUrl;
+      const self = this;
+      return new Promise((resolve, reject) => {
+        this.$nextTick(() => {
+          const frame = document.getElementsByTagName("iframe")[0];
+          const loadHTML = function(html) {
+            frame.src = "about:blank";
+            frame.contentWindow.document.open();
+            frame.contentWindow.document.write(
+              html.replace(/<head>/i, `<head><base href="${url}">`)
+            );
+
+            frame.contentWindow.document.close();
+            frame.contentWindow.document.head.prepend(
+              self.renderStyles(frame.contentWindow.document)
+            );
+            setTimeout(() => {
+              const frames = frame.contentWindow.document.querySelectorAll(
+                "iframe"
+              );
+              for (let i = 0; i < frames.length; i++) {
+                frames[i].remove();
+              }
+              const links = frame.contentWindow.document.querySelectorAll(
+                "*:not(iframe)"
+              );
+              for (let i = 0; i < links.length; i++) {
+                if (links[i].tagName === "BASE") continue;
+                links[i].href &&
+                  replaceUrl(relToAbs(links[i].href, config.serverUrl));
+                links[i].src &&
+                  replaceUrl(relToAbs(links[i].src, config.serverUrl));
+              }
+              function replaceUrl(oldUrl) {
+                return oldUrl.replace(url, `${config.serverUrl}/proxy/${url}`);
+              }
+            }, 100);
+          };
+
+          axios
+            .get(`${config.serverUrl}/proxy/${url}`)
+            .then(r => {
+              loadHTML(r.data);
+              resolve();
+            })
+            .catch(error => {
+              reject(error);
+            });
+        });
+      });
     },
     renderStyles(d) {
       const css = `.lky-error-tip {
@@ -462,9 +490,6 @@ export default {
       }
       .node-highlight {
         z-index: 9999;
-      }
-      body * {
-        pointer-events: none !important;
       }`;
       const style = d.createElement("style");
       if (style.styleSheet) {
@@ -481,6 +506,14 @@ export default {
         "hidden",
         "important"
       );
+    },
+    preventAllLinks(frameDocument) {
+      const anchors = frameDocument.getElementsByTagName("a");
+      for (let i = 0; i < anchors.length; i++) {
+        anchors[i].onclick = () => {
+          return false;
+        };
+      }
     }
   }
 };

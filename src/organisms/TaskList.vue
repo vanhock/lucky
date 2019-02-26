@@ -2,14 +2,14 @@
   <div class="tasks">
     <ul class="tasks-list">
       <li
-        v-for="(issue, index) in tasks"
-        :class="{ active: activeTaskIndex && activeTaskIndex === index }"
-        @click="setActiveTask(issue.node, index)"
+        v-for="(task, index, i) in tasks"
+        :class="{ active: activeTaskIndex && activeTaskIndex === i }"
+        @click="setActiveTask(index)"
       >
-        <div class="index">{{ index + 1 }}</div>
-        <div class="header">{{ issue.name }}</div>
+        <div class="index">{{ i + 1 }}</div>
+        <div class="header">{{ task.name }}</div>
         <div class="issues">
-          Found errors: <b>{{ issue.errors.length }}</b>
+          Found errors: <b>{{ task.issues.length }}</b>
         </div>
       </li>
     </ul>
@@ -22,8 +22,9 @@ export default {
   name: "TaskList",
   props: {
     tasks: {
-      type: Array,
-      required: true
+      type: Object,
+      required: true,
+      default: () => ({})
     }
   },
   data: () => ({

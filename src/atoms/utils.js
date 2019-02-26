@@ -411,3 +411,30 @@ export const relToAbs = function(url, serverUrl) {
     .replace(/>/g, "%3E");
   return url;
 };
+
+export const addToLocal = function(item, name, value) {
+  const localItem = localStorage.getItem(item);
+  let o = {};
+  if (localItem) {
+    o = JSON.parse(localItem);
+  }
+  o[name] = value;
+  localStorage.setItem(item, JSON.stringify(o));
+};
+
+export const getFromLocal = function (item) {
+  return localStorage.getItem(item) && JSON.parse(localStorage.getItem(item));
+};
+
+export const removeFromLocal = function(item, name) {
+  if (item) {
+    const localItem =
+      localStorage.getItem(item) && JSON.parse(localStorage.getItem(item));
+    if (localItem && localItem.hasOwnProperty(name)) {
+      delete localItem[name];
+      localStorage.setItem(item, JSON.stringify(localItem));
+    }
+  } else {
+    localStorage.removeItem(item);
+  }
+};

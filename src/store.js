@@ -10,8 +10,8 @@ export default new Vuex.Store({
     design: null,
     iframeParams: null,
     siteUrl: null,
-    foundIssues: null,
-    foundNodes: null
+    foundNodes: null,
+    currentProject: null
   },
   getters: {
     design: state => state.design,
@@ -42,8 +42,14 @@ export default new Vuex.Store({
         state.iframeParams.siteUrl
       );
     },
-    foundIssues: state => state.foundIssues,
-    foundNodes: state => state.foundNodes
+    foundNodes: state => state.foundNodes,
+    isFoundNodes: state => {
+      return (
+        state.foundNodes &&
+        Array.isArray(state.foundNodes) &&
+        state.foundNodes.length
+      );
+    }
   },
   mutations: {
     SET_DESIGN(state, payload) {
@@ -80,11 +86,11 @@ export default new Vuex.Store({
         }
       }
     },
-    SET_FOUND_ISSUES(state, payload) {
-      state.foundIssues = payload;
-    },
     SET_FOUND_NODES(state, payload) {
       state.foundNodes = payload;
+    },
+    SET_CURRENT_PROJECT(state, payload) {
+      state.currentProject = payload
     }
   },
   actions: {
@@ -102,11 +108,11 @@ export default new Vuex.Store({
     setIframeParams({ commit }, payload) {
       commit("SET_IFRAME_PARAMS", payload);
     },
-    setFoundIssues({ commit }, payload) {
-      commit("SET_FOUND_ISSUES", payload);
-    },
     setFoundNodes({ commit }, payload) {
       commit("SET_FOUND_NODES", payload);
+    },
+    setCurrentProject({commit}, payload) {
+      commit("SET_CURRENT_PROJECT", payload);
     }
   }
 });

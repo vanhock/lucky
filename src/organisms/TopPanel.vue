@@ -6,7 +6,7 @@
         <div><i class="fas fa-bars"></i></div>
       </v-menu>
     </div>
-    <task-list :tasks="foundIssues" v-if="foundIssues" />
+    <task-list :tasks="foundNodes" v-if="foundNodes" />
   </div>
 </template>
 
@@ -18,7 +18,7 @@ export default {
   name: "TopPanel",
   components: { VMenu, TaskList },
   computed: {
-    ...mapGetters(["foundIssues"])
+    ...mapGetters(["foundNodes"])
   }
 };
 </script>

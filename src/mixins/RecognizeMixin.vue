@@ -1,6 +1,4 @@
 <script>
-import PSD from "../psd.json";
-
 export default {
   name: "RecognizeMixin",
   data: () => ({
@@ -8,7 +6,6 @@ export default {
     currentBlock: {},
     searchGutter: 50,
     testGutter: 0,
-    foundBlocks: [],
     errors: [],
     text: {
       errorsFound: "Обнаружены ошибки",
@@ -19,27 +16,26 @@ export default {
     }
   }),
   methods: {
-    testPage(design, nodes) {
-      const _nodes = [...nodes];
-      design.forEach(item => {
-        for (let i = 0, max = _nodes.length; i < max; i++) {
-          if (this.searchByParams(_nodes[i], item)) {
-            const errors = this.testNode(_nodes[i], item);
-            this.foundBlocks.push({
-              name: this.setIssueName(_nodes[i]),
-              design: item,
-              node: _nodes[i],
-              errors: errors
-            });
-            this.displayErrorTip(_nodes[i], errors);
-            _nodes.splice(i, 1);
-            break;
+    testNodes(design, nodes) {
+      return new Promise(resolve => {
+        const _nodes = [...nodes];
+        const foundNodes = {};
+        design.forEach(item => {
+          for (let i = 0, max = _nodes.length; i < max; i++) {
+            if (!_nodes[i].found && this.searchByParams(_nodes[i], item)) {
+              const issues = this.testNode(_nodes[i], item);
+              foundNodes[i] = {
+                name: this.setIssueName(_nodes[i]),
+                issues: issues
+              };
+              _nodes[i].found = true;
+              break;
+            }
           }
-        }
-      });
-      this.$store.dispatch("setFoundIssues", this.foundBlocks);
-      this.errorTipEffects();
-      localStorage.setItem("savedDesign", JSON.stringify(this.foundBlocks));
+        });
+        this.$store.dispatch("setFoundNodes", foundNodes);
+        resolve(foundNodes);
+      })
     },
     searchByParams(node, block) {
       if (!node || !block) {
