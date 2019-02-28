@@ -128,11 +128,7 @@ export default {
       }
     },
     saveProjectToLocal(currentProject) {
-      const recentProjects =
-        getFromLocal("recentProjects") &&
-        JSON.parse(getFromLocal("recentProjects"));
-      recentProjects[currentProject.id] = currentProject;
-      addToLocal("recentProjects", JSON.stringify(recentProjects));
+      addToLocal("recentProjects", currentProject.id, currentProject);
     },
     processNodes(frameNodes, foundNodes) {
       const self = this;
@@ -255,7 +251,7 @@ export default {
       const popup = tip.querySelector(".lky-popup");
       const gutter = 30;
       const documentDim = {
-        width: this.iframeParams.width,
+        width: this.frameParams.width,
         height: this.currentFrameBody.clientHeight
       };
       const nodeDim = {

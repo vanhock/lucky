@@ -32,6 +32,7 @@ export default {
   }),
   methods: {
     setActiveTask(node, index) {
+      return;
       this.activeTaskIndex = index;
       node.scrollIntoView();
       Hub.$emit("setActiveTask", { node: node, index: index });

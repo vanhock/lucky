@@ -1,7 +1,7 @@
 <template>
   <div class="top-panel">
     <div class="container">
-      <div class="site-logo"></div>
+      <router-link class="site-logo" to="/"></router-link>
       <v-menu class="right icon-menu">
         <div><i class="fas fa-bars"></i></div>
       </v-menu>

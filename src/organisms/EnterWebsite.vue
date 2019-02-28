@@ -29,9 +29,9 @@ export default {
       }
 
       this.$store.dispatch("setSiteUrl", url.inputValue);
-      this.setSiteInfo(url.inputValue);
+      this.setProjectInfo(url.inputValue);
     }, 300),
-    setSiteInfo(url) {
+    setProjectInfo(url) {
       const projectId = url
         .replace(/(http|https):\/\//, "")
         .replace(/\?.*/, "")
@@ -45,7 +45,7 @@ export default {
         id: projectId,
         name: (isProjectExist && recentProjects[projectId].name) || projectId
       };
-      this.$store.dispatch("setSiteInfo", projectInfo);
+      this.$store.dispatch("setProjectInfo", projectInfo);
     }
   }
 };

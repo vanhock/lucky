@@ -9,6 +9,7 @@ export default {};
 </script>
 
 <style lang="scss">
+  @import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic');
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
 @import "./assets/normalize.scss";
 $color-1: #606060;
@@ -16,14 +17,15 @@ $color-2: #ebebeb;
 $color-3: #42b983;
 $color-4: #070707;
 body {
-  background-color: $color-bg;
+  background-color: $color-base;
   box-sizing: border-box;
 }
 #app {
-  font-family: "Roboto", sans-serif;
+  //font-family: "Roboto", sans-serif;
+  font-family: "Montserrat", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #fff;
+  color: $color-b2;
 }
 #nav {
   position: absolute;

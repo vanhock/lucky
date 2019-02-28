@@ -55,6 +55,7 @@ export default {
   .drag-area {
     background-color: $color-bg2;
     border: 1px dashed $color-w1;
+    color: $color-b6;
     border-radius: 7px;
     width: 100%;
     height: 100px;

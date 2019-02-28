@@ -39,17 +39,16 @@ export default new Vuex.Store({
       }
       return config.serverUrl + "/proxy/" + getters.siteUrl;
     },
-    viewerReady: state => {
+    viewerReady: (state, getters) => {
       return (
         (state.design &&
-          state.currentProject.hasOwnProperty("frameParams") &&
-          state.currentProject.frameParams.hasOwnProperty("siteUrl")) ||
-        (state.currentProject.hasOwnProperty("foundNodes") &&
-          state.currentProject.hasOwnProperty("id") &&
-          state.currentProject.hasOwnProperty("name"))
+          getters.frameParams &&
+          getters.frameParams.hasOwnProperty("siteUrl")) ||
+        getters.foundNodes
       );
     },
     foundNodes: state =>
+      state.currentProject &&
       state.currentProject.hasOwnProperty("foundNodes") &&
       state.currentProject.foundNodes,
     isFoundNodes: (state, getters) => {
@@ -83,7 +82,7 @@ export default new Vuex.Store({
         if (!payload.hasOwnProperty(key)) {
           continue;
         }
-        if(!state.currentProject) {
+        if (!state.currentProject) {
           state.currentProject = {
             frameParams: {},
             foundNodes: {}
@@ -98,12 +97,12 @@ export default new Vuex.Store({
       }
     },
     SET_PROJECT_INFO(state, payload) {
-      payload.id ? state.currentProject.id = payload.id : "";
-      payload.name ? state.currentProject.name = payload.name : "";
-      state.currentProject.date = new Date.now();
+      payload.id ? (state.currentProject.id = payload.id) : "";
+      payload.name ? (state.currentProject.name = payload.name) : "";
+      state.currentProject.date = Date.now();
     },
     SET_FOUND_NODES(state, payload) {
-      if(!state.currentProject) {
+      if (!state.currentProject) {
         state.currentProject = {};
       }
       state.currentProject.foundNodes = payload;
@@ -131,7 +130,7 @@ export default new Vuex.Store({
       return new Promise(resolve => {
         commit("SET_FOUND_NODES", payload);
         resolve(state.currentProject);
-      })
+      });
     },
     setProjectInfo({ commit }, payload) {
       commit("SET_PROJECT_INFO", payload);

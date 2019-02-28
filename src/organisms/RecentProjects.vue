@@ -1,30 +1,45 @@
 <template>
   <div class="recent-projects">
     <project-card
-      v-for="(project, id) in projects"
+      v-if="projects"
+      v-for="project in projects"
       :project="project"
-      @click="loadProject(id)"
+      @click="loadProject(project)"
     />
   </div>
 </template>
 
 <script>
+import { getFromLocal } from "../atoms/utils";
 import ProjectCard from "../molecules/ProjectCard";
 export default {
   name: "RecentProjects",
   components: { ProjectCard },
-  props: {
-    projects: {
-      type: Object,
-      default: () => ({})
-    }
+  mounted() {
+    this.getProjectsFromLocal()
   },
+  data: () => ({
+    projects: null
+  }),
   methods: {
-    loadProject(id) {
-      return true;
+    getProjectsFromLocal() {
+      this.projects = getFromLocal("recentProjects")
+    },
+    loadProject(project) {
+      this.$store.dispatch("setCurrentProject", project).then(() => {
+        this.$router.push({ name: "view" });
+      });
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+  .recent-projects {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-column-gap: 20px;
+    margin-top: 30px;
+    justify-items: stretch;
+  }
+</style>
