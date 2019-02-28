@@ -38,7 +38,7 @@ export default {
         const design = psd.tree().export();
         if (design) {
           self.$store.dispatch("setDesign", design);
-          self.$store.dispatch("setIframeParams", {
+          self.$store.dispatch("setFrameParams", {
             width: design.document.width,
             height: design.document.height
           });

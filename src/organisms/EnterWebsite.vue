@@ -12,6 +12,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { getFromLocal } from "../atoms/utils";
 import _ from "lodash";
 import FormInput from "../atoms/FormInput";
 export default {
@@ -28,7 +29,24 @@ export default {
       }
 
       this.$store.dispatch("setSiteUrl", url.inputValue);
-    }, 300)
+      this.setSiteInfo(url.inputValue);
+    }, 300),
+    setSiteInfo(url) {
+      const projectId = url
+        .replace(/(http|https):\/\//, "")
+        .replace(/\?.*/, "")
+        .replace(/[\-\/.]/gm, "");
+      const recentProjects =
+        getFromLocal("recentProjects") &&
+        JSON.parse(getFromLocal("recentProjects"));
+      const isProjectExist =
+        recentProjects && recentProjects.hasOwnProperty(projectId);
+      const projectInfo = {
+        id: projectId,
+        name: (isProjectExist && recentProjects[projectId].name) || projectId
+      };
+      this.$store.dispatch("setSiteInfo", projectInfo);
+    }
   }
 };
 </script>

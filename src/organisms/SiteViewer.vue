@@ -9,7 +9,7 @@
   >
     <iframe
       data-perfect-pixel
-      :width="iframeParams.width || '100%'"
+      :width="frameParams.width || '100%'"
       :height="windowDim.height - 54 + 'px'"
       sandbox="allow-same-origin allow-scripts"
     ></iframe>
@@ -19,7 +19,7 @@
 <script>
 import axios from "axios";
 import config from "../config";
-import {getFromLocal} from "../atoms/utils";
+import { getFromLocal, addToLocal } from "../atoms/utils";
 import { mapGetters } from "vuex";
 import {
   addClass,
@@ -32,7 +32,6 @@ export default {
   name: "SiteViewer",
   mixins: [RecognizeMixin],
   mounted() {
-    const self = this;
     !this.viewerReady && this.$router.push({ name: "home" });
     this.init();
   },
@@ -54,7 +53,7 @@ export default {
       "design",
       "siteUrlProxy",
       "viewerReady",
-      "iframeParams",
+      "frameParams",
       "foundNodes",
       "isFoundNodes",
       "currentProject"
@@ -103,14 +102,14 @@ export default {
         "offsetTop"
       ];
       this.frameNodes = this.currentFrameBody.getElementsByTagName("*");
-      const resNodes = [...this.frameNodes].filter(item => {
+      const resultNodes = [...this.frameNodes].filter(item => {
         return requiredParams.every(p => item[p]);
       });
       if (this.isFoundNodes) {
         this.processNodes(this.frameNodes, this.foundNodes);
       } else {
         // Will be process in backend =>
-        this.testNodes(this.design, resNodes).then(foundNodes => {
+        this.testNodes(this.design, resultNodes).then(foundNodes => {
           if (
             !foundNodes ||
             typeof foundNodes !== "object" ||
@@ -119,8 +118,21 @@ export default {
             return;
           }
           this.processNodes(this.frameNodes, foundNodes);
+
+          this.$store
+            .dispatch("setFoundNodes", foundNodes)
+            .then(currentProject => {
+              this.saveProjectToLocal(currentProject);
+            });
         });
       }
+    },
+    saveProjectToLocal(currentProject) {
+      const recentProjects =
+        getFromLocal("recentProjects") &&
+        JSON.parse(getFromLocal("recentProjects"));
+      recentProjects[currentProject.id] = currentProject;
+      addToLocal("recentProjects", JSON.stringify(recentProjects));
     },
     processNodes(frameNodes, foundNodes) {
       const self = this;

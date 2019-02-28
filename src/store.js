@@ -8,47 +8,52 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     design: null,
-    iframeParams: null,
-    siteUrl: null,
-    foundNodes: null,
-    currentProject: null
+    currentProject: null,
+    /**
+     * name: String,
+     * id: String,
+     * date: Date,
+     * frameParams: Object,
+     * foundNodes: Object
+     **/
+    recentProjects: null
   },
   getters: {
     design: state => state.design,
-    iframeParams: state => state.iframeParams,
-    siteUrl: state => {
+    frameParams: state =>
+      state.currentProject &&
+      state.currentProject.hasOwnProperty("frameParams") &&
+      state.currentProject.frameParams,
+    siteUrl: (state, getters) => {
       if (
-        !state.iframeParams ||
-        !state.iframeParams.hasOwnProperty("siteUrl")
+        !getters.frameParams ||
+        !getters.frameParams.hasOwnProperty("siteUrl")
       ) {
         return;
       }
-      return state.iframeParams.siteUrl;
+      return getters.frameParams.siteUrl;
     },
-    siteUrlProxy: state => {
-      if (
-        !state.iframeParams ||
-        !state.iframeParams.hasOwnProperty("siteUrl")
-      ) {
+    siteUrlProxy: (state, getters) => {
+      if (!getters.siteUrl) {
         return;
       }
-      return config.serverUrl + "/proxy/" + state.iframeParams.siteUrl;
+      return config.serverUrl + "/proxy/" + getters.siteUrl;
     },
     viewerReady: state => {
       return (
-        state.design &&
-        state.iframeParams &&
-        state.iframeParams.hasOwnProperty("siteUrl") &&
-        state.iframeParams.siteUrl
+        (state.design &&
+          state.currentProject.hasOwnProperty("frameParams") &&
+          state.currentProject.frameParams.hasOwnProperty("siteUrl")) ||
+        (state.currentProject.hasOwnProperty("foundNodes") &&
+          state.currentProject.hasOwnProperty("id") &&
+          state.currentProject.hasOwnProperty("name"))
       );
     },
-    foundNodes: state => state.foundNodes,
-    isFoundNodes: state => {
-      return (
-        state.foundNodes &&
-        Array.isArray(state.foundNodes) &&
-        state.foundNodes.length
-      );
+    foundNodes: state =>
+      state.currentProject.hasOwnProperty("foundNodes") &&
+      state.currentProject.foundNodes,
+    isFoundNodes: (state, getters) => {
+      return getters.foundNodes && Object.entries(getters.foundNodes).length;
     }
   },
   mutations: {
@@ -69,7 +74,7 @@ export default new Vuex.Store({
         height: i.height
       }));
     },
-    SET_IFRAME_PARAMS(state, payload) {
+    SET_FRAME_PARAMS(state, payload) {
       if (!payload || typeof payload !== "object") {
         return;
       }
@@ -78,19 +83,33 @@ export default new Vuex.Store({
         if (!payload.hasOwnProperty(key)) {
           continue;
         }
-        if (state.iframeParams && state.iframeParams.hasOwnProperty(key)) {
-          state.iframeParams[key] = payload[key];
+        if(!state.currentProject) {
+          state.currentProject = {
+            frameParams: {},
+            foundNodes: {}
+          };
+        }
+
+        if (state.currentProject.frameParams.hasOwnProperty(key)) {
+          state.currentProject.frameParams[key] = payload[key];
         } else {
-          if (!state.iframeParams) state.iframeParams = {};
-          Vue.set(state.iframeParams, key, payload[key]);
+          Vue.set(state.currentProject.frameParams, key, payload[key]);
         }
       }
     },
+    SET_PROJECT_INFO(state, payload) {
+      payload.id ? state.currentProject.id = payload.id : "";
+      payload.name ? state.currentProject.name = payload.name : "";
+      state.currentProject.date = new Date.now();
+    },
     SET_FOUND_NODES(state, payload) {
-      state.foundNodes = payload;
+      if(!state.currentProject) {
+        state.currentProject = {};
+      }
+      state.currentProject.foundNodes = payload;
     },
     SET_CURRENT_PROJECT(state, payload) {
-      state.currentProject = payload
+      state.currentProject = payload;
     }
   },
   actions: {
@@ -101,17 +120,23 @@ export default new Vuex.Store({
       const url =
         "https://" + payload.replace("http://", "").replace("https://", "");
       return new Promise(resolve => {
-        commit("SET_IFRAME_PARAMS", { siteUrl: url });
+        commit("SET_FRAME_PARAMS", { siteUrl: url });
         resolve(url);
       });
     },
-    setIframeParams({ commit }, payload) {
-      commit("SET_IFRAME_PARAMS", payload);
+    setFrameParams({ commit }, payload) {
+      commit("SET_FRAME_PARAMS", payload);
     },
-    setFoundNodes({ commit }, payload) {
-      commit("SET_FOUND_NODES", payload);
+    setFoundNodes({ commit, state }, payload) {
+      return new Promise(resolve => {
+        commit("SET_FOUND_NODES", payload);
+        resolve(state.currentProject);
+      })
     },
-    setCurrentProject({commit}, payload) {
+    setProjectInfo({ commit }, payload) {
+      commit("SET_PROJECT_INFO", payload);
+    },
+    setCurrentProject({ commit }, payload) {
       commit("SET_CURRENT_PROJECT", payload);
     }
   }
