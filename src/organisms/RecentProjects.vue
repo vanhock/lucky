@@ -3,6 +3,7 @@
     <project-card
       v-if="projects"
       v-for="project in projects"
+      :key="project.id"
       :project="project"
       @click="loadProject(project)"
     />

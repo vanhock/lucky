@@ -8,6 +8,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     design: null,
+    currentFrame: null,
     currentProject: null,
     /**
      * name: String,
@@ -20,6 +21,19 @@ export default new Vuex.Store({
   },
   getters: {
     design: state => state.design,
+    currentFrame: state => state.currentFrame,
+    currentFrameWindow: state => {
+      if (!state.currentFrame) {
+        return;
+      }
+      return state.currentFrame.contentWindow;
+    },
+    currentFrameDocument: (state, getters) => {
+      return getters.currentFrameWindow.document;
+    },
+    currentFrameBody: (state, getters) => {
+      return getters.currentFrameDocument.body;
+    },
     frameParams: state =>
       state.currentProject &&
       state.currentProject.hasOwnProperty("frameParams") &&
@@ -109,6 +123,9 @@ export default new Vuex.Store({
     },
     SET_CURRENT_PROJECT(state, payload) {
       state.currentProject = payload;
+    },
+    SET_CURRENT_FRAME(state, payload) {
+      state.currentFrame = payload;
     }
   },
   actions: {
@@ -137,6 +154,9 @@ export default new Vuex.Store({
     },
     setCurrentProject({ commit }, payload) {
       commit("SET_CURRENT_PROJECT", payload);
+    },
+    setCurrentFrame({ commit }, payload) {
+      commit("SET_CURRENT_FRAME", payload);
     }
   }
 });

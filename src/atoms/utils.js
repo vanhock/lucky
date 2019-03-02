@@ -365,7 +365,10 @@ export const getElementOffset = function(el, currentWindow) {
   const rect = el.getBoundingClientRect();
   return {
     top: rect.top + currentWindow.pageYOffset,
-    left: rect.left + currentWindow.pageXOffset
+    left: rect.left + currentWindow.pageXOffset,
+
+    width: rect.width,
+    height: rect.height
   };
 };
 
@@ -422,7 +425,7 @@ export const addToLocal = function(item, name, value) {
   localStorage.setItem(item, JSON.stringify(o));
 };
 
-export const getFromLocal = function (item) {
+export const getFromLocal = function(item) {
   return localStorage.getItem(item) && JSON.parse(localStorage.getItem(item));
 };
 
@@ -437,4 +440,13 @@ export const removeFromLocal = function(item, name) {
   } else {
     localStorage.removeItem(item);
   }
+};
+
+export const detectMouseButton = function(evt) {
+  evt = evt || window.event;
+  if ("buttons" in evt) {
+    return evt.buttons === 1 || evt.buttons === 0;
+  }
+  const button = evt.which || evt.button;
+  return button === 1 || button === 0;
 };

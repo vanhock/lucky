@@ -19,11 +19,12 @@
 <script>
 import axios from "axios";
 import config from "../config";
-import { getFromLocal, addToLocal } from "../atoms/utils";
 import { mapGetters } from "vuex";
 import {
   addClass,
   removeClass,
+  addToLocal,
+  detectMouseButton,
   getElementOffset,
   relToAbs
 } from "../atoms/utils";
@@ -56,22 +57,14 @@ export default {
       "frameParams",
       "foundNodes",
       "isFoundNodes",
-      "currentProject"
+      "currentProject",
+      "currentFrame",
+      "currentFrameDocument",
+      "currentFrameBody",
+      "currentFrameWindow"
     ]),
     viewActive() {
       return this.viewerReady && this.$route.name === "view";
-    },
-    currentFrame() {
-      return document.querySelector("iframe[data-perfect-pixel]");
-    },
-    currentFrameDocument() {
-      if (!this.currentFrame) {
-        return;
-      }
-      return this.currentFrame.contentWindow.document;
-    },
-    currentFrameBody() {
-      return this.currentFrameDocument.body;
     },
     windowDim() {
       return { width: window.innerWidth, height: window.innerHeight };
@@ -88,9 +81,11 @@ export default {
           if (frameDocument.readyState !== "complete") {
             return;
           }
-          self.applyFrameAdditionalStyles();
           self.preventAllLinks(self.currentFrameDocument);
-          self.initTestPage();
+          self.applyFrameAdditionalStyles();
+          self.$nextTick(() => {
+            self.initTestPage();
+          });
         };
       });
     },
@@ -138,6 +133,7 @@ export default {
           self.processFoundNode(node, foundNodes[index]);
         }
       });
+      this.attachTipsEvents();
       this.errorTipEffects();
     },
     processFoundNode(node, foundNode) {
@@ -145,7 +141,6 @@ export default {
         return;
       }
       this.renderIssueTip(node, foundNode, this.currentFrameDocument);
-      this.addElementHighlight(node);
     },
     renderIssueTip(node, foundNode, frameDocument) {
       const self = this;
@@ -172,45 +167,64 @@ export default {
           ${
             this.text.errorsFound
           }: <ul class="lky-errors">${renderIssues()}</ul>
+          <div class="lky-popup-close"></div>
         </div>
       </div>`;
       this.currentFrameBody.appendChild(point);
       this.setTipPopupPosition(node, point);
 
-      const pointElem = point.querySelector(".lky-point");
-      pointElem.onmouseenter = () => {
-        addClass(point, "active");
-        self.addElementOverlay(node);
-      };
-      pointElem.onclick = () => {
-        addClass(point, "active");
-        self.addElementOverlay(node);
-      };
-      pointElem.onmouseleave = () => {
-        removeClass(point, "active");
+      addClass(node, "lky-element");
+      node.onclick = e => {
+        if (!detectMouseButton(e)) {
+          return;
+        }
+        e.stopPropagation();
+        self.currentFrameDocument
+          .querySelectorAll(".lky-error-tip")
+          .forEach(el => {
+            removeClass(el, "active");
+          });
         self.removeOverlayForAll();
+        addClass(point, "active");
+        self.addElementOverlay(node);
+      };
+      point.querySelector(".lky-popup-close").onclick = () => {
+        removeClass(point, "active");
       };
     },
-    addElementHighlight(node) {
-      if (!node) {
+    attachTipsEvents() {
+      const allTips = this.currentFrameDocument.querySelectorAll(
+        ".lky-element"
+      );
+      if (!allTips) {
         return;
       }
-      addClass(node, "lky-hover");
+      allTips.forEach(node => {
+        node.addEventListener("mouseenter", onNodeEnter, true);
+        node.addEventListener("mouseleave", onNodeLeave, true);
+      });
+      function onNodeEnter(e) {
+        allTips.forEach(t => {
+          removeClass(t, "lky-hover");
+        });
+        addClass(e.currentTarget, "lky-hover");
+      }
+      function onNodeLeave(e) {
+        removeClass(e.currentTarget, "lky-hover");
+      }
     },
     addElementOverlay(node) {
       if (!node) {
         return;
       }
-      const styles = node.getBoundingClientRect();
+      const styles = getElementOffset(node, this.currentFrame.contentWindow);
       let div = this.currentFrameDocument.createElement("div");
       div.className = "node-highlight";
-      div.style.position = "fixed";
+      div.style.position = "absolute";
       div.style.content = "";
       div.style.height = `${styles.height + "px"}`;
       div.style.width = `${styles.width + "px"}`;
       div.style.top = `${styles.top + "px"}`;
-      div.style.right = `${styles.right + "px"}`;
-      div.style.bottom = `${styles.bottom + "px"}`;
       div.style.left = `${styles.left + "px"}`;
       div.style.background = "#05f";
       div.style.opacity = "0.25";
@@ -227,20 +241,11 @@ export default {
     errorTipEffects() {
       const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
       const self = this;
-      allTips.forEach(t => {
-        t.querySelector(".lky-point").onmouseover = () => {
-          allTips.forEach(c => {
-            addClass(c, "hover");
-          });
-        };
-        t.onmouseleave = () => {
-          allTips.forEach(c => {
-            removeClass(c, "hover");
-          });
-        };
-      });
-      this.currentFrameBody.onclick = () => {
-        self.removeHighlight();
+      this.currentFrameBody.onclick = e => {
+        if (e.target.className === "lky-popup-close") {
+          return;
+        }
+        self.removeOverlayForAll();
         allTips.forEach(c => {
           removeClass(c, "active");
           removeClass(c, "hover");
@@ -314,13 +319,15 @@ export default {
       const bottomCenter = () => {
         return bottom() && halfLeft() && halfRight();
       };
+      const tipWidth = 13 / 2;
+      /*tip.style.width = nodeDim.width + "px";
+      tip.style.height = nodeDim.height + "px";*/
 
       //BottomCenter as default
       tip.style.top = nodeDim.top + nodeDim.height + "px";
       tip.style.left = nodeDim.left + nodeDim.width / 2 + "px";
       if (rightCenter()) {
-        tip.style.top =
-          nodeDim.top + nodeDim.height / 2 - nodeDim.height / 2 + "px";
+        tip.style.top = nodeDim.top + nodeDim.height / 2 - tipWidth + "px";
         tip.style.left = nodeDim.left + nodeDim.width + "px";
         addClass(popup, "right");
       } else if (bottomCenter()) {
@@ -343,6 +350,10 @@ export default {
     initFrame() {
       const url = this.siteUrl;
       const self = this;
+      this.$store.dispatch(
+        "setCurrentFrame",
+        document.querySelector("iframe[data-perfect-pixel]")
+      );
       return new Promise((resolve, reject) => {
         this.$nextTick(() => {
           const frame = document.getElementsByTagName("iframe")[0];
@@ -395,46 +406,52 @@ export default {
     renderStyles(d) {
       const css = `.lky-error-tip {
        position: absolute;
-       z-index: 999999;
+       left: 50%;
+       top: 50%;
+       transform: translate(-50%, -50%);
+       z-index: 9999;
+      }
+      .lky-error-tip.active {
+        z-index: 99999;
       }
       .lky-error-tip .lky-point {
         position: absolute;
-        width: 25px;
-        height: 25px;
+        width: 13px;
+        height: 13px;
         background-color: red;
-        border: 4px solid #fff;
+        border: 2px solid #fff;
         border-radius: 50%;
-        z-index: 999;
       }
-      .lky-error-tip .lky-popup {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 5px;
-        visibility: hidden;
-        z-index: 99999999;
-        box-shadow: 0 2px 170px rgba(0, 0, 0, 0.5);
+      @media (min-width: 480px){
+        .lky-error-tip .lky-popup {
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 5px;
+          visibility: hidden;
+          box-shadow: 0 2px 170px rgba(0, 0, 0, 0.5);
+        }
       }
       .lky-popup.left, .lky-popup.right, .lky-popup.top, .lky-popup.bottom  {
         position: absolute
       }
       .lky-popup.left {
         right: calc(100% + 30px);
-        top: 50%;
+        top: calc(50% + 6px);
         transform: translate(0, -50%);
       }
       .lky-popup.right {
         left: calc(100% + 30px);
-        top: 50%;
+        top: calc(50% + 6px);
         transform: translate(0, -50%);
       }
       .lky-popup.top {
         bottom: calc(100% + 30px);
-        left: 50%;
+        left: calc(50% + 6px);
         transform: translate(-50%, 0);
       }
       .lky-popup.bottom {
         top: calc(100% + 30px);
-        left: 50%;
+        left: calc(50% + 6px);
         transform: translate(-50%, 0);
       }
       .lky-popup:before {
@@ -496,8 +513,26 @@ export default {
       .lky-error-tip .lky-popup .design {
         color: green;
       }
+      .lky-popup-close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 13px;
+        height: 13px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 47.971 47.971'%3E%3Cpath d='M28.228 23.986L47.092 5.122a2.998 2.998 0 0 0 0-4.242 2.998 2.998 0 0 0-4.242 0L23.986 19.744 5.121.88a2.998 2.998 0 0 0-4.242 0 2.998 2.998 0 0 0 0 4.242l18.865 18.864L.879 42.85a2.998 2.998 0 1 0 4.242 4.241l18.865-18.864L42.85 47.091c.586.586 1.354.879 2.121.879s1.535-.293 2.121-.879a2.998 2.998 0 0 0 0-4.242L28.228 23.986z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        cursor: pointer;
+        opacity: 0.5;
+      }
+      .lky-popup-close:hover {
+        opacity: 0.8;
+      }
       .node-highlight {
         z-index: 9999;
+      }
+      .lky-hover {
+        outline: rgb(17, 151, 200) solid 2px !important;
+        cursor: pointer;
       }`;
       const style = d.createElement("style");
       if (style.styleSheet) {
@@ -518,18 +553,29 @@ export default {
     preventAllLinks(frameDocument) {
       const anchors = frameDocument.getElementsByTagName("a");
       for (let i = 0; i < anchors.length; i++) {
-        anchors[i].onclick = () => {
+        anchors[i].removeAttribute("href");
+        const old_element = anchors[i];
+        const new_element = old_element.cloneNode(true);
+        old_element.parentNode.replaceChild(new_element, old_element);
+        new_element.onclick = () => {
           return false;
         };
       }
+      this.currentFrame.contentWindow.onbeforeunload = e => {
+        e.preventDefault();
+        e.returnValue = "";
+      };
     }
   }
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+body {
+  overflow: hidden;
+}
 .site-viewer {
-  overflow-x: hidden;
+  overflow: hidden;
   transition: opacity 1s 2s linear;
   &.hidden {
     opacity: 0;

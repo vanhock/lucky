@@ -39,13 +39,16 @@ export default {
 
 <style lang="scss">
 body {
-  background-color: $color-bg1;
   overflow-x: hidden;
+  overflow-y: auto;
+  background-color: $color-bg1;
 }
 .home {
+  height: 100%;
   overflow-x: hidden;
-  margin-bottom: 50px;
-
+  overflow-y: auto;
+  padding-bottom: 50px;
+  background-color: $color-bg1;
   .container {
     max-width: 540px;
     margin: 0 auto;

@@ -3,10 +3,10 @@
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
       <v-menu class="right icon-menu">
-        <div><i class="fas fa-bars"></i></div>
+        <div @click="toggleTasksList"><i class="fas fa-bars"></i></div>
       </v-menu>
     </div>
-    <task-list :tasks="foundNodes" v-if="foundNodes" />
+    <task-list v-show="showTasksList" :tasks="foundNodes" v-if="foundNodes" />
   </div>
 </template>
 
@@ -17,8 +17,16 @@ import { mapGetters } from "vuex";
 export default {
   name: "TopPanel",
   components: { VMenu, TaskList },
+  data: () => ({
+    showTasksList: true
+  }),
   computed: {
     ...mapGetters(["foundNodes"])
+  },
+  methods: {
+    toggleTasksList() {
+      this.showTasksList = !this.showTasksList
+    }
   }
 };
 </script>

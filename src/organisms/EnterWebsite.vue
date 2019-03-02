@@ -22,28 +22,28 @@ export default {
     ...mapGetters(["siteUrl", "siteUrlProxy"])
   },
   methods: {
-    checkUrlAvailable: _.throttle(function() {
+    checkUrlAvailable() {
       const url = this.$refs.url;
-      if (!url.valid && url.inputValue !== "") {
-        return;
-      }
+      this.$nextTick(() => {
+        if (!url.valid && url.inputValue !== "") {
+          return;
+        }
 
-      this.$store.dispatch("setSiteUrl", url.inputValue);
-      this.setProjectInfo(url.inputValue);
-    }, 300),
+        this.$store.dispatch("setSiteUrl", url.inputValue);
+        this.setProjectInfo(url.inputValue);
+      });
+    },
     setProjectInfo(url) {
       const projectId = url
         .replace(/(http|https):\/\//, "")
         .replace(/\?.*/, "")
         .replace(/[\-\/.]/gm, "");
-      const recentProjects =
-        getFromLocal("recentProjects") &&
-        JSON.parse(getFromLocal("recentProjects"));
+      const recentProjects = getFromLocal("recentProjects");
       const isProjectExist =
         recentProjects && recentProjects.hasOwnProperty(projectId);
       const projectInfo = {
         id: projectId,
-        name: (isProjectExist && recentProjects[projectId].name) || projectId
+        name: (isProjectExist && recentProjects[projectId].name) || url.replace(/(http|https):\/\//, "").replace(/\?.*/, "")
       };
       this.$store.dispatch("setProjectInfo", projectInfo);
     }

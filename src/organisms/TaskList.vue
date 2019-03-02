@@ -3,7 +3,7 @@
     <ul class="tasks-list">
       <li
         v-for="(task, index, i) in tasks"
-        :class="{ active: activeTaskIndex && activeTaskIndex === i }"
+        :class="{ active: activeTaskIndex && activeTaskIndex === index }"
         @click="setActiveTask(index)"
       >
         <div class="index">{{ i + 1 }}</div>
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import Hub from "../atoms/hub";
+import { mapGetters } from "vuex";
 export default {
   name: "TaskList",
   props: {
@@ -27,15 +27,21 @@ export default {
       default: () => ({})
     }
   },
+  computed: {
+    ...mapGetters(["currentFrameBody"])
+  },
   data: () => ({
     activeTaskIndex: null
   }),
   methods: {
-    setActiveTask(node, index) {
-      return;
+    setActiveTask(index) {
       this.activeTaskIndex = index;
-      node.scrollIntoView();
-      Hub.$emit("setActiveTask", { node: node, index: index });
+      const targetElement = this.currentFrameBody.querySelectorAll("*")[index];
+      if (!targetElement) {
+        return;
+      }
+      targetElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      targetElement.click();
     }
   }
 };
