@@ -1,10 +1,12 @@
 <template>
-  <div class="tasks">
+  <div class="tasks" ref="tasksList">
     <ul class="tasks-list">
       <li
         v-for="(task, index, i) in tasks"
-        :class="{ active: activeTaskIndex && activeTaskIndex === index }"
-        @click="setActiveTask(index)"
+        :key="index"
+        :class="{ active: activeTaskIndex === index }"
+        @click="scrollToFoundNode(index, i)"
+        :data-task-index="index"
       >
         <div class="index">{{ i + 1 }}</div>
         <div class="header">{{ task.name }}</div>
@@ -17,9 +19,26 @@
 </template>
 
 <script>
+import Hub from "../atoms/hub";
+import {scrollTo, getElementOffset} from "../atoms/utils";
 import { mapGetters } from "vuex";
 export default {
   name: "TaskList",
+  mounted() {
+    const self = this;
+    Hub.$on("clickOnFoundNode", foundNode => {
+      if (!foundNode) {
+        return;
+      }
+      self.activeTaskIndex = foundNode.id.toString();
+      const targetElement = document.querySelector(
+        `[data-task-index='${foundNode.id}']`
+      );
+      if (targetElement) {
+        scrollTo(this.$refs.tasksList, targetElement.offsetTop - 50, 100)
+      }
+    });
+  },
   props: {
     tasks: {
       type: Object,
@@ -28,20 +47,20 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["currentFrameBody"])
+    ...mapGetters(["currentFrameBody", "currentFrameWindow", "currentFrameDocument"])
   },
   data: () => ({
     activeTaskIndex: null
   }),
   methods: {
-    setActiveTask(index) {
-      this.activeTaskIndex = index;
+    scrollToFoundNode(index, i) {
+      const tip = this.currentFrameBody.querySelectorAll(".lky-error-tip")[i];
       const targetElement = this.currentFrameBody.querySelectorAll("*")[index];
-      if (!targetElement) {
-        return;
-      }
-      targetElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      targetElement.click();
+      const targetElementOffset = getElementOffset(targetElement, this.currentFrameWindow);
+      this.activeTaskIndex = index;
+
+      scrollTo(this.currentFrameDocument.documentElement, targetElementOffset.top - 50, 100);
+      Hub.$emit("highlightNode", targetElement, tip)
     }
   }
 };

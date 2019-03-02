@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import Hub from "../atoms/hub";
 import axios from "axios";
 import config from "../config";
 import { mapGetters } from "vuex";
@@ -35,6 +36,10 @@ export default {
   mounted() {
     !this.viewerReady && this.$router.push({ name: "home" });
     this.init();
+    const self = this;
+    Hub.$on("highlightNode", (node, point) => {
+      self.highlightNode(node, point)
+    })
   },
   beforeRouteUpdate(from, to, next) {
     if (!this.viewerReady) {
@@ -179,18 +184,22 @@ export default {
           return;
         }
         e.stopPropagation();
-        self.currentFrameDocument
-          .querySelectorAll(".lky-error-tip")
-          .forEach(el => {
-            removeClass(el, "active");
-          });
-        self.removeOverlayForAll();
-        addClass(point, "active");
-        self.addElementOverlay(node);
+        Hub.$emit("clickOnFoundNode", foundNode);
+        self.highlightNode(node, point);
       };
       point.querySelector(".lky-popup-close").onclick = () => {
         removeClass(point, "active");
       };
+    },
+    highlightNode(node, point) {
+      this.currentFrameDocument
+        .querySelectorAll(".lky-error-tip")
+        .forEach(el => {
+          removeClass(el, "active");
+        });
+      this.removeOverlayForAll();
+      addClass(point, "active");
+      this.addElementOverlay(node);
     },
     attachTipsEvents() {
       const allTips = this.currentFrameDocument.querySelectorAll(

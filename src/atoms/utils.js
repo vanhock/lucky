@@ -444,9 +444,5 @@ export const removeFromLocal = function(item, name) {
 
 export const detectMouseButton = function(evt) {
   evt = evt || window.event;
-  if ("buttons" in evt) {
-    return evt.buttons === 1 || evt.buttons === 0;
-  }
-  const button = evt.which || evt.button;
-  return button === 1 || button === 0;
+  return evt.isTrusted ;
 };

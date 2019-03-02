@@ -25,6 +25,7 @@ export default {
             if (!_nodes[i].found && this.searchByParams(_nodes[i], item)) {
               const issues = this.testNode(_nodes[i], item);
               foundNodes[i] = {
+                id: i,
                 name: this.setIssueName(_nodes[i]),
                 issues: issues
               };
