@@ -109,7 +109,7 @@ export default {
         this.processNodes(this.frameNodes, this.foundNodes);
       } else {
         // Will be process in backend =>
-        this.testNodes(this.design, resultNodes).then(foundNodes => {
+        this.recognizeNodes(this.design, resultNodes).then(foundNodes => {
           if (
             !foundNodes ||
             typeof foundNodes !== "object" ||

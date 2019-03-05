@@ -74,17 +74,17 @@ export default new Vuex.Store({
       if (!payload || !payload.hasOwnProperty("children")) {
         return;
       }
-      state.design = getParentAndChild(payload.children).map(i => ({
-        //name: i.name,
-        //opacity: i.opacity,
-        //type: i.type,
+      state.design = getParentAndChild(payload.children).filter(f => f.type === "layer").map(i => ({
+        name: i.name,
+        opacity: i.opacity,
         left: i.left,
         right: i.right,
         top: i.top,
         bottom: i.bottom,
         visible: i.visible,
         width: i.width,
-        height: i.height
+        height: i.height,
+        text: i.text && true || false
       }));
     },
     SET_FRAME_PARAMS(state, payload) {
