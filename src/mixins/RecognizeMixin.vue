@@ -9,6 +9,7 @@ export default {
     topLevelSearchGutter: 100,
     searchGutter: 50,
     testGutter: 0,
+    maximumParents: 5,
     errors: [],
     text: {
       errorsFound: "Обнаружены ошибки",
@@ -25,13 +26,15 @@ export default {
         this.design = [...design];
         this.nodes = [...nodes];
         this.nodes.forEach(node => {
-          // Search for top levels of DOM with low accuracy
           // Skip nodes, found by "whlt"
-          const found = node.whlt || self.searchByDesign(node, false, this.topLevelSearchGutter);
+          // Search node with high accuracy
+          const found =
+            node.whlt ||
+            (self.searchByDesign(node, false, this.topLevelSearchGutter) &&
+              this.deepSearchNode(node));
           if (!found) {
             return;
           }
-          // Deep search node => ()
           const issues = this.testNode(node, found);
           this.$set(this.foundNodes, i, {
             id: i,
@@ -46,7 +49,10 @@ export default {
     },
     searchByDesign(node, full = true, gutter = null) {
       for (let i = 0, max = this.design.length; i < max; i++) {
-        if (!this.design[i].found && this.searchByWHLT(node, this.design[i], full, gutter)) {
+        if (
+          !this.design[i].found &&
+          this.searchByWHLT(node, this.design[i], full, gutter)
+        ) {
           return this.design[i];
         }
       }
@@ -69,39 +75,77 @@ export default {
       );
     },
     deepSearchNode(node) {
-      return (
-        (this.findNodeSiblings(node) === 2 && true) ||
-        (this.findNodeSiblings(node) === 1 && this.findNodeChildren(node) === 2 && true) ||
-        false
-      );
+      return trySearch(this.findNodeSiblings(node), () => {
+        return trySearch(this.findNodeChildren(node), () => {
+          return trySearch(this.findParentsSiblings(node));
+        });
+      });
+
+      function trySearch(func, callback) {
+        if (func === true || func === false) {
+          return func;
+        }
+        if (func === 2) {
+          return true;
+        } else if (func === 1) {
+          callback();
+        } else {
+          return false;
+        }
+      }
     },
     findNodeSiblings(node) {
       const prev =
         node.previousElementSibling &&
-        searchByDesign(node.previousElementSibling);
+        this.searchByDesign(node.previousElementSibling, true);
       const next =
-        node.nextElementSibling && searchByDesign(node.nextElementSibling);
-      // if sibling checked, set "whlt" test true
-      prev &&
-        this.$set(
-          this.nodes[this.nodes.indexOf(node.previousElementSibling)],
-          "whlt",
-          true
-        );
-      next &&
-        this.$set(
-          this.nodes[this.nodes.indexOf(node.nextElementSibling)],
-          "whlt",
-          true
-        );
+        node.nextElementSibling &&
+        this.searchByDesign(node.nextElementSibling, true);
+      // if sibling found, set "whlt" test true
+      prev && this.setFoundWhlt(node.previousElementSibling);
+      next && this.setFoundWhlt(node.nextElementSibling);
       return this.getScore([prev, next]);
     },
     findNodeChildren(node) {
-      return true;
+      const children = node.children;
+      if (!children || !children.length) {
+        return 0;
+      }
+      const self = this;
+      const found = [];
+      children.forEach(c => {
+        const elementFound = self.searchByDesign(c, true);
+        found.push(elementFound);
+        // if child found, set "whlt" test true
+        elementFound && this.setFoundWhlt(c);
+      });
+      if (!found.length) {
+        return 0;
+      }
+      return this.getScore(found);
     },
     findParentsSiblings(node) {
-      // find siblings on parent node
-      return true;
+      let parentCount = 0;
+      lookingParent(node);
+
+      function lookingParent(n) {
+        if (!n.parentElement || parentCount > this.maximumParents) {
+          return;
+        }
+        if (this.findNodeSiblings(n.parentElement) === 2) {
+          return true;
+        } else {
+          parentCount++;
+          lookingParent(n.parentElement);
+        }
+      }
+    },
+    setFoundWhlt(node) {
+      const target = this.nodes.indexOf(node);
+      if (target === -1) {
+        return;
+      }
+      this.$set(this.nodes[target], "whlt", true);
     },
     testNode(node, block) {
       if (!node || !block) {
