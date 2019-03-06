@@ -444,5 +444,10 @@ export const removeFromLocal = function(item, name) {
 
 export const detectMouseButton = function(evt) {
   evt = evt || window.event;
-  return evt.isTrusted ;
+  return evt.isTrusted;
+};
+
+export const isElementHidden = function(el) {
+  const style = window.getComputedStyle(el);
+  return style.display === "none";
 };

@@ -2,9 +2,11 @@
 export default {
   name: "RecognizeMixin",
   data: () => ({
-    nodes: null,
-    design: null,
-    foundNodes: {},
+    recognize: {
+      nodes: [],
+      design: [],
+      foundNodes: {},
+    },
     currentBlock: {},
     topLevelSearchGutter: 100,
     searchGutter: 50,
@@ -23,37 +25,35 @@ export default {
     recognizeNodes(design, nodes) {
       const self = this;
       return new Promise(resolve => {
-        this.design = [...design];
-        this.nodes = [...nodes];
-        this.nodes.forEach(node => {
+        this.recognize.design = [...design];
+        this.recognize.nodes = [...nodes];
+        this.recognize.nodes.forEach((node, i) => {
           // Skip nodes, found by "whlt"
           // Search node with high accuracy
           const found =
-            node.whlt ||
-            (self.searchByDesign(node, false, this.topLevelSearchGutter) &&
-              this.deepSearchNode(node));
-          if (!found) {
+            node.whlt || self.searchByDesign(node, false, this.topLevelSearchGutter);
+          if (!found || !this.deepSearchNode(node)) {
             return;
           }
           const issues = this.testNode(node, found);
-          this.$set(this.foundNodes, i, {
+          this.$set(this.recognize.foundNodes, i, {
             id: i,
             name: this.setIssueName(node),
             issues: issues
           });
-          this.design[i].found = true;
+          this.recognize.nodes[i].found = true;
         });
-        this.$store.dispatch("setFoundNodes", this.foundNodes);
-        resolve(this.foundNodes);
+        this.$store.dispatch("setFoundNodes", this.recognize.foundNodes);
+        resolve(this.recognize.foundNodes);
       });
     },
     searchByDesign(node, full = true, gutter = null) {
-      for (let i = 0, max = this.design.length; i < max; i++) {
+      for (let i = 0, max = this.recognize.design.length; i < max; i++) {
         if (
-          !this.design[i].found &&
-          this.searchByWHLT(node, this.design[i], full, gutter)
+          !this.recognize.nodes[i].found &&
+          this.searchByWHLT(node, this.recognize.design[i], full, gutter)
         ) {
-          return this.design[i];
+          return this.recognize.design[i];
         }
       }
       return false;
@@ -95,6 +95,7 @@ export default {
       }
     },
     findNodeSiblings(node) {
+      const found = [];
       const prev =
         node.previousElementSibling &&
         this.searchByDesign(node.previousElementSibling, true);
@@ -102,9 +103,9 @@ export default {
         node.nextElementSibling &&
         this.searchByDesign(node.nextElementSibling, true);
       // if sibling found, set "whlt" test true
-      prev && this.setFoundWhlt(node.previousElementSibling);
-      next && this.setFoundWhlt(node.nextElementSibling);
-      return this.getScore([prev, next]);
+      prev && found.push(this.setFoundWhlt(node.previousElementSibling));
+      next && found.push(this.setFoundWhlt(node.nextElementSibling));
+      return this.getScore(found);
     },
     findNodeChildren(node) {
       const children = node.children;
@@ -141,11 +142,11 @@ export default {
       }
     },
     setFoundWhlt(node) {
-      const target = this.nodes.indexOf(node);
+      const target = this.recognize.nodes.indexOf(node);
       if (target === -1) {
         return;
       }
-      this.$set(this.nodes[target], "whlt", true);
+      this.$set(this.recognize.nodes[target], "whlt", true);
     },
     testNode(node, block) {
       if (!node || !block) {
@@ -205,7 +206,7 @@ export default {
       const quantityOfTrue = elements
         .map(el => (el && 1) || 0)
         .reduce((f, s) => f + s);
-      const percentOfTrue = (length / 100) * quantityOfTrue;
+      const percentOfTrue = (length * 100) / quantityOfTrue;
       return (
         (percentOfTrue < 30 && 0) ||
         (percentOfTrue >= 30 && percentOfTrue < 70 && 1) ||
