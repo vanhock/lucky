@@ -38,8 +38,8 @@ export default {
     this.init();
     const self = this;
     Hub.$on("highlightNode", (node, point) => {
-      self.highlightNode(node, point)
-    })
+      self.highlightNode(node, point);
+    });
   },
   beforeRouteUpdate(from, to, next) {
     if (!this.viewerReady) {
@@ -95,21 +95,12 @@ export default {
       });
     },
     initTestPage() {
-      const requiredParams = [
-        "clientWidth",
-        "clientHeight",
-        "offsetLeft",
-        "offsetTop"
-      ];
-      this.frameNodes = this.currentFrameBody.getElementsByTagName("*");
-      const resultNodes = [...this.frameNodes].filter(item => {
-        return requiredParams.every(p => item[p]);
-      });
+      this.frameNodes = [...this.currentFrameBody.getElementsByTagName("*")];
       if (this.isFoundNodes) {
         this.processNodes(this.frameNodes, this.foundNodes);
       } else {
         // Will be process in backend =>
-        this.recognizeNodes(this.design, resultNodes).then(foundNodes => {
+        this.recognizeNodes(this.design, this.frameNodes).then(foundNodes => {
           if (
             !foundNodes ||
             typeof foundNodes !== "object" ||
@@ -132,12 +123,11 @@ export default {
     },
     processNodes(frameNodes, foundNodes) {
       const self = this;
-      const nodes = [...frameNodes];
-      nodes.forEach((node, index) => {
-        if (foundNodes.hasOwnProperty(index)) {
-          self.processFoundNode(node, foundNodes[index]);
+      for (let index in foundNodes) {
+        if (foundNodes.hasOwnProperty(index) && frameNodes[index]) {
+          self.processFoundNode(frameNodes[index], foundNodes[index]);
         }
-      });
+      }
       this.attachTipsEvents();
       this.errorTipEffects();
     },
@@ -223,7 +213,7 @@ export default {
       }
     },
     addElementOverlay(node) {
-      if (!node) {
+      if (!node || !this.currentFrame.contentWindow) {
         return;
       }
       const styles = getElementOffset(node, this.currentFrame.contentWindow);
@@ -262,6 +252,9 @@ export default {
       };
     },
     setTipPopupPosition(node, tip) {
+      if (node.className && node.className.includes("ya-share2__badge")) {
+        console.log("hui");
+      }
       const popup = tip.querySelector(".lky-popup");
       const gutter = 30;
       const documentDim = {
@@ -269,8 +262,6 @@ export default {
         height: this.currentFrameBody.clientHeight
       };
       const nodeDim = {
-        width: node.clientWidth,
-        height: node.clientHeight,
         ...getElementOffset(node, this.currentFrame.contentWindow)
       };
       const popupDim = {

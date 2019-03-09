@@ -1,14 +1,16 @@
 <script>
-export default {
+  import {isElementShown} from "../atoms/utils";
+
+  export default {
   name: "RecognizeMixin",
   data: () => ({
     recognize: {
       nodes: [],
       design: [],
-      foundNodes: {},
+      foundNodes: {}
     },
     currentBlock: {},
-    topLevelSearchGutter: 100,
+    generalSearchGutter: 100,
     searchGutter: 50,
     testGutter: 0,
     maximumParents: 5,
@@ -30,36 +32,58 @@ export default {
         this.recognize.nodes.forEach((node, i) => {
           // Skip nodes, found by "whlt"
           // Search node with high accuracy
-          const found =
-            node.whlt || self.searchByDesign(node, false, this.topLevelSearchGutter);
-          if (!found || !this.deepSearchNode(node)) {
+          const foundDesignIndex =
+            this.validateNode(node) &&
+            (node.designBlockIndex ||
+            self.generalSearch(node));
+          if (!foundDesignIndex || !this.deepSearchNode(node)) {
             return;
           }
-          const issues = this.testNode(node, found);
+
+          this.setFoundDesignBlockIndex(node, foundDesignIndex);
+
+          const issues = this.testNode(node, this.recognize.design[foundDesignIndex]);
           this.$set(this.recognize.foundNodes, i, {
             id: i,
             name: this.setIssueName(node),
+            designBlockIndex: foundDesignIndex,
             issues: issues
           });
-          this.recognize.nodes[i].found = true;
         });
         this.$store.dispatch("setFoundNodes", this.recognize.foundNodes);
         resolve(this.recognize.foundNodes);
       });
     },
-    searchByDesign(node, full = true, gutter = null) {
+    generalSearch(node) {
+      if (node.found) {
+        return;
+      }
       for (let i = 0, max = this.recognize.design.length; i < max; i++) {
         if (
-          !this.recognize.nodes[i].found &&
-          this.searchByWHLT(node, this.recognize.design[i], full, gutter)
+          !this.recognize.design[i].found &&
+          this.searchByWHLT(node, this.recognize.design[i], false, this.generalSearchGutter)
         ) {
-          return this.recognize.design[i];
+          return i;
+        }
+      }
+      return false;
+    },
+    searchByDesign(node, full = true, gutter = null) {
+      /**
+       * Return found design index
+       */
+      for (let i = 0, max = this.recognize.design.length; i < max; i++) {
+        if (this.searchByWHLT(node, this.recognize.design[i], full, gutter)) {
+          return i;
         }
       }
       return false;
     },
     searchByWHLT(node, block, full, gutter = null) {
-      // checking: Width, Height, Left, Top
+      /**
+       *  Checking: Width, Height, Left, Top,
+       *  return boolean
+       */
       if (!node || !block) {
         return false;
       }
@@ -73,6 +97,15 @@ export default {
         this.testBySizes(params) ||
         this.testByPosition(params)
       );
+    },
+    validateNode(node) {
+      const requiredParams = [
+        "clientWidth",
+        "clientHeight",
+        "offsetLeft",
+        "offsetTop"
+      ];
+      return isElementShown(node) && requiredParams.every(p => node[p])
     },
     deepSearchNode(node) {
       return trySearch(this.findNodeSiblings(node), () => {
@@ -96,15 +129,21 @@ export default {
     },
     findNodeSiblings(node) {
       const found = [];
-      const prev =
+      const prevDesignElementIndex =
         node.previousElementSibling &&
         this.searchByDesign(node.previousElementSibling, true);
-      const next =
+      const nextDesignElementIndex =
         node.nextElementSibling &&
         this.searchByDesign(node.nextElementSibling, true);
       // if sibling found, set "whlt" test true
-      prev && found.push(this.setFoundWhlt(node.previousElementSibling));
-      next && found.push(this.setFoundWhlt(node.nextElementSibling));
+      if(prevDesignElementIndex) {
+        found.push(prevDesignElementIndex);
+        this.setFoundDesignBlockIndex(node.previousElementSibling, prevDesignElementIndex);
+      }
+      if(nextDesignElementIndex) {
+        found.push(nextDesignElementIndex);
+        this.setFoundDesignBlockIndex(node.nextElementSibling, nextDesignElementIndex);
+      }
       return this.getScore(found);
     },
     findNodeChildren(node) {
@@ -115,10 +154,10 @@ export default {
       const self = this;
       const found = [];
       children.forEach(c => {
-        const elementFound = self.searchByDesign(c, true);
-        found.push(elementFound);
+        const designElementIndex = self.searchByDesign(c, true);
+        found.push(designElementIndex);
         // if child found, set "whlt" test true
-        elementFound && this.setFoundWhlt(c);
+        designElementIndex && this.setFoundDesignBlockIndex(c, designElementIndex);
       });
       if (!found.length) {
         return 0;
@@ -141,12 +180,14 @@ export default {
         }
       }
     },
-    setFoundWhlt(node) {
+    setFoundDesignBlockIndex(node, designElementIndex) {
       const target = this.recognize.nodes.indexOf(node);
       if (target === -1) {
         return;
       }
-      this.$set(this.recognize.nodes[target], "whlt", true);
+      this.$set(this.recognize.nodes[target], "designBlockIndex", designElementIndex);
+      this.$set(this.recognize.nodes[target], "found", true);
+      this.$set(this.recognize.design[designElementIndex], "found", true);
     },
     testNode(node, block) {
       if (!node || !block) {

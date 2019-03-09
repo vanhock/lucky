@@ -366,7 +366,6 @@ export const getElementOffset = function(el, currentWindow) {
   return {
     top: rect.top + currentWindow.pageYOffset,
     left: rect.left + currentWindow.pageXOffset,
-
     width: rect.width,
     height: rect.height
   };
@@ -447,7 +446,7 @@ export const detectMouseButton = function(evt) {
   return evt.isTrusted;
 };
 
-export const isElementHidden = function(el) {
+export const isElementShown = function(el) {
   const style = window.getComputedStyle(el);
-  return style.display === "none";
+  return style.display !== "none" || el.offsetWidth > 0 && el.offsetHeight > 0;
 };
