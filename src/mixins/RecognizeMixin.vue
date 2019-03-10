@@ -1,7 +1,7 @@
 <script>
-  import {isElementShown} from "../atoms/utils";
+import { isElementShown } from "../atoms/utils";
 
-  export default {
+export default {
   name: "RecognizeMixin",
   data: () => ({
     recognize: {
@@ -9,7 +9,8 @@
       design: [],
       foundNodes: {}
     },
-    currentBlock: {},
+    currentDesignBlockIndex: null,
+    currentFoundNodeIndex: null,
     generalSearchGutter: 100,
     searchGutter: 50,
     testGutter: 0,
@@ -29,26 +30,31 @@
       return new Promise(resolve => {
         this.recognize.design = [...design];
         this.recognize.nodes = [...nodes];
-        this.recognize.nodes.forEach((node, i) => {
+        this.recognize.nodes.forEach(node => {
           // Skip nodes, found by "whlt"
           // Search node with high accuracy
-          const foundDesignIndex =
-            this.validateNode(node) &&
-            (node.designBlockIndex ||
-            self.generalSearch(node));
-          if (!foundDesignIndex || !this.deepSearchNode(node)) {
+          const preFound =
+            !node.skip &&
+            this.validateNode(node) && self.generalSearch(node);
+          if (!preFound) {
             return;
           }
 
-          this.setFoundDesignBlockIndex(node, foundDesignIndex);
-
-          const issues = this.testNode(node, this.recognize.design[foundDesignIndex]);
-          this.$set(this.recognize.foundNodes, i, {
-            id: i,
-            name: this.setIssueName(node),
-            designBlockIndex: foundDesignIndex,
-            issues: issues
+          this.deepSearchNode(node).then((foundNodeIndex) => {
+            const foundNode = this.recognize.nodes[foundNodeIndex];
+            const issues = this.testNode(
+              node,
+              this.recognize.design[this.currentDesignBlockIndex]
+            );
+            // const currentFound node
+            this.$set(this.recognize.foundNodes, foundNodeIndex, {
+              id: foundNodeIndex,
+              name: this.setIssueName(foundNode),
+              designBlockIndex: this.currentDesignBlockIndex,
+              issues: issues
+            });
           });
+
         });
         this.$store.dispatch("setFoundNodes", this.recognize.foundNodes);
         resolve(this.recognize.foundNodes);
@@ -61,8 +67,18 @@
       for (let i = 0, max = this.recognize.design.length; i < max; i++) {
         if (
           !this.recognize.design[i].found &&
-          this.searchByWHLT(node, this.recognize.design[i], false, this.generalSearchGutter)
+          this.searchByWHLT(
+            node,
+            this.recognize.design[i],
+            false,
+            this.generalSearchGutter
+          )
         ) {
+          /**
+           * We found a matched design block with one node element,
+           * and then continue testing this design block carefully
+           **/
+          this.currentDesignBlockIndex = i;
           return i;
         }
       }
@@ -105,13 +121,22 @@
         "offsetLeft",
         "offsetTop"
       ];
-      return isElementShown(node) && requiredParams.every(p => node[p])
+      return isElementShown(node) && requiredParams.every(p => node[p]);
     },
     deepSearchNode(node) {
-      return trySearch(this.findNodeSiblings(node), () => {
-        return trySearch(this.findNodeChildren(node), () => {
-          return trySearch(this.findParentsSiblings(node));
+      return new Promise((resolve, reject) => {
+        const careFullyMatchedElement = trySearch(this.findNodeSiblings(node), () => {
+          return trySearch(this.findNodeChildren(node), () => {
+            return trySearch(this.findParentsSiblings(node));
+          });
         });
+        if(!careFullyMatchedElement) {
+          reject("element not found");
+        }
+        /**
+         * return found Element index
+         */
+        resolve(this.findRelevantElement(careFullyMatchedElement));
       });
 
       function trySearch(func, callback) {
@@ -136,28 +161,24 @@
         node.nextElementSibling &&
         this.searchByDesign(node.nextElementSibling, true);
       // if sibling found, set "whlt" test true
-      if(prevDesignElementIndex) {
+      if (prevDesignElementIndex) {
         found.push(prevDesignElementIndex);
-        this.setFoundDesignBlockIndex(node.previousElementSibling, prevDesignElementIndex);
       }
-      if(nextDesignElementIndex) {
+      if (nextDesignElementIndex) {
         found.push(nextDesignElementIndex);
-        this.setFoundDesignBlockIndex(node.nextElementSibling, nextDesignElementIndex);
       }
       return this.getScore(found);
     },
     findNodeChildren(node) {
-      const children = node.children;
-      if (!children || !children.length) {
+      if (!node.hasChildNodes() || !node.children) {
         return 0;
       }
+      const children = node.children;
       const self = this;
       const found = [];
       children.forEach(c => {
         const designElementIndex = self.searchByDesign(c, true);
         found.push(designElementIndex);
-        // if child found, set "whlt" test true
-        designElementIndex && this.setFoundDesignBlockIndex(c, designElementIndex);
       });
       if (!found.length) {
         return 0;
@@ -180,14 +201,86 @@
         }
       }
     },
-    setFoundDesignBlockIndex(node, designElementIndex) {
-      const target = this.recognize.nodes.indexOf(node);
-      if (target === -1) {
+    findRelevantElement(node) {
+      /**
+       *  Except parents with same sizes
+       */
+      exceptParent(node);
+      function exceptParent(node) {
+        const parent = node.parentElement;
+        if(!parent) {
+          return;
+        }
+        const dimCheck =
+          node.clientWidth === parent.clientWidth &&
+          node.clientHeight === parent.clientHeight;
+        if (!dimCheck) {
+          this.setExceptElementFromSearch(parent);
+        }
+        exceptParent(parent);
+      }
+      /**
+       * set Relevant element by traversing children if they exist
+       * Return found element index
+       */
+      return this.traversingChildren(node);
+    },
+    traversingChildren(node) {
+      /**
+       * Traversing children of the node
+       * for find last child element in the node.
+       */
+      const children = node.children;
+      if(!children) {
+        return this.setFoundBlockIndex(node);
+      }
+
+      /** ToDo: Test this traversingChildren closure **/
+      let lastFoundNode = null;
+      return () => {
+        children.forEach(c => {
+          const dimCheck =
+            node.clientWidth === c.clientWidth &&
+            node.clientHeight === c.clientHeight;
+          if (!c.hasChildNodes() || !c.children) {
+            /**
+             * If last children an element of the node with same dimensions - set it found,
+             * else except it from search and set his parent found
+             */
+            if (dimCheck) {
+              this.setFoundBlockIndex(c);
+            } else {
+              this.setExceptElementFromSearch(c);
+              lastFoundNode && this.setFoundBlockIndex(lastFoundNode);
+            }
+          } else {
+            // save last found node
+            dimCheck ? lastFoundNode = c : "";
+            this.traversingChildren(c.children);
+          }
+        });
+      }
+    },
+    setExceptElementFromSearch(node) {
+      const elementIndex = this.recognize.nodes.indexOf(node);
+      if (elementIndex === -1) {
         return;
       }
-      this.$set(this.recognize.nodes[target], "designBlockIndex", designElementIndex);
-      this.$set(this.recognize.nodes[target], "found", true);
-      this.$set(this.recognize.design[designElementIndex], "found", true);
+      this.$set(this.recognize.nodes[target], "skip", true);
+    },
+    setFoundBlockIndex(node, designElementIndex) {
+      const designIndex = designElementIndex || this.currentDesignBlockIndex;
+      const elementIndex = this.recognize.nodes.indexOf(node);
+      if (elementIndex === -1) {
+        return;
+      }
+      this.$set(this.recognize.nodes[target], "found", designIndex);
+      this.$set(this.recognize.design[designIndex], "found", elementIndex);
+      // Remove skip flag
+      this.recognize.nodes[target].hasOwnProperty("skip") &&
+        this.$set(this.recognize.nodes[target], "skip", false);
+      // For Main node traversing in recognizeNodes function
+      return this.currentFoundNodeIndex = elementIndex;
     },
     testNode(node, block) {
       if (!node || !block) {
