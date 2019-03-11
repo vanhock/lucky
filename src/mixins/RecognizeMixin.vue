@@ -31,7 +31,7 @@ export default {
         this.recognize.design = [...design];
         this.recognize.nodes = [...nodes];
         this.recognize.nodes.forEach(node => {
-          // Skip nodes, found by "whlt"
+          // Skip found nodes
           // Search node with high accuracy
           const preFound =
             !node.skip && this.validateNode(node) && self.generalSearch(node);
@@ -39,20 +39,23 @@ export default {
             return;
           }
 
-          this.deepSearchNode(node).then(foundNodeIndex => {
-            const foundNode = this.recognize.nodes[foundNodeIndex];
-            const issues = this.testNode(
-              node,
-              this.recognize.design[this.currentDesignBlockIndex]
-            );
-            // const currentFound node
-            this.$set(this.recognize.foundNodes, foundNodeIndex, {
-              id: foundNodeIndex,
-              name: this.setIssueName(foundNode),
-              designBlockIndex: this.currentDesignBlockIndex,
-              issues: issues
+          this.deepSearchNode(node)
+            .then(foundNodeIndex => {
+              const foundNode = this.recognize.nodes[foundNodeIndex];
+              const issues = this.testNode(
+                node,
+                this.recognize.design[this.currentDesignBlockIndex]
+              );
+              this.$set(this.recognize.foundNodes, foundNodeIndex, {
+                id: foundNodeIndex,
+                name: this.setIssueName(foundNode),
+                designBlockIndex: this.currentDesignBlockIndex,
+                issues: issues
+              });
+            })
+            .catch(error => {
+              console.log(error);
             });
-          });
         });
         this.$store.dispatch("setFoundNodes", this.recognize.foundNodes);
         resolve(this.recognize.foundNodes);
@@ -123,6 +126,12 @@ export default {
     },
     deepSearchNode(node) {
       return new Promise((resolve, reject) => {
+        /**
+         * Test node by this functions,
+         * if score < 30% return false,
+         * if >= 30, but < 70 - continue testing,
+         * else >= 70 return true
+         */
         const careFullyMatchedElement = trySearch(
           this.findNodeSiblings(node),
           () => {
@@ -135,6 +144,7 @@ export default {
           return reject("element not found");
         }
         /**
+         * Find element, except elements with same sizes
          * return found Element index
          */
         resolve(this.findRelevantElement(node));
@@ -161,10 +171,11 @@ export default {
       const prevDesignElementIndex =
         node.previousElementSibling &&
         this.searchByDesign(node.previousElementSibling, true);
+
       const nextDesignElementIndex =
         node.nextElementSibling &&
         this.searchByDesign(node.nextElementSibling, true);
-      // if sibling found, set "whlt" test true
+
       if (prevDesignElementIndex) {
         found.push(prevDesignElementIndex);
       }
@@ -206,13 +217,6 @@ export default {
       }
     },
     findRelevantElement(node) {
-
-      let lastFoundNode = null;
-      /**
-       *  Except parents with same sizes
-       */
-      this.exceptParent(node);
-
       /**
        * set Relevant element by traversing children if they exist
        * Return found element index
@@ -220,14 +224,17 @@ export default {
 
       const foundNode = this.getRelevantElement(node);
       if (foundNode) {
+        /**
+         *  Except parents with same sizes
+         */
+        this.exceptParent(foundNode);
         return foundNode;
       }
     },
     getRelevantElement(node) {
       const self = this;
-      this.recognize.lastFoundNode = null;
       const foundElementIndex = traversingChildren(node);
-      if(foundElementIndex) {
+      if (foundElementIndex) {
         return foundElementIndex;
       }
       function traversingChildren(node) {
@@ -239,34 +246,22 @@ export default {
         if (!children) {
           return self.setFoundBlockIndex(node);
         }
-        const lastFoundNode = self.recognize.lastFoundNode || node;
-        const _children = [...children];
-        for (let i in _children) {
-          const c = _children[i];
+        const sameChildren = [];
+        [...children].forEach(c => {
           const dimCheck =
             node.clientWidth === c.clientWidth &&
             node.clientHeight === c.clientHeight;
-
-          if (!c.hasChildNodes() || !c.children) {
-            /**
-             * If last children an element of the node with same dimensions - set it found,
-             * else except it from search and set his parent found
-             */
-            if (dimCheck) {
-              self.setFoundBlockIndex(c);
-            } else {
-              this.setExceptElementFromSearch(c);
-              return self.setFoundBlockIndex(lastFoundNode);
-            }
-          } else {
-            // save last found node
-            if (!dimCheck) {
-              return self.setFoundBlockIndex(lastFoundNode);
-            }
-            self.recognize.lastFoundNode = c;
-            traversingChildren(c);
+          if (!dimCheck) {
+            return;
           }
+          sameChildren.push(c);
+        });
+
+        if (!sameChildren.length) {
+          return self.setFoundBlockIndex(node);
         }
+
+        traversingChildren(sameChildren[sameChildren.length]);
       }
     },
     exceptParent(node) {
