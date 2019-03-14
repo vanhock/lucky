@@ -361,7 +361,7 @@ export const isSiteOnline = function(url, callback) {
   img.src = url + "/favicon.ico";
 };
 
-export const getElementOffset = function(el, currentWindow) {
+export const getElementBounding = function(el, currentWindow) {
   const rect = el.getBoundingClientRect();
   return {
     top: rect.top + currentWindow.pageYOffset,
@@ -446,7 +446,97 @@ export const detectMouseButton = function(evt) {
   return evt.isTrusted;
 };
 
-export const isElementShown = function(el) {
-  const style = window.getComputedStyle(el);
-  return style.display !== "none" || el.offsetWidth > 0 && el.offsetHeight > 0;
+export const isElementShown = function(el, currentWindow) {
+  const w = currentWindow || window;
+  const style = w.getComputedStyle(el);
+  return (
+    style.display !== "none" &&
+    style.visibility !== "hidden" &&
+    style.opacity !== "0" &&
+    el.offsetWidth > 0 &&
+    el.offsetHeight > 0
+  );
+};
+export const simplifyDom = function(dom, currentWindow) {
+  /**
+   * Allowed params:
+   * 1. width, height
+   * 2. left, top
+   * 3. visible
+   * 4. className, id, tagName
+   * 5. children, parent
+   */
+  if (!dom || !dom.length) {
+    return;
+  }
+  const _dom = [...dom];
+  const simplified = [];
+  const allowedParams = [
+    "width",
+    "height",
+    "left",
+    "top",
+    "visible",
+    "className",
+    "id",
+    "tagName",
+    "children",
+    "parent",
+    "previousSibling",
+    "nextSibling"
+  ];
+  _dom.forEach(node => {
+    const elementBounding = getElementBounding(node, currentWindow);
+    const target = convertToObject(node);
+    target.width = node.clientWidth || elementBounding.width;
+    target.height = node.clientHeight || elementBounding.height;
+    target.left = elementBounding.left;
+    target.top = elementBounding.top;
+
+    target.visible = isElementShown(node, currentWindow);
+
+    if (target.children && target.children.length) {
+      target.children = [...node.children].map(c => getNodeIndex(_dom, c));
+    } else {
+      delete target.children;
+    }
+    if (target.parentElement && target.parentElement.length) {
+      target.parentElement = getNodeIndex(_dom, node.parentElement);
+    } else {
+      delete target.parentElement;
+    }
+    if (node.previousElementSibling && node.previousElementSibling.length) {
+      target.previousSibling = getNodeIndex(_dom, node.previousElementSibling);
+    } else {
+      delete target.previousSibling;
+    }
+    if (node.nextElementSibling && node.nextElementSibling.length) {
+      target.nextSibling = getNodeIndex(_dom, node.nextElementSibling);
+    } else {
+      delete target.nextSibling;
+    }
+
+    simplified.push(
+      Object.keys(target)
+        .filter(key => allowedParams.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = target[key];
+          return obj;
+        }, {})
+    );
+  });
+
+  return simplified;
+
+  function getNodeIndex(nodeList, node) {
+    return (nodeList.indexOf(node) !== -1 && nodeList.indexOf(node)) || null;
+  }
+
+  function convertToObject(node) {
+    const obj = {};
+    for (let p in node) {
+      obj[p] = node[p];
+    }
+    return obj;
+  }
 };

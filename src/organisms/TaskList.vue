@@ -20,7 +20,7 @@
 
 <script>
 import Hub from "../atoms/hub";
-import {scrollTo, getElementOffset} from "../atoms/utils";
+import {scrollTo, getElementBounding} from "../atoms/utils";
 import { mapGetters } from "vuex";
 export default {
   name: "TaskList",
@@ -56,7 +56,7 @@ export default {
     scrollToFoundNode(index, i) {
       const tip = this.currentFrameBody.querySelectorAll(".lky-error-tip")[i];
       const targetElement = this.currentFrameBody.querySelectorAll("*")[index];
-      const targetElementOffset = getElementOffset(targetElement, this.currentFrameWindow);
+      const targetElementOffset = getElementBounding(targetElement, this.currentFrameWindow);
       this.activeTaskIndex = index;
 
       scrollTo(this.currentFrameDocument.documentElement, targetElementOffset.top - 50, 100);

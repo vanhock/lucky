@@ -26,8 +26,9 @@ import {
   removeClass,
   addToLocal,
   detectMouseButton,
-  getElementOffset,
-  relToAbs
+  getElementBounding,
+  relToAbs,
+  simplifyDom
 } from "../atoms/utils";
 import RecognizeMixin from "../mixins/RecognizeMixin.vue";
 export default {
@@ -96,11 +97,12 @@ export default {
     },
     initTestPage() {
       this.frameNodes = [...this.currentFrameBody.getElementsByTagName("*")];
+      const simplifiedNodes = simplifyDom(this.frameNodes, this.currentFrameWindow);
       if (this.isFoundNodes) {
         this.processNodes(this.frameNodes, this.foundNodes);
       } else {
         // Will be process in backend =>
-        this.recognizeNodes(this.design, this.frameNodes).then(foundNodes => {
+        this.recognizeNodes(this.design, simplifiedNodes).then(foundNodes => {
           if (
             !foundNodes ||
             typeof foundNodes !== "object" ||
@@ -216,7 +218,7 @@ export default {
       if (!node || !this.currentFrame.contentWindow) {
         return;
       }
-      const styles = getElementOffset(node, this.currentFrame.contentWindow);
+      const styles = getElementBounding(node, this.currentFrame.contentWindow);
       let div = this.currentFrameDocument.createElement("div");
       div.className = "node-highlight";
       div.style.position = "absolute";
@@ -262,7 +264,7 @@ export default {
         height: this.currentFrameBody.clientHeight
       };
       const nodeDim = {
-        ...getElementOffset(node, this.currentFrame.contentWindow)
+        ...getElementBounding(node, this.currentFrame.contentWindow)
       };
       const popupDim = {
         width: popup.clientWidth,

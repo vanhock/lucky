@@ -1,6 +1,4 @@
 <script>
-import { isElementShown } from "../atoms/utils";
-
 export default {
   name: "RecognizeMixin",
   data: () => ({
@@ -29,27 +27,27 @@ export default {
       const self = this;
       return new Promise(resolve => {
         this.recognize.design = [...design];
-        this.recognize.nodes = [...nodes];
+        this.recognize.nodes = nodes;
         this.recognize.nodes.forEach(node => {
           // Skip found nodes
           // Search node with high accuracy
           const preFound =
-            !node.skip && this.validateNode(node) && self.generalSearch(node);
+            !node.skip && node.visible && self.generalSearch(node);
           if (!preFound) {
             return;
           }
 
           this.deepSearchNode(node)
-            .then(foundNodeIndex => {
+            .then(({foundNodeIndex, foundDesignIndex}) => {
               const foundNode = this.recognize.nodes[foundNodeIndex];
               const issues = this.testNode(
                 node,
-                this.recognize.design[this.currentDesignBlockIndex]
+                this.recognize.design[foundDesignIndex]
               );
               this.$set(this.recognize.foundNodes, foundNodeIndex, {
                 id: foundNodeIndex,
                 name: this.setIssueName(foundNode),
-                designBlockIndex: this.currentDesignBlockIndex,
+                designBlockIndex: foundDesignIndex,
                 issues: issues
               });
             })
@@ -85,12 +83,19 @@ export default {
       }
       return false;
     },
-    searchByDesign(node, full = true, gutter = null) {
+    searchByDesign(index, full = true, gutter = null) {
       /**
        * Return found design index
        */
       for (let i = 0, max = this.recognize.design.length; i < max; i++) {
-        if (this.searchByWHLT(node, this.recognize.design[i], full, gutter)) {
+        if (
+          this.searchByWHLT(
+            this.recognize.nodes[index],
+            this.recognize.design[i],
+            full,
+            gutter
+          )
+        ) {
           return i;
         }
       }
@@ -115,15 +120,6 @@ export default {
         this.testByPosition(params)
       );
     },
-    validateNode(node) {
-      const requiredParams = [
-        "clientWidth",
-        "clientHeight",
-        "offsetLeft",
-        "offsetTop"
-      ];
-      return isElementShown(node) && requiredParams.every(p => node[p]);
-    },
     deepSearchNode(node) {
       return new Promise((resolve, reject) => {
         /**
@@ -132,14 +128,24 @@ export default {
          * if >= 30, but < 70 - continue testing,
          * else >= 70 return true
          */
-        const careFullyMatchedElement = trySearch(
+
+        let careFullyMatchedElement = false;
+        /*careFullyMatchedElement = trySearch(this.findNodeSiblings(node), () => {
+          return trySearch(this.findNodeChildren(node), () => {
+            return trySearch(this.findParentsSiblings(node));
+          });
+        });*/
+        const conditions = [
           this.findNodeSiblings(node),
-          () => {
-            return trySearch(this.findNodeChildren(node), () => {
-              return trySearch(this.findParentsSiblings(node));
-            });
+          this.findNodeChildren(node),
+          this.findParentsSiblings(node)
+        ];
+        for (let fn in conditions) {
+          if (conditions[fn] === 2 || conditions[fn]) {
+            careFullyMatchedElement = true;
+            break;
           }
-        );
+        }
         if (!careFullyMatchedElement) {
           return reject("element not found");
         }
@@ -165,16 +171,14 @@ export default {
     },
     findNodeSiblings(node) {
       const found = [];
-      if (!node.previousElementSibling && !node.nextElementSibling) {
+      if (!node.previousSibling && !node.nextSibling) {
         return 1;
       }
       const prevDesignElementIndex =
-        node.previousElementSibling &&
-        this.searchByDesign(node.previousElementSibling, true);
+        node.previousSibling && this.searchByDesign(node.previousSibling, true);
 
       const nextDesignElementIndex =
-        node.nextElementSibling &&
-        this.searchByDesign(node.nextElementSibling, true);
+        node.nextSibling && this.searchByDesign(node.nextSibling, true);
 
       if (prevDesignElementIndex) {
         found.push(prevDesignElementIndex);
@@ -185,10 +189,10 @@ export default {
       return this.getScore(found);
     },
     findNodeChildren(node) {
-      if (!node.hasChildNodes() || !node.children) {
+      if (!node.children) {
         return 0;
       }
-      const children = [...node.children];
+      const children = node.children;
       const self = this;
       const found = [];
       children.forEach(c => {
@@ -198,7 +202,8 @@ export default {
       if (!found.length) {
         return 0;
       }
-      return this.getScore(found);
+      const score = this.getScore(found);
+      return score;
     },
     findParentsSiblings(node) {
       let parentCount = 0;
@@ -206,13 +211,14 @@ export default {
 
       function lookingParent(n) {
         if (!n.parentElement || parentCount > this.maximumParents) {
-          return;
+          return false;
         }
-        if (this.findNodeSiblings(n.parentElement) === 2) {
+        const parentElement = this.recognize.nodes[n.parentElement];
+        if (this.findNodeSiblings(parentElement) === 2) {
           return true;
         } else {
           parentCount++;
-          lookingParent(n.parentElement);
+          lookingParent(parentElement);
         }
       }
     },
@@ -242,15 +248,15 @@ export default {
          * Traversing children of the node
          * for find last child element in the node.
          */
+
         const children = node.children;
         if (!children) {
           return self.setFoundBlockIndex(node);
         }
         const sameChildren = [];
-        [...children].forEach(c => {
-          const dimCheck =
-            node.clientWidth === c.clientWidth &&
-            node.clientHeight === c.clientHeight;
+        [...children].forEach(i => {
+          const c = self.recognize.nodes[i];
+          const dimCheck = node.width === c.width && node.height === c.height;
           if (!dimCheck) {
             return;
           }
@@ -265,13 +271,12 @@ export default {
       }
     },
     exceptParent(node) {
-      const parent = node.parentElement;
+      const parent = this.recognize.nodes[node.parentElement];
       if (!parent) {
         return;
       }
       const dimCheck =
-        node.clientWidth === parent.clientWidth &&
-        node.clientHeight === parent.clientHeight;
+        node.width === parent.width && node.height === parent.height;
       if (dimCheck) {
         this.setExceptElementFromSearch(parent);
       }
@@ -297,7 +302,7 @@ export default {
         this.$set(this.recognize.nodes[elementIndex], "skip", false);
       // For Main node traversing in recognizeNodes function
       this.currentFoundNodeIndex = elementIndex;
-      return elementIndex;
+      return { foundNodeIndex: elementIndex, foundDesignIndex: designIndex };
     },
     testNode(node, block) {
       if (!node || !block) {
@@ -310,33 +315,33 @@ export default {
       };
       const errors = [];
       if (!this.testBySizes(params)) {
-        setIssue("width", "clientWidth", this.text.width);
-        setIssue("height", "clientHeight", this.text.height);
+        setIssue("width", "width", this.text.width);
+        setIssue("height", "height", this.text.height);
       }
       if (!this.testByPosition(params)) {
-        setIssue("top", "offsetTop", this.text.top);
-        setIssue("left", "offsetLeft", this.text.left);
+        setIssue("top", "top", this.text.top);
+        setIssue("left", "left", this.text.left);
       }
       return errors;
       function setIssue(first, second, name = null) {
         const n = name || first;
         errors.push({
           name: n,
-          designValue: node[second],
-          nodeValue: block[first]
+          designValue: block[second],
+          nodeValue: node[first]
         });
       }
     },
     testBySizes({ node, block, gutter }) {
       return (
-        Math.abs(block.width - node.clientWidth) <= gutter &&
-        Math.abs(block.height - node.clientHeight) <= gutter
+        Math.abs(block.width - node.width) <= gutter &&
+        Math.abs(block.height - node.height) <= gutter
       );
     },
     testByPosition({ node, block, gutter }) {
       return (
-        Math.abs(block.top - node.offsetTop) <= gutter &&
-        Math.abs(block.left - node.offsetLeft) <= gutter
+        Math.abs(block.top - node.top) <= gutter &&
+        Math.abs(block.left - node.left) <= gutter
       );
     },
     setIssueName(node) {
@@ -346,7 +351,7 @@ export default {
       return (
         node.id ||
         ((node.className && "." + node.className.replace(" ", ".")) ||
-          node.nodeName)
+          node.tagName)
       ).toUpperCase();
     },
     getScore(elements) {
