@@ -13,7 +13,7 @@ export default {
     searchGutter: 50,
     testGutter: 0,
     maximumParents: 5,
-    errors: [],
+    issues: [],
     text: {
       errorsFound: "Обнаружены ошибки",
       width: "Ширина",
@@ -130,11 +130,6 @@ export default {
          */
 
         let careFullyMatchedElement = false;
-        /*careFullyMatchedElement = trySearch(this.findNodeSiblings(node), () => {
-          return trySearch(this.findNodeChildren(node), () => {
-            return trySearch(this.findParentsSiblings(node));
-          });
-        });*/
         const conditions = [
           this.findNodeSiblings(node),
           this.findNodeChildren(node),
@@ -155,19 +150,6 @@ export default {
          */
         resolve(this.findRelevantElement(node));
       });
-
-      function trySearch(func, callback) {
-        if (func === true || func === false) {
-          return func;
-        }
-        if (func === 2) {
-          return true;
-        } else if (func === 1) {
-          callback();
-        } else {
-          return false;
-        }
-      }
     },
     findNodeSiblings(node) {
       const found = [];
@@ -313,7 +295,7 @@ export default {
         block: block,
         gutter: this.testGutter
       };
-      const errors = [];
+      const issues = [];
       if (!this.testBySizes(params)) {
         setIssue("width", "width", this.text.width);
         setIssue("height", "height", this.text.height);
@@ -322,10 +304,10 @@ export default {
         setIssue("top", "top", this.text.top);
         setIssue("left", "left", this.text.left);
       }
-      return errors;
+      return issues;
       function setIssue(first, second, name = null) {
         const n = name || first;
-        errors.push({
+        issues.push({
           name: n,
           designValue: block[second],
           nodeValue: node[first]

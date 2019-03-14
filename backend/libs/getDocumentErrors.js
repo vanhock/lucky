@@ -1,92 +1,283 @@
-const isUrl = require("is-url"), // module use to verify the sourceUrl is an actual URL
-  cheerio = require("cheerio"), // used to convert raw html into jQuery style object to we can use css selectors
-  request = require("request-promise"); // promise based request object
-  //NodeCache = require("node-cache"); // auto expiring in memory caching collection
-  //cache = new NodeCache({ stdTTL: 300 }); // cache source HTML for 5 minutes, after which we fetch a new version
-
 module.exports = function(design, nodes, cb) {
-  const searchGutter = 50;
-  const testGutter = 0;
-  const errors = [];
-  const foundBlocks = [];
-
   if (!design || !nodes) {
     return;
   }
-
-  design.forEach(item => {
-    for (let i = 0, max = nodes.length; i < max; i++) {
-      if (searchByParams(nodes[i], item)) {
-        const errors = testNode(nodes[i], item);
-        foundBlocks.push({
-          design: item,
-          node: nodes[i],
-          errors: errors
+  const recognize = {
+    design: [],
+    nodes: [],
+    foundNodes: {}
+  };
+  let currentDesignBlockIndex = null;
+  const params = {
+    generalSearchGutter: 100,
+    searchGutter: 50,
+    testGutter: 0,
+    maximumParents: 5
+  };
+  const text = {
+    errorsFound: "Обнаружены ошибки",
+    width: "Ширина",
+    height: "Высота",
+    left: "Смещение слева",
+    top: "Смещение сверху"
+  };
+  return new Promise(resolve => {
+    recognize.design = [...design];
+    recognize.nodes = nodes;
+    recognize.nodes.forEach(node => {
+      // Skip found nodes
+      // Search node with high accuracy
+      const preFound = !node.skip && node.visible && generalSearch(node);
+      if (!preFound) {
+        return;
+      }
+      deepSearchNode(node)
+        .then(({ foundNodeIndex, foundDesignIndex }) => {
+          const foundNode = recognize.nodes[foundNodeIndex];
+          const issues = testNode(node, recognize.design[foundDesignIndex]);
+          recognize.foundNodes[foundNodeIndex] = {
+            id: foundNodeIndex,
+            name: setIssueName(foundNode),
+            designBlockIndex: foundDesignIndex,
+            issues: issues
+          };
+        })
+        .catch(error => {
+          console.log(error);
         });
-        break;
+    });
+    resolve(recognize.foundNodes);
+  });
+
+  function generalSearch(node) {
+    if (node.found) {
+      return;
+    }
+    for (let i = 0, max = recognize.design.length; i < max; i++) {
+      if (
+        !recognize.design[i].found &&
+        searchByWHLT(
+          node,
+          recognize.design[i],
+          false,
+          params.generalSearchGutter
+        )
+      ) {
+        /**
+         * We found a matched design block with one node element,
+         * and then continue testing this design block carefully
+         **/
+        currentDesignBlockIndex = i;
+        return i;
       }
     }
-  });
-  cb(foundBlocks);
-
-
-  function resolveTemplate(sourceUrl) {
-    return new Promise(function(resolve, reject) {
-      // if its a url and we have the contents in cache
-      if (isUrl(sourceUrl) && cache.get(sourceUrl)) {
-        // get source html from cache
-        const html = cache.get(sourceUrl);
-
-        // covert html into jquery object
-        const $ = cheerio.load(html);
-
-        // return source as a jquery style object
-        resolve($);
-      } else if (isUrl(sourceUrl)) {
-        const params = {
-          uri: sourceUrl,
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"
-          }
-        };
-
-        // request the source url
-        return request(params)
-          .then(function(html) {
-            // convert html into jquery style object so we can use selectors
-            const $ = cheerio.load(html);
-
-            // insert base tag to ensure links/scripts/styles load correctly
-            $("head").prepend('<base href="' + sourceUrl + '">');
-
-            // cache result as HTML so we dont have to keep getting it for future requests and it remains clean
-            cache.set(sourceUrl, $.html());
-
-            // resolve with jquery object containing content
-            resolve($);
-          })
-          .catch(function(err) {
-            // request failed
-            reject("Unable to retrieve " + sourceUrl);
-          });
-      } else {
-        // the sourceUrl must contain markup, just return it
-        resolve(sourceUrl);
-      }
-    });
+    return false;
   }
 
-  function searchByParams(node, block) {
+  function searchByDesign(index, full = true, gutter = null) {
+    /**
+     * Return found design index
+     */
+    for (let i = 0, max = recognize.design.length; i < max; i++) {
+      if (
+        searchByWHLT(recognize.nodes[index], recognize.design[i], full, gutter)
+      ) {
+        return i;
+      }
+    }
+    return false;
+  }
+
+  function searchByWHLT(node, block, full, gutter = null) {
+    /**
+     *  Checking: Width, Height, Left, Top,
+     *  return boolean
+     */
     if (!node || !block) {
       return false;
     }
     const params = {
       node: node,
       block: block,
-      gutter: searchGutter
+      gutter: gutter || params.searchGutter
     };
-    return testBySizes(params) && testByPosition(params);
+    return (
+      (full && (testBySizes(params) && testByPosition(params))) ||
+      testBySizes(params) ||
+      testByPosition(params)
+    );
+  }
+
+  function deepSearchNode(node) {
+    return new Promise((resolve, reject) => {
+      /**
+       * Test node by this functions,
+       * if score < 30% return false,
+       * if >= 30, but < 70 - continue testing,
+       * else >= 70 return true
+       */
+
+      let careFullyMatchedElement = false;
+      const conditions = [
+        findNodeSiblings(node),
+        findNodeChildren(node),
+        findParentsSiblings(node)
+      ];
+      for (let fn in conditions) {
+        if (conditions[fn] === 2 || conditions[fn]) {
+          careFullyMatchedElement = true;
+          break;
+        }
+      }
+      if (!careFullyMatchedElement) {
+        return reject("element not found");
+      }
+      /**
+       * Find element, except elements with same sizes
+       * return found Element index
+       */
+      resolve(findRelevantElement(node));
+    });
+  }
+
+  function findNodeSiblings(node) {
+    const found = [];
+    if (!node.previousSibling && !node.nextSibling) {
+      return 1;
+    }
+    const prevDesignElementIndex =
+      node.previousSibling && searchByDesign(node.previousSibling, true);
+
+    const nextDesignElementIndex =
+      node.nextSibling && searchByDesign(node.nextSibling, true);
+
+    if (prevDesignElementIndex) {
+      found.push(prevDesignElementIndex);
+    }
+    if (nextDesignElementIndex) {
+      found.push(nextDesignElementIndex);
+    }
+    return getScore(found);
+  }
+
+  function findNodeChildren(node) {
+    if (!node.children) {
+      return 0;
+    }
+    const children = node.children;
+    const found = [];
+    children.forEach(c => {
+      const designElementIndex = searchByDesign(c, true);
+      found.push(designElementIndex);
+    });
+    if (!found.length) {
+      return 0;
+    }
+    return getScore(found);
+  }
+
+  function findParentsSiblings(node) {
+    let parentCount = 0;
+    lookingParent(node);
+
+    function lookingParent(n) {
+      if (!n.parentElement || parentCount > params.maximumParents) {
+        return false;
+      }
+      const parentElement = recognize.nodes[n.parentElement];
+      if (findNodeSiblings(parentElement) === 2) {
+        return true;
+      } else {
+        parentCount++;
+        lookingParent(parentElement);
+      }
+    }
+  }
+
+  function findRelevantElement(node) {
+    /**
+     * set Relevant element by traversing children if they exist
+     * Return found element index
+     */
+
+    const foundNode = getRelevantElement(node);
+    if (foundNode) {
+      /**
+       *  Except parents with same sizes
+       */
+      exceptParent(foundNode);
+      return foundNode;
+    }
+  }
+
+  function getRelevantElement(node) {
+    const foundElementIndex = traversingChildren(node);
+    if (foundElementIndex) {
+      return foundElementIndex;
+    }
+    function traversingChildren(node) {
+      /**
+       * Traversing children of the node
+       * for find last child element in the node.
+       */
+
+      const children = node.children;
+      if (!children) {
+        return setFoundBlockIndex(node);
+      }
+      const sameChildren = [];
+      [...children].forEach(i => {
+        const c = recognize.nodes[i];
+        const dimCheck = node.width === c.width && node.height === c.height;
+        if (!dimCheck) {
+          return;
+        }
+        sameChildren.push(c);
+      });
+
+      if (!sameChildren.length) {
+        return setFoundBlockIndex(node);
+      }
+
+      traversingChildren(sameChildren[sameChildren.length]);
+    }
+  }
+
+  function exceptParent(node) {
+    const parent = recognize.nodes[node.parentElement];
+    if (!parent) {
+      return;
+    }
+    const dimCheck =
+      node.width === parent.width && node.height === parent.height;
+    if (dimCheck) {
+      setExceptElementFromSearch(parent);
+    }
+    exceptParent(parent);
+  }
+
+  function setExceptElementFromSearch(node) {
+    const elementIndex = recognize.nodes.indexOf(node);
+    if (elementIndex === -1) {
+      return;
+    }
+    recognize.nodes[elementIndex]["skip"] = true;
+  }
+
+  function setFoundBlockIndex(node, designElementIndex) {
+    const designIndex = designElementIndex || currentDesignBlockIndex;
+    const elementIndex = recognize.nodes.indexOf(node);
+    if (elementIndex === -1) {
+      return;
+    }
+    recognize.nodes[elementIndex]["found"] = designIndex;
+    recognize.design[designIndex]["found"] = elementIndex;
+    // Remove skip flag
+    recognize.nodes[elementIndex].hasOwnProperty("skip")
+      ? (recognize.nodes[elementIndex]["skip"] = false)
+      : "";
+    // For Main node traversing in recognizeNodes function
+    return { foundNodeIndex: elementIndex, foundDesignIndex: designIndex };
   }
 
   function testNode(node, block) {
@@ -96,25 +287,25 @@ module.exports = function(design, nodes, cb) {
     const params = {
       node: node,
       block: block,
-      gutter: testGutter
+      gutter: params.testGutter
     };
-    const errors = [];
+    const issues = [];
     if (!testBySizes(params)) {
-      doTest("width", "width");
-      doTest("height", "height");
+      setIssue("width", "width", text.width);
+      setIssue("height", "height", text.height);
     }
     if (!testByPosition(params)) {
-      doTest("top", "top");
-      doTest("left", "left");
+      setIssue("top", "top", text.top);
+      setIssue("left", "left", text.left);
     }
-    return errors;
-    function doTest(first, second, name = null) {
+    return issues;
+    function setIssue(first, second, name = null) {
       const n = name || first;
-      !(Math.abs(block[first] - node[second]) <= params.gutter) &&
-        errors.push({
-          name: n,
-          error: --block[first] - node[second]
-        });
+      issues.push({
+        name: n,
+        designValue: block[second],
+        nodeValue: node[first]
+      });
     }
   }
 
@@ -131,5 +322,31 @@ module.exports = function(design, nodes, cb) {
       Math.abs(block.left - node.left) <= gutter
     );
   }
-};
 
+  function setIssueName(node) {
+    if (!node) {
+      return;
+    }
+    return (
+      node.id ||
+      ((node.className && "." + node.className.replace(" ", ".")) ||
+        node.tagName)
+    ).toUpperCase();
+  }
+
+  function getScore(elements) {
+    if (!elements || !elements.length) {
+      return 0;
+    }
+    const length = elements.length;
+    const quantityOfTrue = elements
+      .map(el => (el && 1) || 0)
+      .reduce((f, s) => f + s);
+    const percentOfTrue = (length * 100) / quantityOfTrue;
+    return (
+      (percentOfTrue < 30 && 0) ||
+      (percentOfTrue >= 30 && percentOfTrue < 70 && 1) ||
+      (percentOfTrue >= 70 && 2)
+    );
+  }
+};

@@ -7,7 +7,7 @@ const PSD = require("../libs/psd.node.js");
 
 const designUploadPath = path.join(__dirname, "../public/design/");
 module.exports = function(app, db) {
-  app.post("/upload-design", (req, res) => {
+  /*app.post("/upload-design", (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req);
     form.on("fileBegin", function(name, file) {
@@ -27,6 +27,7 @@ module.exports = function(app, db) {
       });
     });
   });
+  */
   const corsAnywhere = require("cors-anywhere");
   let proxy = corsAnywhere.createServer({
     originWhitelist: [], // Allow all origins
@@ -43,10 +44,6 @@ module.exports = function(app, db) {
   app.post("/get-errors", (req, res) => {
     const getData = () => {
       const form = new formidable.IncomingForm();
-      form.parse(req);
-      form.on("fileBegin", function(name, file) {
-        file.path = designUploadPath + file.name;
-      });
       return new Promise(function(resolve, reject) {
         form.parse(req, function(err, fields, files) {
           if (err) return reject(err);
@@ -76,7 +73,8 @@ module.exports = function(app, db) {
         return;
       }
       const design = JSON.parse(fields.design);
-      getDocumentErrors(design, JSON.parse(fields.nodes), cb => {
+      const nodes = JSON.parse(fields.nodes)
+      getDocumentErrors(design, nodes, cb => {
         if (!cb) {
           res.status(500).send("Error with getting errors!");
         } else {
