@@ -7,12 +7,15 @@
       active: viewActive
     }"
   >
-    <iframe
-      data-perfect-pixel
-      :width="frameParams.width || '100%'"
-      :height="windowDim.height - 54 + 'px'"
-      sandbox="allow-same-origin allow-scripts"
-    ></iframe>
+    <div class="frame" :style="frameStyles">
+      <iframe
+        data-perfect-pixel
+        :width="(frameParams.width || '100%') + 'px'"
+        :height="windowDim.height - 54 + 'px'"
+        sandbox="allow-same-origin allow-scripts"
+      ></iframe>
+      <preloader :show="gettingFoundNodeData" />
+    </div>
   </div>
 </template>
 
@@ -31,9 +34,12 @@ import {
   simplifyDom
 } from "../atoms/utils";
 import RecognizeMixin from "../mixins/RecognizeMixin.vue";
+import { getFoundNodesFromApi } from "../api";
+import Preloader from "../atoms/Preloader";
 export default {
   name: "SiteViewer",
   mixins: [RecognizeMixin],
+  components: { Preloader },
   mounted() {
     !this.viewerReady && this.$router.push({ name: "home" });
     this.init();
@@ -52,7 +58,8 @@ export default {
     }
   },
   data: () => ({
-    frameNodes: null
+    frameNodes: null,
+    gettingFoundNodeData: true
   }),
   computed: {
     ...mapGetters([
@@ -74,6 +81,15 @@ export default {
     },
     windowDim() {
       return { width: window.innerWidth, height: window.innerHeight };
+    },
+    frameStyles() {
+      if (!this.frameParams) {
+        return;
+      }
+      return {
+        width: (this.frameParams.width || "100%") + "px",
+        height: this.windowDim.height - 54 + "px"
+      };
     }
   },
   methods: {
@@ -97,12 +113,32 @@ export default {
     },
     initTestPage() {
       this.frameNodes = [...this.currentFrameBody.getElementsByTagName("*")];
-      const simplifiedNodes = simplifyDom(this.frameNodes, this.currentFrameWindow);
+      const simplifiedNodes = simplifyDom(
+        this.frameNodes,
+        this.currentFrameWindow
+      );
       if (this.isFoundNodes) {
         this.processNodes(this.frameNodes, this.foundNodes);
+        this.gettingFoundNodeData = false;
       } else {
-        // Will be process in backend =>
-        this.recognizeNodes(this.design, simplifiedNodes).then(foundNodes => {
+        getFoundNodesFromApi(this.design, simplifiedNodes, foundNodes => {
+          if (
+            !foundNodes ||
+            typeof foundNodes !== "object" ||
+            !Object.entries(foundNodes).length
+          ) {
+            return console.log("nodes not found!");
+          }
+          this.processNodes(this.frameNodes, foundNodes);
+          this.$store
+            .dispatch("setFoundNodes", foundNodes)
+            .then(currentProject => {
+              this.saveProjectToLocal(currentProject);
+            });
+          this.gettingFoundNodeData = false;
+        });
+
+        /*this.recognizeNodes(this.design, simplifiedNodes).then(foundNodes => {
           if (
             !foundNodes ||
             typeof foundNodes !== "object" ||
@@ -117,7 +153,7 @@ export default {
             .then(currentProject => {
               this.saveProjectToLocal(currentProject);
             });
-        });
+        });*/
       }
     },
     saveProjectToLocal(currentProject) {
@@ -577,6 +613,7 @@ body {
   overflow: hidden;
 }
 .site-viewer {
+  position: relative;
   overflow: hidden;
   transition: opacity 1s 2s linear;
   &.hidden {
@@ -593,6 +630,10 @@ body {
       left: 0;
       top: 0;
     }
+  }
+
+  .frame {
+    position: relative;
   }
 
   iframe {

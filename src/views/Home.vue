@@ -31,6 +31,9 @@ import { mapGetters } from "vuex";
 export default {
   name: "home",
   components: { DesignUploader, EnterWebsite, RecentProjects, VButton },
+  mounted() {
+    this.$store.dispatch("resetHomepageState");
+  },
   computed: {
     ...mapGetters(["design", "siteUrl", "viewerReady"])
   }

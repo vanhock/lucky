@@ -1,4 +1,4 @@
-module.exports = function(design, nodes, cb) {
+module.exports = function(design, nodes) {
   if (!design || !nodes) {
     return;
   }
@@ -21,7 +21,7 @@ module.exports = function(design, nodes, cb) {
     left: "Смещение слева",
     top: "Смещение сверху"
   };
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     recognize.design = [...design];
     recognize.nodes = nodes;
     recognize.nodes.forEach(node => {
@@ -46,6 +46,7 @@ module.exports = function(design, nodes, cb) {
           console.log(error);
         });
     });
+
     resolve(recognize.foundNodes);
   });
 
@@ -96,15 +97,15 @@ module.exports = function(design, nodes, cb) {
     if (!node || !block) {
       return false;
     }
-    const params = {
+    const searchParams = {
       node: node,
       block: block,
       gutter: gutter || params.searchGutter
     };
     return (
-      (full && (testBySizes(params) && testByPosition(params))) ||
-      testBySizes(params) ||
-      testByPosition(params)
+      (full && (testBySizes(searchParams) && testByPosition(searchParams))) ||
+      testBySizes(searchParams) ||
+      testByPosition(searchParams)
     );
   }
 
@@ -220,7 +221,9 @@ module.exports = function(design, nodes, cb) {
        * Traversing children of the node
        * for find last child element in the node.
        */
-
+      if (!node) {
+        return;
+      }
       const children = node.children;
       if (!children) {
         return setFoundBlockIndex(node);
@@ -284,17 +287,17 @@ module.exports = function(design, nodes, cb) {
     if (!node || !block) {
       return false;
     }
-    const params = {
+    const testParams = {
       node: node,
       block: block,
       gutter: params.testGutter
     };
     const issues = [];
-    if (!testBySizes(params)) {
+    if (!testBySizes(testParams)) {
       setIssue("width", "width", text.width);
       setIssue("height", "height", text.height);
     }
-    if (!testByPosition(params)) {
+    if (!testByPosition(testParams)) {
       setIssue("top", "top", text.top);
       setIssue("left", "left", text.left);
     }

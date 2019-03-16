@@ -1,13 +1,8 @@
-const path = require("path");
-const fs = require("fs");
 const formidable = require("formidable");
-//require("../libs/psd.min.js");
-
-const PSD = require("../libs/psd.node.js");
-
-const designUploadPath = path.join(__dirname, "../public/design/");
 module.exports = function(app, db) {
-  /*app.post("/upload-design", (req, res) => {
+  /* const PSD = require("../libs/psd.node.js");
+    const designUploadPath = path.join(__dirname, "../public/design/");
+    app.post("/upload-design", (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req);
     form.on("fileBegin", function(name, file) {
@@ -40,8 +35,8 @@ module.exports = function(app, db) {
     proxy.emit("request", req, res);
   });
 
-  const getDocumentErrors = require("../libs/getDocumentErrors");
-  app.post("/get-errors", (req, res) => {
+  const getFoundNodes = require("../libs/getFoundNodes");
+  app.post("/get-found-nodes", (req, res) => {
     const getData = () => {
       const form = new formidable.IncomingForm();
       return new Promise(function(resolve, reject) {
@@ -51,39 +46,20 @@ module.exports = function(app, db) {
         });
       });
     };
-
-    const getPsdTree = file => {
-      return new Promise((resolve, reject) => {
-        let filePath = (designUploadPath + file.name).replace(/\\/g, "/");
-        PSD.open(filePath).then(psd => {
-          const design = psd.tree().export();
-          /**try {
-            fs.unlinkSync(filePath);
-            //file removed
-          } catch (err) {
-            console.error(err);
-          }*/
-          resolve(design);
-        });
-      });
-    };
-
-    getData().then(({ fields, files }) => {
+    getData().then(({ fields }) => {
       if (!fields.design || !fields.nodes) {
         return;
       }
       const design = JSON.parse(fields.design);
-      const nodes = JSON.parse(fields.nodes)
-      getDocumentErrors(design, nodes, cb => {
-        if (!cb) {
-          res.status(500).send("Error with getting errors!");
-        } else {
-          console.log("errors sent: ");
-          res.status(200).send(cb);
-        }
-      });
-
+      const nodes = JSON.parse(fields.nodes);
+      getFoundNodes(design, nodes)
+        .then(found => {
+          console.log("We got found nodes: ");
+          res.status(200).send(found);
+        })
+        .catch(error => {
+          res.status(500).send(error);
+        });
     });
   });
 };
-

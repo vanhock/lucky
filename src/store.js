@@ -15,7 +15,9 @@ export default new Vuex.Store({
      * id: String,
      * date: Date,
      * frameParams: Object,
-     * foundNodes: Object
+     * foundNodes: Object,
+     * designBlocks: Array,
+     * designImage: String
      **/
     recentProjects: null
   },
@@ -24,14 +26,20 @@ export default new Vuex.Store({
     currentFrame: state => state.currentFrame,
     currentFrameWindow: state => {
       if (!state.currentFrame) {
-        return;
+        return window;
       }
       return state.currentFrame.contentWindow;
     },
     currentFrameDocument: (state, getters) => {
+      if (!state.currentFrame) {
+        return window.document;
+      }
       return getters.currentFrameWindow.document;
     },
     currentFrameBody: (state, getters) => {
+      if (!state.currentFrame) {
+        return window.document.body;
+      }
       return getters.currentFrameDocument.body;
     },
     frameParams: state =>
@@ -74,18 +82,20 @@ export default new Vuex.Store({
       if (!payload || !payload.hasOwnProperty("children")) {
         return;
       }
-      state.design = getParentAndChild(payload.children).filter(f => f.type === "layer").map(i => ({
-        name: i.name,
-        opacity: i.opacity,
-        left: i.left,
-        right: i.right,
-        top: i.top,
-        bottom: i.bottom,
-        visible: i.visible,
-        width: i.width,
-        height: i.height,
-        text: i.text && true || false
-      }));
+      state.design = getParentAndChild(payload.children)
+        .filter(f => f.type === "layer")
+        .map(i => ({
+          name: i.name,
+          opacity: i.opacity,
+          left: i.left,
+          right: i.right,
+          top: i.top,
+          bottom: i.bottom,
+          visible: i.visible,
+          width: i.width,
+          height: i.height,
+          text: (i.text && true) || false
+        }));
     },
     SET_FRAME_PARAMS(state, payload) {
       if (!payload || typeof payload !== "object") {
@@ -126,6 +136,11 @@ export default new Vuex.Store({
     },
     SET_CURRENT_FRAME(state, payload) {
       state.currentFrame = payload;
+    },
+    RESET_HOMEPAGE_STATE(state) {
+      state.design = null;
+      state.currentProject = null;
+      state.currentFrame = null;
     }
   },
   actions: {
@@ -157,6 +172,9 @@ export default new Vuex.Store({
     },
     setCurrentFrame({ commit }, payload) {
       commit("SET_CURRENT_FRAME", payload);
+    },
+    resetHomepageState({ commit }) {
+      commit("RESET_HOMEPAGE_STATE");
     }
   }
 });

@@ -78,6 +78,12 @@ export default {
   overflow-x: hidden;
   overflow-y: auto;
   border-radius: 0 0 0 5px;
+  z-index: 10;
+  transition: opacity .2s ease-in;
+  opacity: 1;
+  &:hover {
+    opacity: 1;
+  }
   .tasks-list {
     margin: 0;
     padding: 0;
