@@ -14,24 +14,8 @@
 import { mapGetters } from "vuex";
 export default {
   name: "DesignInspector",
-  props: {
-    image: {
-      type: String,
-      required: true
-    },
-    designBlocks: {
-      type: Array,
-      required: true
-    },
-    designParams: {
-      type: Object,
-      required: true
-    }
-  },
   computed: {
-    ...mapGetters([
-
-    ]),
+    ...mapGetters(["designBlocks", "designImage", "frameParams"]),
     shouldShow() {
       return this.image && this.designBlocks && this.designBlocks.length;
     }
@@ -49,11 +33,11 @@ export default {
       };
     },
     setInspectorSizes() {
-      if (!this.designParams) {
+      if (!this.frameParams) {
         return;
       }
       return {
-        width: this.designParams.width + "px",
+        width: this.frameParams.width + "px",
         height: window.outerHeight
       };
     }

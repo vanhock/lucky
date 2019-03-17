@@ -36,13 +36,15 @@ export default {
       }
       window.PSD.fromEvent(e).then(psd => {
         const design = psd.tree().export();
-        if (design) {
-          self.$store.dispatch("setDesign", design);
-          self.$store.dispatch("setFrameParams", {
-            width: design.document.width,
-            height: design.document.height
-          });
+        const image = psd.image.toPng();
+        if (!design || !image) {
+          return;
         }
+        self.$store.dispatch("setDesign", { blocks: design, image: image });
+        self.$store.dispatch("setFrameParams", {
+          width: design.document.width,
+          height: design.document.height
+        });
       });
       /** ToDo: Add file type validation **/
     }

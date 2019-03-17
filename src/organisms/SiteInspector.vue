@@ -137,23 +137,6 @@ export default {
             });
           this.gettingFoundNodeData = false;
         });
-
-        /*this.recognizeNodes(this.design, simplifiedNodes).then(foundNodes => {
-          if (
-            !foundNodes ||
-            typeof foundNodes !== "object" ||
-            !Object.entries(foundNodes).length
-          ) {
-            return;
-          }
-          this.processNodes(this.frameNodes, foundNodes);
-
-          this.$store
-            .dispatch("setFoundNodes", foundNodes)
-            .then(currentProject => {
-              this.saveProjectToLocal(currentProject);
-            });
-        });*/
       }
     },
     saveProjectToLocal(currentProject) {
