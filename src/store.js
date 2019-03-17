@@ -7,7 +7,6 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    design: null,
     currentFrame: null,
     currentProject: null,
     /**
@@ -22,7 +21,6 @@ export default new Vuex.Store({
     recentProjects: null
   },
   getters: {
-    design: state => state.design,
     currentFrame: state => state.currentFrame,
     currentFrameWindow: state => {
       if (!state.currentFrame) {
@@ -42,18 +40,11 @@ export default new Vuex.Store({
       }
       return getters.currentFrameDocument.body;
     },
-    frameParams: state =>
-      state.currentProject &&
-      state.currentProject.hasOwnProperty("frameParams") &&
-      state.currentProject.frameParams,
+    frameParams: state => getObjectValue(state.currentProject, "frameParams"),
+    designBlocks: state => getObjectValue(state.currentProject, "designBlocks"),
+    designImage: state => getObjectValue(state.currentProject, "designImage"),
     siteUrl: (state, getters) => {
-      if (
-        !getters.frameParams ||
-        !getters.frameParams.hasOwnProperty("siteUrl")
-      ) {
-        return;
-      }
-      return getters.frameParams.siteUrl;
+      return getObjectValue(getters.frameParams, "siteUrl");
     },
     siteUrlProxy: (state, getters) => {
       if (!getters.siteUrl) {
@@ -69,20 +60,17 @@ export default new Vuex.Store({
         getters.foundNodes
       );
     },
-    foundNodes: state =>
-      state.currentProject &&
-      state.currentProject.hasOwnProperty("foundNodes") &&
-      state.currentProject.foundNodes,
+    foundNodes: state => getObjectValue(state.currentProject, "foundNodes"),
     isFoundNodes: (state, getters) => {
       return getters.foundNodes && Object.entries(getters.foundNodes).length;
     }
   },
   mutations: {
-    SET_DESIGN(state, payload) {
-      if (!payload || !payload.hasOwnProperty("children")) {
+    SET_DESIGN_BLOCKS(state, blocks) {
+      if (!blocks || !blocks.hasOwnProperty("children")) {
         return;
       }
-      state.design = getParentAndChild(payload.children)
+      const designBlocks = getParentAndChild(blocks.children)
         .filter(f => f.type === "layer")
         .map(i => ({
           name: i.name,
@@ -96,6 +84,16 @@ export default new Vuex.Store({
           height: i.height,
           text: (i.text && true) || false
         }));
+      if (!designBlocks) {
+        return;
+      }
+      Vue.set(state.currentProject, "designBlocks", designBlocks);
+    },
+    SET_DESIGN_IMAGE(state, image) {
+      if (!image) {
+        return;
+      }
+      Vue.set(state.currentProject, "designImage", image);
     },
     SET_FRAME_PARAMS(state, payload) {
       if (!payload || typeof payload !== "object") {
@@ -145,7 +143,8 @@ export default new Vuex.Store({
   },
   actions: {
     setDesign({ commit }, payload) {
-      commit("SET_DESIGN", payload);
+      commit("SET_DESIGN_BLOCKS", payload.blocks);
+      commit("SET_DESIGN_IMAGE", payload.image);
     },
     setSiteUrl({ commit }, payload) {
       const url =
@@ -178,3 +177,7 @@ export default new Vuex.Store({
     }
   }
 });
+
+function getObjectValue(object, key) {
+  return object && object.hasOwnProperty(key) && object[key];
+}
