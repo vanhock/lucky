@@ -24,6 +24,7 @@ button {
   @include box-shadow(deep);
   &[disabled] {
     opacity: 0.7;
+    pointer-events: none;
   }
 }
 </style>

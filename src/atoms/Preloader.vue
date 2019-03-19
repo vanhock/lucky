@@ -1,5 +1,5 @@
 <template>
-  <div class="preloader" :class="{ show: show && !preloaderOutOfTime }">
+  <div class="preloader" :class="{ show: show, dark: dark }">
     <div class="pp-fading-spinner">
       <div
         class="pp-circle"
@@ -14,34 +14,28 @@
 <script>
 export default {
   name: "Preloader",
-  mounted() {
-    const self = this;
-    setTimeout(() => {
-      self.preloaderOutOfTime = true;
-    }, this.timer);
-  },
   data: () => ({
-    timer: 30000,
-    preloaderOutOfTime: false
+    timer: 30000
   }),
   props: {
     show: {
       type: Boolean,
       default: false
+    },
+    dark: {
+      type: Boolean,
+      default: false
     }
   },
-  watch: {
-    show: current => {
+  computed: {
+    preloaderOutOfTime: () => {
+      if (!this || !this.show) {
+        return false;
+      }
       const self = this;
-      if (!this || !this.preloaderOutOfTime) {
-        return;
-      }
-      this.preloaderOutOfTime = false;
-      if (!current) {
-        setTimeout(() => {
-          self.preloaderOutOfTime = true;
-        }, this.timer);
-      }
+      setTimeout(() => {
+        self.preloaderOutOfTime = true;
+      }, this.timer);
     }
   }
 };
@@ -54,15 +48,28 @@ export default {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: #fff;
+  background-color: inherit;
   opacity: 0;
-  z-index: -2;
-  transition: opacity 1s ease-in-out;
+  z-index: -5;
+  transition: opacity 0.5s ease-in-out;
   &.show {
     opacity: 1;
     z-index: 9999;
+    transition: opacity 1s ease-in-out;
+  }
+
+  &.dark {
+    background-color: $color-bg1;
+    .pp-fading-spinner {
+      .pp-circle {
+        &:before {
+          background-color: #fff;
+        }
+      }
+    }
   }
 }
+
 .pp-fading-spinner {
   position: absolute;
   @include align();
@@ -88,6 +95,7 @@ export default {
     }
   }
 }
+
 .pp-fading-spinner .pp-circle2 {
   -webkit-transform: rotate(30deg);
   -ms-transform: rotate(30deg);

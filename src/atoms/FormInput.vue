@@ -59,7 +59,7 @@ export default {
       background-color: transparent;
       color: #fff;
       &:focus {
-        border-bottom-color: $color-w2;
+        border-bottom-color: $color-b4;
       }
       &.valid {
         border-bottom-color: $color-green;

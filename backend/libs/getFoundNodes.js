@@ -33,6 +33,9 @@ module.exports = function(design, nodes) {
       }
       deepSearchNode(node)
         .then(({ foundNodeIndex, foundDesignIndex }) => {
+          if (!foundNodeIndex || !foundDesignIndex) {
+            return;
+          }
           const foundNode = recognize.nodes[foundNodeIndex];
           const issues = testNode(node, recognize.design[foundDesignIndex]);
           recognize.foundNodes[foundNodeIndex] = {

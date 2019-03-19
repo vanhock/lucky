@@ -10,8 +10,8 @@
     <div class="frame" :style="frameStyles">
       <iframe
         data-perfect-pixel
-        :width="(frameParams.width || '100%') + 'px'"
-        :height="windowDim.height - 54 + 'px'"
+        :width="frameStyles.width"
+        :height="frameStyles.height"
         sandbox="allow-same-origin allow-scripts"
       ></iframe>
       <preloader :show="gettingFoundNodeData" />
@@ -59,22 +59,27 @@ export default {
   },
   data: () => ({
     frameNodes: null,
-    gettingFoundNodeData: true
+    gettingFoundNodeData: true,
+    defaultViewParams: {
+      websiteInspector: true,
+      designInspector: true,
+      websiteInspectorHeight: window.innerHeight - 50 + "px"
+    }
   }),
   computed: {
     ...mapGetters([
       "siteUrl",
-      "design",
+      "designBlocks",
       "siteUrlProxy",
       "viewerReady",
       "frameParams",
       "foundNodes",
       "isFoundNodes",
-      "currentProject",
       "currentFrame",
       "currentFrameDocument",
       "currentFrameBody",
-      "currentFrameWindow"
+      "currentFrameWindow",
+      "viewParams"
     ]),
     viewActive() {
       return this.viewerReady && this.$route.name === "view";
@@ -88,7 +93,9 @@ export default {
       }
       return {
         width: (this.frameParams.width || "100%") + "px",
-        height: this.windowDim.height - 54 + "px"
+        height:
+          (this.viewParams && this.viewParams.websiteInspectorHeight + "px") ||
+          this.defaultViewParams.websiteInspectorHeight
       };
     }
   },
@@ -96,15 +103,23 @@ export default {
     init() {
       const self = this;
       this.initFrame().then(() => {
-        const frameDocument = document.querySelector(
-          "iframe[data-perfect-pixel]"
-        ).contentWindow.document;
+        const frameWindow = document.querySelector("iframe[data-perfect-pixel]").contentWindow;
+        const frameDocument = frameWindow.document;
         frameDocument.onreadystatechange = () => {
           if (frameDocument.readyState !== "complete") {
             return;
           }
-          self.preventAllLinks(self.currentFrameDocument);
+          this.$store.dispatch(
+            "setCurrentFrame",
+            document.querySelector("iframe[data-perfect-pixel]")
+          );
+          self.preventAllLinks(frameWindow);
           self.applyFrameAdditionalStyles();
+          if (!self.viewParams) {
+            const viewParams = self.defaultViewParams;
+            viewParams.websiteInspectorHeight = self.windowDim.height / 2 - 54;
+            self.$store.dispatch("setViewParams", viewParams);
+          }
           self.$nextTick(() => {
             self.initTestPage();
           });
@@ -112,7 +127,9 @@ export default {
       });
     },
     initTestPage() {
-      this.frameNodes = [...this.currentFrameBody.getElementsByTagName("*")];
+      const body = document.querySelector("iframe[data-perfect-pixel]")
+        .contentWindow.document.body;
+      this.frameNodes = [...body.getElementsByTagName("*")];
       const simplifiedNodes = simplifyDom(
         this.frameNodes,
         this.currentFrameWindow
@@ -121,7 +138,7 @@ export default {
         this.processNodes(this.frameNodes, this.foundNodes);
         this.gettingFoundNodeData = false;
       } else {
-        getFoundNodesFromApi(this.design, simplifiedNodes, foundNodes => {
+        getFoundNodesFromApi(this.designBlocks, simplifiedNodes, foundNodes => {
           if (
             !foundNodes ||
             typeof foundNodes !== "object" ||
@@ -371,10 +388,6 @@ export default {
     initFrame() {
       const url = this.siteUrl;
       const self = this;
-      this.$store.dispatch(
-        "setCurrentFrame",
-        document.querySelector("iframe[data-perfect-pixel]")
-      );
       return new Promise((resolve, reject) => {
         this.$nextTick(() => {
           const frame = document.getElementsByTagName("iframe")[0];
@@ -571,8 +584,8 @@ export default {
         "important"
       );
     },
-    preventAllLinks(frameDocument) {
-      const anchors = frameDocument.getElementsByTagName("a");
+    preventAllLinks(frameWindow) {
+      const anchors = frameWindow.document.getElementsByTagName("a");
       for (let i = 0; i < anchors.length; i++) {
         anchors[i].removeAttribute("href");
         const old_element = anchors[i];
@@ -582,7 +595,7 @@ export default {
           return false;
         };
       }
-      this.currentFrame.contentWindow.onbeforeunload = e => {
+      frameWindow.onbeforeunload = e => {
         e.preventDefault();
         e.returnValue = "";
       };
@@ -617,6 +630,7 @@ body {
 
   .frame {
     position: relative;
+    background-color: #fff;
   }
 
   iframe {

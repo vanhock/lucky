@@ -1,6 +1,6 @@
 <template>
-  <div class="design-inspector" v-if="shouldShow" :style="setInspectorSizes">
-    <img :src="image" alt="design image" />
+  <div class="design-inspector" v-if="shouldShow" :style="inspectorSizes">
+    <img :src="designImage" alt="design image" class="image" />
     <div
       class="design-block"
       v-for="(block, index) in designBlocks"
@@ -15,9 +15,24 @@ import { mapGetters } from "vuex";
 export default {
   name: "DesignInspector",
   computed: {
-    ...mapGetters(["designBlocks", "designImage", "frameParams"]),
+    ...mapGetters([
+      "designBlocks",
+      "designImage",
+      "designParams",
+      "viewParams"
+    ]),
     shouldShow() {
-      return this.image && this.designBlocks && this.designBlocks.length;
+      return this.designImage && this.designBlocks && this.designBlocks.length;
+    },
+    inspectorSizes() {
+      if (!this.designParams || !this.viewParams) {
+        return;
+      }
+      return {
+        width: this.designParams.width + "px",
+        height:
+          window.innerHeight - this.viewParams.websiteInspectorHeight + "px"
+      };
     }
   },
   methods: {
@@ -31,18 +46,16 @@ export default {
         width: block.width + "px",
         height: block.height + "px"
       };
-    },
-    setInspectorSizes() {
-      if (!this.frameParams) {
-        return;
-      }
-      return {
-        width: this.frameParams.width + "px",
-        height: window.outerHeight
-      };
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+  .design-inspector {
+    overflow-x: hidden;
+    overflow-y: auto;
+    .image {
+    }
+  }
+</style>

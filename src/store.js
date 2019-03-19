@@ -16,7 +16,14 @@ export default new Vuex.Store({
      * frameParams: Object,
      * foundNodes: Object,
      * designBlocks: Array,
-     * designImage: String
+     * designImage: String,
+     * designParams: Object
+     * viewParams: {
+     *   websiteInspector: true,
+     *   designInspector: true,
+     *   websiteInspectorHeight: ''
+     * }
+     *
      **/
     recentProjects: null
   },
@@ -43,6 +50,8 @@ export default new Vuex.Store({
     frameParams: state => getObjectValue(state.currentProject, "frameParams"),
     designBlocks: state => getObjectValue(state.currentProject, "designBlocks"),
     designImage: state => getObjectValue(state.currentProject, "designImage"),
+    designParams: state => getObjectValue(state.currentProject, "designParams"),
+    viewParams: state => getObjectValue(state.currentProject, "viewParams"),
     siteUrl: (state, getters) => {
       return getObjectValue(getters.frameParams, "siteUrl");
     },
@@ -54,8 +63,7 @@ export default new Vuex.Store({
     },
     viewerReady: (state, getters) => {
       return (
-        (state.design &&
-          getters.frameParams &&
+        (getters.frameParams &&
           getters.frameParams.hasOwnProperty("siteUrl")) ||
         getters.foundNodes
       );
@@ -66,7 +74,7 @@ export default new Vuex.Store({
     }
   },
   mutations: {
-    SET_DESIGN_BLOCKS(state, blocks) {
+    SET_DESIGN(state, { blocks, image, params }) {
       if (!blocks || !blocks.hasOwnProperty("children")) {
         return;
       }
@@ -87,13 +95,12 @@ export default new Vuex.Store({
       if (!designBlocks) {
         return;
       }
-      Vue.set(state.currentProject, "designBlocks", designBlocks);
-    },
-    SET_DESIGN_IMAGE(state, image) {
-      if (!image) {
-        return;
+      if (!state.currentProject) {
+        state.currentProject = {};
       }
+      Vue.set(state.currentProject, "designBlocks", designBlocks);
       Vue.set(state.currentProject, "designImage", image);
+      Vue.set(state.currentProject, "designParams", params);
     },
     SET_FRAME_PARAMS(state, payload) {
       if (!payload || typeof payload !== "object") {
@@ -105,16 +112,30 @@ export default new Vuex.Store({
           continue;
         }
         if (!state.currentProject) {
-          state.currentProject = {
-            frameParams: {},
-            foundNodes: {}
-          };
+          state.currentProject = {};
+        }
+
+        if (!state.currentProject.frameParams) {
+          Vue.set(state.currentProject, "frameParams", {});
         }
 
         if (state.currentProject.frameParams.hasOwnProperty(key)) {
           state.currentProject.frameParams[key] = payload[key];
         } else {
           Vue.set(state.currentProject.frameParams, key, payload[key]);
+        }
+      }
+    },
+    SET_VIEW_PARAMS(state, payload) {
+      if (!state.currentProject) {
+        state.currentProject = {};
+      }
+      if (!state.currentProject.hasOwnProperty("viewParams")) {
+        Vue.set(state.currentProject, "viewParams", payload);
+      } else {
+        for (let i in payload) {
+          if (payload.hasOwnProperty(i))
+            Vue.set(state.currentProject.viewParams, i, payload[i]);
         }
       }
     },
@@ -127,7 +148,7 @@ export default new Vuex.Store({
       if (!state.currentProject) {
         state.currentProject = {};
       }
-      state.currentProject.foundNodes = payload;
+      Vue.set(state.currentProject, "foundNodes", payload);
     },
     SET_CURRENT_PROJECT(state, payload) {
       state.currentProject = payload;
@@ -135,16 +156,19 @@ export default new Vuex.Store({
     SET_CURRENT_FRAME(state, payload) {
       state.currentFrame = payload;
     },
+    RESET_DESIGN(state) {
+      Vue.delete(state.currentProject, "designBlocks");
+      Vue.delete(state.currentProject, "designImage");
+      Vue.delete(state.currentProject, "designParams");
+    },
     RESET_HOMEPAGE_STATE(state) {
-      state.design = null;
       state.currentProject = null;
       state.currentFrame = null;
     }
   },
   actions: {
     setDesign({ commit }, payload) {
-      commit("SET_DESIGN_BLOCKS", payload.blocks);
-      commit("SET_DESIGN_IMAGE", payload.image);
+      commit("SET_DESIGN", payload);
     },
     setSiteUrl({ commit }, payload) {
       const url =
@@ -156,6 +180,9 @@ export default new Vuex.Store({
     },
     setFrameParams({ commit }, payload) {
       commit("SET_FRAME_PARAMS", payload);
+    },
+    setViewParams({ commit }, payload) {
+      commit("SET_VIEW_PARAMS", payload);
     },
     setFoundNodes({ commit, state }, payload) {
       return new Promise(resolve => {
@@ -171,6 +198,9 @@ export default new Vuex.Store({
     },
     setCurrentFrame({ commit }, payload) {
       commit("SET_CURRENT_FRAME", payload);
+    },
+    resetDesign({ commit }) {
+      commit("RESET_DESIGN");
     },
     resetHomepageState({ commit }) {
       commit("RESET_HOMEPAGE_STATE");

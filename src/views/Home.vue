@@ -12,10 +12,19 @@
           </div>
         </div>
         <enter-website ref="url" />
-        <design-uploader ref="uploader" v-if="!design" />
-        <router-link tag="div" to="/view">
-          <v-button v-if="design" :disabled="!viewerReady">Let`s go!</v-button>
-        </router-link>
+        <label for="input-url">
+          <router-link
+            tag="div"
+            to="/view"
+            v-if="designBlocks"
+            :disabled="!viewerReady"
+          >
+            <v-button :disabled="!viewerReady">{{
+              !viewerReady ? "⬑ Enter website, before we start" : "Let`s go!"
+            }}</v-button>
+          </router-link>
+        </label>
+        <design-uploader ref="uploader" />
         <recent-projects />
       </div>
     </div>
@@ -35,7 +44,7 @@ export default {
     this.$store.dispatch("resetHomepageState");
   },
   computed: {
-    ...mapGetters(["design", "siteUrl", "viewerReady"])
+    ...mapGetters(["designBlocks", "siteUrl", "viewerReady"])
   }
 };
 </script>
