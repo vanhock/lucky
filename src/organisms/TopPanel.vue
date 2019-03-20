@@ -50,10 +50,11 @@ export default {
   }
 }
 .site-logo {
-  width: 30px;
-  height: 30px;
-  background: url("/pixel.png") no-repeat;
+  width: 32px;
+  height: 32px;
+  background: url(/pixel.png) no-repeat;
   margin-right: 150px;
+  margin-left: -15px;
 }
 .icon-menu {
   height: 100%;

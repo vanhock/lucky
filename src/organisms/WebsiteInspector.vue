@@ -63,7 +63,9 @@ export default {
     defaultViewParams: {
       websiteInspector: true,
       designInspector: true,
-      websiteInspectorHeight: window.innerHeight - 50 + "px"
+      websiteInspectorHeight: window.innerHeight - 50 + "px",
+      showAllDesignBlocks: true,
+      showFoundDesignBlocks: true
     }
   }),
   computed: {
@@ -103,7 +105,8 @@ export default {
     init() {
       const self = this;
       this.initFrame().then(() => {
-        const frameWindow = document.querySelector("iframe[data-perfect-pixel]").contentWindow;
+        const frameWindow = document.querySelector("iframe[data-perfect-pixel]")
+          .contentWindow;
         const frameDocument = frameWindow.document;
         frameDocument.onreadystatechange = () => {
           if (frameDocument.readyState !== "complete") {

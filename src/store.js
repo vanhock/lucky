@@ -27,7 +27,8 @@ export default new Vuex.Store({
      * }
      *
      **/
-    recentProjects: null
+    recentProjects: null,
+    targetElement: null
   },
   getters: {
     currentFrame: state => state.currentFrame,
@@ -50,7 +51,27 @@ export default new Vuex.Store({
       return getters.currentFrameDocument.body;
     },
     frameParams: state => getObjectValue(state.currentProject, "frameParams"),
-    designBlocks: state => getObjectValue(state.currentProject, "designBlocks"),
+    designBlocks: state => {
+      const foundNodes = getObjectValue(state.currentProject, "foundNodes");
+      const designBlocks = getObjectValue(state.currentProject, "designBlocks");
+      if (!foundNodes) {
+        return designBlocks;
+      }
+      for (let i in foundNodes) {
+        if (!foundNodes.hasOwnProperty(i)) {
+          continue;
+        }
+        const designIndex = foundNodes[i].designBlockIndex;
+        if (designBlocks[designIndex]) {
+          Vue.set(
+            state.currentProject.designBlocks[designIndex],
+            "found",
+            true
+          );
+        }
+      }
+      return designBlocks;
+    },
     designImage: state => getObjectValue(state.currentProject, "designImage"),
     designParams: state => getObjectValue(state.currentProject, "designParams"),
     viewParams: state => getObjectValue(state.currentProject, "viewParams"),
@@ -73,7 +94,8 @@ export default new Vuex.Store({
     foundNodes: state => getObjectValue(state.currentProject, "foundNodes"),
     isFoundNodes: (state, getters) => {
       return getters.foundNodes && Object.entries(getters.foundNodes).length;
-    }
+    },
+    targetElement: state => state.targetElement
   },
   mutations: {
     SET_DESIGN(state, { blocks, image, params }) {
@@ -167,6 +189,9 @@ export default new Vuex.Store({
     RESET_HOMEPAGE_STATE(state) {
       state.currentProject = null;
       state.currentFrame = null;
+    },
+    SET_TARGET_ELEMENT(state, payload) {
+      state.targetElement = payload;
     }
   },
   actions: {
@@ -207,6 +232,9 @@ export default new Vuex.Store({
     },
     resetHomepageState({ commit }) {
       commit("RESET_HOMEPAGE_STATE");
+    },
+    setTargetElement({ commit }, payload) {
+      commit("SET_TARGET_ELEMENT", payload);
     }
   }
 });

@@ -30,20 +30,20 @@ export default {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  color: $color-b3;
+  color: $color-b6;
   .icon {
     width: 15px;
     height: 15px;
-    fill: $color-b3;
+    fill: $color-b6;
   }
   .text {
     font-size: 11px;
     margin-left: 7px;
   }
   &.active {
-    color: $color-b6;
+    color: $color-w2;
     .icon {
-      fill: $color-b6;
+      fill: $color-w2;
     }
   }
   &:not(.active) {

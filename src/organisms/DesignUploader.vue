@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import Compressor from "compressorjs";
 import { mapGetters } from "vuex";
 import Preloader from "../atoms/Preloader";
 export default {
@@ -62,27 +63,30 @@ export default {
       this.uploading = true;
       window.PSD.fromEvent(e).then(psd => {
         const design = psd.tree().export();
-        const image = psd.image.toPng();
         const params = {
           fileName: file.name,
           fileSize: file.size,
           width: design.document.width,
           height: design.document.height
         };
-        if (!design || !image) {
+        if (!design) {
           return;
         }
-        self.$store.dispatch("setDesign", {
-          blocks: design,
-          image: image.src,
-          params: params
-        });
         self.$store.dispatch("setFrameParams", {
           width: design.document.width,
           height: design.document.height
         });
         this.uploading = false;
         this.$refs.file.value = "";
+        /**
+         * Compress and set design image
+         */
+        const image = psd.image.toPng();
+        self.$store.dispatch("setDesign", {
+          blocks: design,
+          image: image.src,
+          params: params
+        });
       });
       /** ToDo: Add file type validation **/
     }

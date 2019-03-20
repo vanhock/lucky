@@ -20,7 +20,7 @@
 
 <script>
 import Hub from "../atoms/hub";
-import {scrollTo, getElementBounding} from "../atoms/utils";
+import { scrollTo, getElementBounding } from "../atoms/utils";
 import { mapGetters } from "vuex";
 export default {
   name: "TaskList",
@@ -35,8 +35,12 @@ export default {
         `[data-task-index='${foundNode.id}']`
       );
       if (targetElement) {
-        scrollTo(this.$refs.tasksList, targetElement.offsetTop - 50, 100)
+        scrollTo(this.$refs.tasksList, targetElement.offsetTop - 50, 100);
       }
+      self.$store.dispatch("setTargetElement", {
+        nodeIndex: foundNode.id,
+        blockIndex: foundNode.designBlockIndex
+      });
     });
   },
   props: {
@@ -47,7 +51,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["currentFrameBody", "currentFrameWindow", "currentFrameDocument"])
+    ...mapGetters([
+      "currentFrameBody",
+      "currentFrameWindow",
+      "currentFrameDocument"
+    ])
   },
   data: () => ({
     activeTaskIndex: null
@@ -56,11 +64,18 @@ export default {
     scrollToFoundNode(index, i) {
       const tip = this.currentFrameBody.querySelectorAll(".lky-error-tip")[i];
       const targetElement = this.currentFrameBody.querySelectorAll("*")[index];
-      const targetElementOffset = getElementBounding(targetElement, this.currentFrameWindow);
+      const targetElementOffset = getElementBounding(
+        targetElement,
+        this.currentFrameWindow
+      );
       this.activeTaskIndex = index;
 
-      scrollTo(this.currentFrameDocument.documentElement, targetElementOffset.top - 50, 100);
-      Hub.$emit("highlightNode", targetElement, tip)
+      scrollTo(
+        this.currentFrameDocument.documentElement,
+        targetElementOffset.top - 50,
+        100
+      );
+      Hub.$emit("highlightNode", targetElement, tip);
     }
   }
 };
@@ -79,7 +94,7 @@ export default {
   overflow-y: auto;
   border-radius: 0 0 0 5px;
   z-index: 10;
-  transition: opacity .2s ease-in;
+  transition: opacity 0.2s ease-in;
   opacity: 1;
   &:hover {
     opacity: 1;

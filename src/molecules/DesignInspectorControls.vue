@@ -3,9 +3,9 @@
     <div class="design-inspector-controls">
       <toggle
         :active="showAllBlocks"
-        icon="layers"
-        text="Layers"
-        @click="setParam('showAllDesignBlocks', !showAllBlocks)"
+        :icon="(showFoundBlocks && 'target') || 'layers'"
+        :text="(showFoundBlocks && 'Found layers') || 'All layers'"
+        @click="toggleLayersViewMode"
       />
     </div>
   </panel-control>
@@ -21,17 +21,23 @@ export default {
   computed: {
     ...mapGetters(["viewParams"]),
     showAllBlocks() {
-      if (!this.viewParams) {
-        return;
-      }
-      return (
-        this.viewParams &&
-        this.viewParams.hasOwnProperty("showAllDesignBlocks") &&
-        this.viewParams.showAllDesignBlocks
-      );
+      return this.getParam("showAllDesignBlocks");
+    },
+    showFoundBlocks() {
+      return this.getParam("showFoundDesignBlocks");
     }
   },
   methods: {
+    toggleLayersViewMode() {
+      if (!this.getParam("showAllDesignBlocks")) {
+        this.setParam("showAllDesignBlocks", true);
+      } else if (this.getParam("showFoundDesignBlocks")) {
+        this.setParam("showAllDesignBlocks", false);
+        this.setParam("showFoundDesignBlocks", false);
+      } else {
+        this.setParam("showFoundDesignBlocks", true);
+      }
+    },
     setParam(name, value) {
       if (!name) {
         return;
@@ -39,6 +45,16 @@ export default {
       const param = {};
       param[name] = value;
       this.$store.dispatch("setViewParams", param);
+    },
+    getParam(name) {
+      if (!this.viewParams) {
+        return;
+      }
+      return (
+        this.viewParams &&
+        this.viewParams.hasOwnProperty(name) &&
+        this.viewParams[name]
+      );
     }
   }
 };
@@ -48,7 +64,7 @@ export default {
 .design-inspector-controls {
   height: inherit;
   .toggle {
-   width: auto;
+    width: auto;
   }
 }
 </style>
