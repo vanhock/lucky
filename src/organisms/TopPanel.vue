@@ -2,6 +2,7 @@
   <div class="top-panel">
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
+      <design-inspector-controls class="left" />
       <v-menu class="right icon-menu">
         <div @click="toggleTasksList"><i class="fas fa-bars"></i></div>
       </v-menu>
@@ -14,9 +15,10 @@
 import VMenu from "../atoms/Menu";
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
+import DesignInspectorControls from "../molecules/DesignInspectorControls";
 export default {
   name: "TopPanel",
-  components: { VMenu, TaskList },
+  components: {DesignInspectorControls, VMenu, TaskList },
   data: () => ({
     showTasksList: true
   }),
@@ -35,7 +37,7 @@ export default {
 @import url("https://use.fontawesome.com/releases/v5.7.2/css/all.css");
 .top-panel {
   display: flex;
-  height: 50px;
+  height: 32px;
   width: 100%;
   background-color: $color-bg2;
   .container {
@@ -51,6 +53,7 @@ export default {
   width: 30px;
   height: 30px;
   background: url("/pixel.png") no-repeat;
+  margin-right: 150px;
 }
 .icon-menu {
   height: 100%;

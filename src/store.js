@@ -21,7 +21,9 @@ export default new Vuex.Store({
      * viewParams: {
      *   websiteInspector: true,
      *   designInspector: true,
-     *   websiteInspectorHeight: ''
+     *   websiteInspectorHeight: '',
+     *   showAllDesignBlocks: false,
+     *   showFoundDesignBlocks: true
      * }
      *
      **/
@@ -90,6 +92,7 @@ export default new Vuex.Store({
           visible: i.visible,
           width: i.width,
           height: i.height,
+          hide: i.width === params.width || i.height === params.height,
           text: (i.text && true) || false
         }));
       if (!designBlocks) {
