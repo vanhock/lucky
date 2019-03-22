@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import Compressor from "compressorjs";
 import { mapGetters } from "vuex";
 import Preloader from "../atoms/Preloader";
 export default {
