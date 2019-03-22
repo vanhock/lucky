@@ -3,6 +3,9 @@
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
       <design-inspector-controls class="left" />
+      <panel-control>
+        <toggle icon="refresh" text="Reload view" @click="reloadView" />
+      </panel-control>
       <v-menu class="right icon-menu">
         <div @click="toggleTasksList"><i class="fas fa-bars"></i></div>
       </v-menu>
@@ -12,13 +15,22 @@
 </template>
 
 <script>
+import Hub from "../atoms/hub";
 import VMenu from "../atoms/Menu";
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
 import DesignInspectorControls from "../molecules/DesignInspectorControls";
+import PanelControl from "../atoms/PanelControl";
+import Toggle from "../atoms/Toggle";
 export default {
   name: "TopPanel",
-  components: {DesignInspectorControls, VMenu, TaskList },
+  components: {
+    Toggle,
+    PanelControl,
+    DesignInspectorControls,
+    VMenu,
+    TaskList
+  },
   data: () => ({
     showTasksList: true
   }),
@@ -27,7 +39,10 @@ export default {
   },
   methods: {
     toggleTasksList() {
-      this.showTasksList = !this.showTasksList
+      this.showTasksList = !this.showTasksList;
+    },
+    reloadView() {
+      Hub.$emit("initTestPage");
     }
   }
 };

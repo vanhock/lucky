@@ -9,8 +9,9 @@ module.exports = function(design, nodes) {
   };
   let currentDesignBlockIndex = null;
   const params = {
-    generalSearchGutter: 100,
-    searchGutter: 50,
+    sizesGutter: 5,
+    generalSearchGutter: 50,
+    searchGutter: 5,
     testGutter: 0,
     maximumParents: 5
   };
@@ -26,11 +27,12 @@ module.exports = function(design, nodes) {
     recognize.nodes = nodes;
     recognize.nodes.forEach(node => {
       // Skip found nodes
-      // Search node with high accuracy
+      currentDesignBlockIndex = null;
       const preFound = !node.skip && node.visible && generalSearch(node);
       if (!preFound) {
         return;
       }
+      // Search node with high accuracy
       deepSearchNode(node)
         .then(({ foundNodeIndex, foundDesignIndex }) => {
           if (!foundNodeIndex || !foundDesignIndex) {
@@ -54,8 +56,10 @@ module.exports = function(design, nodes) {
   });
 
   function generalSearch(node) {
+    const self = this;
     if (node.found) {
-      return;
+      currentDesignBlockIndex = node.found;
+      return true;
     }
     for (let i = 0, max = recognize.design.length; i < max; i++) {
       if (
@@ -72,7 +76,7 @@ module.exports = function(design, nodes) {
          * and then continue testing this design block carefully
          **/
         currentDesignBlockIndex = i;
-        return i;
+        return true;
       }
     }
     return false;
@@ -82,10 +86,17 @@ module.exports = function(design, nodes) {
     /**
      * Return found design index
      */
+    const found = recognize.nodes[index].found;
+    if (found) {
+      currentDesignBlockIndex = found;
+      return found;
+    }
     for (let i = 0, max = recognize.design.length; i < max; i++) {
       if (
+        !recognize.design[i].found &&
         searchByWHLT(recognize.nodes[index], recognize.design[i], full, gutter)
       ) {
+        currentDesignBlockIndex = i;
         return i;
       }
     }
@@ -105,11 +116,10 @@ module.exports = function(design, nodes) {
       block: block,
       gutter: gutter || params.searchGutter
     };
-    return (
+    const result =
       (full && (testBySizes(searchParams) && testByPosition(searchParams))) ||
-      testBySizes(searchParams) ||
-      testByPosition(searchParams)
-    );
+      testBySizes(searchParams);
+    return result && true || false;
   }
 
   function deepSearchNode(node) {
@@ -122,13 +132,16 @@ module.exports = function(design, nodes) {
        */
 
       let careFullyMatchedElement = false;
+      if (searchByDesign(recognize.nodes.indexOf(node), true, 0)) {
+        resolve(findRelevantElement(node));
+      }
       const conditions = [
         findNodeSiblings(node),
         findNodeChildren(node),
         findParentsSiblings(node)
       ];
       for (let fn in conditions) {
-        if (conditions[fn] === 2 || conditions[fn]) {
+        if (conditions[fn] === 2) {
           careFullyMatchedElement = true;
           break;
         }
@@ -316,9 +329,10 @@ module.exports = function(design, nodes) {
   }
 
   function testBySizes({ node, block, gutter }) {
+    const sizeGutter = (gutter === 0 && gutter) || params.sizesGutter;
     return (
-      Math.abs(block.width - node.width) <= gutter &&
-      Math.abs(block.height - node.height) <= gutter
+      Math.abs(block.width - node.width) <= sizeGutter &&
+      Math.abs(block.height - node.height) <= sizeGutter
     );
   }
 
@@ -348,7 +362,7 @@ module.exports = function(design, nodes) {
     const quantityOfTrue = elements
       .map(el => (el && 1) || 0)
       .reduce((f, s) => f + s);
-    const percentOfTrue = (length * 100) / quantityOfTrue;
+    const percentOfTrue = 100 - quantityOfTrue / (length / 100);
     return (
       (percentOfTrue < 30 && 0) ||
       (percentOfTrue >= 30 && percentOfTrue < 70 && 1) ||

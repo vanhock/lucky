@@ -11,7 +11,9 @@
         <div class="index">{{ i + 1 }}</div>
         <div class="header">{{ task.name }}</div>
         <div class="issues">
-          Found errors: <b>{{ task.issues.length }}</b>
+          Found errors: <b>{{ task.issues.length }}</b
+          ><br />
+          Design block index: <b>{{ task.designBlockIndex }}</b>
         </div>
       </li>
     </ul>

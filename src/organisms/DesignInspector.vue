@@ -18,7 +18,9 @@
       :key="index"
       @mouseenter="toggleClass"
       @mouseleave="toggleClass"
-    ></div>
+    >
+      <div class="design-block-index">{{ index }}</div>
+    </div>
   </div>
 </template>
 
@@ -115,6 +117,16 @@ export default {
     }
     &.active {
       background-color: rgba(0, 85, 255, 0.5);
+    }
+    &-index {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      font-weight: bold;
+      background-color: #fff;
+      border-radius: 22px;
+      padding: 3px 10px;
+      font-size: 11px;
     }
   }
   &.only-found {

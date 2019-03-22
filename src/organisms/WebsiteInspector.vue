@@ -47,6 +47,10 @@ export default {
     Hub.$on("highlightNode", (node, point) => {
       self.highlightNode(node, point);
     });
+    Hub.$on("initTestPage", () => {
+      self.$store.dispatch("setFoundNodes", {});
+      self.initTestPage();
+    });
   },
   beforeRouteUpdate(from, to, next) {
     if (!this.viewerReady) {
@@ -66,6 +70,13 @@ export default {
       websiteInspectorHeight: window.innerHeight - 50 + "px",
       showAllDesignBlocks: true,
       showFoundDesignBlocks: true
+    },
+    text: {
+      errorsFound: "Обнаружены ошибки",
+      width: "Ширина",
+      height: "Высота",
+      left: "Смещение слева",
+      top: "Смещение сверху"
     }
   }),
   computed: {
@@ -137,6 +148,7 @@ export default {
         this.frameNodes,
         this.currentFrameWindow
       );
+      this.gettingFoundNodeData = true;
       if (this.isFoundNodes) {
         this.processNodes(this.frameNodes, this.foundNodes);
         this.gettingFoundNodeData = false;
