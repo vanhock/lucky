@@ -7,7 +7,7 @@ module.exports = function(design, nodes) {
     nodes: [],
     foundNodes: {}
   };
-  let currentDesignBlockIndex = null;
+  let lastFoundDesignIndex = null;
   const params = {
     sizesGutter: 5,
     generalSearchGutter: 50,
@@ -27,10 +27,17 @@ module.exports = function(design, nodes) {
     recognize.nodes = nodes;
     recognize.nodes.forEach(node => {
       // Skip found nodes
-      currentDesignBlockIndex = null;
-      const preFound = !node.skip && node.visible && generalSearch(node);
+      lastFoundDesignIndex = null;
+      const preFound =
+        !node.skip &&
+        node.visible &&
+        generalSearch(node, params.generalSearchGutter);
       if (!preFound) {
         return;
+      }
+      /** If element already full match **/
+      if (typeof preFound === "object") {
+        return setFoundNode(node, ...preFound);
       }
       // Search node with high accuracy
       deepSearchNode(node)
@@ -38,14 +45,7 @@ module.exports = function(design, nodes) {
           if (!foundNodeIndex || !foundDesignIndex) {
             return;
           }
-          const foundNode = recognize.nodes[foundNodeIndex];
-          const issues = testNode(node, recognize.design[foundDesignIndex]);
-          recognize.foundNodes[foundNodeIndex] = {
-            id: foundNodeIndex,
-            name: setIssueName(foundNode),
-            designBlockIndex: foundDesignIndex,
-            issues: issues
-          };
+          setFoundNode(node, foundNodeIndex, foundDesignIndex);
         })
         .catch(error => {
           console.log(error);
@@ -55,58 +55,87 @@ module.exports = function(design, nodes) {
     resolve(recognize.foundNodes);
   });
 
-  function generalSearch(node) {
-    const self = this;
+  function setFoundNode(node, foundNodeIndex, foundDesignIndex) {
+    const foundNode = recognize.nodes[foundNodeIndex];
+    const issues = testNode(node, recognize.design[foundDesignIndex]);
+    recognize.foundNodes[foundNodeIndex] = {
+      id: foundNodeIndex,
+      name: setIssueName(foundNode),
+      designBlockIndex: foundDesignIndex,
+      issues: issues
+    };
+  }
+
+  function generalSearch(node, gutter) {
+    /**
+     * Find node, matched with design block by sizes and position,
+     * element has [index, score, gutter];
+     * 1. Push matched element in foundByDesign array,
+     *    if el matched only by sizes we get score 1, else if el matched by sizes and position, score 2;
+     * 2. Find element with minimum gutter, started from elements with score 2
+     * Return found design index or false
+     */
     if (node.found) {
-      currentDesignBlockIndex = node.found;
+      lastFoundDesignIndex = node.found;
       return true;
     }
+    const foundByDesign = [];
     for (let i = 0, max = recognize.design.length; i < max; i++) {
-      if (
-        !recognize.design[i].found &&
-        searchByWHLT(
-          node,
-          recognize.design[i],
-          false,
-          params.generalSearchGutter
-        )
-      ) {
-        /**
-         * We found a matched design block with one node element,
-         * and then continue testing this design block carefully
-         **/
-        currentDesignBlockIndex = i;
-        return true;
+      if (!recognize.design[i].found) {
+        continue;
+      }
+      /** Try to find fully matched element with sizes and position **/
+      const alreadyFound = fullMatchesSearch(node, i);
+      if (alreadyFound) {
+        return {
+          foundNodeIndex: recognize.nodes.indexOf(node),
+          foundDesignIndex: i
+        };
+      }
+      /** Try to find with gutter **/
+      const foundScoreAndGutter = searchBySizesAndPosition(
+        node,
+        recognize.design[i],
+        gutter
+      );
+      foundScoreAndGutter &&
+        foundByDesign.push({ index: i, ...foundScoreAndGutter });
+    }
+    if (foundByDesign.length) {
+      const fullFoundElements = foundByDesign.filter(item => item.score === 2);
+      const halfFoundElements = foundByDesign.filter(item => item.score === 1);
+      const foundIndex =
+        (fullFoundElements &&
+          fullFoundElements.length &&
+          findMinMax(fullFoundElements, "gutter").min.index) ||
+        findMinMax(halfFoundElements, "gutter").min.index;
+      if (foundIndex) {
+        lastFoundDesignIndex = foundIndex;
+        return foundIndex;
       }
     }
     return false;
   }
 
-  function searchByDesign(index, full = true, gutter = null) {
+  function fullMatchesSearch(node, designIndex) {
     /**
-     * Return found design index
+     * Find node, matched with design block by sizes and position without gutter
+     * Return found design index or false
      */
-    const found = recognize.nodes[index].found;
-    if (found) {
-      currentDesignBlockIndex = found;
-      return found;
-    }
-    for (let i = 0, max = recognize.design.length; i < max; i++) {
-      if (
-        !recognize.design[i].found &&
-        searchByWHLT(recognize.nodes[index], recognize.design[i], full, gutter)
-      ) {
-        currentDesignBlockIndex = i;
-        return i;
-      }
-    }
-    return false;
+
+    const searchParams = {
+      node: node,
+      block: recognize.design[designIndex],
+      gutter: 0
+    };
+    return testBySizes(searchParams) && testByPosition(searchParams);
   }
 
-  function searchByWHLT(node, block, full, gutter = null) {
+  function searchBySizesAndPosition(node, block, gutter = null) {
     /**
      *  Checking: Width, Height, Left, Top,
-     *  return boolean
+     *  Return found score and position gutter,
+     *  if found only by sizes, return 1, else return 2
      */
     if (!node || !block) {
       return false;
@@ -116,10 +145,17 @@ module.exports = function(design, nodes) {
       block: block,
       gutter: gutter || params.searchGutter
     };
-    const result =
-      (full && (testBySizes(searchParams) && testByPosition(searchParams))) ||
-      testBySizes(searchParams);
-    return result && true || false;
+    let score = 0;
+    const bySizes = testBySizes(searchParams);
+    if (!bySizes) {
+      return;
+    }
+    score++;
+    const byPosition = testByPosition(searchParams);
+    if (byPosition) {
+      score++;
+    }
+    return { score: score, gutter: bySizes };
   }
 
   function deepSearchNode(node) {
@@ -132,9 +168,6 @@ module.exports = function(design, nodes) {
        */
 
       let careFullyMatchedElement = false;
-      if (searchByDesign(recognize.nodes.indexOf(node), true, 0)) {
-        resolve(findRelevantElement(node));
-      }
       const conditions = [
         findNodeSiblings(node),
         findNodeChildren(node),
@@ -163,10 +196,10 @@ module.exports = function(design, nodes) {
       return 1;
     }
     const prevDesignElementIndex =
-      node.previousSibling && searchByDesign(node.previousSibling, true);
+      node.previousSibling && generalSearch(node.previousSibling, true);
 
     const nextDesignElementIndex =
-      node.nextSibling && searchByDesign(node.nextSibling, true);
+      node.nextSibling && generalSearch(node.nextSibling, true);
 
     if (prevDesignElementIndex) {
       found.push(prevDesignElementIndex);
@@ -184,7 +217,7 @@ module.exports = function(design, nodes) {
     const children = node.children;
     const found = [];
     children.forEach(c => {
-      const designElementIndex = searchByDesign(c, true);
+      const designElementIndex = generalSearch(c, true);
       found.push(designElementIndex);
     });
     if (!found.length) {
@@ -284,7 +317,7 @@ module.exports = function(design, nodes) {
   }
 
   function setFoundBlockIndex(node, designElementIndex) {
-    const designIndex = designElementIndex || currentDesignBlockIndex;
+    const designIndex = designElementIndex || lastFoundDesignIndex;
     const elementIndex = recognize.nodes.indexOf(node);
     if (elementIndex === -1) {
       return;
@@ -330,10 +363,12 @@ module.exports = function(design, nodes) {
 
   function testBySizes({ node, block, gutter }) {
     const sizeGutter = (gutter === 0 && gutter) || params.sizesGutter;
-    return (
-      Math.abs(block.width - node.width) <= sizeGutter &&
-      Math.abs(block.height - node.height) <= sizeGutter
-    );
+    const width = Math.abs(block.width - node.width);
+    const height = Math.abs(block.height - node.height);
+    if (width <= sizeGutter && height <= sizeGutter) {
+      /** returns average gutter **/
+      return average(width, height);
+    }
   }
 
   function testByPosition({ node, block, gutter }) {
@@ -368,5 +403,23 @@ module.exports = function(design, nodes) {
       (percentOfTrue >= 30 && percentOfTrue < 70 && 1) ||
       (percentOfTrue >= 70 && 2)
     );
+  }
+  function average() {
+    let sum = 0;
+
+    for (let i = 0; i < arguments[i]; i++) sum += arguments[i];
+
+    return sum === 0 ? sum : sum / arguments.length;
+  }
+  function findMinMax(arr, fieldName) {
+    let min = arr[0][fieldName],
+      max = arr[0][fieldName];
+
+    for (let i = 1, len = arr.length; i < len; i++) {
+      let v = arr[i][fieldName];
+      min = v < min ? v : min;
+      max = v > max ? v : max;
+    }
+    return [min, max];
   }
 };

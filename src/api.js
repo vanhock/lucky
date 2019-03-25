@@ -18,10 +18,3 @@ export function getFoundNodesFromApi(design, nodes, cb) {
       cb(foundNodes);
     });
 }
-
-/*export function getTargetView(url, cb) {
-  axios.get(config.serverUrl + "/get-target-view" + "?url=" + url).then(res => {
-    const html = res.data;
-    cb(html);
-  });
-}*/
