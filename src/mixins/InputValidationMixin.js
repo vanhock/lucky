@@ -13,7 +13,7 @@ export default {
           defaultRule = /^(\+7|7|8)?[\s-]?\(?[489][0-9]{2}\)?[\s-]?[0-9]{3}[\s-]?[0-9]{2}[\s-]?[0-9]{2}$/gm;
           break;
         case "url":
-          defaultRule =  /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=]+$/g;
+          defaultRule = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=]+$/g;
           break;
         default:
           return null;
@@ -23,10 +23,12 @@ export default {
       if (!this.inputValue) {
         return false;
       }
-      if(rule) {
+      if (rule) {
         return rule.test(this.inputValue);
       } else {
-        return this.inputValue && this.inputValue.length && this.inputValue !== "";
+        return (
+          this.inputValue && this.inputValue.length && this.inputValue !== ""
+        );
       }
     }
   }

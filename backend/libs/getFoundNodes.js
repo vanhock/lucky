@@ -1,13 +1,10 @@
 module.exports = function(design, nodes) {
-  if (!design || !nodes) {
-    return;
-  }
   const recognize = {
     design: [],
     nodes: [],
-    foundNodes: {}
+    foundNodes: {},
+    currentRecognizedNode: null
   };
-  let lastFoundDesignIndex = null;
   const params = {
     sizesGutter: 5,
     generalSearchGutter: 50,
@@ -23,33 +20,32 @@ module.exports = function(design, nodes) {
     top: "Смещение сверху"
   };
   return new Promise((resolve, reject) => {
+    if (!design || !nodes) {
+      return reject("Design or Nodes not found");
+    }
     recognize.design = [...design];
     recognize.nodes = nodes;
-    recognize.nodes.forEach(node => {
+    recognize.nodes.forEach((node, nodeIndex) => {
       // Skip found nodes
-      lastFoundDesignIndex = null;
-      const preFound =
-        !node.skip &&
-        node.visible &&
-        generalSearch(node, params.generalSearchGutter);
-      if (!preFound) {
+      if (node.found || !node.visible) {
         return;
       }
-      /** If element already full match **/
-      if (typeof preFound === "object") {
-        return setFoundNode(node, ...preFound);
-      }
-      // Search node with high accuracy
-      deepSearchNode(node)
-        .then(({ foundNodeIndex, foundDesignIndex }) => {
-          if (!foundNodeIndex || !foundDesignIndex) {
-            return;
-          }
-          setFoundNode(node, foundNodeIndex, foundDesignIndex);
-        })
-        .catch(error => {
-          console.log(error);
-        });
+      /** Search by sizes and position **/
+      generalSearch(node, params.generalSearchGutter, foundDesign => {
+        if (!foundDesign) {
+          return;
+        }
+        if (foundDesign.absolute) {
+          setFoundNode(node, nodeIndex, foundDesign);
+        } else {
+          /** Search node with high accuracy **/
+          deepSearchNode(node, foundDesignIndex => {
+            if (foundDesignIndex) {
+              setFoundNode(node, nodeIndex, foundDesignIndex);
+            }
+          });
+        }
+      });
     });
 
     resolve(recognize.foundNodes);
@@ -64,65 +60,66 @@ module.exports = function(design, nodes) {
       designBlockIndex: foundDesignIndex,
       issues: issues
     };
+    /** Except found node and design from search **/
+    recognize.nodes[foundNodeIndex].found = foundDesignIndex;
+    recognize.design[foundDesignIndex].found = foundNodeIndex;
   }
 
-  function generalSearch(node, gutter) {
-    /**
-     * Find node, matched with design block by sizes and position,
-     * element has [index, score, gutter];
-     * 1. Push matched element in foundByDesign array,
-     *    if el matched only by sizes we get score 1, else if el matched by sizes and position, score 2;
-     * 2. Find element with minimum gutter, started from elements with score 2
-     * Return found design index or false
-     */
-    if (node.found) {
-      lastFoundDesignIndex = node.found;
-      return true;
-    }
+  function generalSearch(node, gutter, cb) {
+    let foundDesign = null;
     const foundByDesign = [];
-    for (let i = 0, max = recognize.design.length; i < max; i++) {
-      if (!recognize.design[i].found) {
+    for (
+      let designIndex = 0, max = recognize.design.length;
+      designIndex < max;
+      designIndex++
+    ) {
+      /** Skip already found design element **/
+      if (recognize.design[designIndex].found) {
         continue;
       }
       /** Try to find fully matched element with sizes and position **/
-      const alreadyFound = fullMatchesSearch(node, i);
-      if (alreadyFound) {
-        return {
-          foundNodeIndex: recognize.nodes.indexOf(node),
-          foundDesignIndex: i
-        };
+      const tryFindAbsolutely = fullMatchesSearch(node, designIndex);
+      if (tryFindAbsolutely) {
+        foundDesign = { index: designIndex, absolute: true };
+        return cb(foundDesign);
       }
-      /** Try to find with gutter **/
-      const foundScoreAndGutter = searchBySizesAndPosition(
+      /**
+       * Find matched element
+       * and add to foundByDesign array for getting design,
+       * found by lowest gutter
+       **/
+      const foundNodeGutter = searchBySizesAndPosition(
         node,
-        recognize.design[i],
+        recognize.design[designIndex],
         gutter
       );
-      foundScoreAndGutter &&
-        foundByDesign.push({ index: i, ...foundScoreAndGutter });
-    }
-    if (foundByDesign.length) {
-      const fullFoundElements = foundByDesign.filter(item => item.score === 2);
-      const halfFoundElements = foundByDesign.filter(item => item.score === 1);
-      const foundIndex =
-        (fullFoundElements &&
-          fullFoundElements.length &&
-          findMinMax(fullFoundElements, "gutter").min.index) ||
-        findMinMax(halfFoundElements, "gutter").min.index;
-      if (foundIndex) {
-        lastFoundDesignIndex = foundIndex;
-        return foundIndex;
+      if (!foundNodeGutter) {
+        continue;
       }
+      foundByDesign.push({ index: designIndex, gutter: foundNodeGutter });
     }
-    return false;
+
+    if (!foundByDesign.length) {
+      foundDesign = false;
+      return cb(foundDesign);
+    }
+    /** Get design index with lowest gutter **/
+    const designIndexWithMinGutter = findMinMax(
+      foundByDesign,
+      "gutter",
+      "index"
+    )[0];
+    if (designIndexWithMinGutter) {
+      foundDesign = { index: designIndexWithMinGutter, absolute: false };
+      cb(foundDesign);
+    }
   }
 
   function fullMatchesSearch(node, designIndex) {
     /**
      * Find node, matched with design block by sizes and position without gutter
      * Return found design index or false
-     */
-
+     **/
     const searchParams = {
       node: node,
       block: recognize.design[designIndex],
@@ -133,10 +130,8 @@ module.exports = function(design, nodes) {
 
   function searchBySizesAndPosition(node, block, gutter = null) {
     /**
-     *  Checking: Width, Height, Left, Top,
-     *  Return found score and position gutter,
-     *  if found only by sizes, return 1, else return 2
-     */
+     * Checking: Width, Height, Left, Top
+     **/
     if (!node || !block) {
       return false;
     }
@@ -145,49 +140,32 @@ module.exports = function(design, nodes) {
       block: block,
       gutter: gutter || params.searchGutter
     };
-    let score = 0;
-    const bySizes = testBySizes(searchParams);
-    if (!bySizes) {
+    /** We get gutter, where a match is found **/
+    const gutterBySizes = testBySizes(searchParams);
+    const foundByPosition = testByPosition(searchParams);
+    if (!foundByPosition || !gutterBySizes) {
       return;
     }
-    score++;
-    const byPosition = testByPosition(searchParams);
-    if (byPosition) {
-      score++;
-    }
-    return { score: score, gutter: bySizes };
+    return gutterBySizes;
   }
 
-  function deepSearchNode(node) {
-    return new Promise((resolve, reject) => {
-      /**
-       * Test node by this functions,
-       * if score < 30% return false,
-       * if >= 30, but < 70 - continue testing,
-       * else >= 70 return true
-       */
-
-      let careFullyMatchedElement = false;
-      const conditions = [
-        findNodeSiblings(node),
-        findNodeChildren(node),
-        findParentsSiblings(node)
-      ];
-      for (let fn in conditions) {
-        if (conditions[fn] === 2) {
-          careFullyMatchedElement = true;
-          break;
-        }
+  function deepSearchNode(node, cb) {
+    /**
+     * Test node by this functions,
+     * if score < 30% return false,
+     * if >= 30, but < 70 - continue testing,
+     * else >= 70 return true
+     */
+    const conditions = [
+      findNodeSiblings(node),
+      findNodeChildren(node),
+      findParentsSiblings(node)
+    ];
+    for (let fn in conditions) {
+      if (conditions[fn] === 2) {
+        cb(true);
       }
-      if (!careFullyMatchedElement) {
-        return reject("element not found");
-      }
-      /**
-       * Find element, except elements with same sizes
-       * return found Element index
-       */
-      resolve(findRelevantElement(node));
-    });
+    }
   }
 
   function findNodeSiblings(node) {
@@ -268,7 +246,7 @@ module.exports = function(design, nodes) {
     function traversingChildren(node) {
       /**
        * Traversing children of the node
-       * for find last child element in the node.
+       * for find last child element in the node with same sizes.
        */
       if (!node) {
         return;
@@ -302,9 +280,10 @@ module.exports = function(design, nodes) {
     }
     const dimCheck =
       node.width === parent.width && node.height === parent.height;
-    if (dimCheck) {
-      setExceptElementFromSearch(parent);
+    if (!dimCheck) {
+      return;
     }
+    setExceptElementFromSearch(parent);
     exceptParent(parent);
   }
 
@@ -314,22 +293,6 @@ module.exports = function(design, nodes) {
       return;
     }
     recognize.nodes[elementIndex]["skip"] = true;
-  }
-
-  function setFoundBlockIndex(node, designElementIndex) {
-    const designIndex = designElementIndex || lastFoundDesignIndex;
-    const elementIndex = recognize.nodes.indexOf(node);
-    if (elementIndex === -1) {
-      return;
-    }
-    recognize.nodes[elementIndex]["found"] = designIndex;
-    recognize.design[designIndex]["found"] = elementIndex;
-    // Remove skip flag
-    recognize.nodes[elementIndex].hasOwnProperty("skip")
-      ? (recognize.nodes[elementIndex]["skip"] = false)
-      : "";
-    // For Main node traversing in recognizeNodes function
-    return { foundNodeIndex: elementIndex, foundDesignIndex: designIndex };
   }
 
   function testNode(node, block) {
@@ -411,15 +374,21 @@ module.exports = function(design, nodes) {
 
     return sum === 0 ? sum : sum / arguments.length;
   }
-  function findMinMax(arr, fieldName) {
+  function findMinMax(arr, fieldName, resultFieldName) {
     let min = arr[0][fieldName],
       max = arr[0][fieldName];
-
+    let resMin = arr[0][resultFieldName];
+    let resMax = arr[0][resultFieldName];
     for (let i = 1, len = arr.length; i < len; i++) {
       let v = arr[i][fieldName];
-      min = v < min ? v : min;
-      max = v > max ? v : max;
+      if (v < min) {
+        min = v;
+        resMin = arr[i][resultFieldName];
+      } else if (v > max) {
+        max = v;
+        resMax = arr[i][resultFieldName];
+      }
     }
-    return [min, max];
+    return [resMin, resMax];
   }
 };

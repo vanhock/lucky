@@ -1,7 +1,6 @@
 <template>
-  <div class="recent-projects">
+  <div class="recent-projects" v-if="projects">
     <project-card
-      v-if="projects"
       v-for="project in projects"
       :key="project.id"
       :project="project"
@@ -17,14 +16,14 @@ export default {
   name: "RecentProjects",
   components: { ProjectCard },
   mounted() {
-    this.getProjectsFromLocal()
+    this.getProjectsFromLocal();
   },
   data: () => ({
     projects: null
   }),
   methods: {
     getProjectsFromLocal() {
-      this.projects = getFromLocal("recentProjects")
+      this.projects = getFromLocal("recentProjects");
     },
     loadProject(project) {
       this.$store.dispatch("setCurrentProject", project).then(() => {
@@ -36,11 +35,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .recent-projects {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-column-gap: 20px;
-    margin-top: 30px;
-    justify-items: stretch;
-  }
+.recent-projects {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 20px;
+  margin-top: 30px;
+  justify-items: stretch;
+}
 </style>

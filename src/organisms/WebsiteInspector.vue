@@ -33,12 +33,10 @@ import {
   relToAbs,
   simplifyDom
 } from "../atoms/utils";
-import RecognizeMixin from "../mixins/RecognizeMixin.vue";
 import { getFoundNodesFromApi } from "../api";
 import Preloader from "../atoms/Preloader";
 export default {
   name: "SiteViewer",
-  mixins: [RecognizeMixin],
   components: { Preloader },
   mounted() {
     !this.viewerReady && this.$router.push({ name: "home" });
@@ -305,9 +303,6 @@ export default {
       };
     },
     setTipPopupPosition(node, tip) {
-      if (node.className && node.className.includes("ya-share2__badge")) {
-        console.log("hui");
-      }
       const popup = tip.querySelector(".lky-popup");
       const gutter = 30;
       const documentDim = {
@@ -373,8 +368,6 @@ export default {
         return bottom() && halfLeft() && halfRight();
       };
       const tipWidth = 13 / 2;
-      /*tip.style.width = nodeDim.width + "px";
-      tip.style.height = nodeDim.height + "px";*/
 
       //BottomCenter as default
       tip.style.top = nodeDim.top + nodeDim.height + "px";
