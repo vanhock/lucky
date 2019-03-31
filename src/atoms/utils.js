@@ -472,6 +472,7 @@ export const simplifyDom = function(dom, currentWindow) {
   const _dom = [...dom];
   const simplified = [];
   const allowedParams = [
+    "index",
     "width",
     "height",
     "left",
@@ -485,9 +486,10 @@ export const simplifyDom = function(dom, currentWindow) {
     "previousSibling",
     "nextSibling"
   ];
-  _dom.forEach(node => {
+  _dom.forEach((node, index) => {
     const elementBounding = getElementBounding(node, currentWindow);
     const target = convertToObject(node);
+    target.index = index;
     target.width = node.clientWidth || elementBounding.width;
     target.height = node.clientHeight || elementBounding.height;
     target.left = elementBounding.left;

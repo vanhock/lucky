@@ -7,7 +7,7 @@ module.exports = function(design, nodes) {
   };
   const params = {
     sizesGutter: 5,
-    generalSearchGutter: 50,
+    positionGutter: 40,
     searchGutter: 5,
     testGutter: 0,
     maximumParents: 5
@@ -25,48 +25,50 @@ module.exports = function(design, nodes) {
     }
     recognize.design = [...design];
     recognize.nodes = nodes;
-    recognize.nodes.forEach((node, nodeIndex) => {
+    recognize.nodes.forEach(node => {
       // Skip found nodes
       if (node.found || !node.visible) {
         return;
       }
       /** Search by sizes and position **/
-      generalSearch(node, params.generalSearchGutter, foundDesign => {
-        if (!foundDesign) {
-          return;
-        }
-        if (foundDesign.absolute) {
-          setFoundNode(node, nodeIndex, foundDesign);
-        } else {
-          /** Search node with high accuracy **/
-          deepSearchNode(node, foundDesignIndex => {
-            if (foundDesignIndex) {
-              setFoundNode(node, nodeIndex, foundDesignIndex);
-            }
-          });
-        }
-      });
+      const foundByGeneralSearch = generalSearch(
+        node,
+        params.generalSearchGutter
+      );
+      if (!Object.keys(foundByGeneralSearch).length) {
+        return;
+      }
+      setFoundNode(node, foundByGeneralSearch.index);
+      /*if (foundByGeneralSearch.absolute) {
+        setFoundNode(node, foundByGeneralSearch.index);
+      } else {
+        /!** Search node with high accuracy **!/
+        deepSearchNode(node, foundDesignIndex => {
+          if (foundDesignIndex) {
+            setFoundNode(node, foundDesignIndex);
+          }
+        });
+      }*/
     });
 
     resolve(recognize.foundNodes);
   });
 
-  function setFoundNode(node, foundNodeIndex, foundDesignIndex) {
-    const foundNode = recognize.nodes[foundNodeIndex];
+  function setFoundNode(node, foundDesignIndex) {
+    const foundNode = recognize.nodes[node.index];
     const issues = testNode(node, recognize.design[foundDesignIndex]);
-    recognize.foundNodes[foundNodeIndex] = {
-      id: foundNodeIndex,
+    recognize.foundNodes[node.index] = {
+      id: node.index,
       name: setIssueName(foundNode),
       designBlockIndex: foundDesignIndex,
       issues: issues
     };
     /** Except found node and design from search **/
-    recognize.nodes[foundNodeIndex].found = foundDesignIndex;
-    recognize.design[foundDesignIndex].found = foundNodeIndex;
+    recognize.nodes[node.index].found = foundDesignIndex;
+    recognize.design[foundDesignIndex].found = node.index;
   }
 
-  function generalSearch(node, gutter, cb) {
-    let foundDesign = null;
+  function generalSearch(node, gutter) {
     const foundByDesign = [];
     for (
       let designIndex = 0, max = recognize.design.length;
@@ -80,8 +82,7 @@ module.exports = function(design, nodes) {
       /** Try to find fully matched element with sizes and position **/
       const tryFindAbsolutely = fullMatchesSearch(node, designIndex);
       if (tryFindAbsolutely) {
-        foundDesign = { index: designIndex, absolute: true };
-        return cb(foundDesign);
+        return { index: designIndex, absolute: true };
       }
       /**
        * Find matched element
@@ -93,25 +94,34 @@ module.exports = function(design, nodes) {
         recognize.design[designIndex],
         gutter
       );
-      if (!foundNodeGutter) {
+      if (foundNodeGutter === undefined) {
         continue;
       }
-      foundByDesign.push({ index: designIndex, gutter: foundNodeGutter });
+      foundByDesign.push({ index: designIndex, ...foundNodeGutter });
     }
 
     if (!foundByDesign.length) {
-      foundDesign = false;
-      return cb(foundDesign);
+      return {};
     }
-    /** Get design index with lowest gutter **/
-    const designIndexWithMinGutter = findMinMax(
+    const minSizesGutter = findMinMax(
       foundByDesign,
-      "gutter",
-      "index"
+      "gutterBySizes",
+      "gutterBySizes"
     )[0];
-    if (designIndexWithMinGutter) {
-      foundDesign = { index: designIndexWithMinGutter, absolute: false };
-      cb(foundDesign);
+    const minPositionGutter = findMinMax(
+      foundByDesign,
+      "gutterByPosition",
+      "gutterByPosition"
+    )[0];
+    const filteredByMinGutter = foundByDesign.filter(item => {
+      return (
+        item.gutterBySizes === minSizesGutter &&
+        item.gutterByPosition === minPositionGutter
+      );
+    });
+    /** Get design index with lowest gutter **/
+    if (filteredByMinGutter.length) {
+      return { index: filteredByMinGutter[0].index, absolute: false };
     }
   }
 
@@ -128,7 +138,7 @@ module.exports = function(design, nodes) {
     return testBySizes(searchParams) && testByPosition(searchParams);
   }
 
-  function searchBySizesAndPosition(node, block, gutter = null) {
+  function searchBySizesAndPosition(node, block) {
     /**
      * Checking: Width, Height, Left, Top
      **/
@@ -137,19 +147,24 @@ module.exports = function(design, nodes) {
     }
     const searchParams = {
       node: node,
-      block: block,
-      gutter: gutter || params.searchGutter
+      block: block
     };
     /** We get gutter, where a match is found **/
-    const gutterBySizes = testBySizes(searchParams);
-    const foundByPosition = testByPosition(searchParams);
-    if (!foundByPosition || !gutterBySizes) {
+    const gutterBySizes = testBySizes({
+      ...searchParams,
+      gutter: params.sizesGutter
+    });
+    const gutterByPosition = testByPosition({
+      ...searchParams,
+      gutter: params.positionGutter
+    });
+    if (!gutterByPosition || !gutterBySizes) {
       return;
     }
-    return gutterBySizes;
+    return { gutterBySizes: gutterBySizes, gutterByPosition: gutterByPosition };
   }
 
-  function deepSearchNode(node, cb) {
+  function deepSearchNode(found, cb) {
     /**
      * Test node by this functions,
      * if score < 30% return false,
@@ -157,9 +172,9 @@ module.exports = function(design, nodes) {
      * else >= 70 return true
      */
     const conditions = [
-      findNodeSiblings(node),
-      findNodeChildren(node),
-      findParentsSiblings(node)
+      findNodeSiblings(found),
+      findNodeChildren(found),
+      findParentsSiblings(found)
     ];
     for (let fn in conditions) {
       if (conditions[fn] === 2) {
@@ -173,24 +188,24 @@ module.exports = function(design, nodes) {
     if (!node.previousSibling && !node.nextSibling) {
       return 1;
     }
-    const prevDesignElementIndex =
-      node.previousSibling && generalSearch(node.previousSibling, true);
-
-    const nextDesignElementIndex =
-      node.nextSibling && generalSearch(node.nextSibling, true);
-
-    if (prevDesignElementIndex) {
-      found.push(prevDesignElementIndex);
-    }
-    if (nextDesignElementIndex) {
-      found.push(nextDesignElementIndex);
-    }
+    const siblings = [node.previousSibling, !node.nextSibling];
+    siblings.forEach(node => {
+      if (!node) {
+        return;
+      }
+      generalSearch(node.previousSibling, true, foundDesign => {
+        if (foundDesign) {
+          found.push(foundDesign.index);
+        }
+        foundDesign.absolute && setFoundNode(node, foundDesign.index);
+      });
+    });
     return getScore(found);
   }
 
   function findNodeChildren(node) {
     if (!node.children) {
-      return 0;
+      return 1;
     }
     const children = node.children;
     const found = [];
@@ -214,7 +229,7 @@ module.exports = function(design, nodes) {
       }
       const parentElement = recognize.nodes[n.parentElement];
       if (findNodeSiblings(parentElement) === 2) {
-        return true;
+        return 2;
       } else {
         parentCount++;
         lookingParent(parentElement);
@@ -325,20 +340,21 @@ module.exports = function(design, nodes) {
   }
 
   function testBySizes({ node, block, gutter }) {
-    const sizeGutter = (gutter === 0 && gutter) || params.sizesGutter;
     const width = Math.abs(block.width - node.width);
     const height = Math.abs(block.height - node.height);
-    if (width <= sizeGutter && height <= sizeGutter) {
+    if (width <= gutter && height <= gutter) {
       /** returns average gutter **/
       return average(width, height);
     }
   }
 
   function testByPosition({ node, block, gutter }) {
-    return (
-      Math.abs(block.top - node.top) <= gutter &&
-      Math.abs(block.left - node.left) <= gutter
-    );
+    const top = Math.abs(block.top - node.top) <= gutter;
+    const left = Math.abs(block.left - node.left) <= gutter;
+    if (top <= gutter && left <= gutter) {
+      /** returns average gutter **/
+      return average(top, left);
+    }
   }
 
   function setIssueName(node) {
