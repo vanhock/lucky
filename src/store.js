@@ -56,15 +56,18 @@ export default new Vuex.Store({
       const foundNodes = getObjectValue(state.currentProject, "foundNodes");
       const designBlocks = getObjectValue(state.currentProject, "designBlocks");
       if (!foundNodes || !Object.keys(foundNodes).length) {
-        return [];
+        return designBlocks;
       }
       const found = [];
+      designBlocks.forEach(block => found.push(block));
       for (let i in foundNodes) {
         if (!foundNodes.hasOwnProperty(i)) {
           continue;
         }
         const index = foundNodes[i].designBlockIndex;
-        if (designBlocks.hasOwnProperty(index)) found.push(designBlocks[index]);
+        if (designBlocks.hasOwnProperty(index)) {
+          found[index].found = true;
+        }
       }
       return found;
     },

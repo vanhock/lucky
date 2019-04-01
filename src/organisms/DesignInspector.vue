@@ -3,14 +3,16 @@
     class="design-inspector"
     v-if="shouldShow"
     :style="inspectorSizes"
+    :class="{ 'only-found': showOnlyFoundBlocks }"
   >
     <img :src="designImage" alt="design image" class="image" />
     <div
       class="design-block"
-      v-for="(block, index) in blocks"
+      v-for="(block, index) in foundDesignBlocks"
       :style="setBlockStyle(block)"
       :class="{
         hidden: block.hide || !showAllBlocks,
+        found: block.found,
         active: index === targetBlockIndex
       }"
       :key="index"
@@ -30,7 +32,6 @@ export default {
   name: "DesignInspector",
   computed: {
     ...mapGetters([
-      "designBlocks",
       "foundDesignBlocks",
       "designImage",
       "designParams",
@@ -38,11 +39,7 @@ export default {
       "targetElement"
     ]),
     shouldShow() {
-      return (
-        this.designImage &&
-        this.foundDesignBlocks &&
-        this.foundDesignBlocks.length
-      );
+      return this.designImage && this.foundDesignBlocks && this.foundDesignBlocks.length;
     },
     showAllBlocks() {
       return this.getParam("showAllDesignBlocks");
@@ -65,12 +62,6 @@ export default {
         this.targetElement &&
         this.targetElement.hasOwnProperty("blockIndex") &&
         this.targetElement.blockIndex
-      );
-    },
-    blocks() {
-      return (
-        (this.showOnlyFoundBlocks && this.foundDesignBlocks) ||
-        this.designBlocks
       );
     }
   },
