@@ -9,7 +9,7 @@ export default {};
 </script>
 
 <style lang="scss">
-  @import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic');
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
 @import "./assets/normalize.scss";
 $color-1: #606060;

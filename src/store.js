@@ -51,26 +51,22 @@ export default new Vuex.Store({
       return getters.currentFrameDocument.body;
     },
     frameParams: state => getObjectValue(state.currentProject, "frameParams"),
-    designBlocks: state => {
+    designBlocks: state => getObjectValue(state.currentProject, "designBlocks"),
+    foundDesignBlocks: state => {
       const foundNodes = getObjectValue(state.currentProject, "foundNodes");
       const designBlocks = getObjectValue(state.currentProject, "designBlocks");
-      if (!foundNodes) {
-        return designBlocks;
+      if (!foundNodes || !Object.keys(foundNodes).length) {
+        return [];
       }
+      const found = [];
       for (let i in foundNodes) {
         if (!foundNodes.hasOwnProperty(i)) {
           continue;
         }
-        const designIndex = foundNodes[i].designBlockIndex;
-        if (designBlocks[designIndex]) {
-          Vue.set(
-            state.currentProject.designBlocks[designIndex],
-            "found",
-            true
-          );
-        }
+        const index = foundNodes[i].designBlockIndex;
+        if (designBlocks.hasOwnProperty(index)) found.push(designBlocks[index]);
       }
-      return designBlocks;
+      return found;
     },
     designImage: state => getObjectValue(state.currentProject, "designImage"),
     designParams: state => getObjectValue(state.currentProject, "designParams"),

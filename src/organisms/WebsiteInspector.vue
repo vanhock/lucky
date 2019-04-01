@@ -46,6 +46,7 @@ export default {
       self.highlightNode(node, point);
     });
     Hub.$on("initTestPage", () => {
+      self.clearFrame();
       self.$store.dispatch("setFoundNodes", {});
       self.initTestPage();
     });
@@ -398,7 +399,7 @@ export default {
       const self = this;
       return new Promise((resolve, reject) => {
         this.$nextTick(() => {
-          const frame = document.getElementsByTagName("iframe")[0];
+          const frame = document.querySelector("iframe[data-perfect-pixel]");
           const loadHTML = function(html) {
             frame.src = "about:blank";
             frame.contentWindow.document.open();
@@ -607,6 +608,24 @@ export default {
         e.preventDefault();
         e.returnValue = "";
       };
+    },
+    clearFrame() {
+      const tips = this.currentFrameDocument.getElementsByClassName(
+        "lky-error-tip"
+      );
+      const foundElements = this.currentFrameDocument.getElementsByClassName(
+        "lky-element"
+      );
+      if (tips && tips.length) {
+        while (tips.length) {
+          tips[tips.length - 1].remove();
+        }
+      }
+      if (foundElements && foundElements.length) {
+        while (foundElements.length) {
+          removeClass(foundElements[foundElements.length - 1], "lky-element");
+        }
+      }
     }
   }
 };

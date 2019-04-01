@@ -6,7 +6,7 @@ module.exports = function(design, nodes) {
     currentRecognizedNode: null
   };
   const params = {
-    sizesGutter: 5,
+    sizesGutter: 4,
     positionGutter: 40,
     searchGutter: 5,
     testGutter: 0,

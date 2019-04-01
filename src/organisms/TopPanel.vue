@@ -2,13 +2,21 @@
   <div class="top-panel">
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
-      <design-inspector-controls class="left" />
+      <design-inspector-controls />
       <panel-control>
         <toggle icon="refresh" text="Reload view" @click="reloadView" />
       </panel-control>
-      <v-menu class="right icon-menu">
-        <div @click="toggleTasksList"><i class="fas fa-bars"></i></div>
-      </v-menu>
+      <panel-control :dropdown="true">
+        <toggle icon="tuning" text="Recognize settings" />
+        <template v-slot:dropdown>
+          <v-menu>
+            <menu-item>
+              <input type="text" value="5" />
+            </menu-item>
+          </v-menu>
+        </template>
+      </panel-control>
+      <toggle class="right" icon="inbox-full" text="Found elements" @click="toggleTasksList" />
     </div>
     <task-list v-show="showTasksList" :tasks="foundNodes" v-if="foundNodes" />
   </div>
@@ -22,9 +30,11 @@ import { mapGetters } from "vuex";
 import DesignInspectorControls from "../molecules/DesignInspectorControls";
 import PanelControl from "../atoms/PanelControl";
 import Toggle from "../atoms/Toggle";
+import MenuItem from "../atoms/MenuItem";
 export default {
   name: "TopPanel",
   components: {
+    MenuItem,
     Toggle,
     PanelControl,
     DesignInspectorControls,
@@ -41,15 +51,14 @@ export default {
     toggleTasksList() {
       this.showTasksList = !this.showTasksList;
     },
-    reloadView() {
-      Hub.$emit("initTestPage");
+    reloadView(params) {
+      Hub.$emit("initTestPage", params);
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-@import url("https://use.fontawesome.com/releases/v5.7.2/css/all.css");
 .top-panel {
   display: flex;
   height: 32px;
@@ -62,6 +71,14 @@ export default {
     width: 100%;
     height: 100%;
     padding: 0 15px;
+  }
+  .right {
+    justify-content: right;
+    margin-left: auto;
+  }
+  .left {
+    justify-content: left;
+    margin-right: auto;
   }
 }
 .site-logo {

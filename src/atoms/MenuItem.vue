@@ -1,17 +1,18 @@
 <template>
-  <div class="menu">
+  <div class="menu-item">
     <slot></slot>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Menu"
+  name: "MenuItem"
 };
 </script>
 
 <style lang="scss" scoped>
-.menu {
+.menu-item {
   display: block;
+  padding: 4px 10px;
 }
 </style>

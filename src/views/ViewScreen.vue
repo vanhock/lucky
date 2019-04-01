@@ -13,9 +13,6 @@ import SiteInspector from "../organisms/WebsiteInspector";
 import DesignInspector from "../organisms/DesignInspector";
 export default {
   name: "ViewScreen",
-  components: {DesignInspector, SiteInspector, TopPanel },
-  computed: {
-    ...mapGetters(["design", "siteUrl", "viewerReady"])
-  }
+  components: {DesignInspector, SiteInspector, TopPanel }
 };
 </script>

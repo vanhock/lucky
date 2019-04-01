@@ -1,6 +1,7 @@
 <template>
   <div class="toggle" :class="{ active: active }" @click="$emit('click')">
-    <Zodicon v-if="icon" :icon="icon" class="icon" /><div class="text">{{ text }}</div>
+    <Zodicon v-if="icon" :icon="icon" class="icon" />
+    <div class="text" v-if="text">{{ text }}</div>
   </div>
 </template>
 
@@ -25,7 +26,7 @@ export default {
   position: relative;
   padding: 0 10px;
   height: inherit;
-  background-color: $color-b2;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -45,6 +46,9 @@ export default {
     .icon {
       fill: $color-w2;
     }
+  }
+  &:hover {
+    background-color: $color-b2;
   }
   &:not(.active) {
     &:hover {
