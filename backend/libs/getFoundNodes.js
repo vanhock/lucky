@@ -6,8 +6,8 @@ module.exports = function(design, nodes) {
     currentRecognizedNode: null
   };
   const params = {
-    sizesGutter: 4,
-    positionGutter: 40,
+    sizesGutter: 40,
+    positionGutter: 100,
     searchGutter: 5,
     testGutter: 0,
     maximumParents: 5
@@ -35,7 +35,7 @@ module.exports = function(design, nodes) {
         node,
         params.generalSearchGutter
       );
-      if (!Object.keys(foundByGeneralSearch).length) {
+      if (!foundByGeneralSearch || !Object.keys(foundByGeneralSearch).length) {
         return;
       }
       setFoundNode(node, foundByGeneralSearch.index);
@@ -75,8 +75,11 @@ module.exports = function(design, nodes) {
       designIndex < max;
       designIndex++
     ) {
-      /** Skip already found design element **/
-      if (recognize.design[designIndex].found) {
+      /** Skip already found or excluded design element **/
+      if (
+        recognize.design[designIndex].found ||
+        recognize.design[designIndex].skip
+      ) {
         continue;
       }
       /** Try to find fully matched element with sizes and position **/
@@ -119,6 +122,14 @@ module.exports = function(design, nodes) {
         item.gutterByPosition === minPositionGutter
       );
     });
+    /** Skip elements with same size and position **/
+    if (filteredByMinGutter.length > 1) {
+      filteredByMinGutter.forEach((item, index) => {
+        if (index !== 0) {
+          recognize.design[item.index].skip = true;
+        }
+      });
+    }
     /** Get design index with lowest gutter **/
     if (filteredByMinGutter.length) {
       return { index: filteredByMinGutter[0].index, absolute: false };
@@ -344,16 +355,18 @@ module.exports = function(design, nodes) {
     const height = Math.abs(block.height - node.height);
     if (width <= gutter && height <= gutter) {
       /** returns average gutter **/
-      return average(width, height);
+      //return Math.max(width, height);
+      return (width + height) / 2;
     }
   }
 
   function testByPosition({ node, block, gutter }) {
-    const top = Math.abs(block.top - node.top) <= gutter;
-    const left = Math.abs(block.left - node.left) <= gutter;
+    const top = Math.abs(block.top - node.top);
+    const left = Math.abs(block.left - node.left);
     if (top <= gutter && left <= gutter) {
       /** returns average gutter **/
-      return average(top, left);
+      //return Math.max(left, top);
+      return (left + top) / 2;
     }
   }
 
