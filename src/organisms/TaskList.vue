@@ -2,18 +2,19 @@
   <div class="tasks" ref="tasksList">
     <ul class="tasks-list">
       <li
-        v-for="(task, index, i) in tasks"
-        :key="index"
-        :class="{ active: activeTaskIndex === index }"
-        @click="scrollToFoundNode(index, i)"
-        :data-task-index="index"
+        v-for="(task, nodeIndex, i) in tasks"
+        :key="nodeIndex"
+        :class="{
+          active: targetNodeIndex === nodeIndex
+        }"
+        @click="setTargetElement(nodeIndex, task.designBlockIndex, i)"
       >
         <div class="index">{{ i + 1 }}</div>
         <div class="header">{{ task.name }}</div>
         <div class="issues">
-          Found errors: <b>{{ task.issues.length }}</b
+          Node index <b>{{ nodeIndex }}</b
           ><br />
-          Design block index: <b>{{ task.designBlockIndex }}</b>
+          Block index: <b>{{ task.designBlockIndex }}</b>
         </div>
       </li>
     </ul>
@@ -21,30 +22,10 @@
 </template>
 
 <script>
-import Hub from "../atoms/hub";
-import { scrollTo, getElementBounding } from "../atoms/utils";
+import { scrollTo } from "../atoms/utils";
 import { mapGetters } from "vuex";
 export default {
   name: "TaskList",
-  mounted() {
-    const self = this;
-    Hub.$on("clickOnFoundNode", foundNode => {
-      if (!foundNode) {
-        return;
-      }
-      self.activeTaskIndex = foundNode.id.toString();
-      const targetElement = document.querySelector(
-        `[data-task-index='${foundNode.id}']`
-      );
-      if (targetElement) {
-        scrollTo(this.$refs.tasksList, targetElement.offsetTop - 50, 100);
-      }
-      self.$store.dispatch("setTargetElement", {
-        nodeIndex: foundNode.id,
-        blockIndex: foundNode.designBlockIndex
-      });
-    });
-  },
   props: {
     tasks: {
       type: Object,
@@ -56,28 +37,47 @@ export default {
     ...mapGetters([
       "currentFrameBody",
       "currentFrameWindow",
-      "currentFrameDocument"
-    ])
+      "currentFrameDocument",
+      "targetElement"
+    ]),
+    listElement() {
+      return this.$refs.tasksList;
+    },
+    targetNodeIndex() {
+      return this.targetElement && this.targetElement.nodeIndex.toString();
+    }
+  },
+  watch: {
+    targetElement(value) {
+      if (!value) {
+        return;
+      }
+      this.scrollToTask(value.index);
+    }
   },
   data: () => ({
-    activeTaskIndex: null
+    noScroll: false
   }),
   methods: {
-    scrollToFoundNode(index, i) {
-      const tip = this.currentFrameBody.querySelectorAll(".lky-error-tip")[i];
-      const targetElement = this.currentFrameBody.querySelectorAll("*")[index];
-      const targetElementOffset = getElementBounding(
-        targetElement,
-        this.currentFrameWindow
-      );
-      this.activeTaskIndex = index;
-
-      scrollTo(
-        this.currentFrameDocument.documentElement,
-        targetElementOffset.top - 50,
-        100
-      );
-      Hub.$emit("highlightNode", targetElement, tip);
+    setTargetElement(nodeIndex, designIndex, index) {
+      this.$store.dispatch("setTargetElement", {
+        nodeIndex: nodeIndex,
+        designIndex: designIndex,
+        index: index
+      });
+      /** If we set target element from Task List **/
+      this.noScroll = true;
+    },
+    scrollToTask(index) {
+      const targetTask = this.listElement.getElementsByTagName("li")[index];
+      if (!targetTask) {
+        return;
+      }
+      if (!this.noScroll) {
+        scrollTo(this.listElement, targetTask.offsetTop - 50, 100);
+      } else {
+        this.noScroll = false;
+      }
     }
   }
 };

@@ -42,9 +42,6 @@ export default {
     !this.viewerReady && this.$router.push({ name: "home" });
     this.init();
     const self = this;
-    Hub.$on("highlightNode", (node, point) => {
-      self.highlightNode(node, point);
-    });
     Hub.$on("initTestPage", () => {
       self.clearFrame();
       self.$store.dispatch("setFoundNodes", {});
@@ -91,7 +88,8 @@ export default {
       "currentFrameDocument",
       "currentFrameBody",
       "currentFrameWindow",
-      "viewParams"
+      "viewParams",
+      "targetElement"
     ]),
     viewActive() {
       return this.viewerReady && this.$route.name === "view";
@@ -109,6 +107,11 @@ export default {
           (this.viewParams && this.viewParams.websiteInspectorHeight + "px") ||
           this.defaultViewParams.websiteInspectorHeight
       };
+    }
+  },
+  watch: {
+    targetElement(value) {
+      this.focusNode(value);
     }
   },
   methods: {
@@ -140,6 +143,9 @@ export default {
       });
     },
     initTestPage() {
+      /** ToDo: Вынести гет нодес в ViewScreen, в WebInpector
+       * оставить только инит фрейма и передавать событие готовности фрейма
+       */
       const body = document.querySelector("iframe[data-perfect-pixel]")
         .contentWindow.document.body;
       this.frameNodes = [...body.getElementsByTagName("*")];
@@ -175,21 +181,22 @@ export default {
     },
     processNodes(frameNodes, foundNodes) {
       const self = this;
-      for (let index in foundNodes) {
-        if (foundNodes.hasOwnProperty(index) && frameNodes[index]) {
-          self.processFoundNode(frameNodes[index], foundNodes[index]);
+      for (let key in foundNodes) {
+        if (foundNodes.hasOwnProperty(key) && frameNodes[key]) {
+          const index = Object.keys(foundNodes).indexOf(key);
+          self.processFoundNode(frameNodes[key], foundNodes[key], index);
         }
       }
       this.attachTipsEvents();
       this.errorTipEffects();
     },
-    processFoundNode(node, foundNode) {
+    processFoundNode(node, foundNode, index) {
       if (!node || !foundNode) {
         return;
       }
-      this.renderIssueTip(node, foundNode, this.currentFrameDocument);
+      this.renderIssueTip(node, foundNode, this.currentFrameDocument, index);
     },
-    renderIssueTip(node, foundNode, frameDocument) {
+    renderIssueTip(node, foundNode, frameDocument, index) {
       const self = this;
       const left = node.offsetLeft + node.clientWidth / 2;
       const top = node.offsetTop + node.clientHeight - 7;
@@ -225,23 +232,33 @@ export default {
         if (!detectMouseButton(e)) {
           return;
         }
+        this.$store.dispatch("setTargetElement", {
+          nodeIndex: foundNode.id,
+          designIndex: foundNode.designBlockIndex,
+          index: index
+        });
         e.stopPropagation();
-        Hub.$emit("clickOnFoundNode", foundNode);
-        self.highlightNode(node, point);
       };
       point.querySelector(".lky-popup-close").onclick = () => {
         removeClass(point, "active");
       };
     },
-    highlightNode(node, point) {
+    focusNode(targetElement) {
+      if (!targetElement) {
+        return;
+      }
+      const foundElements = this.currentFrameDocument.querySelectorAll(
+        ".lky-element"
+      );
+      const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
       this.currentFrameDocument
         .querySelectorAll(".lky-error-tip")
         .forEach(el => {
           removeClass(el, "active");
         });
       this.removeOverlayForAll();
-      addClass(point, "active");
-      this.addElementOverlay(node);
+      addClass(allTips[targetElement.index], "active");
+      this.addElementOverlay(foundElements[targetElement.index]);
     },
     attachTipsEvents() {
       const allTips = this.currentFrameDocument.querySelectorAll(

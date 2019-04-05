@@ -13,7 +13,7 @@
       :class="{
         hidden: block.hide || !showAllBlocks,
         found: block.found,
-        active: index === targetBlockIndex
+        active: index === targetDesignIndex
       }"
       :key="index"
       @mouseenter="toggleClass"
@@ -57,11 +57,11 @@ export default {
           window.innerHeight - this.viewParams.websiteInspectorHeight + "px"
       };
     },
-    targetBlockIndex() {
+    targetDesignIndex() {
       return (
         this.targetElement &&
-        this.targetElement.hasOwnProperty("blockIndex") &&
-        this.targetElement.blockIndex
+        this.targetElement.hasOwnProperty("designIndex") &&
+        this.targetElement.designIndex
       );
     }
   },
