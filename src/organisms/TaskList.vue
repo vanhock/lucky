@@ -52,18 +52,18 @@ export default {
       if (!value) {
         return;
       }
-      this.scrollToTask(value.index);
+      this.scrollToTask(value.foundNodeIndex);
     }
   },
   data: () => ({
     noScroll: false
   }),
   methods: {
-    setTargetElement(nodeIndex, designIndex, index) {
+    setTargetElement(nodeIndex, designIndex, foundNodeIndex) {
       this.$store.dispatch("setTargetElement", {
         nodeIndex: nodeIndex,
         designIndex: designIndex,
-        index: index
+        foundNodeIndex: foundNodeIndex
       });
       /** If we set target element from Task List **/
       this.noScroll = true;
@@ -74,7 +74,7 @@ export default {
         return;
       }
       if (!this.noScroll) {
-        scrollTo(this.listElement, targetTask.offsetTop - 50, 100);
+        scrollTo(this.listElement, targetTask.offsetTop - 100, 100);
       } else {
         this.noScroll = false;
       }

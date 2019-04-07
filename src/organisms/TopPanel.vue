@@ -4,7 +4,7 @@
       <router-link class="site-logo" to="/"></router-link>
       <design-inspector-controls />
       <panel-control>
-        <toggle icon="refresh" text="Reload view" @click="reloadView" />
+        <toggle icon="refresh" text="Reload view" @click="$emit('reloadView')" />
       </panel-control>
       <panel-control :dropdown="true">
         <toggle icon="tuning" text="Recognize settings" />
@@ -50,9 +50,6 @@ export default {
   methods: {
     toggleTasksList() {
       this.showTasksList = !this.showTasksList;
-    },
-    reloadView(params) {
-      Hub.$emit("initTestPage", params);
     }
   }
 };

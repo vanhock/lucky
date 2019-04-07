@@ -54,7 +54,10 @@ module.exports = function(app, db) {
       const nodes = JSON.parse(fields.nodes);
       getFoundNodes(design, nodes)
         .then(found => {
-          console.log("We got found nodes: ");
+          if (!found || typeof found !== "object") {
+            return;
+          }
+          console.log("We got found nodes: " + Object.keys(found).length);
           res.status(200).send(found);
         })
         .catch(error => {

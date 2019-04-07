@@ -1,14 +1,19 @@
 <template>
   <div class="view">
-    <top-panel @getFoundNodes="getFoundNodes" />
+    <top-panel @getFoundNodes="getFoundNodes" @reloadView="getFoundNodes" />
     <design-inspector />
-    <website-inspector ref="websiteInspector" @getFoundNodes="getFoundNodes" />
+    <website-inspector
+      ref="websiteInspector"
+      @getFoundNodes="getFoundNodes"
+      @websiteInspectorReady="getFoundNodes"
+      @setViewParams="setViewParams"
+    />
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import { simplifyDom, addToLocal } from "../atoms/utils";
+import { mapGetters, mapState } from "vuex";
+import { simplifyDom, addToLocal, removeClass } from "../atoms/utils";
 import { getFoundNodesFromApi } from "../api";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/WebsiteInspector";
@@ -17,7 +22,9 @@ export default {
   name: "ViewScreen",
   components: { DesignInspector, WebsiteInspector, TopPanel },
   created() {
-    !this.viewerReady && this.$router.push({ name: "home" });
+    !this.viewerReady
+      ? this.$router.push({ name: "home" })
+      : this.getFoundNodes();
   },
   beforeRouteUpdate(from, to, next) {
     if (!this.viewerReady) {
@@ -29,34 +36,44 @@ export default {
   },
   data: () => ({
     gettingFoundNodeData: true,
-    frameNodes: null
+    frameNodes: null,
+    defaultViewParams: {
+      websiteInspector: true,
+      designInspector: true,
+      websiteInspectorHeight: window.innerHeight / 2 - 16,
+      showAllDesignBlocks: true,
+      showFoundDesignBlocks: true
+    }
   }),
   computed: {
+    ...mapState(["currentProject"]),
     ...mapGetters([
       "viewerReady",
+      "currentFrameDocument",
       "currentFrameWindow",
       "foundNodes",
-      "isFoundNodes",
-      "designBlocks",
-      "websiteInspectorReady"
-    ])
-  },
-  watch: {
-    websiteInspectorReady(value) {
-      if (value === true) {
-        this.getFoundNodes();
-      }
+      "isFoundNodes"
+    ]),
+    designBlocks() {
+      return (
+        this.currentProject &&
+        this.currentProject.hasOwnProperty("designBlocks") &&
+        this.currentProject.designBlocks
+      );
     }
   },
   methods: {
     getFoundNodes() {
       /** Clear FoundNodes before get it **/
-      self.$store.dispatch("setFoundNodes", {});
+      this.clearFrame();
+      this.$store.dispatch("setFoundNodes", {});
       this.gettingFoundNodeData = true;
 
       const body = document.querySelector("iframe[data-perfect-pixel]")
         .contentWindow.document.body;
-      this.frameNodes = [...body.getElementsByTagName("*")];
+      if (!this.frameNodes) {
+        this.frameNodes = [...body.getElementsByTagName("*")];
+      }
       const simplifiedNodes = simplifyDom(
         this.frameNodes,
         this.currentFrameWindow
@@ -91,9 +108,27 @@ export default {
       addToLocal("recentProjects", currentProject.id, currentProject);
     },
     setViewParams() {
-      const viewParams = self.defaultViewParams;
+      const viewParams = this.defaultViewParams;
       //viewParams.websiteInspectorHeight = self.windowDim.height / 2 - 54;
-      self.$store.dispatch("setViewParams", viewParams);
+      this.$store.dispatch("setViewParams", viewParams);
+    },
+    clearFrame() {
+      const tips = this.currentFrameDocument.getElementsByClassName(
+        "pp-found-node-tip"
+      );
+      const foundElements = this.currentFrameDocument.getElementsByClassName(
+        "pp-element"
+      );
+      if (tips && tips.length) {
+        while (tips.length) {
+          tips[tips.length - 1].remove();
+        }
+      }
+      if (foundElements && foundElements.length) {
+        while (foundElements.length) {
+          removeClass(foundElements[foundElements.length - 1], "pp-element");
+        }
+      }
     }
   }
 };

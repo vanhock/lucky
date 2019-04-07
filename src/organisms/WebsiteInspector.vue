@@ -1,9 +1,9 @@
 <template>
   <div
-    v-if="siteUrl"
+    v-if="websiteUrl"
     class="site-viewer"
     :class="{
-      hidden: !siteUrl || siteUrl === '',
+      hidden: !websiteUrl || websiteUrl === '',
       active: viewActive
     }"
   >
@@ -14,7 +14,6 @@
         :height="frameStyles.height"
         sandbox="allow-same-origin allow-scripts"
       ></iframe>
-      <preloader :show="gettingFoundNodeData" />
     </div>
   </div>
 </template>
@@ -30,24 +29,12 @@ import {
   getElementBounding,
   relToAbs
 } from "../atoms/utils";
-import Preloader from "../atoms/Preloader";
 export default {
-  name: "SiteViewer",
-  components: { Preloader },
+  name: "WebsiteInspector",
   created() {
     this.initFrame();
   },
-  props: {
-    loading: { type: Boolean, default: false }
-  },
   data: () => ({
-    defaultViewParams: {
-      websiteInspector: true,
-      designInspector: true,
-      websiteInspectorHeight: window.innerHeight - 50 + "px",
-      showAllDesignBlocks: true,
-      showFoundDesignBlocks: true
-    },
     text: {
       errorsFound: "Обнаружены ошибки",
       width: "Ширина",
@@ -58,9 +45,9 @@ export default {
   }),
   computed: {
     ...mapGetters([
-      "siteUrl",
       "designBlocks",
-      "siteUrlProxy",
+      "websiteUrl",
+      "websiteUrlProxy",
       "viewerReady",
       "frameParams",
       "foundNodes",
@@ -81,33 +68,22 @@ export default {
       }
       return {
         width: (this.frameParams.width || "100%") + "px",
-        height:
-          (this.viewParams && this.viewParams.websiteInspectorHeight + "px") ||
-          this.defaultViewParams.websiteInspectorHeight
+        height: this.viewParams && this.viewParams.websiteInspectorHeight + "px"
       };
     }
   },
   watch: {
-    targetElement(value) {
-      this.focusNode(value);
-    },
-    foundNodes(value) {
-      if (!value) {
-        return;
-      }
-      if (value === {} && Object.keys(value).length === 0) {
-        this.clearFrame();
-      }
+    targetElement(element) {
+      this.focusOnElement(element);
     }
   },
   methods: {
     initFrame() {
-      const url = this.siteUrl;
       const self = this;
       this.$nextTick(() => {
         const frame = document.querySelector("iframe[data-perfect-pixel]");
         axios
-          .get(`${config.serverUrl}/proxy/${url}`)
+          .get(self.websiteUrlProxy)
           .then(r => {
             self.loadFrameHtml(r.data, frame);
             const frameWindow = document.querySelector(
@@ -119,18 +95,18 @@ export default {
               if (frameDocument.readyState !== "complete") {
                 return;
               }
-              this.$store.dispatch(
+              self.$store.dispatch(
                 "setCurrentFrame",
                 document.querySelector("iframe[data-perfect-pixel]")
               );
               self.preventAllLinks(frameWindow);
-              self.applyFrameAdditionalStyles();
-              /** If viewParams not set, emmit action **/
+              self.applyAdditionalFrameStyles();
+              /** If viewParams not set, emmit setViewParams **/
               if (!self.viewParams) {
                 self.$emit("setViewParams");
               }
               self.$nextTick(() => {
-                self.$store.dispatch("setWebsiteInspectorReady");
+                self.$emit("websiteInspectorReady");
               });
             };
           })
@@ -140,15 +116,16 @@ export default {
       });
     },
     loadFrameHtml(html, frame) {
+      const self = this;
       frame.src = "about:blank";
       frame.contentWindow.document.open();
       frame.contentWindow.document.write(
-        html.replace(/<head>/i, `<head><base href="${url}">`)
+        html.replace(/<head>/i, `<head><base href="${this.websiteUrl}">`)
       );
 
       frame.contentWindow.document.close();
       frame.contentWindow.document.head.prepend(
-        self.renderStyles(frame.contentWindow.document)
+        this.renderTipsStyles(frame.contentWindow.document)
       );
       setTimeout(() => {
         const frames = frame.contentWindow.document.querySelectorAll("iframe");
@@ -165,7 +142,10 @@ export default {
           links[i].src && replaceUrl(relToAbs(links[i].src, config.serverUrl));
         }
         function replaceUrl(oldUrl) {
-          return oldUrl.replace(url, `${config.serverUrl}/proxy/${url}`);
+          return oldUrl.replace(
+            self.websiteUrl,
+            `${config.serverUrl}/proxy/${self.websiteUrl}`
+          );
         }
       }, 100);
     },
@@ -173,22 +153,31 @@ export default {
       const self = this;
       for (let key in foundNodes) {
         if (foundNodes.hasOwnProperty(key) && frameNodes[key]) {
-          const index = Object.keys(foundNodes).indexOf(key);
-          self.processFoundNode(frameNodes[key], foundNodes[key], index);
+          const foundNodeIndex = Object.keys(foundNodes).indexOf(key);
+          self.processFoundNode(
+            frameNodes[key],
+            foundNodes[key],
+            foundNodeIndex
+          );
         }
       }
       this.attachTipsEvents();
       this.errorTipEffects();
     },
-    processFoundNode(node, foundNode, index) {
-      if (!node || !foundNode) {
+    processFoundNode(frameNode, foundNode, foundNodeIndex) {
+      if (!frameNode || !foundNode) {
         return;
       }
-      this.renderIssueTip(node, foundNode, this.currentFrameDocument, index);
+      this.renderIssueTip(
+        frameNode,
+        foundNode,
+        this.currentFrameDocument,
+        foundNodeIndex
+      );
     },
-    renderIssueTip(node, foundNode, frameDocument, index) {
-      const left = node.offsetLeft + node.clientWidth / 2;
-      const top = node.offsetTop + node.clientHeight - 7;
+    renderIssueTip(frameNode, foundNode, frameDocument, foundNodeIndex) {
+      const left = frameNode.offsetLeft + frameNode.clientWidth / 2;
+      const top = frameNode.offsetTop + frameNode.clientHeight - 7;
       const point = frameDocument.createElement("div");
       const renderIssues = () => {
         let issueHtml = "";
@@ -196,63 +185,61 @@ export default {
           issueHtml += `
           <li>
             <b class="title">${issue.name}: </b>
-            <span class="node">${issue.nodeValue}px</span>
+            <span class="frameNode">${issue.nodeValue}px</span>
             <span class="design">${issue.designValue}px</span>
           </li>`;
         });
         return issueHtml;
       };
-      point.setAttribute("class", "lky-error-tip");
+      point.setAttribute("class", "pp-found-node-tip");
       point.setAttribute("style", `left: ${left}px; top: ${top}px`);
       point.innerHTML = `
-      <div class="lky-point" style="pointer-events: auto !important;"></div>
-        <div class="lky-popup">
-          ${
-            this.text.errorsFound
-          }: <ul class="lky-errors">${renderIssues()}</ul>
-          <div class="lky-popup-close"></div>
+      <div class="pp-point" style="pointer-events: auto !important;"></div>
+        <div class="pp-popup">
+          ${this.text.errorsFound}: <ul class="pp-errors">${renderIssues()}</ul>
+          <div class="pp-popup-close"></div>
         </div>
       </div>`;
       this.currentFrameBody.appendChild(point);
-      this.setTipPopupPosition(node, point);
+      this.setTipPopupPosition(frameNode, point);
 
-      addClass(node, "lky-element");
-      node.onclick = e => {
+      addClass(frameNode, "pp-element");
+      frameNode.onclick = e => {
         if (!detectMouseButton(e)) {
           return;
         }
         this.$store.dispatch("setTargetElement", {
           nodeIndex: foundNode.id,
           designIndex: foundNode.designBlockIndex,
-          index: index
+          foundNodeIndex: foundNodeIndex
         });
         e.stopPropagation();
       };
-      point.querySelector(".lky-popup-close").onclick = () => {
+      point.querySelector(".pp-popup-close").onclick = () => {
         removeClass(point, "active");
       };
     },
-    focusNode(targetElement) {
+    focusOnElement(targetElement) {
       if (!targetElement) {
         return;
       }
       const foundElements = this.currentFrameDocument.querySelectorAll(
-        ".lky-element"
+        ".pp-element"
       );
-      const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
+      const allTips = this.currentFrameBody.querySelectorAll(
+        ".pp-found-node-tip"
+      );
       this.currentFrameDocument
-        .querySelectorAll(".lky-error-tip")
+        .querySelectorAll(".pp-found-node-tip")
         .forEach(el => {
           removeClass(el, "active");
         });
       this.removeOverlayForAll();
-      addClass(allTips[targetElement.index], "active");
-      this.addElementOverlay(foundElements[targetElement.index]);
+      addClass(allTips[targetElement.foundNodeIndex], "active");
+      this.addElementOverlay(foundElements[targetElement.foundNodeIndex]);
     },
     attachTipsEvents() {
-      const allTips = this.currentFrameDocument.querySelectorAll(
-        ".lky-element"
-      );
+      const allTips = this.currentFrameDocument.querySelectorAll(".pp-element");
       if (!allTips) {
         return;
       }
@@ -262,12 +249,12 @@ export default {
       });
       function onNodeEnter(e) {
         allTips.forEach(t => {
-          removeClass(t, "lky-hover");
+          removeClass(t, "pp-hover");
         });
-        addClass(e.currentTarget, "lky-hover");
+        addClass(e.currentTarget, "pp-hover");
       }
       function onNodeLeave(e) {
-        removeClass(e.currentTarget, "lky-hover");
+        removeClass(e.currentTarget, "pp-hover");
       }
     },
     addElementOverlay(node) {
@@ -283,8 +270,7 @@ export default {
       div.style.width = `${styles.width + "px"}`;
       div.style.top = `${styles.top + "px"}`;
       div.style.left = `${styles.left + "px"}`;
-      div.style.background = "#05f";
-      div.style.opacity = "0.25";
+      div.style.background = "rgba(0, 85, 255, 0.35)";
       this.currentFrameBody.appendChild(div);
     },
     removeOverlayForAll() {
@@ -296,10 +282,12 @@ export default {
       }
     },
     errorTipEffects() {
-      const allTips = this.currentFrameBody.querySelectorAll(".lky-error-tip");
+      const allTips = this.currentFrameBody.querySelectorAll(
+        ".pp-found-node-tip"
+      );
       const self = this;
       this.currentFrameBody.onclick = e => {
-        if (e.target.className === "lky-popup-close") {
+        if (e.target.className === "pp-popup-close") {
           return;
         }
         self.removeOverlayForAll();
@@ -310,7 +298,7 @@ export default {
       };
     },
     setTipPopupPosition(node, tip) {
-      const popup = tip.querySelector(".lky-popup");
+      const popup = tip.querySelector(".pp-popup");
       const gutter = 30;
       const documentDim = {
         width: this.frameParams.width,
@@ -400,18 +388,19 @@ export default {
       }
       popup.style.position = "absolute";
     },
-    renderStyles(d) {
-      const css = `.lky-error-tip {
+    renderTipsStyles(d) {
+      const css = `.pp-found-node-tip {
        position: absolute;
        left: 50%;
        top: 50%;
        transform: translate(-50%, -50%);
        z-index: 9999;
       }
-      .lky-error-tip.active {
+      .pp-found-node-tip.active {
         z-index: 99999;
       }
-      .lky-error-tip .lky-point {
+      .pp-found-node-tip .pp-point {
+        display: none;
         position: absolute;
         width: 13px;
         height: 13px;
@@ -420,7 +409,7 @@ export default {
         border-radius: 50%;
       }
       @media (min-width: 480px){
-        .lky-error-tip .lky-popup {
+        .pp-found-node-tip .pp-popup {
           background-color: #fff;
           padding: 20px;
           border-radius: 5px;
@@ -428,36 +417,36 @@ export default {
           box-shadow: 0 2px 170px rgba(0, 0, 0, 0.5);
         }
       }
-      .lky-popup.left, .lky-popup.right, .lky-popup.top, .lky-popup.bottom  {
+      .pp-popup.left, .pp-popup.right, .pp-popup.top, .pp-popup.bottom  {
         position: absolute
       }
-      .lky-popup.left {
+      .pp-popup.left {
         right: calc(100% + 30px);
         top: calc(50% + 6px);
         transform: translate(0, -50%);
       }
-      .lky-popup.right {
+      .pp-popup.right {
         left: calc(100% + 30px);
         top: calc(50% + 6px);
         transform: translate(0, -50%);
       }
-      .lky-popup.top {
+      .pp-popup.top {
         bottom: calc(100% + 30px);
         left: calc(50% + 6px);
         transform: translate(-50%, 0);
       }
-      .lky-popup.bottom {
+      .pp-popup.bottom {
         top: calc(100% + 30px);
         left: calc(50% + 6px);
         transform: translate(-50%, 0);
       }
-      .lky-popup:before {
+      .pp-popup:before {
         content: "";
         position: absolute;
         width: 0;
         height: 0;
       }
-      .lky-popup.top:before {
+      .pp-popup.top:before {
         bottom: -5px;
         left: 50%;
         transform: translate(-50%, 0);
@@ -466,7 +455,7 @@ export default {
         border-top: 5px solid #fff;
 
       }
-      .lky-popup.bottom:before {
+      .pp-popup.bottom:before {
         top: -5px;
         left: 50%;
         transform: translate(-50%, 0);
@@ -474,7 +463,7 @@ export default {
         border-right: 5px solid transparent;
         border-bottom: 5px solid #fff;
       }
-      .lky-popup.left:before {
+      .pp-popup.left:before {
       top: 50%;
         right: -5px;
         transform: translate(0, -50%);
@@ -482,7 +471,7 @@ export default {
         border-bottom: 5px solid transparent;
         border-left: 5px solid #fff;
       }
-      .lky-popup.right:before {
+      .pp-popup.right:before {
         top: 50%;
         left: -5px;
         transform: translate(0, -50%);
@@ -490,27 +479,27 @@ export default {
         border-bottom: 5px solid transparent;
         border-right: 5px solid #fff;
       }
-      .lky-error-tip.active .lky-popup {
+      .pp-found-node-tip.active .pp-popup {
         visibility: visible;
         width: 250px;
         height: auto;
       }
-      .lky-error-tip.hover .lky-point {
+      .pp-found-node-tip.hover .pp-point {
         z-index: 2;
         opacity: 0;
       }
-      .lky-error-tip .lky-popup .title {
+      .pp-found-node-tip .pp-popup .title {
         color: #404241;
         font-size: 11px;
         display: block;
       }
-      .lky-error-tip .lky-popup .node {
+      .pp-found-node-tip .pp-popup .node {
         color: red;
       }
-      .lky-error-tip .lky-popup .design {
+      .pp-found-node-tip .pp-popup .design {
         color: green;
       }
-      .lky-popup-close {
+      .pp-popup-close {
         position: absolute;
         right: 10px;
         top: 10px;
@@ -521,13 +510,16 @@ export default {
         cursor: pointer;
         opacity: 0.5;
       }
-      .lky-popup-close:hover {
+      .pp-popup-close:hover {
         opacity: 0.8;
       }
       .node-highlight {
         z-index: 9999;
       }
-      .lky-hover {
+      .pp-element {
+        border: 1px dashed #05f;
+      }
+      .pp-hover {
         outline: rgb(17, 151, 200) solid 2px !important;
         cursor: pointer;
       }`;
@@ -540,7 +532,7 @@ export default {
       }
       return style;
     },
-    applyFrameAdditionalStyles() {
+    applyAdditionalFrameStyles() {
       this.currentFrameBody.style.setProperty(
         "overflow-x",
         "hidden",
@@ -562,24 +554,6 @@ export default {
         e.preventDefault();
         e.returnValue = "";
       };
-    },
-    clearFrame() {
-      const tips = this.currentFrameDocument.getElementsByClassName(
-        "lky-error-tip"
-      );
-      const foundElements = this.currentFrameDocument.getElementsByClassName(
-        "lky-element"
-      );
-      if (tips && tips.length) {
-        while (tips.length) {
-          tips[tips.length - 1].remove();
-        }
-      }
-      if (foundElements && foundElements.length) {
-        while (foundElements.length) {
-          removeClass(foundElements[foundElements.length - 1], "lky-element");
-        }
-      }
     }
   }
 };

@@ -12,12 +12,13 @@
       :style="setBlockStyle(block)"
       :class="{
         hidden: block.hide || !showAllBlocks,
-        found: block.found,
+        found: block.foundNodeIndex !== undefined && true,
         active: index === targetDesignIndex
       }"
       :key="index"
       @mouseenter="toggleClass"
       @mouseleave="toggleClass"
+      @click="setTargetElement(block.nodeIndex, index, block.foundNodeIndex)"
     >
       <div class="design-block-index">{{ index }}</div>
     </div>
@@ -39,7 +40,11 @@ export default {
       "targetElement"
     ]),
     shouldShow() {
-      return this.designImage && this.foundDesignBlocks && this.foundDesignBlocks.length;
+      return (
+        this.designImage &&
+        this.foundDesignBlocks &&
+        this.foundDesignBlocks.length
+      );
     },
     showAllBlocks() {
       return this.getParam("showAllDesignBlocks");
@@ -54,7 +59,10 @@ export default {
       return {
         width: this.designParams.width + "px",
         height:
-          window.innerHeight - this.viewParams.websiteInspectorHeight + "px"
+          window.innerHeight -
+          this.viewParams.websiteInspectorHeight -
+          32 +
+          "px"
       };
     },
     targetDesignIndex() {
@@ -97,6 +105,13 @@ export default {
         this.viewParams.hasOwnProperty(name) &&
         this.viewParams[name]
       );
+    },
+    setTargetElement(nodeIndex, designBlockIndex, foundNodeIndex) {
+      this.$store.dispatch("setTargetElement", {
+        nodeIndex: nodeIndex,
+        designIndex: designBlockIndex,
+        foundNodeIndex: foundNodeIndex
+      });
     }
   }
 };
@@ -113,10 +128,11 @@ export default {
     position: absolute;
     border: 1px dashed #05f;
     &.hover {
-      background-color: rgba(0, 85, 255, 0.35);
+      outline: rgb(17, 151, 200) solid 2px !important;
+      cursor: pointer;
     }
     &.active {
-      background-color: rgba(0, 85, 255, 0.5);
+      background-color: rgba(0, 85, 255, 0.35);
     }
     &-index {
       position: absolute;

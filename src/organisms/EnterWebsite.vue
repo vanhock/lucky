@@ -19,7 +19,7 @@ export default {
   name: "EnterWebsite",
   components: { FormInput },
   computed: {
-    ...mapGetters(["siteUrl", "siteUrlProxy"])
+    ...mapGetters(["websiteUrl", "siteUrlProxy"])
   },
   methods: {
     checkUrlAvailable() {

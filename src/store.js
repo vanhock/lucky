@@ -28,20 +28,17 @@ export default new Vuex.Store({
      *
      **/
     recentProjects: null,
-    targetElement: null,
-    websiteInspectorReady: false
+    targetElement: null
   },
   getters: {
     viewerReady: state => {
       return (
         getObjectValue(state.currentProject, "designBlocks") &&
-        getObjectValue(state.currentProject, "designImage") &&
         getObjectValue(state.currentProject, "designParams") &&
         getObjectValue(state.currentProject, "frameParams") &&
-        getObjectValue(state.currentProject.frameParams, "siteUrl")
+        getObjectValue(state.currentProject.frameParams, "websiteUrl")
       );
     },
-    websiteInspectorReady: state => state.websiteInspectorReady,
     viewParams: state => getObjectValue(state.currentProject, "viewParams"),
     designParams: state => getObjectValue(state.currentProject, "designParams"),
     frameParams: state => getObjectValue(state.currentProject, "frameParams"),
@@ -65,34 +62,37 @@ export default new Vuex.Store({
       return getters.currentFrameDocument.body;
     },
     designBlocks: state => getObjectValue(state.currentProject, "designBlocks"),
-    foundDesignBlocks: state => {
-      const foundNodes = getObjectValue(state.currentProject, "foundNodes");
-      const designBlocks = getObjectValue(state.currentProject, "designBlocks");
+    foundDesignBlocks: (state, getters) => {
+      const foundNodes = getters.foundNodes;
+      const designBlocks = getters.designBlocks;
       if (!foundNodes || !Object.keys(foundNodes).length) {
         return designBlocks;
       }
-      const found = [];
-      designBlocks.forEach(block => found.push(block));
+      let found = [];
+      designBlocks.forEach(block => (found = [...found, { ...block }]));
+      let nodeIndex = 0;
       for (let i in foundNodes) {
         if (!foundNodes.hasOwnProperty(i)) {
           continue;
         }
         const index = foundNodes[i].designBlockIndex;
         if (designBlocks.hasOwnProperty(index)) {
-          found[index].found = true;
+          found[index].foundNodeIndex = nodeIndex;
+          found[index].nodeIndex = i;
         }
+        nodeIndex++;
       }
       return found;
     },
     designImage: state => getObjectValue(state.currentProject, "designImage"),
-    siteUrl: (state, getters) => {
-      return getObjectValue(getters.frameParams, "siteUrl");
+    websiteUrl: (state, getters) => {
+      return getObjectValue(getters.frameParams, "websiteUrl");
     },
-    siteUrlProxy: (state, getters) => {
-      if (!getters.siteUrl) {
+    websiteUrlProxy: (state, getters) => {
+      if (!getters.websiteUrl) {
         return;
       }
-      return config.serverUrl + "/proxy/" + getters.siteUrl;
+      return config.serverUrl + "/proxy/" + getters.websiteUrl;
     },
     foundNodes: state => getObjectValue(state.currentProject, "foundNodes"),
     isFoundNodes: (state, getters) => {
@@ -195,9 +195,6 @@ export default new Vuex.Store({
     },
     SET_TARGET_ELEMENT(state, payload) {
       state.targetElement = payload;
-    },
-    SET_WEBSITE_INSPECTOR_READY(state) {
-      state.websiteInspectorReady = true;
     }
   },
   actions: {
@@ -208,7 +205,7 @@ export default new Vuex.Store({
       const url =
         "https://" + payload.replace("http://", "").replace("https://", "");
       return new Promise(resolve => {
-        commit("SET_FRAME_PARAMS", { siteUrl: url });
+        commit("SET_FRAME_PARAMS", { websiteUrl: url });
         resolve(url);
       });
     },
@@ -241,9 +238,6 @@ export default new Vuex.Store({
     },
     setTargetElement({ commit }, payload) {
       commit("SET_TARGET_ELEMENT", payload);
-    },
-    setWebsiteInspectorReady({ commit }) {
-      commit("SET_WEBSITE_INSPECTOR_READY");
     }
   }
 });
