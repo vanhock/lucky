@@ -20,46 +20,27 @@
 </template>
 
 <script>
-import Hub from "../atoms/hub";
 import axios from "axios";
 import config from "../config";
 import { mapGetters } from "vuex";
 import {
   addClass,
   removeClass,
-  addToLocal,
   detectMouseButton,
   getElementBounding,
-  relToAbs,
-  simplifyDom
+  relToAbs
 } from "../atoms/utils";
-import { getFoundNodesFromApi } from "../api";
 import Preloader from "../atoms/Preloader";
 export default {
   name: "SiteViewer",
   components: { Preloader },
-  mounted() {
-    !this.viewerReady && this.$router.push({ name: "home" });
-    this.init();
-    const self = this;
-    Hub.$on("initTestPage", () => {
-      self.clearFrame();
-      self.$store.dispatch("setFoundNodes", {});
-      self.initTestPage();
-    });
+  created() {
+    this.initFrame();
   },
-  beforeRouteUpdate(from, to, next) {
-    if (!this.viewerReady) {
-      next(false);
-      this.$router.push({ name: "home" });
-    } else {
-      next(true);
-      this.init();
-    }
+  props: {
+    loading: { type: Boolean, default: false }
   },
   data: () => ({
-    frameNodes: null,
-    gettingFoundNodeData: true,
     defaultViewParams: {
       websiteInspector: true,
       designInspector: true,
@@ -94,9 +75,6 @@ export default {
     viewActive() {
       return this.viewerReady && this.$route.name === "view";
     },
-    windowDim() {
-      return { width: window.innerWidth, height: window.innerHeight };
-    },
     frameStyles() {
       if (!this.frameParams) {
         return;
@@ -112,72 +90,84 @@ export default {
   watch: {
     targetElement(value) {
       this.focusNode(value);
+    },
+    foundNodes(value) {
+      if (!value) {
+        return;
+      }
+      if (value === {} && Object.keys(value).length === 0) {
+        this.clearFrame();
+      }
     }
   },
   methods: {
-    init() {
+    initFrame() {
+      const url = this.siteUrl;
       const self = this;
-      this.initFrame().then(() => {
-        const frameWindow = document.querySelector("iframe[data-perfect-pixel]")
-          .contentWindow;
-        const frameDocument = frameWindow.document;
-        frameDocument.onreadystatechange = () => {
-          if (frameDocument.readyState !== "complete") {
-            return;
-          }
-          this.$store.dispatch(
-            "setCurrentFrame",
-            document.querySelector("iframe[data-perfect-pixel]")
-          );
-          self.preventAllLinks(frameWindow);
-          self.applyFrameAdditionalStyles();
-          if (!self.viewParams) {
-            const viewParams = self.defaultViewParams;
-            viewParams.websiteInspectorHeight = self.windowDim.height / 2 - 54;
-            self.$store.dispatch("setViewParams", viewParams);
-          }
-          self.$nextTick(() => {
-            self.initTestPage();
+      this.$nextTick(() => {
+        const frame = document.querySelector("iframe[data-perfect-pixel]");
+        axios
+          .get(`${config.serverUrl}/proxy/${url}`)
+          .then(r => {
+            self.loadFrameHtml(r.data, frame);
+            const frameWindow = document.querySelector(
+              "iframe[data-perfect-pixel]"
+            ).contentWindow;
+            const frameDocument = frameWindow.document;
+
+            frameDocument.onreadystatechange = () => {
+              if (frameDocument.readyState !== "complete") {
+                return;
+              }
+              this.$store.dispatch(
+                "setCurrentFrame",
+                document.querySelector("iframe[data-perfect-pixel]")
+              );
+              self.preventAllLinks(frameWindow);
+              self.applyFrameAdditionalStyles();
+              /** If viewParams not set, emmit action **/
+              if (!self.viewParams) {
+                self.$emit("setViewParams");
+              }
+              self.$nextTick(() => {
+                self.$store.dispatch("setWebsiteInspectorReady");
+              });
+            };
+          })
+          .catch(error => {
+            console.log("Error with getting by proxy: " + error);
           });
-        };
       });
     },
-    initTestPage() {
-      /** ToDo: Вынести гет нодес в ViewScreen, в WebInpector
-       * оставить только инит фрейма и передавать событие готовности фрейма
-       */
-      const body = document.querySelector("iframe[data-perfect-pixel]")
-        .contentWindow.document.body;
-      this.frameNodes = [...body.getElementsByTagName("*")];
-      const simplifiedNodes = simplifyDom(
-        this.frameNodes,
-        this.currentFrameWindow
+    loadFrameHtml(html, frame) {
+      frame.src = "about:blank";
+      frame.contentWindow.document.open();
+      frame.contentWindow.document.write(
+        html.replace(/<head>/i, `<head><base href="${url}">`)
       );
-      this.gettingFoundNodeData = true;
-      if (this.isFoundNodes) {
-        this.processNodes(this.frameNodes, this.foundNodes);
-        this.gettingFoundNodeData = false;
-      } else {
-        getFoundNodesFromApi(this.designBlocks, simplifiedNodes, foundNodes => {
-          if (
-            !foundNodes ||
-            typeof foundNodes !== "object" ||
-            !Object.entries(foundNodes).length
-          ) {
-            return console.log("nodes not found!");
-          }
-          this.processNodes(this.frameNodes, foundNodes);
-          this.$store
-            .dispatch("setFoundNodes", foundNodes)
-            .then(currentProject => {
-              this.saveProjectToLocal(currentProject);
-            });
-          this.gettingFoundNodeData = false;
-        });
-      }
-    },
-    saveProjectToLocal(currentProject) {
-      addToLocal("recentProjects", currentProject.id, currentProject);
+
+      frame.contentWindow.document.close();
+      frame.contentWindow.document.head.prepend(
+        self.renderStyles(frame.contentWindow.document)
+      );
+      setTimeout(() => {
+        const frames = frame.contentWindow.document.querySelectorAll("iframe");
+        for (let i = 0; i < frames.length; i++) {
+          frames[i].remove();
+        }
+        const links = frame.contentWindow.document.querySelectorAll(
+          "*:not(iframe)"
+        );
+        for (let i = 0; i < links.length; i++) {
+          if (links[i].tagName === "BASE") continue;
+          links[i].href &&
+            replaceUrl(relToAbs(links[i].href, config.serverUrl));
+          links[i].src && replaceUrl(relToAbs(links[i].src, config.serverUrl));
+        }
+        function replaceUrl(oldUrl) {
+          return oldUrl.replace(url, `${config.serverUrl}/proxy/${url}`);
+        }
+      }, 100);
     },
     processNodes(frameNodes, foundNodes) {
       const self = this;
@@ -197,7 +187,6 @@ export default {
       this.renderIssueTip(node, foundNode, this.currentFrameDocument, index);
     },
     renderIssueTip(node, foundNode, frameDocument, index) {
-      const self = this;
       const left = node.offsetLeft + node.clientWidth / 2;
       const top = node.offsetTop + node.clientHeight - 7;
       const point = frameDocument.createElement("div");
@@ -410,58 +399,6 @@ export default {
         addClass(popup, "bottom");
       }
       popup.style.position = "absolute";
-    },
-    initFrame() {
-      const url = this.siteUrl;
-      const self = this;
-      return new Promise((resolve, reject) => {
-        this.$nextTick(() => {
-          const frame = document.querySelector("iframe[data-perfect-pixel]");
-          const loadHTML = function(html) {
-            frame.src = "about:blank";
-            frame.contentWindow.document.open();
-            frame.contentWindow.document.write(
-              html.replace(/<head>/i, `<head><base href="${url}">`)
-            );
-
-            frame.contentWindow.document.close();
-            frame.contentWindow.document.head.prepend(
-              self.renderStyles(frame.contentWindow.document)
-            );
-            setTimeout(() => {
-              const frames = frame.contentWindow.document.querySelectorAll(
-                "iframe"
-              );
-              for (let i = 0; i < frames.length; i++) {
-                frames[i].remove();
-              }
-              const links = frame.contentWindow.document.querySelectorAll(
-                "*:not(iframe)"
-              );
-              for (let i = 0; i < links.length; i++) {
-                if (links[i].tagName === "BASE") continue;
-                links[i].href &&
-                  replaceUrl(relToAbs(links[i].href, config.serverUrl));
-                links[i].src &&
-                  replaceUrl(relToAbs(links[i].src, config.serverUrl));
-              }
-              function replaceUrl(oldUrl) {
-                return oldUrl.replace(url, `${config.serverUrl}/proxy/${url}`);
-              }
-            }, 100);
-          };
-
-          axios
-            .get(`${config.serverUrl}/proxy/${url}`)
-            .then(r => {
-              loadHTML(r.data);
-              resolve();
-            })
-            .catch(error => {
-              reject(error);
-            });
-        });
-      });
     },
     renderStyles(d) {
       const css = `.lky-error-tip {

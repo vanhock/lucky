@@ -28,9 +28,23 @@ export default new Vuex.Store({
      *
      **/
     recentProjects: null,
-    targetElement: null
+    targetElement: null,
+    websiteInspectorReady: false
   },
   getters: {
+    viewerReady: state => {
+      return (
+        getObjectValue(state.currentProject, "designBlocks") &&
+        getObjectValue(state.currentProject, "designImage") &&
+        getObjectValue(state.currentProject, "designParams") &&
+        getObjectValue(state.currentProject, "frameParams") &&
+        getObjectValue(state.currentProject.frameParams, "siteUrl")
+      );
+    },
+    websiteInspectorReady: state => state.websiteInspectorReady,
+    viewParams: state => getObjectValue(state.currentProject, "viewParams"),
+    designParams: state => getObjectValue(state.currentProject, "designParams"),
+    frameParams: state => getObjectValue(state.currentProject, "frameParams"),
     currentFrame: state => state.currentFrame,
     currentFrameWindow: state => {
       if (!state.currentFrame) {
@@ -50,7 +64,6 @@ export default new Vuex.Store({
       }
       return getters.currentFrameDocument.body;
     },
-    frameParams: state => getObjectValue(state.currentProject, "frameParams"),
     designBlocks: state => getObjectValue(state.currentProject, "designBlocks"),
     foundDesignBlocks: state => {
       const foundNodes = getObjectValue(state.currentProject, "foundNodes");
@@ -72,8 +85,6 @@ export default new Vuex.Store({
       return found;
     },
     designImage: state => getObjectValue(state.currentProject, "designImage"),
-    designParams: state => getObjectValue(state.currentProject, "designParams"),
-    viewParams: state => getObjectValue(state.currentProject, "viewParams"),
     siteUrl: (state, getters) => {
       return getObjectValue(getters.frameParams, "siteUrl");
     },
@@ -82,13 +93,6 @@ export default new Vuex.Store({
         return;
       }
       return config.serverUrl + "/proxy/" + getters.siteUrl;
-    },
-    viewerReady: (state, getters) => {
-      return (
-        (getters.frameParams &&
-          getters.frameParams.hasOwnProperty("siteUrl")) ||
-        getters.foundNodes
-      );
     },
     foundNodes: state => getObjectValue(state.currentProject, "foundNodes"),
     isFoundNodes: (state, getters) => {
@@ -191,6 +195,9 @@ export default new Vuex.Store({
     },
     SET_TARGET_ELEMENT(state, payload) {
       state.targetElement = payload;
+    },
+    SET_WEBSITE_INSPECTOR_READY(state) {
+      state.websiteInspectorReady = true;
     }
   },
   actions: {
@@ -234,6 +241,9 @@ export default new Vuex.Store({
     },
     setTargetElement({ commit }, payload) {
       commit("SET_TARGET_ELEMENT", payload);
+    },
+    setWebsiteInspectorReady({ commit }) {
+      commit("SET_WEBSITE_INSPECTOR_READY");
     }
   }
 });
