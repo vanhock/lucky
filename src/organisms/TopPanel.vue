@@ -2,9 +2,13 @@
   <div class="top-panel">
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
-      <design-inspector-controls />
+      <view-params />
       <panel-control>
-        <toggle icon="refresh" text="Reload view" @click="$emit('reloadView')" />
+        <toggle
+          icon="refresh"
+          text="Reload view"
+          @click="$emit('reloadView')"
+        />
       </panel-control>
       <panel-control :dropdown="true">
         <toggle icon="tuning" text="Recognize settings" />
@@ -16,18 +20,22 @@
           </v-menu>
         </template>
       </panel-control>
-      <toggle class="right" icon="inbox-full" text="Found elements" @click="toggleTasksList" />
+      <toggle
+        class="right"
+        icon="inbox-full"
+        text="Found elements"
+        @click="toggleTasksList"
+      />
     </div>
     <task-list v-show="showTasksList" :tasks="foundNodes" v-if="foundNodes" />
   </div>
 </template>
 
 <script>
-import Hub from "../atoms/hub";
 import VMenu from "../atoms/Menu";
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
-import DesignInspectorControls from "../molecules/DesignInspectorControls";
+import ViewParams from "../molecules/ViewParams";
 import PanelControl from "../atoms/PanelControl";
 import Toggle from "../atoms/Toggle";
 import MenuItem from "../atoms/MenuItem";
@@ -37,7 +45,7 @@ export default {
     MenuItem,
     Toggle,
     PanelControl,
-    DesignInspectorControls,
+    ViewParams,
     VMenu,
     TaskList
   },

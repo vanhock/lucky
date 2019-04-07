@@ -23,7 +23,8 @@ export default new Vuex.Store({
      *   designInspector: true,
      *   websiteInspectorHeight: '',
      *   showAllDesignBlocks: false,
-     *   showFoundDesignBlocks: true
+     *   showFoundDesignBlocks: true,
+     *   syncScroll: false
      * }
      *
      **/

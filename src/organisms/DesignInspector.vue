@@ -4,6 +4,7 @@
     v-if="shouldShow"
     :style="inspectorSizes"
     :class="{ 'only-found': showOnlyFoundBlocks }"
+    @scroll="onDocumentScroll"
   >
     <img :src="designImage" alt="design image" class="image" />
     <div
@@ -20,17 +21,19 @@
       @mouseleave="toggleClass"
       @click="onDesignBlockClick(block.nodeIndex, index, block.foundNodeIndex)"
     >
-      <div class="design-block-index">{{ index }}</div>
+      <!--<div class="design-block-index">{{ index }}</div>-->
     </div>
   </div>
 </template>
 
 <script>
+import ViewMixin from "../mixins/ViewMixin.js";
 import { mapGetters } from "vuex";
 import { addClass, removeClass, scrollTo } from "../atoms/utils";
 
 export default {
   name: "DesignInspector",
+  mixins: [ViewMixin],
   data: () => ({
     noScroll: false
   }),
@@ -50,10 +53,13 @@ export default {
       );
     },
     showAllBlocks() {
-      return this.getParam("showAllDesignBlocks");
+      return this.getViewParam("showAllDesignBlocks");
     },
     showOnlyFoundBlocks() {
-      return this.getParam("showFoundDesignBlocks");
+      return this.getViewParam("showFoundDesignBlocks");
+    },
+    syncScroll() {
+      return this.getViewParam("syncScroll");
     },
     inspectorSizes() {
       if (!this.designParams || !this.viewParams) {
@@ -64,7 +70,7 @@ export default {
         height:
           window.innerHeight -
           this.viewParams.websiteInspectorHeight -
-          32 +
+          36 +
           "px"
       };
     },
@@ -104,16 +110,6 @@ export default {
         ? addClass(el, "hover")
         : removeClass(el, "hover");
     },
-    getParam(name) {
-      if (!this.viewParams) {
-        return;
-      }
-      return (
-        this.viewParams &&
-        this.viewParams.hasOwnProperty(name) &&
-        this.viewParams[name]
-      );
-    },
     onDesignBlockClick(nodeIndex, designBlockIndex, foundNodeIndex) {
       this.setTargetElement(nodeIndex, designBlockIndex, foundNodeIndex);
       this.noScroll = true;
@@ -141,6 +137,15 @@ export default {
       } else {
         this.noScroll = false;
       }
+    },
+    onDocumentScroll(e) {
+      if (!this.syncScroll) {
+        return;
+      }
+      this.$emit("designScrollTop", e.target.scrollTop);
+    },
+    scrollDocument(scroll) {
+      document.querySelector(".design-inspector").scrollTop = scroll;
     }
   }
 };
@@ -151,6 +156,7 @@ export default {
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
+  border-bottom: 4px solid #000;
   .image {
   }
   .design-block {

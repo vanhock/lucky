@@ -1,42 +1,55 @@
 <template>
-  <panel-control>
-    <div class="design-inspector-controls">
+  <div class="design-inspector-controls">
+    <panel-control>
       <toggle
         :active="showAllBlocks"
         :icon="(showFoundBlocks && 'target') || 'layers'"
         :text="(showFoundBlocks && 'Found layers') || 'All layers'"
         @click="toggleLayersViewMode"
       />
-    </div>
-  </panel-control>
+      <toggle
+        :active="syncScroll"
+        icon="link"
+        text="Sync scroll"
+        @click="toggleSyncScroll"
+      ></toggle>
+    </panel-control>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-import Toggle from "../atoms/Toggle";
 import PanelControl from "../atoms/PanelControl";
+import Toggle from "../atoms/Toggle";
+
 export default {
-  name: "DesignInspectorControls",
+  name: "ViewParams",
   components: { PanelControl, Toggle },
   computed: {
     ...mapGetters(["viewParams"]),
     showAllBlocks() {
-      return this.getParam("showAllDesignBlocks");
+      return this.getViewParam("showAllDesignBlocks");
     },
     showFoundBlocks() {
-      return this.getParam("showFoundDesignBlocks");
+      return this.getViewParam("showFoundDesignBlocks");
+    },
+    syncScroll() {
+      return this.getViewParam("syncScroll");
     }
   },
   methods: {
     toggleLayersViewMode() {
-      if (!this.getParam("showAllDesignBlocks")) {
+      if (!this.getViewParam("showAllDesignBlocks")) {
         this.setParam("showAllDesignBlocks", true);
-      } else if (this.getParam("showFoundDesignBlocks")) {
+      } else if (this.getViewParam("showFoundDesignBlocks")) {
         this.setParam("showAllDesignBlocks", false);
         this.setParam("showFoundDesignBlocks", false);
       } else {
         this.setParam("showFoundDesignBlocks", true);
       }
+    },
+    toggleSyncScroll() {
+      this.$store.dispatch("setViewParams", { syncScroll: !this.syncScroll });
     },
     setParam(name, value) {
       if (!name) {
@@ -46,7 +59,7 @@ export default {
       param[name] = value;
       this.$store.dispatch("setViewParams", param);
     },
-    getParam(name) {
+    getViewParam(name) {
       if (!this.viewParams) {
         return;
       }

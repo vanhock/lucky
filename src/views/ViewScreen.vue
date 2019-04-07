@@ -1,12 +1,13 @@
 <template>
   <div class="view">
     <top-panel @getFoundNodes="getFoundNodes" @reloadView="getFoundNodes" />
-    <design-inspector />
+    <design-inspector ref="designInspector" @designScrollTop="scrollWebsite" />
     <website-inspector
       ref="websiteInspector"
       @getFoundNodes="getFoundNodes"
       @websiteInspectorReady="getFoundNodes"
       @setViewParams="setViewParams"
+      @websiteScrollTop="scrollDesign"
     />
   </div>
 </template>
@@ -40,7 +41,7 @@ export default {
     defaultViewParams: {
       websiteInspector: true,
       designInspector: true,
-      websiteInspectorHeight: window.innerHeight / 2 - 16,
+      websiteInspectorHeight: window.innerHeight / 2 - 24,
       showAllDesignBlocks: true,
       showFoundDesignBlocks: true
     }
@@ -132,6 +133,18 @@ export default {
           removeClass(foundElements[foundElements.length - 1], "pp-element");
         }
       }
+    },
+    scrollWebsite(value) {
+      if (!this.currentFrameDocument) {
+        return;
+      }
+      this.currentFrameDocument.scrollingElement.scrollTop = value;
+    },
+    scrollDesign(value) {
+      if (!this.$refs.designInspector) {
+        return;
+      }
+      this.$refs.designInspector.scrollDocument(value);
     }
   }
 };

@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 import axios from "axios";
 import config from "../config";
 import { mapGetters } from "vuex";
@@ -30,8 +31,10 @@ import {
   relToAbs,
   scrollTo
 } from "../atoms/utils";
+import ViewMixin from "../mixins/ViewMixin";
 export default {
   name: "WebsiteInspector",
+  mixins: [ViewMixin],
   created() {
     this.initFrame();
   },
@@ -72,6 +75,9 @@ export default {
         width: (this.frameParams.width || "100%") + "px",
         height: this.viewParams && this.viewParams.websiteInspectorHeight + "px"
       };
+    },
+    syncScroll() {
+      return this.getViewParam("syncScroll");
     }
   },
   watch: {
@@ -108,9 +114,15 @@ export default {
               if (!self.viewParams) {
                 self.$emit("setViewParams");
               }
-              self.$nextTick(() => {
-                self.$emit("websiteInspectorReady");
-              });
+              this.currentFrame.contentDocument.onscroll = () => {
+                if (!self.syncScroll) {
+                  return;
+                }
+                self.$emit(
+                  "websiteScrollTop",
+                  frameDocument.scrollingElement.scrollTop
+                );
+              };
             };
           })
           .catch(error => {
