@@ -27,7 +27,8 @@ import {
   removeClass,
   detectMouseButton,
   getElementBounding,
-  relToAbs
+  relToAbs,
+  scrollTo
 } from "../atoms/utils";
 export default {
   name: "WebsiteInspector",
@@ -40,7 +41,8 @@ export default {
       width: "Ширина",
       height: "Высота",
       left: "Смещение слева",
-      top: "Смещение сверху"
+      top: "Смещение сверху",
+      noScroll: false
     }
   }),
   computed: {
@@ -75,6 +77,7 @@ export default {
   watch: {
     targetElement(element) {
       this.focusOnElement(element);
+      this.scrollToTargetElement(element);
     }
   },
   methods: {
@@ -209,10 +212,11 @@ export default {
           return;
         }
         this.$store.dispatch("setTargetElement", {
-          nodeIndex: foundNode.id,
-          designIndex: foundNode.designBlockIndex,
-          foundNodeIndex: foundNodeIndex
+          nodeIndex: parseInt(foundNode.id),
+          designIndex: parseInt(foundNode.designBlockIndex),
+          foundNodeIndex: parseInt(foundNodeIndex)
         });
+        this.noScroll = true;
         e.stopPropagation();
       };
       point.querySelector(".pp-popup-close").onclick = () => {
@@ -554,6 +558,22 @@ export default {
         e.preventDefault();
         e.returnValue = "";
       };
+    },
+    scrollToTargetElement(element) {
+      if (!element || !this.currentFrameDocument) {
+        return;
+      }
+      const all = this.currentFrameDocument.querySelectorAll(".pp-element");
+      const target = all[element.foundNodeIndex];
+      if (!this.noScroll) {
+        scrollTo(
+          this.currentFrameDocument.scrollingElement,
+          target.offsetTop - 100,
+          100
+        );
+      } else {
+        this.noScroll = false;
+      }
     }
   }
 };

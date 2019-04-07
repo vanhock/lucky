@@ -5,7 +5,7 @@
         v-for="(task, nodeIndex, i) in tasks"
         :key="nodeIndex"
         :class="{
-          active: targetNodeIndex === nodeIndex
+          active: targetNodeIndex === parseInt(nodeIndex)
         }"
         @click="setTargetElement(nodeIndex, task.designBlockIndex, i)"
       >
@@ -44,7 +44,7 @@ export default {
       return this.$refs.tasksList;
     },
     targetNodeIndex() {
-      return this.targetElement && this.targetElement.nodeIndex.toString();
+      return this.targetElement && this.targetElement.nodeIndex;
     }
   },
   watch: {
@@ -61,9 +61,9 @@ export default {
   methods: {
     setTargetElement(nodeIndex, designIndex, foundNodeIndex) {
       this.$store.dispatch("setTargetElement", {
-        nodeIndex: nodeIndex,
-        designIndex: designIndex,
-        foundNodeIndex: foundNodeIndex
+        nodeIndex: parseInt(nodeIndex),
+        designIndex: parseInt(designIndex),
+        foundNodeIndex: parseInt(foundNodeIndex)
       });
       /** If we set target element from Task List **/
       this.noScroll = true;

@@ -68,7 +68,10 @@ export default {
       this.clearFrame();
       this.$store.dispatch("setFoundNodes", {});
       this.gettingFoundNodeData = true;
-
+      const frameElement = document.querySelector("iframe[data-perfect-pixel]");
+      if (!frameElement) {
+        return;
+      }
       const body = document.querySelector("iframe[data-perfect-pixel]")
         .contentWindow.document.body;
       if (!this.frameNodes) {

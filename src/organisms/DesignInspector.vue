@@ -18,7 +18,7 @@
       :key="index"
       @mouseenter="toggleClass"
       @mouseleave="toggleClass"
-      @click="setTargetElement(block.nodeIndex, index, block.foundNodeIndex)"
+      @click="onDesignBlockClick(block.nodeIndex, index, block.foundNodeIndex)"
     >
       <div class="design-block-index">{{ index }}</div>
     </div>
@@ -27,10 +27,13 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { addClass, removeClass } from "../atoms/utils";
+import { addClass, removeClass, scrollTo } from "../atoms/utils";
 
 export default {
   name: "DesignInspector",
+  data: () => ({
+    noScroll: false
+  }),
   computed: {
     ...mapGetters([
       "foundDesignBlocks",
@@ -73,6 +76,11 @@ export default {
       );
     }
   },
+  watch: {
+    targetElement(element) {
+      this.scrollToTargetElement(element.designIndex);
+    }
+  },
   methods: {
     setBlockStyle(block) {
       if (!block) {
@@ -106,12 +114,33 @@ export default {
         this.viewParams[name]
       );
     },
+    onDesignBlockClick(nodeIndex, designBlockIndex, foundNodeIndex) {
+      this.setTargetElement(nodeIndex, designBlockIndex, foundNodeIndex);
+      this.noScroll = true;
+    },
     setTargetElement(nodeIndex, designBlockIndex, foundNodeIndex) {
       this.$store.dispatch("setTargetElement", {
-        nodeIndex: nodeIndex,
-        designIndex: designBlockIndex,
-        foundNodeIndex: foundNodeIndex
+        nodeIndex: parseInt(nodeIndex),
+        designIndex: parseInt(designBlockIndex),
+        foundNodeIndex: parseInt(foundNodeIndex)
       });
+      this.scrollToTargetElement(designBlockIndex);
+    },
+    scrollToTargetElement(designBlockIndex) {
+      if (!designBlockIndex) {
+        return;
+      }
+      const all = document.querySelectorAll(".design-inspector .design-block");
+      const target = all[designBlockIndex];
+      if (!this.noScroll) {
+        scrollTo(
+          document.querySelector(".design-inspector"),
+          target.offsetTop - 100,
+          100
+        );
+      } else {
+        this.noScroll = false;
+      }
     }
   }
 };
