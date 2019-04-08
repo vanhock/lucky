@@ -2,6 +2,7 @@
   <div class="view-params">
     <panel-control>
       <toggle icon="refresh" text="Reload view" @click="$emit('reloadView')" />
+      <toggle icon="view-carousel" text="Change view"></toggle>
       <toggle
         :active="syncScroll"
         icon="link"
