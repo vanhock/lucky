@@ -1,12 +1,7 @@
 <template>
-  <div class="design-inspector-controls">
+  <div class="view-params">
     <panel-control>
-      <toggle
-        :active="showAllBlocks"
-        :icon="(showFoundBlocks && 'target') || 'layers'"
-        :text="(showFoundBlocks && 'Found layers') || 'All layers'"
-        @click="toggleLayersViewMode"
-      />
+      <toggle icon="refresh" text="Reload view" @click="$emit('reloadView')" />
       <toggle
         :active="syncScroll"
         icon="link"
@@ -18,63 +13,29 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
 import PanelControl from "../atoms/PanelControl";
 import Toggle from "../atoms/Toggle";
+import ViewMixin from "../mixins/ViewMixin";
 
 export default {
   name: "ViewParams",
+  mixins: [ViewMixin],
   components: { PanelControl, Toggle },
   computed: {
-    ...mapGetters(["viewParams"]),
-    showAllBlocks() {
-      return this.getViewParam("showAllDesignBlocks");
-    },
-    showFoundBlocks() {
-      return this.getViewParam("showFoundDesignBlocks");
-    },
     syncScroll() {
       return this.getViewParam("syncScroll");
     }
   },
   methods: {
-    toggleLayersViewMode() {
-      if (!this.getViewParam("showAllDesignBlocks")) {
-        this.setParam("showAllDesignBlocks", true);
-      } else if (this.getViewParam("showFoundDesignBlocks")) {
-        this.setParam("showAllDesignBlocks", false);
-        this.setParam("showFoundDesignBlocks", false);
-      } else {
-        this.setParam("showFoundDesignBlocks", true);
-      }
-    },
     toggleSyncScroll() {
       this.$store.dispatch("setViewParams", { syncScroll: !this.syncScroll });
-    },
-    setParam(name, value) {
-      if (!name) {
-        return;
-      }
-      const param = {};
-      param[name] = value;
-      this.$store.dispatch("setViewParams", param);
-    },
-    getViewParam(name) {
-      if (!this.viewParams) {
-        return;
-      }
-      return (
-        this.viewParams &&
-        this.viewParams.hasOwnProperty(name) &&
-        this.viewParams[name]
-      );
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.design-inspector-controls {
+.view-params {
   height: inherit;
   .toggle {
     width: auto;

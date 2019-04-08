@@ -3,13 +3,7 @@
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
       <view-params />
-      <panel-control>
-        <toggle
-          icon="refresh"
-          text="Reload view"
-          @click="$emit('reloadView')"
-        />
-      </panel-control>
+      <design-params />
       <panel-control :dropdown="true">
         <toggle icon="tuning" text="Recognize settings" />
         <template v-slot:dropdown>
@@ -39,9 +33,11 @@ import ViewParams from "../molecules/ViewParams";
 import PanelControl from "../atoms/PanelControl";
 import Toggle from "../atoms/Toggle";
 import MenuItem from "../atoms/MenuItem";
+import DesignParams from "../molecules/DesignParams";
 export default {
   name: "TopPanel",
   components: {
+    DesignParams,
     MenuItem,
     Toggle,
     PanelControl,
@@ -76,6 +72,9 @@ export default {
     width: 100%;
     height: 100%;
     padding: 0 15px;
+    & > * {
+      height: 100%;
+    }
   }
   .right {
     justify-content: right;

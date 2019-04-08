@@ -48,7 +48,7 @@ export default {
     }
   }
   &:hover {
-    background-color: $color-b2;
+    background-color: rgba(0, 0, 0, 0.24);
   }
   &:not(.active) {
     &:hover {

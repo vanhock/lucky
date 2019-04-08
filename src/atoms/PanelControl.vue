@@ -25,7 +25,6 @@ export default {
 <style lang="scss" scoped>
 .panel-control {
   display: flex;
-  margin: 0 5px;
   height: 100%;
 }
 </style>

@@ -1,4 +1,8 @@
+import { mapGetters } from "vuex";
 export default {
+  computed: {
+    ...mapGetters(["viewParams"])
+  },
   methods: {
     getViewParam(name) {
       if (!this.viewParams) {
@@ -9,6 +13,14 @@ export default {
         this.viewParams.hasOwnProperty(name) &&
         this.viewParams[name]
       );
+    },
+    setViewParam(name, value) {
+      if (!name) {
+        return;
+      }
+      const param = {};
+      param[name] = value;
+      this.$store.dispatch("setViewParams", param);
     }
   }
-}
+};
