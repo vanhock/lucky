@@ -99,22 +99,28 @@ export default {
               "iframe[data-perfect-pixel]"
             ).contentWindow;
             const frameDocument = frameWindow.document;
-
+            if (frameDocument.readyState === "complete") {
+              setUpFrame();
+            }
             frameDocument.onreadystatechange = () => {
               if (frameDocument.readyState !== "complete") {
                 return;
               }
+              setUpFrame();
+            };
+            function setUpFrame() {
               self.$store.dispatch(
                 "setCurrentFrame",
                 document.querySelector("iframe[data-perfect-pixel]")
               );
               self.preventAllLinks(frameWindow);
               self.applyAdditionalFrameStyles();
+              self.$emit("websiteInspectorReady");
               /** If viewParams not set, emmit setViewParams **/
               if (!self.viewParams) {
                 self.$emit("setViewParams");
               }
-              this.currentFrame.contentDocument.onscroll = () => {
+              self.currentFrame.contentDocument.onscroll = () => {
                 if (!self.syncScroll) {
                   return;
                 }
@@ -123,7 +129,7 @@ export default {
                   frameDocument.scrollingElement.scrollTop
                 );
               };
-            };
+            }
           })
           .catch(error => {
             console.log("Error with getting by proxy: " + error);

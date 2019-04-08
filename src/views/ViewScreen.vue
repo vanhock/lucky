@@ -5,7 +5,7 @@
     <website-inspector
       ref="websiteInspector"
       @getFoundNodes="getFoundNodes"
-      @websiteInspectorReady="getFoundNodes"
+      @websiteInspectorReady="initView"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
     />
@@ -23,9 +23,10 @@ export default {
   name: "ViewScreen",
   components: { DesignInspector, WebsiteInspector, TopPanel },
   created() {
-    !this.viewerReady
-      ? this.$router.push({ name: "home" })
-      : this.getFoundNodes();
+    !this.viewerReady && this.$router.push({ name: "home" });
+  },
+  mounted() {
+    this.currentFrame && this.initView();
   },
   beforeRouteUpdate(from, to, next) {
     if (!this.viewerReady) {
@@ -50,6 +51,7 @@ export default {
     ...mapState(["currentProject"]),
     ...mapGetters([
       "viewerReady",
+      "currentFrame",
       "currentFrameDocument",
       "currentFrameWindow",
       "foundNodes",
@@ -64,25 +66,15 @@ export default {
     }
   },
   methods: {
-    getFoundNodes() {
-      /** Clear FoundNodes before get it **/
-      this.clearFrame();
-      this.$store.dispatch("setFoundNodes", {});
+    initView() {
       this.gettingFoundNodeData = true;
-      const frameElement = document.querySelector("iframe[data-perfect-pixel]");
-      if (!frameElement) {
-        return;
-      }
+
       const body = document.querySelector("iframe[data-perfect-pixel]")
         .contentWindow.document.body;
-      if (!this.frameNodes) {
-        this.frameNodes = [...body.getElementsByTagName("*")];
+      this.frameNodes = [...body.getElementsByTagName("*")];
+      if (!this.frameNodes.length) {
+        return;
       }
-      const simplifiedNodes = simplifyDom(
-        this.frameNodes,
-        this.currentFrameWindow
-      );
-
       if (this.isFoundNodes) {
         this.$refs.websiteInspector.processNodes(
           this.frameNodes,
@@ -90,23 +82,36 @@ export default {
         );
         this.gettingFoundNodeData = false;
       } else {
-        getFoundNodesFromApi(this.designBlocks, simplifiedNodes, foundNodes => {
-          if (
-            !foundNodes ||
-            typeof foundNodes !== "object" ||
-            !Object.entries(foundNodes).length
-          ) {
-            return console.log("nodes not found!");
-          }
-          this.$refs.websiteInspector.processNodes(this.frameNodes, foundNodes);
-          this.$store
-            .dispatch("setFoundNodes", foundNodes)
-            .then(currentProject => {
-              this.saveProjectToLocal(currentProject);
-            });
-          this.gettingFoundNodeData = false;
-        });
+        this.getFoundNodes();
       }
+    },
+    getFoundNodes() {
+      this.clearFrame();
+      this.gettingFoundNodeData = true;
+      this.$store.dispatch("setFoundNodes", {});
+      const body = document.querySelector("iframe[data-perfect-pixel]")
+        .contentWindow.document.body;
+      this.frameNodes = [...body.getElementsByTagName("*")];
+      const simplifiedNodes = simplifyDom(
+        this.frameNodes,
+        this.currentFrameWindow
+      );
+      getFoundNodesFromApi(this.designBlocks, simplifiedNodes, foundNodes => {
+        if (
+          !foundNodes ||
+          typeof foundNodes !== "object" ||
+          !Object.entries(foundNodes).length
+        ) {
+          return console.log("nodes not found!");
+        }
+        this.$refs.websiteInspector.processNodes(this.frameNodes, foundNodes);
+        this.$store
+          .dispatch("setFoundNodes", foundNodes)
+          .then(currentProject => {
+            this.saveProjectToLocal(currentProject);
+          });
+        this.gettingFoundNodeData = false;
+      });
     },
     saveProjectToLocal(currentProject) {
       addToLocal("recentProjects", currentProject.id, currentProject);
@@ -117,6 +122,9 @@ export default {
       this.$store.dispatch("setViewParams", viewParams);
     },
     clearFrame() {
+      if (!this.currentFrameDocument) {
+        return;
+      }
       const tips = this.currentFrameDocument.getElementsByClassName(
         "pp-found-node-tip"
       );

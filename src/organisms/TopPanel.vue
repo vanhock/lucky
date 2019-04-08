@@ -2,7 +2,7 @@
   <div class="top-panel">
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
-      <view-params />
+      <view-params @reloadView="$emit('reloadView')" />
       <design-params />
       <panel-control :dropdown="true">
         <toggle icon="tuning" text="Recognize settings" />
