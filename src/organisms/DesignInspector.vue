@@ -13,16 +13,14 @@
       :style="setBlockStyle(block)"
       :class="{
         hidden: block.hide || !showAllBlocks,
-        found: block.foundNodeIndex !== undefined && true,
+        found: block.foundNodeIndex !== undefined,
         active: index === targetDesignIndex
       }"
       :key="index"
       @mouseenter="toggleClass"
       @mouseleave="toggleClass"
       @click="onDesignBlockClick(block.nodeIndex, index, block.foundNodeIndex)"
-    >
-      <!--<div class="design-block-index">{{ index }}</div>-->
-    </div>
+    ></div>
   </div>
 </template>
 

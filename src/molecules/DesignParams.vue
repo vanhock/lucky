@@ -5,9 +5,10 @@
         :active="showAllBlocks"
         :icon="(showFoundBlocks && 'target') || 'layers'"
         :text="(showFoundBlocks && 'Found layers') || 'All layers'"
+        :show-text="false"
         @click="toggleLayersViewMode"
       />
-      <toggle icon="border-horizontal" text="Guides" />
+      <toggle icon="border-horizontal" text="Guides" :show-text="false" />
       <toggle icon="repost" text="Change design" />
     </panel-control>
   </div>

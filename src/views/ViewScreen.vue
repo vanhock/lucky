@@ -118,7 +118,6 @@ export default {
     },
     setViewParams() {
       const viewParams = this.defaultViewParams;
-      //viewParams.websiteInspectorHeight = self.windowDim.height / 2 - 54;
       this.$store.dispatch("setViewParams", viewParams);
     },
     clearFrame() {

@@ -2,18 +2,12 @@
   <div class="top-panel">
     <div class="container">
       <router-link class="site-logo" to="/"></router-link>
-      <view-params @reloadView="$emit('reloadView')" />
       <design-params />
-      <panel-control :dropdown="true">
-        <toggle icon="tuning" text="Recognize settings" />
-        <template v-slot:dropdown>
-          <v-menu>
-            <menu-item>
-              <input type="text" value="5" />
-            </menu-item>
-          </v-menu>
-        </template>
-      </panel-control>
+      <div
+        style="flex-grow: 1;
+    flex-shrink: 999;"
+      ></div>
+      <view-params @reloadView="$emit('reloadView')" class="right" />
       <toggle
         class="right"
         icon="inbox-full"
@@ -26,23 +20,17 @@
 </template>
 
 <script>
-import VMenu from "../atoms/Menu";
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
 import ViewParams from "../molecules/ViewParams";
-import PanelControl from "../atoms/PanelControl";
 import Toggle from "../atoms/Toggle";
-import MenuItem from "../atoms/MenuItem";
 import DesignParams from "../molecules/DesignParams";
 export default {
   name: "TopPanel",
   components: {
     DesignParams,
-    MenuItem,
     Toggle,
-    PanelControl,
     ViewParams,
-    VMenu,
     TaskList
   },
   data: () => ({
