@@ -69,7 +69,7 @@ export default {
   }
   .dropdown {
     position: absolute;
-    top: 31px;
+    top: 37px;
     padding-top: 13px;
     @include galign();
     z-index: 11;

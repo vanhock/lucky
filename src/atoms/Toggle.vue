@@ -46,8 +46,8 @@ export default {
   cursor: pointer;
   color: $color-b5;
   .icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     fill: $color-b5;
   }
   .text {
@@ -58,15 +58,14 @@ export default {
     .text {
       display: none;
       position: absolute;
-      top: 45px;
+      top: 50px;
       @include galign();
       margin-left: 0;
-      background-color: $color-b5;
-      color: #333;
+      background-color: $color-b2;
+      color: #fff;
       min-width: 70px;
       padding: 5px;
       text-align: center;
-      font-weight: bold;
       z-index: 12;
       &:before {
         position: absolute;
@@ -77,7 +76,7 @@ export default {
         @include galign();
         border-left: 7px solid transparent;
         border-right: 7px solid transparent;
-        border-bottom: 7px solid $color-b5;
+        border-bottom: 7px solid $color-b2;
       }
     }
     &:hover {

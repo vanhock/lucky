@@ -86,7 +86,7 @@ export default {
 <style lang="scss" scoped>
 .tasks {
   position: absolute;
-  top: 32px;
+  top: 38px;
   right: 0;
   width: 400px;
   max-height: 600px;

@@ -11,7 +11,9 @@
       <toggle
         class="right"
         icon="inbox-full"
+        :icon-hover="showTasksList && 'arrow-thin-right'"
         text="Found elements"
+        :active="showTasksList"
         @click="toggleTasksList"
       />
     </div>
@@ -50,7 +52,7 @@ export default {
 <style lang="scss" scoped>
 .top-panel {
   display: flex;
-  height: 32px;
+  height: 38px;
   width: 100%;
   background-color: $color-bg2;
   .container {
@@ -60,7 +62,7 @@ export default {
     width: 100%;
     height: 100%;
     padding: 0 15px;
-    & > * {
+    & > *:not(.site-logo) {
       height: 100%;
     }
   }
@@ -77,7 +79,8 @@ export default {
   width: 32px;
   height: 32px;
   background: url(/pixel.png) no-repeat;
-  margin-left: -15px;
+  margin-left: -12px;
+  background-size: contain;
 }
 .icon-menu {
   height: 100%;

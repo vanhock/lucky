@@ -68,7 +68,7 @@ export default {
         height:
           window.innerHeight -
           this.viewParams.websiteInspectorHeight -
-          36 +
+          42 +
           "px"
       };
     },
