@@ -8,7 +8,7 @@
         :show-text="false"
         @click="toggleLayersViewMode"
       />
-      <toggle icon="border-horizontal" text="Guides" :show-text="false" />
+      <toggle icon="border-none" text="Guides" :show-text="false" />
       <toggle icon="repost" text="Change design" />
     </panel-control>
   </div>

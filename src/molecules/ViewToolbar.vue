@@ -8,7 +8,25 @@
         @click="toggleSyncScroll"
         :show-text="false"
       ></toggle>
-      <toggle icon="view-carousel" text="Change view" :show-text="false"></toggle>
+      <panel-control :dropdown="true">
+        <toggle icon="view-carousel" text="Change view" :show-text="false"></toggle>
+        <template v-slot:dropdown>
+          <v-menu>
+            <menu-item>
+              <toggle icon="border-horizontal" text="Split horizontal" />
+            </menu-item>
+            <menu-item>
+              <toggle icon="border-vertical" text="Split vertical" />
+            </menu-item>
+            <menu-item>
+              <toggle icon="browser-window-open" text="In new window" />
+            </menu-item>
+            <menu-item>
+              <toggle icon="view-hide" text="Hide design view" />
+            </menu-item>
+          </v-menu>
+        </template>
+      </panel-control>
       <toggle icon="refresh" text="Reload view" @click="$emit('reloadView')" />
       <panel-control :dropdown="true">
         <toggle icon="tuning" text="Recognize settings" />

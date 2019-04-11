@@ -6,12 +6,14 @@
       <div
         style="flex-grow: 1;
     flex-shrink: 999;"
-      ></div>
+      >
+        <project-toolbar />
+      </div>
       <view-params @reloadView="$emit('reloadView')" class="right" />
       <toggle
         class="right"
         icon="inbox-full"
-        :icon-hover="showTasksList && 'arrow-thin-right'"
+        :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
         text="Found elements"
         :active="showTasksList"
         @click="toggleTasksList"
@@ -24,12 +26,14 @@
 <script>
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
-import ViewParams from "../molecules/ViewParams";
+import ViewParams from "../molecules/ViewToolbar";
 import Toggle from "../atoms/Toggle";
-import DesignParams from "../molecules/DesignParams";
+import DesignParams from "../molecules/DesignToolbar";
+import ProjectToolbar from "../molecules/ProjectToolbar";
 export default {
   name: "TopPanel",
   components: {
+    ProjectToolbar,
     DesignParams,
     Toggle,
     ViewParams,
