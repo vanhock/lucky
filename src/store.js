@@ -119,7 +119,18 @@ export default new Vuex.Store({
           width: i.width,
           height: i.height,
           hide: i.width === params.width || i.height === params.height,
-          text: (i.text && true) || false
+          text: i.text &&
+            Object.keys(i.text).length && {
+              value: i.text.value && i.text.value.trim().toLowerCase(),
+              fontSize: i.text.font.sizes && i.text.font.sizes[0],
+              fontFamily: i.text.font.name,
+              align: i.text.font.alignment[0],
+              color:
+                i.text.font.colors &&
+                i.text.font.colors[0] &&
+                i.text.font.colors[0].join(",")
+            },
+          image: {}
         }));
       if (!designBlocks) {
         return;

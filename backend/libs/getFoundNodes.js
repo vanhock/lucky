@@ -6,8 +6,8 @@ module.exports = function(design, nodes) {
     currentRecognizedNode: null
   };
   const params = {
-    sizesGutter: 40,
-    positionGutter: 100,
+    sizesGutter: 30,
+    positionGutter: 50,
     searchGutter: 5,
     testGutter: 0,
     maximumParents: 5
@@ -38,7 +38,11 @@ module.exports = function(design, nodes) {
       if (!foundByGeneralSearch || !Object.keys(foundByGeneralSearch).length) {
         return;
       }
-      setFoundNode(node, foundByGeneralSearch.index);
+      setFoundNode(
+        node,
+        foundByGeneralSearch.index,
+        foundByGeneralSearch.absolute
+      );
       /*if (foundByGeneralSearch.absolute) {
         setFoundNode(node, foundByGeneralSearch.index);
       } else {
@@ -54,18 +58,29 @@ module.exports = function(design, nodes) {
     resolve(recognize.foundNodes);
   });
 
-  function setFoundNode(node, foundDesignIndex) {
+  function setFoundNode(node, foundDesignIndex, absolute) {
     const foundNode = recognize.nodes[node.index];
     const issues = testNode(node, recognize.design[foundDesignIndex]);
+    /** If this design index already found, erase old index in according node **/
+    if (recognize.design[foundDesignIndex].found) {
+      delete recognize.foundNodes[recognize.design[foundDesignIndex].found];
+      delete recognize.nodes[recognize.design[foundDesignIndex].found].found;
+    }
+
     recognize.foundNodes[node.index] = {
       id: node.index,
       name: setIssueName(foundNode),
       designBlockIndex: foundDesignIndex,
       issues: issues
     };
-    /** Except found node and design from search **/
+
     recognize.nodes[node.index].found = foundDesignIndex;
     recognize.design[foundDesignIndex].found = node.index;
+    if (absolute) {
+      /** Except found node and design from search, if they found absolutely **/
+      recognize.nodes[node.index].absoluteFound = true;
+      recognize.design[foundDesignIndex].absoluteFound = true;
+    }
   }
 
   function generalSearch(node, gutter) {
@@ -75,11 +90,8 @@ module.exports = function(design, nodes) {
       designIndex < max;
       designIndex++
     ) {
-      /** Skip already found or excluded design element **/
-      if (
-        recognize.design[designIndex].found ||
-        recognize.design[designIndex].skip
-      ) {
+      /** Skip absolutely found design block **/
+      if (recognize.design[designIndex].absoluteFound) {
         continue;
       }
       /** Try to find fully matched element with sizes and position **/
@@ -116,24 +128,28 @@ module.exports = function(design, nodes) {
       "gutterByPosition",
       "gutterByPosition"
     )[0];
+    /** Get design index with lowest gutter **/
     const filteredByMinGutter = foundByDesign.filter(item => {
       return (
         item.gutterBySizes === minSizesGutter &&
         item.gutterByPosition === minPositionGutter
       );
     });
-    /** Skip elements with same size and position **/
-    if (filteredByMinGutter.length > 1) {
-      filteredByMinGutter.forEach((item, index) => {
-        if (index !== 0) {
-          recognize.design[item.index].skip = true;
-        }
-      });
+    if (!filteredByMinGutter.length) {
+      return;
     }
-    /** Get design index with lowest gutter **/
-    if (filteredByMinGutter.length) {
-      return { index: filteredByMinGutter[0].index, absolute: false };
+    const currentFoundDesign = filteredByMinGutter[0];
+    /** If current design block already found, validate inner text if it exist. **/
+    if (recognize.design[currentFoundDesign.index].found) {
+      if (!innerTextValidationCheck(node, currentFoundDesign.index)) {
+        return;
+      }
     }
+
+    return {
+      index: filteredByMinGutter[0].index,
+      absolute: false
+    };
   }
 
   function fullMatchesSearch(node, designIndex) {
@@ -173,6 +189,15 @@ module.exports = function(design, nodes) {
       return;
     }
     return { gutterBySizes: gutterBySizes, gutterByPosition: gutterByPosition };
+  }
+
+  function innerTextValidationCheck(node, designIndex) {
+    const designText = recognize.design[designIndex].text.value;
+    const nodeText = node.text;
+    if (!designText || !nodeText) {
+      return true;
+    }
+    return nodeText.includes(designText);
   }
 
   function deepSearchNode(found, cb) {

@@ -484,7 +484,9 @@ export const simplifyDom = function(dom, currentWindow) {
     "children",
     "parent",
     "previousSibling",
-    "nextSibling"
+    "nextSibling",
+    "text",
+    "image"
   ];
   _dom.forEach((node, index) => {
     const elementBounding = getElementBounding(node, currentWindow);
@@ -496,17 +498,34 @@ export const simplifyDom = function(dom, currentWindow) {
     target.top = elementBounding.top;
 
     target.visible = isElementShown(node, currentWindow);
-
+    /**
+     * Check element on including text or image data
+     */
+    if (target.nodeName === "IMG") {
+      target.image = target.src;
+    }
+    if (target.innerText && target.innerText !== "") {
+      target.text = target.innerText.trim().toLowerCase();
+    }
+    /**
+     * Set child element index, if child element exist
+     */
     if (target.children && target.children.length) {
       target.children = [...node.children].map(c => getNodeIndex(_dom, c));
     } else {
       delete target.children;
     }
+    /**
+     * Set parent element index, if child element exist
+     */
     if (target.parentElement && target.parentElement.length) {
       target.parentElement = getNodeIndex(_dom, node.parentElement);
     } else {
       delete target.parentElement;
     }
+    /**
+     * Set siblings indexes, if they exist
+     */
     if (node.previousElementSibling && node.previousElementSibling.length) {
       target.previousSibling = getNodeIndex(_dom, node.previousElementSibling);
     } else {
