@@ -130,6 +130,7 @@ export default {
       const foundElements = this.currentFrameDocument.getElementsByClassName(
         "pp-element"
       );
+      this.$refs.websiteInspector.detachEvents();
       if (tips && tips.length) {
         while (tips.length) {
           tips[tips.length - 1].remove();

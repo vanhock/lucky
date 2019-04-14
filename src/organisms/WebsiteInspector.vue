@@ -19,7 +19,6 @@
 </template>
 
 <script>
-import _ from "lodash";
 import axios from "axios";
 import config from "../config";
 import { mapGetters } from "vuex";
@@ -44,9 +43,10 @@ export default {
       width: "Ширина",
       height: "Высота",
       left: "Смещение слева",
-      top: "Смещение сверху",
-      noScroll: false
-    }
+      top: "Смещение сверху"
+    },
+    noScroll: false,
+    foundNodesEventHandlers: []
   }),
   computed: {
     ...mapGetters([
@@ -182,7 +182,7 @@ export default {
           );
         }
       }
-      this.attachTipsEvents();
+      this.attachEvents();
       this.errorTipEffects();
     },
     processFoundNode(frameNode, foundNode, foundNodeIndex) {
@@ -223,22 +223,67 @@ export default {
       </div>`;
       this.currentFrameBody.appendChild(point);
       this.setTipPopupPosition(frameNode, point);
-
       addClass(frameNode, "pp-element");
-      frameNode.onclick = e => {
+
+      this.addToEventsList(
+        point.querySelector(".pp-popup-close"),
+        "click",
+        () => removeClass(point, "active")
+      );
+      this.addToEventsList(
+        frameNode,
+        "click",
+        this.onClickOnFoundNode(foundNode, foundNodeIndex)
+      );
+      this.addToEventsList(frameNode, "mouseenter", this.onNodeEnter);
+      this.addToEventsList(frameNode, "mouseleave", this.onNodeLeave);
+    },
+    addToEventsList(element, listener, func) {
+      const self = this;
+      self.foundNodesEventHandlers.push({
+        element: element,
+        listener: listener,
+        func: func
+      });
+    },
+    attachEvents() {
+      this.foundNodesEventHandlers.forEach(({ element, listener, func }) => {
+        element.addEventListener(listener, func);
+      });
+    },
+    detachEvents() {
+      this.foundNodesEventHandlers.forEach(({ element, listener, func }) => {
+        element.removeEventListener(listener, func);
+      });
+    },
+    onNodeEnter(e) {
+      const allTips = this.currentFrameDocument.querySelectorAll(".pp-element");
+      if (!allTips) {
+        return;
+      }
+      allTips.forEach(t => {
+        removeClass(t, "pp-hover");
+      });
+      addClass(e.currentTarget, "pp-hover");
+    },
+    onNodeLeave(e) {
+      removeClass(e.currentTarget, "pp-hover");
+    },
+    onClickOnFoundNode(foundNode, foundNodeIndex) {
+      const self = this;
+      return function(e) {
         if (!detectMouseButton(e)) {
           return;
         }
-        this.$store.dispatch("setTargetElement", {
+        const targetElement = {
           nodeIndex: parseInt(foundNode.id),
           designIndex: parseInt(foundNode.designBlockIndex),
           foundNodeIndex: parseInt(foundNodeIndex)
-        });
-        this.noScroll = true;
+        };
+        self.$store.dispatch("setTargetElement", targetElement);
+        self.focusOnElement(targetElement);
+        self.noScroll = true;
         e.stopPropagation();
-      };
-      point.querySelector(".pp-popup-close").onclick = () => {
-        removeClass(point, "active");
       };
     },
     focusOnElement(targetElement) {
@@ -259,25 +304,6 @@ export default {
       this.removeOverlayForAll();
       addClass(allTips[targetElement.foundNodeIndex], "active");
       this.addElementOverlay(foundElements[targetElement.foundNodeIndex]);
-    },
-    attachTipsEvents() {
-      const allTips = this.currentFrameDocument.querySelectorAll(".pp-element");
-      if (!allTips) {
-        return;
-      }
-      allTips.forEach(node => {
-        node.addEventListener("mouseenter", onNodeEnter, true);
-        node.addEventListener("mouseleave", onNodeLeave, true);
-      });
-      function onNodeEnter(e) {
-        allTips.forEach(t => {
-          removeClass(t, "pp-hover");
-        });
-        addClass(e.currentTarget, "pp-hover");
-      }
-      function onNodeLeave(e) {
-        removeClass(e.currentTarget, "pp-hover");
-      }
     },
     addElementOverlay(node) {
       if (!node || !this.currentFrame.contentWindow) {
