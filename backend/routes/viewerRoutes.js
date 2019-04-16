@@ -1,5 +1,4 @@
-const formidable = require("formidable");
-module.exports = function(app, db) {
+module.exports = function(app) {
   /* const PSD = require("../libs/psd.node.js");
     const designUploadPath = path.join(__dirname, "../public/design/");
     app.post("/upload-design", (req, res) => {
@@ -37,32 +36,25 @@ module.exports = function(app, db) {
 
   const getFoundNodes = require("../libs/getFoundNodes");
   app.post("/get-found-nodes", (req, res) => {
-    const getData = () => {
-      const form = new formidable.IncomingForm();
-      return new Promise(function(resolve, reject) {
-        form.parse(req, function(err, fields, files) {
-          if (err) return reject(err);
-          resolve({ fields: fields, files: files });
-        });
+    if (!req.fields) {
+      return;
+    }
+    const fields = req.fields;
+    if (!fields.design || !fields.nodes) {
+      return;
+    }
+    const design = JSON.parse(fields.design);
+    const nodes = JSON.parse(fields.nodes);
+    getFoundNodes(design, nodes)
+      .then(found => {
+        if (!found || typeof found !== "object") {
+          return;
+        }
+        console.log("We got found nodes: " + Object.keys(found).length);
+        res.status(200).send(found);
+      })
+      .catch(error => {
+        res.status(500).send(error);
       });
-    };
-    getData().then(({ fields }) => {
-      if (!fields.design || !fields.nodes) {
-        return;
-      }
-      const design = JSON.parse(fields.design);
-      const nodes = JSON.parse(fields.nodes);
-      getFoundNodes(design, nodes)
-        .then(found => {
-          if (!found || typeof found !== "object") {
-            return;
-          }
-          console.log("We got found nodes: " + Object.keys(found).length);
-          res.status(200).send(found);
-        })
-        .catch(error => {
-          res.status(500).send(error);
-        });
-    });
   });
 };

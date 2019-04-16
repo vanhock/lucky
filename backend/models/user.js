@@ -1,4 +1,16 @@
-module.exports = (sequelize, DataTypes) => {
+const config = require("../config/config");
+const tempPasswordLength = 7;
+const tokenLength = 80;
+const saltLength = 32;
+
+let crypto;
+try {
+  crypto = require("crypto");
+} catch (err) {
+  console.log("crypto support is disabled!");
+}
+
+module.exports = function(sequelize, DataTypes) {
   const User = sequelize.define(
     "User",
     {
@@ -26,8 +38,8 @@ module.exports = (sequelize, DataTypes) => {
             "salt",
             crypto.randomBytes(saltLength).toString("hex")
           );
-          this.setDataValue("password", this.encryptPassword(plain_password));
-          this.token = User.generateToken();
+          this.setDataValue("password", User.options.instanceMethods.encryptPassword(plain_password, this.salt));
+          this.token = User.options.classMethods.generateToken();
         }
       },
       tempPassword: {
@@ -57,9 +69,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       instanceMethods: {
-        encryptPassword: function(plain) {
+        encryptPassword: function(plain, salt_key) {
+          const salt = this.salt || salt_key;
           return crypto
-            .createHmac("sha1", this.salt)
+            .createHmac("sha1", salt)
             .update(plain)
             .digest("hex");
         },
@@ -71,7 +84,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         createToken: function() {
           if (!this.token || this.isTokenOutdated()) {
-            this.token = User.generateToken();
+            this.token = User.options.classMethods.generateToken();
             this.save();
           }
 
@@ -79,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         removeAvatar: function() {
           if (this.avatar) {
-            fs.unlink(pathService.absFile(user.avatar), function(err) {
+            fs.unlink(pathService.absFile(User.avatar), function(err) {
               // doing nothing
             });
           }
@@ -91,7 +104,7 @@ module.exports = (sequelize, DataTypes) => {
             name: user.name,
             company: user.company,
             email: user.email,
-            password: this.generatePassword(),
+            password: user.password,
             tempPassword: this.generatePassword()
           });
         },
@@ -153,10 +166,10 @@ module.exports = (sequelize, DataTypes) => {
               token: token
             }
           });
-        },
-        associate: function(models) {
-          User.hasMany(models.Client);
         }
+        /*associate: function(models) {
+          User.hasMany(models.Client);
+        }*/
       },
       hooks: {
         beforeDestroy: function(user) {

@@ -1,4 +1,8 @@
+const formidableMiddleware = require("express-formidable");
 const viewerRoutes = require("./viewerRoutes");
-module.exports = function(app, db) {
-  viewerRoutes(app, db);
+const userRoutes = require("./userRoutes");
+module.exports = function(app) {
+  app.use(formidableMiddleware());
+  viewerRoutes(app);
+  userRoutes(app);
 };
