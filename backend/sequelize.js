@@ -40,7 +40,7 @@ User.belongsToMany(Comment, { through: CommentUser, unique: false });
 
 Project.belongsTo(User);
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: false }).then(() => {
   console.log(`Database & tables created!`);
 });
 

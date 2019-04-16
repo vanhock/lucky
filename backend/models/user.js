@@ -38,7 +38,13 @@ module.exports = function(sequelize, DataTypes) {
             "salt",
             crypto.randomBytes(saltLength).toString("hex")
           );
-          this.setDataValue("password", User.options.instanceMethods.encryptPassword(plain_password, this.salt));
+          this.setDataValue(
+            "password",
+            User.options.instanceMethods.encryptPassword(
+              plain_password,
+              this.salt
+            )
+          );
           this.token = User.options.classMethods.generateToken();
         }
       },
@@ -99,14 +105,17 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
       classMethods: {
-        createNewUser: function(user) {
-          return User.create({
-            name: user.name,
-            company: user.company,
-            email: user.email,
-            password: user.password,
-            tempPassword: this.generatePassword()
-          });
+        createNewUser: function(user, done) {
+          return User.create(
+            {
+              name: user.name,
+              company: user.company,
+              email: user.email,
+              password: user.password,
+              tempPassword: this.generatePassword()
+            },
+            done()
+          );
         },
         generatePassword: function() {
           return crypto.randomBytes(tempPasswordLength).toString("hex");
@@ -131,7 +140,8 @@ module.exports = function(sequelize, DataTypes) {
                 token: foundUser.createToken()
               });
             } else if (
-              foundUser.password !== foundUser.encryptPassword(password)
+              foundUser.password !==
+              User.options.instanceMethods.encryptPassword(password, foundUser.salt)
             ) {
               done("Incorrect password");
             } else if (foundUser.status !== "active") {
