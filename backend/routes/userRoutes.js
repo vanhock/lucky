@@ -1,4 +1,6 @@
 const { User } = require("../sequelize");
+const { getUserByToken, filterObject } = require("../libs/helpers");
+
 const allowedParams = ["id", "name", "avatar", "email", "company"];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
@@ -35,7 +37,7 @@ module.exports = function(app) {
       fields.password,
       (response, object) => {
         if (!response) {
-          res.status(200).send("User authorized: " + JSON.stringify(object));
+          res.status(200).send(JSON.stringify(object));
         } else {
           res.status(500).send("Error: " + response);
         }
@@ -44,43 +46,25 @@ module.exports = function(app) {
   });
 
   app.post("/change-user-info", (req, res) => {
-    if (!req.headers.authorization || !Object.keys(req.query).length) {
+    if (!Object.keys(req.fields).length) {
       return;
     }
-    const fields = req.query;
+    const fields = req.fields;
 
-    User.options.classMethods.findByToken(
-      req.headers.authorization,
-      (message, user) => {
-        if (!user) {
-          res.status(500).send("User not found");
-        }
-        user
-          .update(fields)
-          .then(user => {
-            res.status(200).send(
-              "User edited: " +
-                JSON.stringify(
-                  Object.keys(user.dataValues)
-                    .filter(key => allowedParams.includes(key))
-                    .reduce((obj, key) => {
-                      obj[key] = user.dataValues[key];
-                      return obj;
-                    }, {})
-                )
-            );
-          })
-          .catch(message => {
-            res.status(500).send("Error: " + message);
-          });
-      }
-    );
+    getUserByToken(req, res, user => {
+      user
+        .update(fields)
+        .then(user => {
+          res
+            .status(200)
+            .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
+        })
+        .catch(message => {
+          res.status(500).send("Error: " + message);
+        });
+    });
   });
   app.post("/set-user-avatar", (req, res) => {
-    if (!req.headers.authorization) {
-      return;
-    }
-    User.options.classMethods.findByToken(req.headers.authorization, (message, user) => {});
     console.log(req.files);
   });
 };
