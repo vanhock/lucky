@@ -23,14 +23,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 50
     },
     showDesignViewMode: {
-      /**
-       * ["all", "found", "none"]
-       */
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("all", "found", "none"),
       defaultValue: "found"
     },
     showWebsiteViewMode: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("all", "found", "none"),
       defaultValue: "found"
     },
     syncScroll: {

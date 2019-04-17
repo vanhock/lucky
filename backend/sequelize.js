@@ -4,6 +4,7 @@ const ProjectModel = require("./models/project");
 const PageModel = require("./models/page");
 const CommentModel = require("./models/comment");
 const DesignModel = require("./models/design");
+const TaskModel = require("./models/task");
 
 const sequelize = new Sequelize("pixel", "root", "root", {
   host: "localhost",
@@ -17,28 +18,31 @@ const sequelize = new Sequelize("pixel", "root", "root", {
 });
 
 const User = UserModel(sequelize, Sequelize);
-const UserProject = sequelize.define("user_project", {
-  role: Sequelize.STRING
-});
-const ProjectPage = sequelize.define("project_page", {});
-const PageComment = sequelize.define("page_comment", {});
-const CommentUser = sequelize.define("comment_user", {});
-const DesignProject = sequelize.define("design_project", {});
 const Project = ProjectModel(sequelize, Sequelize);
 const Page = PageModel(sequelize, Sequelize);
 const Comment = CommentModel(sequelize, Sequelize);
 const Design = DesignModel(sequelize, Sequelize);
+const Task = TaskModel(sequelize, Sequelize);
 
-Project.belongsToMany(User, { through: UserProject, unique: false });
-Project.belongsToMany(Page, { through: ProjectPage, unique: false });
+User.belongsToMany(Project, { through: "project_collaborators" });
+Project.belongsToMany(User, {
+  as: "Collaborators",
+  through: "project_collaborators"
+});
 
-Project.belongsToMany(Design, { through: DesignProject, unique: false });
-Design.belongsToMany(Project, { through: DesignProject, unique: false });
+User.hasMany(Project);
+User.hasMany(Comment);
 
-Comment.belongsToMany(Page, { through: PageComment, unique: false });
-User.belongsToMany(Comment, { through: CommentUser, unique: false });
+Project.hasMany(Page);
+Page.belongsTo(Project);
 
-Project.belongsTo(User);
+Project.hasMany(Design);
+
+Page.hasMany(Comment);
+Page.hasOne(Design);
+Page.hasMany(Task);
+
+Task.hasMany(Comment);
 
 sequelize.sync({ force: false }).then(() => {
   console.log(`Database & tables created!`);

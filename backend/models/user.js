@@ -12,7 +12,7 @@ try {
 
 module.exports = function(sequelize, DataTypes) {
   const User = sequelize.define(
-    "User",
+    "user",
     {
       name: {
         type: DataTypes.STRING,
@@ -53,7 +53,7 @@ module.exports = function(sequelize, DataTypes) {
       },
       status: {
         type: DataTypes.ENUM("new", "confirmed", "active", "disabled"),
-        defaultValue: "new"
+        defaultValue: "active"
       },
       isAdmin: {
         type: DataTypes.BOOLEAN,
@@ -91,9 +91,7 @@ module.exports = function(sequelize, DataTypes) {
         createToken: function() {
           if (!this.token || this.isTokenOutdated()) {
             this.token = User.options.classMethods.generateToken();
-            this.save();
           }
-
           return this.token;
         },
         removeAvatar: function() {
@@ -130,30 +128,42 @@ module.exports = function(sequelize, DataTypes) {
             }
           }).then(function(foundUser) {
             if (!foundUser) {
-              done("User not found");
-            } else if (
+              return done("User not found");
+            }
+
+            if (
+              foundUser.password !==
+              User.options.instanceMethods.encryptPassword(
+                password,
+                foundUser.salt
+              )
+            ) {
+              return done("Incorrect password");
+            }
+
+            if (foundUser.status !== "active") {
+              done(
+                "This user isn't confirmed by admin or account has been locked"
+              );
+            }
+
+            const newToken = User.options.instanceMethods.createToken();
+            foundUser.update({ token: newToken });
+            if (
               foundUser.status === "confirmed" &&
               foundUser.tempPassword === password
             ) {
               done(null, {
                 confirmed: true,
-                token: foundUser.createToken()
+                token: newToken
               });
-            } else if (
-              foundUser.password !==
-              User.options.instanceMethods.encryptPassword(password, foundUser.salt)
-            ) {
-              done("Incorrect password");
-            } else if (foundUser.status !== "active") {
-              done(
-                "This user isn't confirmed by admin or account has been locked"
-              );
             } else {
+              const newToken = User.options.instanceMethods.createToken();
               done(null, {
                 name: foundUser.name,
                 email: foundUser.email,
                 isAdmin: foundUser.isAdmin,
-                token: foundUser.createToken()
+                token: newToken
               });
             }
           }, done);
@@ -170,12 +180,14 @@ module.exports = function(sequelize, DataTypes) {
             );
           }, done);
         },
-        findByToken: function(token) {
-          return User.findOne({
-            where: {
-              token: token
-            }
-          });
+        findByToken: function(token, done) {
+          User.findOne({ where: { token: token } })
+            .then(user => {
+              done(null, user);
+            })
+            .catch(error => {
+              done(error);
+            });
         }
         /*associate: function(models) {
           User.hasMany(models.Client);
