@@ -15,9 +15,11 @@ const getUserByToken = function(req, res, cb) {
   );
 };
 
-const filterObject = function(object, params) {
+const filterObject = function(object, includes, except) {
   return Object.keys(object)
-    .filter(key => params.includes(key))
+    .filter(key =>
+      except.length ? !except.includes(key) : includes.includes(key)
+    )
     .reduce((obj, key) => {
       obj[key] = object[key];
       return obj;

@@ -1,11 +1,12 @@
 const { Page, Project } = require("../sequelize");
-const { getUserByToken } = require("../libs/helpers");
+const { getUserByToken, filterObject } = require("../libs/helpers");
 
 module.exports = function(app) {
   app.post("/create-page", (req, res) => {
-    if (!req.fields.url) {
+    if (!req.fields.websiteUrl) {
       return res.status(500).send("Website url did not provide!");
     }
+    const websiteUrl = req.fields.websiteUrl;
     getUserByToken(req, res, user => {
       let projectId = req.fields.projectId;
 
@@ -39,7 +40,8 @@ module.exports = function(app) {
         Page.create({
           name: req.fields.name || "Untitled",
           userId: user.id,
-          projectId: projectId
+          projectId: projectId,
+          websiteUrl: websiteUrl
         })
           .then(page => {
             res.status(200).send(JSON.stringify(page.dataValues));
@@ -53,19 +55,20 @@ module.exports = function(app) {
 
   app.get("/get-all-pages", (req, res) => {
     if (!req.query.projectId) {
-      res.status(500).send("Project id does not provide!");
+      res.status(500).send("Project id did not provide!");
     }
+    const projectId = req.query.projectId;
     getUserByToken(req, res, user => {
       Project.findOne({
         where: {
-          id: req.query.projectId
+          id: projectId
         }
       })
         .then(project => {
           if (project.userId === user.id || user.isAdmin) {
             Page.findAll({
               where: {
-                projectId: req.query.projectId
+                projectId: projectId
               }
             })
               .then(pages => {
@@ -85,4 +88,93 @@ module.exports = function(app) {
         });
     });
   });
+
+  app.post("/delete-page", (req, res) => {
+    if (!req.fields.id) {
+      res.status(500).send("Page id did not provide!");
+    }
+    checkAllowChanges(req, res, page => {
+      page.destroy();
+      res.status(200).send("Page deleted!");
+    });
+  });
+
+  app.post("/move-page", (req, res) => {
+    if (!req.fields.id || !req.fields.projectId) {
+      res.status(500).send("Required fields did not provide!");
+    }
+    checkAllowChanges(req, res, (page, project, user) => {
+      Project.findOne({
+        where: {
+          id: req.fields.projectId
+        }
+      })
+        .then(targetProject => {
+          if (user.id !== targetProject.userId) {
+            res
+              .status(500)
+              .send("You don't allow to move the page to this project");
+          }
+          page
+            .update({
+              projectId: targetProject.id
+            })
+            .then(result => {
+              res.status(200).send(JSON.stringify(result));
+            });
+        })
+        .catch(() => {
+          res.status(500).send("Target project did not found!");
+        });
+    });
+  });
+
+  app.post("/set-page-params", (req, res) => {
+    const params = filterObject(req.fields, null, [
+      "createdAt",
+      "updatedAt",
+      "projectId",
+      "id"
+    ]);
+    checkAllowChanges(req, res, page => {
+      page
+        .update(params)
+        .then(result => {
+          res.status(200).send(JSON.stringify(result));
+        })
+        .catch(() => {
+          res.status(500).send("Error with update page params!");
+        });
+    });
+  });
 };
+
+function checkAllowChanges(req, res, cb) {
+  getUserByToken(req, res, user => {
+    Page.findOne({
+      where: {
+        id: req.fields.id
+      }
+    })
+      .then(page => {
+        Project.findOne({
+          where: {
+            id: page.projectId
+          }
+        })
+          .then(project => {
+            if (project.userId === user.id || user.isAdmin) {
+              cb(page, project, user);
+            } else {
+              res.status(500).send("You don't have rights to edit this page!");
+            }
+          })
+          .catch(() => {
+            res.status(500).send("Project of this page not found!");
+          });
+      })
+      .catch(() => {
+        res.status(500).send("Page not found!");
+      });
+  });
+}

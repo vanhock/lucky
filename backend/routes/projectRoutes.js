@@ -1,4 +1,4 @@
-const { Project } = require("../sequelize");
+const { Project, Page } = require("../sequelize");
 const { getUserByToken, filterObject } = require("../libs/helpers");
 
 module.exports = function(app) {
@@ -80,6 +80,11 @@ module.exports = function(app) {
           }
           if (project.userId === user.id || user.isAdmin) {
             project.destroy();
+            Page.destroy({
+              where: {
+                projectId: project.id
+              }
+            });
             res.status(200).send("Project deleted!");
           } else {
             res

@@ -34,12 +34,11 @@ User.hasMany(Project);
 User.hasMany(Comment);
 
 Project.hasMany(Page);
-Page.belongsTo(Project);
-
 Project.hasMany(Design);
 
 Page.hasMany(Comment);
-Page.hasOne(Design);
+Page.belongsTo(Design);
+Page.belongsTo(Project);
 Page.hasMany(Task);
 
 Task.hasMany(Comment);
