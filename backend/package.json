@@ -27,6 +27,7 @@
     "parse-engine-data": "^0.1.2",
     "pngjs": "^3.3.3",
     "prettier": "^1.16.4",
+    "psd": "^3.2.0",
     "request-promise": "^4.2.4",
     "rsvp": "^4.8.4",
     "sequelize": "^5.3.5"

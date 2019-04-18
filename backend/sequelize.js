@@ -51,5 +51,6 @@ module.exports = {
   User,
   Project,
   Page,
+  Design,
   Comment
 };

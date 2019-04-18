@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     fileType: DataTypes.STRING,
     width: DataTypes.STRING,
     height: DataTypes.STRING,
-    blocks: DataTypes.STRING
+    blocks: DataTypes.JSON,
+    image: DataTypes.STRING
   });
 };
