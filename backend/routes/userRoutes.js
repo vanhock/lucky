@@ -4,13 +4,16 @@ const { getUserByToken, filterObject } = require("../libs/helpers");
 const allowedParams = ["id", "name", "avatar", "email", "company"];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
-    if (!Object.keys(req.query).length) {
-      return;
-    }
     const fields = req.query;
-    if (!fields.name || !fields.email || !fields.password) {
-      return;
+    if (
+      !Object.keys(fields).length ||
+      !fields.name ||
+      !fields.email ||
+      !fields.password
+    ) {
+      return res.status(500).send("Required fields did not provide!");
     }
+
     User.options.classMethods.createNewUser(
       {
         name: fields.name,
