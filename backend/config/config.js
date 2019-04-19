@@ -5,7 +5,8 @@ module.exports = {
   },
   upload: {
     path: path.join(__dirname, "../public/"),
-    designFullPath: path.join(__dirname, "../public/design/"),
-    designPath: "/design/"
+    designImagesTempPath: path.join(__dirname, "../public/design/temp/"),
+    designImagesFullPath: path.join(__dirname, "../public/design/"),
+    designImagesPath: "/design/"
   }
 };

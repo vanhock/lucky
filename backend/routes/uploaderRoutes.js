@@ -9,13 +9,13 @@ module.exports = function(app) {
   app.use(
     formidableMiddleware(
       {
-        uploadDir: config.upload.designFullPath
+        uploadDir: config.upload.designImagesTempPath
       },
       [
         {
           event: "fileBegin",
           action: function(req, res, next, name, file) {
-            file.path = config.upload.designFullPath + file.name;
+            file.path = config.upload.designImagesTempPath + file.name;
           }
         }
       ]
@@ -29,6 +29,7 @@ module.exports = function(app) {
     if (!fileTypes.includes(design.type)) {
       return res.status(500).send("Unsupported format or empty!");
     }
+    const tempPath = design.path;
     getUserByToken(req, res, user => {
       Project.findOne({
         where: {
@@ -50,19 +51,23 @@ module.exports = function(app) {
                 height: parsed.document.height
               })
                 .then(design => {
+                  removeFile(tempPath);
                   res.status(200).send(JSON.stringify(design));
                 })
                 .catch(message => {
+                  removeFile(tempPath);
                   res.status(500).send("Error with create design: " + message);
                 });
             });
           } else {
+            removeFile(tempPath);
             res
               .status(500)
               .send("You don't have rights to upload files to this project!");
           }
         })
         .catch(() => {
+          removeFile(tempPath);
           res.status(500).send("Project not found!");
         });
     });
@@ -70,23 +75,50 @@ module.exports = function(app) {
     function upload(done) {
       if (design.type === "image/vnd.adobe.photoshop") {
         let currentPsd = null;
-        const designImgPath =
-          config.upload.designFullPath +
-          "/" +
-          design.name.substring(0, design.name.lastIndexOf(".") + 1) +
-          "png";
+        const designName =
+          design.name.substring(0, design.name.lastIndexOf(".") + 1) + "png";
+        const designImgTempPath =
+          config.upload.designImagesTempPath + designName;
+
         PSD.open(design.path)
           .then(psd => {
             currentPsd = psd;
-            return psd.image.saveAsPng(designImgPath);
+            return psd.image.saveAsPng(designImgTempPath);
           })
           .then(() => {
-            const parsed = currentPsd.tree().export();
-            done(config.upload.designPath + design.name, parsed);
+            compressImage(
+              designImgTempPath,
+              config.upload.designImagesFullPath + designName,
+              () => {
+                removeFile(designImgTempPath);
+                const parsed = currentPsd.tree().export();
+                done(config.upload.designImagesPath + design.name, parsed);
+              }
+            );
           })
           .catch(error => {
             res.status(500).send(error);
           });
+      }
+    }
+    function compressImage(filePath, outputPath, cb) {
+      const tinify = require("tinify");
+      tinify.key = "SsRBejmd1xCuajdafYzgkKry4Fr6pnUJ";
+      tinify
+        .fromFile(filePath)
+        .toFile(outputPath)
+        .then(callback => {
+          cb(callback);
+        });
+    }
+    function removeFile(filePath) {
+      const fs = require("fs");
+      /** Remove temp design file **/
+      try {
+        fs.unlinkSync(filePath);
+        //file removed
+      } catch (err) {
+        console.error(err);
       }
     }
   });
