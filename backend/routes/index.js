@@ -7,10 +7,20 @@ const pageRoutes = require("./pageRoutes");
 const designRoutes = require("./designRoutes");
 module.exports = function(app) {
   app.use(
-    formidableMiddleware({
-      encoding: "utf-8",
-      uploadDir: config.upload.path
-    })
+    formidableMiddleware(
+      {
+        encoding: "utf-8",
+        uploadDir: config.upload.tempPath
+      },
+      [
+        {
+          event: "fileBegin",
+          action: function(req, res, next, name, file) {
+            file.path = file.path + file.name;
+          }
+        }
+      ]
+    )
   );
   viewerRoutes(app);
   userRoutes(app);

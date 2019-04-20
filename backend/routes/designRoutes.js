@@ -1,30 +1,14 @@
 const config = require("../config/config");
-const formidableMiddleware = require("express-formidable");
 const { Design, Project } = require("../sequelize");
 const {
   getUserByToken,
   normalizePSD,
   filterObject
 } = require("../libs/helpers");
-
-var PSD = require("psd");
+const ns = require("node-sketch");
+const PSD = require("psd");
 const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
 module.exports = function(app) {
-  app.use(
-    formidableMiddleware(
-      {
-        uploadDir: config.upload.designImagesTempPath
-      },
-      [
-        {
-          event: "fileBegin",
-          action: function(req, res, next, name, file) {
-            file.path = config.upload.designImagesTempPath + file.name;
-          }
-        }
-      ]
-    )
-  );
   app.post("/upload-design", (req, res) => {
     const design = req.files.design;
     if (!design || !req.fields.projectId) {
@@ -42,7 +26,10 @@ module.exports = function(app) {
       })
         .then(project => {
           if (project.userId === user.id) {
-            upload((designImgPath, parsed) => {
+            upload(design, (message, designImgPath, parsed) => {
+              if (message) {
+                return res.status(500).send(message);
+              }
               const blocks = normalizePSD(parsed);
               Design.create({
                 projectId: req.fields.projectId,
@@ -75,36 +62,6 @@ module.exports = function(app) {
           res.status(500).send("Project not found!");
         });
     });
-
-    function upload(done) {
-      if (design.type === "image/vnd.adobe.photoshop") {
-        let currentPsd = null;
-        const designName =
-          design.name.substring(0, design.name.lastIndexOf(".") + 1) + "png";
-        const designImgTempPath =
-          config.upload.designImagesTempPath + designName;
-
-        PSD.open(design.path)
-          .then(psd => {
-            currentPsd = psd;
-            return psd.image.saveAsPng(designImgTempPath);
-          })
-          .then(() => {
-            compressImage(
-              designImgTempPath,
-              config.upload.designImagesFullPath + designName,
-              () => {
-                removeFile(designImgTempPath);
-                const parsed = currentPsd.tree().export();
-                done(config.upload.designImagesPath + designName, parsed);
-              }
-            );
-          })
-          .catch(error => {
-            res.status(500).send(error);
-          });
-      }
-    }
   });
 
   app.post("/delete-design", (req, res) => {
@@ -188,6 +145,40 @@ module.exports = function(app) {
     });
   });
 };
+
+function upload(design, done) {
+  let currentPsd = null;
+  const designName =
+    design.name.substring(0, design.name.lastIndexOf(".") + 1) + "png";
+  const designImgTempPath = config.upload.designImagesTempPath + designName;
+  switch (design.type) {
+    case "image/vnd.adobe.photoshop":
+      PSD.open(design.path)
+        .then(psd => {
+          currentPsd = psd;
+          return psd.image.saveAsPng(designImgTempPath);
+        })
+        .then(() => {
+          compressImage(
+            designImgTempPath,
+            config.upload.designImagesFullPath + designName,
+            () => {
+              removeFile(designImgTempPath);
+              const parsed = currentPsd.tree().export();
+              done(null, config.upload.designImagesPath + designName, parsed);
+            }
+          );
+        })
+        .catch(error => {
+          done(error);
+        });
+      break;
+    case "application/octet-stream":
+      ns.read(design.path).then(sketch => {
+        console.log(sketch);
+      });
+  }
+}
 
 function compressImage(filePath, outputPath, cb) {
   const tinify = require("tinify");
