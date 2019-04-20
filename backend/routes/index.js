@@ -4,7 +4,7 @@ const viewerRoutes = require("./viewerRoutes");
 const userRoutes = require("./userRoutes");
 const projectRoutes = require("./projectRoutes");
 const pageRoutes = require("./pageRoutes");
-const uploaderRoutes = require("./uploaderRoutes");
+const designRoutes = require("./designRoutes");
 module.exports = function(app) {
   app.use(
     formidableMiddleware({
@@ -16,5 +16,5 @@ module.exports = function(app) {
   userRoutes(app);
   projectRoutes(app);
   pageRoutes(app);
-  uploaderRoutes(app);
+  designRoutes(app);
 };

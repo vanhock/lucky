@@ -1,4 +1,4 @@
-const { Project, Page } = require("../sequelize");
+const { Project, Page, Design } = require("../sequelize");
 const { getUserByToken, filterObject } = require("../libs/helpers");
 
 module.exports = function(app) {
@@ -81,6 +81,11 @@ module.exports = function(app) {
           if (project.userId === user.id || user.isAdmin) {
             project.destroy();
             Page.destroy({
+              where: {
+                projectId: project.id
+              }
+            });
+            Design.destroy({
               where: {
                 projectId: project.id
               }
