@@ -9,98 +9,6 @@ const ns = require("node-sketch");
 const PSD = require("psd");
 const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
 module.exports = function(app) {
-  app.post("/upload-design", (req, res) => {
-    const design = req.files.design;
-    if (!design || !req.fields.projectId) {
-      return res.status(500).send("Required params did not provide!");
-    }
-    if (!fileTypes.includes(design.type)) {
-      return res.status(500).send("Unsupported format or empty!");
-    }
-    const tempPath = design.path;
-    getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          id: req.fields.projectId
-        }
-      })
-        .then(project => {
-          if (project.userId === user.id) {
-            upload(design, (message, designImgPath, parsed) => {
-              if (message) {
-                return res.status(500).send(message);
-              }
-              const blocks = normalizePSD(parsed);
-              Design.create({
-                projectId: req.fields.projectId,
-                blocks: blocks,
-                image: designImgPath,
-                fileName: design.name,
-                fileSize: design.size,
-                fileType: design.type,
-                width: parsed.document.width,
-                height: parsed.document.height
-              })
-                .then(design => {
-                  removeFile(tempPath);
-                  res.status(200).send(JSON.stringify(design));
-                })
-                .catch(message => {
-                  removeFile(tempPath);
-                  res.status(500).send("Error with create design: " + message);
-                });
-            });
-          } else {
-            removeFile(tempPath);
-            res
-              .status(500)
-              .send("You don't have rights to upload files to this project!");
-          }
-        })
-        .catch(() => {
-          removeFile(tempPath);
-          res.status(500).send("Project not found!");
-        });
-    });
-  });
-
-  app.post("/delete-design", (req, res) => {
-    if (!req.fields.id || !req.fields.projectId) {
-      return res.status(500).send("Required params did not provide!");
-    }
-
-    getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          id: req.fields.projectId
-        }
-      }).then(project => {
-        if (project.userId === user.id) {
-          Design.findOne({
-            where: {
-              id: req.fields.id
-            }
-          }).then(design => {
-            if (design.projectId === parseInt(req.fields.projectId)) {
-              design.destroy();
-              res
-                .status(200)
-                .send(`Design with id: ${req.fields.id} successfully deleted!`);
-            } else {
-              res
-                .status(500)
-                .send("You don't have rights for delete this design!");
-            }
-          });
-        } else {
-          res
-            .status(500)
-            .send("You don't have rights for edit designs of this project!");
-        }
-      });
-    });
-  });
-
   app.get("/get-project-designs", (req, res) => {
     if (!req.fields.projectId) {
       return res.status(500).send("Project id did not provide!");
@@ -120,6 +28,11 @@ module.exports = function(app) {
               }
             })
               .then(designs => {
+                if (!designs.length) {
+                  return res
+                    .status(500)
+                    .send("Have no designs found for this project!");
+                }
                 res
                   .status(200)
                   .send(
@@ -144,6 +57,114 @@ module.exports = function(app) {
         });
     });
   });
+
+  app.post("/delete-designs", (req, res) => {
+    if (!req.fields.ids || !req.fields.projectId) {
+      return res.status(500).send("Required params did not provide!");
+    }
+
+    const ids = req.fields.ids.split(",");
+
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          id: req.fields.projectId
+        }
+      }).then(project => {
+        if (project.userId === user.id) {
+          Design.findAll({
+            where: {
+              id: ids,
+              projectId: req.fields.projectId
+            }
+          })
+            .then(() => {
+              Design.destroy({
+                where: {
+                  id: ids,
+                  projectId: req.fields.projectId
+                }
+              });
+              res
+                .status(200)
+                .send(
+                  `Designs with ids: ${req.fields.ids} successfully deleted!`
+                );
+            })
+            .catch(() => {
+              res
+                .status(500)
+                .send(`Designs with ids: ${req.fields.ids} not found!`);
+            });
+        } else {
+          res
+            .status(500)
+            .send("You don't have rights for edit designs of this project!");
+        }
+      });
+    });
+  });
+
+  app.post("/upload-design", (req, res) => {
+    const designFile = req.files.design;
+    if (!designFile || !req.fields.projectId) {
+      return res.status(500).send("Required params did not provide!");
+    }
+    if (!fileTypes.includes(designFile.type)) {
+      return res.status(500).send("Unsupported format or empty!");
+    }
+    const tempPath = designFile.path;
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          id: req.fields.projectId
+        }
+      })
+        .then(project => {
+          if (project.userId === user.id) {
+            upload(designFile, (message, designs) => {
+              if (message) {
+                return res.status(500).send(message);
+              }
+              const responseDesigns = [];
+              designs.forEach((design, index) => {
+                Design.create({
+                  projectId: req.fields.projectId,
+                  blocks: design.blocks,
+                  image: design.imagePath,
+                  fileName: designFile.name,
+                  fileSize: designFile.size,
+                  fileType: designFile.type,
+                  width: design.document.width,
+                  height: design.document.height
+                })
+                  .then(d => {
+                    responseDesigns.push(d);
+                    if (index === designs.length - 1) {
+                      removeFile(tempPath);
+                      res.status(200).send(JSON.stringify(responseDesigns));
+                    }
+                  })
+                  .catch(message => {
+                    return res
+                      .status(500)
+                      .send("Error with save design! Log: " + message);
+                  });
+              });
+            });
+          } else {
+            removeFile(tempPath);
+            res
+              .status(500)
+              .send("You don't have rights to upload files to this project!");
+          }
+        })
+        .catch(() => {
+          removeFile(tempPath);
+          res.status(500).send("Project not found!");
+        });
+    });
+  });
 };
 
 function upload(design, done) {
@@ -165,7 +186,20 @@ function upload(design, done) {
             () => {
               removeFile(designImgTempPath);
               const parsed = currentPsd.tree().export();
-              done(null, config.upload.designImagesPath + designName, parsed);
+              if (!parsed) {
+                done("Error with parsing PSD");
+              }
+              const blocks = normalizePSD(parsed);
+              done(null, [
+                {
+                  imagePath: config.upload.designImagesPath + designName,
+                  blocks: blocks,
+                  document: {
+                    width: parsed.document.width,
+                    height: parsed.document.height
+                  }
+                }
+              ]);
             }
           );
         })
