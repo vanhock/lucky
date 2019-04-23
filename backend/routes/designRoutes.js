@@ -3,11 +3,24 @@ const { Design, Project } = require("../sequelize");
 const {
   getUserByToken,
   normalizePSD,
+  normalizeFigma,
+  getParentAndChild,
   filterObject
 } = require("../libs/helpers");
-const ns = require("node-sketch");
-const PSD = require("psd");
+
 const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
+const fs = require("fs");
+const download = require("image-downloader");
+const axios = require("axios");
+const { Sketch } = require("sketch-constructor");
+const ns = require("../libs/node-sketch");
+const PSD = require("psd");
+const figma = axios.create({
+  baseURL: "https://api.figma.com/v1",
+  headers: {
+    "X-FIGMA-TOKEN": config.authorization.figmaAccessToken
+  }
+});
 module.exports = function(app) {
   app.get("/get-project-designs", (req, res) => {
     if (!req.fields.projectId) {
@@ -105,6 +118,108 @@ module.exports = function(app) {
     });
   });
 
+  app.get("/get-figma-designs", (req, res) => {
+    if (!req.fields.projectId || !req.fields.fileUrl) {
+      return res.status(500).send("Required fields did not provide!");
+    }
+    const pageId = req.fields.fileUrl
+      .match(/\/file\/(.*)\//)
+      .pop()
+      .replace("/file/", "");
+
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          id: req.fields.projectId
+        }
+      })
+        .then(project => {
+          if (project.userId === user.id) {
+            figma.get(`/files/${pageId}`).then(response => {
+              if (!response.data) {
+                return;
+              }
+              const designIds = [];
+              const processedDesigns = [];
+              const artboards = response.data.document.children[0].children.filter(
+                item => item.type === "FRAME"
+              );
+              artboards.forEach(artboard => {
+                designIds.push(artboard.id);
+                processedDesigns.push({
+                  name: artboard.name,
+                  projectId: project.id,
+                  blocks: normalizeFigma(artboard),
+                  image: "",
+                  width: artboard.absoluteBoundingBox.width,
+                  height: artboard.absoluteBoundingBox.height
+                });
+              });
+              const imagesUrl = `/images/${pageId}?ids=${designIds.join(",")}`;
+              figma
+                .get(imagesUrl)
+                .then(response => {
+                  if (!response.data) {
+                    return;
+                  }
+                  const images = response.data.images;
+                  let imageIndex = 0;
+                  for (let i in images) {
+                    if (!images.hasOwnProperty(i)) {
+                      continue;
+                    }
+                    download
+                      .image({
+                        url: images[i],
+                        dest: config.upload.designImagesFullPath
+                      })
+                      .then(({ filename }) => {
+                        const splittedName = filename.split("\\");
+                        const imageName =
+                          splittedName[splittedName.length - 1] + ".png";
+                        fs.rename(filename, filename + ".png", () => {
+                          // Doing nothing
+                        });
+                        processedDesigns[imageIndex].image =
+                          config.upload.designImagesPath + imageName;
+                        if (imageIndex === Object.keys(images).length - 1) {
+                          /** If all design images saved => **/
+                          saveDesignsToDataBase(res, processedDesigns);
+                        }
+                        imageIndex++;
+                      });
+                  }
+                })
+                .catch(message => {
+                  res.status(500).send(message);
+                });
+            });
+          }
+        })
+        .catch(() => {
+          res.status(500).send("User not found or wrong api key");
+        });
+    });
+
+    function saveDesignsToDataBase(res, designs) {
+      const responseDesigns = [];
+      designs.forEach((design, index) => {
+        Design.create(design)
+          .then(d => {
+            responseDesigns.push(d);
+            if (index === designs.length - 1) {
+              res.status(200).send(JSON.stringify(responseDesigns));
+            }
+          })
+          .catch(message => {
+            return res
+              .status(500)
+              .send("Error with save design! Log: " + message);
+          });
+      });
+    }
+  });
+
   app.post("/upload-design", (req, res) => {
     const designFile = req.files.design;
     if (!designFile || !req.fields.projectId) {
@@ -132,9 +247,7 @@ module.exports = function(app) {
                   projectId: req.fields.projectId,
                   blocks: design.blocks,
                   image: design.imagePath,
-                  fileName: designFile.name,
-                  fileSize: designFile.size,
-                  fileType: designFile.type,
+                  name: designFile.name,
                   width: design.document.width,
                   height: design.document.height
                 })
@@ -207,10 +320,6 @@ function upload(design, done) {
           done(error);
         });
       break;
-    case "application/octet-stream":
-      ns.read(design.path).then(sketch => {
-        console.log(sketch);
-      });
   }
 }
 
@@ -234,4 +343,14 @@ function removeFile(filePath) {
   } catch (err) {
     console.error(err);
   }
+}
+
+async function downloadImage(url, path) {
+  const writer = fs.createWriteStream(path);
+  url.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+    writer.on("finish", resolve);
+    writer.on("error", reject);
+  });
 }

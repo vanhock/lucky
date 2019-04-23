@@ -18,7 +18,7 @@ const getUserByToken = function(req, res, cb) {
 const filterObject = function(object, includes, except) {
   return Object.keys(object)
     .filter(key =>
-      except.length ? !except.includes(key) : includes.includes(key)
+      except && except.length ? !except.includes(key) : includes.includes(key)
     )
     .reduce((obj, key) => {
       obj[key] = object[key];
@@ -27,18 +27,17 @@ const filterObject = function(object, includes, except) {
 };
 
 const normalizePSD = function(source) {
-  return getParentAndChild(source.children)
+  return getParentAndChild(source.children, "children")
     .filter(f => f.type === "layer")
     .map(i => ({
       name: i.name,
-      opacity: i.opacity,
+      type: i.type,
       left: i.left,
-      right: i.right,
       top: i.top,
-      bottom: i.bottom,
-      visible: i.visible,
       width: i.width,
       height: i.height,
+      visible: i.visible,
+      opacity: i.opacity,
       hide:
         i.width === source.document.width ||
         i.height === source.document.height,
@@ -57,15 +56,46 @@ const normalizePSD = function(source) {
     }));
 };
 
-const getParentAndChild = function(list) {
-  return list.map(getPairsForNode).reduce((arr1, arr2) => arr1.concat(arr2));
+const normalizeFigma = function(source) {
+  const test = getParentAndChild(source.children, "children");
+  return test.map(i => ({
+    name: i.name,
+    type: i.type,
+    left: i.absoluteBoundingBox.x,
+    top: i.absoluteBoundingBox.y,
+    width: i.absoluteBoundingBox.width,
+    height: i.absoluteBoundingBox.height,
+    visible: true,
+    /*opacity:
+      i.hasOwnProperty("style") &&
+      i.style.hasOwnProperty("opacity") &&
+      i.style.opacity,*/
+    textValue: i.characters,
+    textStyle: i.type === "TEXT" && {
+      value: i.characters,
+      fontFamily: i.style.fontFamily,
+      fontSize: i.style.fontSize,
+      fontWeight: i.style.fontWeight,
+      letterSpacing: i.style.letterSpacing,
+      lineHeightPercent: i.style.lineHeightPercent,
+      lineHeightPx: i.style.lineHeightPx,
+      textAlignHorizontal: i.style.textAlignHorizontal,
+      textAlignVertical: i.style.textAlignVertical
+    }
+  }));
 };
 
-const getPairsForNode = function(node) {
-  if (node.children)
-    return node.children
-      .map(child => getPairsForNode(child))
-      .concat(node.children)
+const getParentAndChild = function(list, childrenKey) {
+  return list
+    .map(node => getPairsForNode(node, childrenKey))
+    .reduce((arr1, arr2) => arr1.concat(arr2));
+};
+
+const getPairsForNode = function(node, childrenKey) {
+  if (node[childrenKey])
+    return node[childrenKey]
+      .map(child => getPairsForNode(child, childrenKey))
+      .concat(node[childrenKey])
       .reduce((arr1, arr2) => arr1.concat(arr2));
   else return [node];
 };
@@ -73,5 +103,7 @@ const getPairsForNode = function(node) {
 module.exports = {
   getUserByToken,
   filterObject,
-  normalizePSD
+  normalizePSD,
+  normalizeFigma,
+  getParentAndChild
 };

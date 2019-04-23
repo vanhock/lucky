@@ -5,9 +5,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    fileName: DataTypes.STRING,
-    fileSize: DataTypes.STRING,
-    fileType: DataTypes.STRING,
+    name: DataTypes.STRING,
     width: DataTypes.STRING,
     height: DataTypes.STRING,
     blocks: DataTypes.JSON,
