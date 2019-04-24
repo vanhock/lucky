@@ -1,4 +1,4 @@
-const { User } = require("../sequelize");
+const { User, Page, Project } = require("../sequelize");
 const getUserByToken = function(req, res, cb) {
   if (!req.headers.authorization) {
     return;
@@ -14,6 +14,36 @@ const getUserByToken = function(req, res, cb) {
     }
   );
 };
+
+function checkAllowChangesToPage(req, res, cb) {
+  getUserByToken(req, res, user => {
+    Page.findOne({
+      where: {
+        id: req.fields.pageId
+      }
+    })
+      .then(page => {
+        Project.findOne({
+          where: {
+            id: page.projectId
+          }
+        })
+          .then(project => {
+            if (project.userId === user.id || user.isAdmin) {
+              cb(page, project, user);
+            } else {
+              res.status(500).send("You don't have rights to edit this page!");
+            }
+          })
+          .catch(() => {
+            res.status(500).send("Project of this page not found!");
+          });
+      })
+      .catch(() => {
+        res.status(500).send("Page not found!");
+      });
+  });
+}
 
 const filterObject = function(object, includes, except) {
   return Object.keys(object)
@@ -105,5 +135,6 @@ module.exports = {
   filterObject,
   normalizePSD,
   normalizeFigma,
-  getParentAndChild
+  getParentAndChild,
+  checkAllowChangesToPage
 };

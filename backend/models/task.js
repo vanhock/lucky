@@ -5,10 +5,18 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
+    name: DataTypes.STRING,
     text: DataTypes.STRING,
     designBlockId: DataTypes.STRING,
     websiteNodeId: DataTypes.STRING,
-    coordinatesOnWebsite: DataTypes.STRING,
-    coordinatesOnDesign: DataTypes.STRING
+    /**
+     * coordinates
+     * @value: {
+     *   x: INTEGER,
+     *   y: INTEGER
+     * }
+     **/
+    coordinatesOnWebsite: DataTypes.JSON,
+    coordinatesOnDesign: DataTypes.JSON
   });
 };

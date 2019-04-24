@@ -32,6 +32,7 @@ Project.belongsToMany(User, {
 
 User.hasMany(Project);
 User.hasMany(Comment);
+User.hasMany(Task);
 
 Project.hasMany(Page);
 Project.hasMany(Design);
@@ -52,5 +53,6 @@ module.exports = {
   Project,
   Page,
   Design,
-  Comment
+  Comment,
+  Task
 };

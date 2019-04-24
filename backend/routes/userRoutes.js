@@ -4,7 +4,7 @@ const { getUserByToken, filterObject } = require("../libs/helpers");
 const allowedParams = ["id", "name", "avatar", "email", "company"];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
-    const fields = req.query;
+    const fields = req.fields;
     if (
       !Object.keys(fields).length ||
       !fields.name ||
@@ -28,10 +28,10 @@ module.exports = function(app) {
   });
 
   app.get("/authorization", (req, res) => {
-    if (!Object.keys(req.query).length) {
+    if (!Object.keys(req.fields).length) {
       return;
     }
-    const fields = req.query;
+    const fields = req.fields;
     if (!fields.email || !fields.password) {
       return;
     }

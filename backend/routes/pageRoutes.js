@@ -1,5 +1,9 @@
 const { Page, Project } = require("../sequelize");
-const { getUserByToken, filterObject } = require("../libs/helpers");
+const {
+  getUserByToken,
+  checkAllowChangesToPage,
+  filterObject
+} = require("../libs/helpers");
 
 module.exports = function(app) {
   app.post("/create-page", (req, res) => {
@@ -54,10 +58,10 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-pages", (req, res) => {
-    if (!req.query.projectId) {
+    if (!req.fields.projectId) {
       res.status(500).send("Project id did not provide!");
     }
-    const projectId = req.query.projectId;
+    const projectId = req.fields.projectId;
     getUserByToken(req, res, user => {
       Project.findOne({
         where: {
@@ -90,20 +94,20 @@ module.exports = function(app) {
   });
 
   app.post("/delete-page", (req, res) => {
-    if (!req.fields.id) {
+    if (!req.fields.pageId) {
       res.status(500).send("Page id did not provide!");
     }
-    checkAllowChanges(req, res, page => {
+    checkAllowChangesToPage(req, res, page => {
       page.destroy();
       res.status(200).send("Page deleted!");
     });
   });
 
   app.post("/move-page", (req, res) => {
-    if (!req.fields.id || !req.fields.projectId) {
+    if (!req.fields.pageId || !req.fields.projectId) {
       res.status(500).send("Required fields did not provide!");
     }
-    checkAllowChanges(req, res, (page, project, user) => {
+    checkAllowChangesToPage(req, res, (page, project, user) => {
       Project.findOne({
         where: {
           id: req.fields.projectId
@@ -136,7 +140,7 @@ module.exports = function(app) {
       "projectId",
       "id"
     ]);
-    checkAllowChanges(req, res, page => {
+    checkAllowChangesToPage(req, res, page => {
       page
         .update(params)
         .then(result => {
@@ -148,33 +152,3 @@ module.exports = function(app) {
     });
   });
 };
-
-function checkAllowChanges(req, res, cb) {
-  getUserByToken(req, res, user => {
-    Page.findOne({
-      where: {
-        id: req.fields.id
-      }
-    })
-      .then(page => {
-        Project.findOne({
-          where: {
-            id: page.projectId
-          }
-        })
-          .then(project => {
-            if (project.userId === user.id || user.isAdmin) {
-              cb(page, project, user);
-            } else {
-              res.status(500).send("You don't have rights to edit this page!");
-            }
-          })
-          .catch(() => {
-            res.status(500).send("Project of this page not found!");
-          });
-      })
-      .catch(() => {
-        res.status(500).send("Page not found!");
-      });
-  });
-}

@@ -5,6 +5,7 @@ const userRoutes = require("./userRoutes");
 const projectRoutes = require("./projectRoutes");
 const pageRoutes = require("./pageRoutes");
 const designRoutes = require("./designRoutes");
+const taskRoutes = require("./taskRoutes");
 module.exports = function(app) {
   app.use(
     formidableMiddleware(
@@ -27,4 +28,5 @@ module.exports = function(app) {
   projectRoutes(app);
   pageRoutes(app);
   designRoutes(app);
+  taskRoutes(app);
 };

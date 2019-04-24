@@ -4,23 +4,20 @@ const {
   getUserByToken,
   normalizePSD,
   normalizeFigma,
-  getParentAndChild,
   filterObject
 } = require("../libs/helpers");
-
-const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
 const fs = require("fs");
 const download = require("image-downloader");
-const axios = require("axios");
-const { Sketch } = require("sketch-constructor");
-const ns = require("../libs/node-sketch");
 const PSD = require("psd");
+const axios = require("axios");
 const figma = axios.create({
   baseURL: "https://api.figma.com/v1",
   headers: {
     "X-FIGMA-TOKEN": config.authorization.figmaAccessToken
   }
 });
+const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
+
 module.exports = function(app) {
   app.get("/get-project-designs", (req, res) => {
     if (!req.fields.projectId) {
@@ -91,7 +88,16 @@ module.exports = function(app) {
               projectId: req.fields.projectId
             }
           })
-            .then(() => {
+            .then(designs => {
+              if (!designs.length) {
+                return res
+                  .status(500)
+                  .send(`Designs with ids: ${req.fields.ids} not found!`);
+              }
+              designs.forEach(design => {
+                removeFile(config.upload.path + design.image);
+              });
+
               Design.destroy({
                 where: {
                   id: ids,
@@ -343,14 +349,4 @@ function removeFile(filePath) {
   } catch (err) {
     console.error(err);
   }
-}
-
-async function downloadImage(url, path) {
-  const writer = fs.createWriteStream(path);
-  url.pipe(writer);
-
-  return new Promise((resolve, reject) => {
-    writer.on("finish", resolve);
-    writer.on("error", reject);
-  });
 }
