@@ -15,10 +15,10 @@ module.exports = function(app) {
         userId: user.id
       })
         .then(comment => {
-          res.status(200).send(JSON.stringify(comment));
+          return res.status(200).send(JSON.stringify(comment));
         })
         .catch(message => {
-          res.status(500).send(message);
+          return res.status(500).send(message);
         });
     });
   });
@@ -33,12 +33,12 @@ module.exports = function(app) {
         })
           .then(comments => {
             if (!comments.length) {
-              res.status(500).send("Comments not found");
+              return res.status(500).send("Comments not found");
             }
-            res.status(200).send(JSON.stringify(comments));
+            return res.status(200).send(JSON.stringify(comments));
           })
           .catch(message => {
-            res.status(500).send(message);
+            return res.status(500).send(message);
           });
       });
     } else {
@@ -50,12 +50,12 @@ module.exports = function(app) {
         })
           .then(comments => {
             if (!comments.length) {
-              res.status(500).send("Comments not found");
+              return res.status(500).send("Comments not found");
             }
-            res.status(200).send(JSON.stringify(comments));
+            return res.status(200).send(JSON.stringify(comments));
           })
           .catch(message => {
-            res.status(500).send(message);
+            return res.status(500).send(message);
           });
       });
     }
@@ -82,13 +82,17 @@ module.exports = function(app) {
               ])
             })
             .then(comment => {
-              res.status(200).send(JSON.stringify(comment));
+              return res.status(200).send(JSON.stringify(comment));
             })
             .catch(message => {
-              res.status(500).send("Error with update comment: " + message);
+              return res
+                .status(500)
+                .send("Error with update comment: " + message);
             });
         } else {
-          res.status(500).send("You don't have rights to edit this comment!");
+          return res
+            .status(500)
+            .send("You don't have rights to edit this comment!");
         }
       });
     });
@@ -106,9 +110,11 @@ module.exports = function(app) {
       }).then(comment => {
         if (user.id === comment.userId || user.isAdmin) {
           comment.destroy();
-          res.status(200).send("Comment deleted!");
+          return res.status(200).send("Comment deleted!");
         } else {
-          res.status(500).send("You don't have rights to delete this comment!");
+          return res
+            .status(500)
+            .send("You don't have rights to delete this comment!");
         }
       });
     });

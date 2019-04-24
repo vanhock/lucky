@@ -28,7 +28,7 @@ module.exports = function(app) {
         company: fields.company
       },
       () => {
-        res.status(200).send("User created");
+        return res.status(200).send("User created");
       }
     );
   });
@@ -46,9 +46,9 @@ module.exports = function(app) {
       fields.password,
       (response, object) => {
         if (!response) {
-          res.status(200).send(JSON.stringify(object));
+          return res.status(200).send(JSON.stringify(object));
         } else {
-          res.status(500).send("Error: " + response);
+          return res.status(500).send("Error: " + response);
         }
       }
     );
@@ -56,7 +56,7 @@ module.exports = function(app) {
 
   app.post("/change-user-info", (req, res) => {
     if (!Object.keys(req.fields).length) {
-      res.status(500).send("Fields are empty!");
+      return res.status(500).send("Fields are empty!");
     }
     const fields = req.fields;
 
@@ -69,13 +69,13 @@ module.exports = function(app) {
             .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
         })
         .catch(message => {
-          res.status(500).send("Error: " + message);
+          return res.status(500).send("Error: " + message);
         });
     });
   });
   app.post("/set-user-avatar", (req, res) => {
     if (!Object.keys(req.files).length || !req.files.avatar) {
-      res.status(500).send("Avatar did not provide!");
+      return res.status(500).send("Avatar did not provide!");
     }
     const tempPath = req.files.avatar.path;
     const avatarName =
@@ -90,12 +90,12 @@ module.exports = function(app) {
           avatar: config.upload.avatarPath + avatarName
         })
         .then(user => {
-          res
+          return res
             .status(200)
             .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
         })
         .catch(message => {
-          res.status(500).send("Error: " + message);
+          return res.status(500).send("Error: " + message);
         });
     });
     removeFile(tempPath);
@@ -104,7 +104,7 @@ module.exports = function(app) {
   app.post("/delete-user-avatar", (req, res) => {
     getUserByToken(req, res, user => {
       if (!user.avatar && !user.avatar.length) {
-        res.status(500).send("Avatar not set!");
+        return res.status(500).send("Avatar not set!");
       }
       removeFile(config.upload.path + user.avatar);
       user
@@ -112,12 +112,12 @@ module.exports = function(app) {
           avatar: null
         })
         .then(user => {
-          res
+          return res
             .status(200)
             .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
         })
         .catch(message => {
-          res.status(500).send("Error: " + message);
+          return res.status(500).send("Error: " + message);
         });
     });
   });

@@ -48,7 +48,7 @@ module.exports = function(app) {
           websiteUrl: websiteUrl
         })
           .then(page => {
-            res.status(200).send(JSON.stringify(page.dataValues));
+            return res.status(200).send(JSON.stringify(page.dataValues));
           })
           .catch(() => {
             return res.status(500).send("Error with creating page!");
@@ -59,7 +59,7 @@ module.exports = function(app) {
 
   app.get("/get-all-pages", (req, res) => {
     if (!req.fields.projectId) {
-      res.status(500).send("Project id did not provide!");
+      return res.status(500).send("Project id did not provide!");
     }
     const projectId = req.fields.projectId;
     getUserByToken(req, res, user => {
@@ -76,10 +76,12 @@ module.exports = function(app) {
               }
             })
               .then(pages => {
-                res.status(200).send(JSON.stringify(pages));
+                return res.status(200).send(JSON.stringify(pages));
               })
               .catch(() => {
-                res.status(500).send("Have no pages found for this project!");
+                return res
+                  .status(500)
+                  .send("Have no pages found for this project!");
               });
           } else {
             res
@@ -88,24 +90,24 @@ module.exports = function(app) {
           }
         })
         .catch(() => {
-          res.status(500).send("Project not found by id!");
+          return res.status(500).send("Project not found by id!");
         });
     });
   });
 
   app.post("/delete-page", (req, res) => {
     if (!req.fields.pageId) {
-      res.status(500).send("Page id did not provide!");
+      return res.status(500).send("Page id did not provide!");
     }
     checkAllowChangesToPage(req, res, page => {
       page.destroy();
-      res.status(200).send("Page deleted!");
+      return res.status(200).send("Page deleted!");
     });
   });
 
   app.post("/move-page", (req, res) => {
     if (!req.fields.pageId || !req.fields.projectId) {
-      res.status(500).send("Required fields did not provide!");
+      return res.status(500).send("Required fields did not provide!");
     }
     checkAllowChangesToPage(req, res, (page, project, user) => {
       Project.findOne({
@@ -124,11 +126,11 @@ module.exports = function(app) {
               projectId: targetProject.id
             })
             .then(result => {
-              res.status(200).send(JSON.stringify(result));
+              return res.status(200).send(JSON.stringify(result));
             });
         })
         .catch(() => {
-          res.status(500).send("Target project did not found!");
+          return res.status(500).send("Target project did not found!");
         });
     });
   });
@@ -144,10 +146,10 @@ module.exports = function(app) {
       page
         .update(params)
         .then(result => {
-          res.status(200).send(JSON.stringify(result));
+          return res.status(200).send(JSON.stringify(result));
         })
         .catch(() => {
-          res.status(500).send("Error with update page params!");
+          return res.status(500).send("Error with update page params!");
         });
     });
   });

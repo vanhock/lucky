@@ -8,18 +8,18 @@ module.exports = function(app) {
         name: req.fields.name || "Untitled",
         userId: user.id
       }).then(response => {
-        res.status(200).send(JSON.stringify(response.dataValues));
+        return res.status(200).send(JSON.stringify(response.dataValues));
       });
     });
   });
 
   app.post("/edit-project", (req, res) => {
     if (!req.fields.id) {
-      res.status(500).send("Id did not provide!");
+      return res.status(500).send("Id did not provide!");
     }
     getUserByToken(req, res, user => {
       if (req.fields.name === "") {
-        res.status(500).send("Name can't have an empty value!");
+        return res.status(500).send("Name can't have an empty value!");
       }
       const fieldsToEdit = filterObject(req.fields, ["name"]);
       Project.findOne({
@@ -30,20 +30,20 @@ module.exports = function(app) {
         .then(project => {
           if (project.userId === user.id || user.isAdmin) {
             project.update(fieldsToEdit).then(project => {
-              res
+              return res
                 .status(200)
                 .send(
                   JSON.stringify(filterObject(project.dataValues, ["name"]))
                 );
             });
           } else {
-            res
+            return res
               .status(500)
               .send("You don't have rights for edit this project!");
           }
         })
         .catch(() => {
-          res.status(500).send("Project not found!");
+          return res.status(500).send("Project not found!");
         });
     });
   });
@@ -56,10 +56,10 @@ module.exports = function(app) {
         }
       })
         .then(projects => {
-          res.status(200).send(JSON.stringify(projects));
+          return res.status(200).send(JSON.stringify(projects));
         })
         .catch(() => {
-          res.status(500).send("Projects not found for this user!");
+          return res.status(500).send("Projects not found for this user!");
         });
     });
   });
@@ -90,7 +90,7 @@ module.exports = function(app) {
                 projectId: project.id
               }
             });
-            res.status(200).send("Project deleted!");
+            return res.status(200).send("Project deleted!");
           } else {
             res
               .status(500)
@@ -98,7 +98,7 @@ module.exports = function(app) {
           }
         })
         .catch(() => {
-          res.status(500).send("Projects not found for this user!");
+          return res.status(500).send("Projects not found for this user!");
         });
     });
   });

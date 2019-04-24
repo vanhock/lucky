@@ -8,7 +8,6 @@ const {
   removeFile,
   moveFile
 } = require("../libs/helpers");
-const fs = require("fs");
 const download = require("image-downloader");
 const PSD = require("psd");
 const axios = require("axios");
@@ -45,7 +44,7 @@ module.exports = function(app) {
                     .status(500)
                     .send("Have no designs found for this project!");
                 }
-                res
+                return res
                   .status(200)
                   .send(
                     JSON.stringify(
@@ -56,16 +55,18 @@ module.exports = function(app) {
                   );
               })
               .catch(() => {
-                res.status(500).send("Have no designs found for this project!");
+                return res
+                  .status(500)
+                  .send("Have no designs found for this project!");
               });
           } else {
-            res
+            return res
               .status(500)
               .send("You don't have rights for edit this project!");
           }
         })
         .catch(() => {
-          res.status(500).send("Project not found by id!");
+          return res.status(500).send("Project not found by id!");
         });
     });
   });
@@ -106,19 +107,19 @@ module.exports = function(app) {
                   projectId: req.fields.projectId
                 }
               });
-              res
+              return res
                 .status(200)
                 .send(
                   `Designs with ids: ${req.fields.ids} successfully deleted!`
                 );
             })
             .catch(() => {
-              res
+              return res
                 .status(500)
                 .send(`Designs with ids: ${req.fields.ids} not found!`);
             });
         } else {
-          res
+          return res
             .status(500)
             .send("You don't have rights for edit designs of this project!");
         }
@@ -198,13 +199,13 @@ module.exports = function(app) {
                   }
                 })
                 .catch(message => {
-                  res.status(500).send(message);
+                  return res.status(500).send(message);
                 });
             });
           }
         })
         .catch(() => {
-          res.status(500).send("User not found or wrong api key");
+          return res.status(500).send("User not found or wrong api key");
         });
     });
 
@@ -215,7 +216,7 @@ module.exports = function(app) {
           .then(d => {
             responseDesigns.push(d);
             if (index === designs.length - 1) {
-              res.status(200).send(JSON.stringify(responseDesigns));
+              return res.status(200).send(JSON.stringify(responseDesigns));
             }
           })
           .catch(message => {
@@ -262,7 +263,9 @@ module.exports = function(app) {
                     responseDesigns.push(d);
                     if (index === designs.length - 1) {
                       removeFile(tempPath);
-                      res.status(200).send(JSON.stringify(responseDesigns));
+                      return res
+                        .status(200)
+                        .send(JSON.stringify(responseDesigns));
                     }
                   })
                   .catch(message => {
@@ -274,14 +277,14 @@ module.exports = function(app) {
             });
           } else {
             removeFile(tempPath);
-            res
+            return res
               .status(500)
               .send("You don't have rights to upload files to this project!");
           }
         })
         .catch(() => {
           removeFile(tempPath);
-          res.status(500).send("Project not found!");
+          return res.status(500).send("Project not found!");
         });
     });
   });
@@ -340,4 +343,3 @@ function compressImage(filePath, outputPath, cb) {
       cb(callback);
     });
 }
-

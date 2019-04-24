@@ -16,10 +16,10 @@ module.exports = function(app) {
         ...req.fields
       })
         .then(task => {
-          res.status(200).send(JSON.stringify(task));
+          return res.status(200).send(JSON.stringify(task));
         })
         .catch(message => {
-          res.status(500).send(message);
+          return res.status(500).send(message);
         });
     });
   });
@@ -36,12 +36,12 @@ module.exports = function(app) {
       })
         .then(tasks => {
           if (!tasks.length) {
-            res.status(500).send("Tasks not found");
+            return res.status(500).send("Tasks not found");
           }
-          res.status(200).send(JSON.stringify(tasks));
+          return res.status(200).send(JSON.stringify(tasks));
         })
         .catch(message => {
-          res.status(500).send(message);
+          return res.status(500).send(message);
         });
     });
   });
@@ -62,13 +62,15 @@ module.exports = function(app) {
               ...filterObject(req.fields, null, ["id", "userId", "pageId"])
             })
             .then(task => {
-              res.status(200).send(JSON.stringify(task));
+              return res.status(200).send(JSON.stringify(task));
             })
             .catch(message => {
-              res.status(500).send("Error with update task: " + message);
+              return res.status(500).send("Error with update task: " + message);
             });
         } else {
-          res.status(500).send("You don't have rights to edit this task!");
+          return res
+            .status(500)
+            .send("You don't have rights to edit this task!");
         }
       });
     });
@@ -86,9 +88,11 @@ module.exports = function(app) {
       }).then(task => {
         if (user.id === task.userId || user.isAdmin) {
           task.destroy();
-          res.status(200).send("Task deleted!");
+          return res.status(200).send("Task deleted!");
         } else {
-          res.status(500).send("You don't have rights to delete this task!");
+          return res
+            .status(500)
+            .send("You don't have rights to delete this task!");
         }
       });
     });

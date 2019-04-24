@@ -8,7 +8,7 @@ const getUserByToken = function(req, res, cb) {
     req.headers.authorization,
     (message, user) => {
       if (!user) {
-        res.status(500).send("User not found");
+        return res.status(500).send("User not found");
       } else {
         cb(user);
       }
@@ -33,15 +33,17 @@ function checkAllowChangesToPage(req, res, cb) {
             if (project.userId === user.id || user.isAdmin) {
               cb(page, project, user);
             } else {
-              res.status(500).send("You don't have rights to edit this page!");
+              return res
+                .status(500)
+                .send("You don't have rights to edit this page!");
             }
           })
           .catch(() => {
-            res.status(500).send("Project of this page not found!");
+            return res.status(500).send("Project of this page not found!");
           });
       })
       .catch(() => {
-        res.status(500).send("Page not found!");
+        return res.status(500).send("Page not found!");
       });
   });
 }
