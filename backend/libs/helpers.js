@@ -1,6 +1,7 @@
 const fs = require("fs");
-const { User, Page, Project } = require("../sequelize");
+
 const getUserByToken = function(req, res, cb) {
+  const { User } = require("../sequelize");
   if (!req.headers.authorization) {
     return;
   }
@@ -8,7 +9,7 @@ const getUserByToken = function(req, res, cb) {
     req.headers.authorization,
     (message, user) => {
       if (!user) {
-        return res.status(500).send("User not found");
+        res.status(500).send("User not found");
       } else {
         cb(user);
       }
@@ -17,6 +18,7 @@ const getUserByToken = function(req, res, cb) {
 };
 
 function checkAllowChangesToPage(req, res, cb) {
+  const { Page, Project } = require("../sequelize");
   getUserByToken(req, res, user => {
     Page.findOne({
       where: {
@@ -33,17 +35,15 @@ function checkAllowChangesToPage(req, res, cb) {
             if (project.userId === user.id || user.isAdmin) {
               cb(page, project, user);
             } else {
-              return res
-                .status(500)
-                .send("You don't have rights to edit this page!");
+              res.status(500).send("You don't have rights to edit this page!");
             }
           })
           .catch(() => {
-            return res.status(500).send("Project of this page not found!");
+            res.status(500).send("Project of this page not found!");
           });
       })
       .catch(() => {
-        return res.status(500).send("Page not found!");
+        res.status(500).send("Page not found!");
       });
   });
 }

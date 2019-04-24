@@ -12,7 +12,8 @@ module.exports = function(app) {
     }
     checkAllowChangesToPage(req, res, (page, project, user) => {
       Comment.create({
-        userId: user.id
+        userId: user.id,
+        ...filterObject(req.fields, null, ["userId"])
       })
         .then(comment => {
           return res.status(200).send(JSON.stringify(comment));
@@ -74,12 +75,7 @@ module.exports = function(app) {
         if (user.id === comment.userId || user.isAdmin) {
           comment
             .update({
-              ...filterObject(req.fields, null, [
-                "id",
-                "userId",
-                "pageId",
-                "taskId"
-              ])
+              ...filterObject(req.fields, ["text"])
             })
             .then(comment => {
               return res.status(200).send(JSON.stringify(comment));
