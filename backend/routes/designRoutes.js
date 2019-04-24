@@ -4,7 +4,9 @@ const {
   getUserByToken,
   normalizePSD,
   normalizeFigma,
-  filterObject
+  filterObject,
+  removeFile,
+  moveFile
 } = require("../libs/helpers");
 const fs = require("fs");
 const download = require("image-downloader");
@@ -183,9 +185,8 @@ module.exports = function(app) {
                         const splittedName = filename.split("\\");
                         const imageName =
                           splittedName[splittedName.length - 1] + ".png";
-                        fs.rename(filename, filename + ".png", () => {
-                          // Doing nothing
-                        });
+                        // Move file with another name
+                        moveFile(filename, filename + ".png");
                         processedDesigns[imageIndex].image =
                           config.upload.designImagesPath + imageName;
                         if (imageIndex === Object.keys(images).length - 1) {
@@ -290,7 +291,7 @@ function upload(design, done) {
   let currentPsd = null;
   const designName =
     design.name.substring(0, design.name.lastIndexOf(".") + 1) + "png";
-  const designImgTempPath = config.upload.designImagesTempPath + designName;
+  const designImgTempPath = config.upload.tempPath + designName;
   switch (design.type) {
     case "image/vnd.adobe.photoshop":
       PSD.open(design.path)
@@ -340,13 +341,3 @@ function compressImage(filePath, outputPath, cb) {
     });
 }
 
-function removeFile(filePath) {
-  const fs = require("fs");
-  /** Remove temp design file **/
-  try {
-    fs.unlinkSync(filePath);
-    //file removed
-  } catch (err) {
-    console.error(err);
-  }
-}

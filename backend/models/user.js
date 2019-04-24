@@ -1,4 +1,5 @@
 const config = require("../config/config");
+const { removeFile } = require("../libs/helpers");
 const tempPasswordLength = 7;
 const tokenLength = 80;
 const saltLength = 32;
@@ -96,9 +97,7 @@ module.exports = function(sequelize, DataTypes) {
         },
         removeAvatar: function() {
           if (this.avatar) {
-            fs.unlink(pathService.absFile(User.avatar), function(err) {
-              // doing nothing
-            });
+            removeFile(config.upload.path + this.avatar);
           }
         }
       },

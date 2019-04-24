@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { User, Page, Project } = require("../sequelize");
 const getUserByToken = function(req, res, cb) {
   if (!req.headers.authorization) {
@@ -130,11 +131,33 @@ const getPairsForNode = function(node, childrenKey) {
   else return [node];
 };
 
+const removeFile = function(filePath) {
+  /** Remove temp design file **/
+  try {
+    fs.unlinkSync(filePath);
+    //file removed
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const moveFile = function(sourceName, targetName) {
+  try {
+    fs.rename(sourceName, targetName, () => {
+      // Doing nothing
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 module.exports = {
   getUserByToken,
   filterObject,
   normalizePSD,
   normalizeFigma,
   getParentAndChild,
-  checkAllowChangesToPage
+  checkAllowChangesToPage,
+  removeFile,
+  moveFile
 };
