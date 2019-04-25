@@ -35,7 +35,7 @@
 import DesignUploader from "../organisms/DesignUploader";
 import EnterWebsite from "../organisms/EnterWebsite";
 import RecentProjects from "../organisms/RecentProjects";
-import VButton from "../atoms/Button";
+import VButton from "../atoms/VButton";
 import { mapGetters } from "vuex";
 export default {
   name: "home",

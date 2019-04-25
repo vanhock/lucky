@@ -1,7 +1,8 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Home from "./views/Home.vue";
-import ViewScreen from "./views/ViewScreen.vue";
+import Home from "./views/HomeView.vue";
+import ViewScreen from "./views/InspectorsView.vue";
+import AuthView from "./views/AuthView";
 
 Vue.use(Router);
 
@@ -10,7 +11,7 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: "/",
+      path: "/homepage",
       name: "home",
       component: Home
     },
@@ -18,6 +19,11 @@ export default new Router({
       path: "/view",
       name: "view",
       component: ViewScreen
+    },
+    {
+      path: "/",
+      name: "auth",
+      component: AuthView
     }
   ]
 });

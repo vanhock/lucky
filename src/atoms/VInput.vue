@@ -1,5 +1,5 @@
 <template>
-  <div class="form-item-general">
+  <div class="v-input" :class="appTheme">
     <div class="label">
       <label :for="`input-${name}`">{{ label }}</label>
     </div>
@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 /** Mixins: **/
 import InputMixin from "../mixins/InputMixin.vue";
 import InputValidationMixin from "../mixins/InputValidationMixin.js";
@@ -36,6 +37,9 @@ export default {
     /** from InputMixin **/
     componentType: "general"
   }),
+  computed: {
+    ...mapState(["appTheme"])
+  },
   props: {
     /** from InputMixin **/
   }
@@ -43,7 +47,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.form-item-general {
+.v-input {
   display: block;
   font-size: 18px;
   @include clearfix();
@@ -77,10 +81,19 @@ export default {
     align-items: flex-end;
     text-align: left;
     width: 190px;
-    color: #fff;
     margin-right: 5px;
     margin-bottom: 5px;
     float: left;
+  }
+  &.white {
+    .label, input {
+      color: $color-b2;
+    }
+  }
+  &.black {
+    .label, input {
+      color: #fff;
+    }
   }
 }
 </style>

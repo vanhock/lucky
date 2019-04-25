@@ -9,13 +9,16 @@ export default {};
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic');
+@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
 @import "./assets/normalize.scss";
 $color-1: #606060;
 $color-2: #ebebeb;
 $color-3: #42b983;
 $color-4: #070707;
+html, body {
+  height: 100%;
+}
 body {
   background-color: $color-base;
   box-sizing: border-box;
@@ -26,6 +29,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: $color-b2;
+  height: 100%;
 }
 #nav {
   position: absolute;
@@ -57,20 +61,6 @@ body {
     width: 100%;
     height: 100%;
   }
-}
-
-.sign-in {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 124px;
-  //height: 89px;
-  height: 100%;
-  right: 0;
-  top: 0;
-  background-color: $color-4;
-  color: $color-2;
 }
 
 .clearfix:after {

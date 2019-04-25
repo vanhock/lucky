@@ -9784,6 +9784,11 @@ vm-browserify@0.0.4:
   dependencies:
     indexof "0.0.1"
 
+vue-class-component@^7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/vue-class-component/-/vue-class-component-7.0.2.tgz#c5f35a91c0e9341532392b84d606a84911fb13bc"
+  integrity sha512-8xw/wkZI2tgHcwvkSRC1ax7GeP1CG27wKhedvOAdjdASm05VU4RijGsCYti6s6CzBioBL5BQUmntQQTCsp1wnQ==
+
 vue-cli-plugin-coffeescript@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/vue-cli-plugin-coffeescript/-/vue-cli-plugin-coffeescript-0.0.3.tgz#717b608395a2bafc31c0d568159e014a16fbb6bc"

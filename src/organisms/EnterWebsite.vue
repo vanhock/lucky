@@ -14,7 +14,7 @@
 import { mapGetters } from "vuex";
 import { getFromLocal } from "../atoms/utils";
 import _ from "lodash";
-import FormInput from "../atoms/FormInput";
+import FormInput from "../atoms/VInput";
 export default {
   name: "EnterWebsite",
   components: { FormInput },
