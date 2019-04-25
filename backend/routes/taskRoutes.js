@@ -56,6 +56,9 @@ module.exports = function(app) {
           id: req.fields.id
         }
       }).then(task => {
+        if (!task) {
+          return res.status(500).send("Task not found!");
+        }
         if (user.id === task.userId || user.isAdmin) {
           task
             .update({
@@ -86,6 +89,9 @@ module.exports = function(app) {
           id: req.fields.id
         }
       }).then(task => {
+        if (!task) {
+          return res.status(500).send("Task not found!");
+        }
         if (user.id === task.userId || user.isAdmin) {
           task.destroy();
           return res.status(200).send("Task deleted!");

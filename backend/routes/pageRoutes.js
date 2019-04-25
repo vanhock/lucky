@@ -76,6 +76,11 @@ module.exports = function(app) {
               }
             })
               .then(pages => {
+                if (!pages.length) {
+                  return res
+                    .status(500)
+                    .send("Have no pages found for this project!");
+                }
                 return res.status(200).send(JSON.stringify(pages));
               })
               .catch(() => {
@@ -116,6 +121,9 @@ module.exports = function(app) {
         }
       })
         .then(targetProject => {
+          if (!targetProject) {
+            return res.status(500).send("Project of this page not found!");
+          }
           if (user.id !== targetProject.userId) {
             res
               .status(500)

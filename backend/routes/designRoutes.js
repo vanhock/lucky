@@ -32,6 +32,9 @@ module.exports = function(app) {
         }
       })
         .then(project => {
+          if (!project) {
+            return res.status(500).send("Project not found!");
+          }
           if (project.userId === user.id) {
             Design.findAll({
               where: {
@@ -84,6 +87,9 @@ module.exports = function(app) {
           id: req.fields.projectId
         }
       }).then(project => {
+        if (!project) {
+          return res.status(500).send("Project not found!");
+        }
         if (project.userId === user.id) {
           Design.findAll({
             where: {

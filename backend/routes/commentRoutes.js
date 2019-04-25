@@ -71,26 +71,33 @@ module.exports = function(app) {
         where: {
           id: req.fields.id
         }
-      }).then(comment => {
-        if (user.id === comment.userId || user.isAdmin) {
-          comment
-            .update({
-              ...filterObject(req.fields, ["text"])
-            })
-            .then(comment => {
-              return res.status(200).send(JSON.stringify(comment));
-            })
-            .catch(message => {
-              return res
-                .status(500)
-                .send("Error with update comment: " + message);
-            });
-        } else {
-          return res
-            .status(500)
-            .send("You don't have rights to edit this comment!");
-        }
-      });
+      })
+        .then(comment => {
+          if (!comment) {
+            return res.status(500).send("Comment not found!");
+          }
+          if (user.id === comment.userId || user.isAdmin) {
+            comment
+              .update({
+                ...filterObject(req.fields, ["text"])
+              })
+              .then(comment => {
+                return res.status(200).send(JSON.stringify(comment));
+              })
+              .catch(message => {
+                return res
+                  .status(500)
+                  .send("Error with update comment: " + message);
+              });
+          } else {
+            return res
+              .status(500)
+              .send("You don't have rights to edit this comment!");
+          }
+        })
+        .catch(message => {
+          return res.status(500).send("Comment not found: " + message);
+        });
     });
   });
 
@@ -104,6 +111,9 @@ module.exports = function(app) {
           id: req.fields.id
         }
       }).then(comment => {
+        if (!comment) {
+          return res.status(500).send("Comment not found!");
+        }
         if (user.id === comment.userId || user.isAdmin) {
           comment.destroy();
           return res.status(200).send("Comment deleted!");

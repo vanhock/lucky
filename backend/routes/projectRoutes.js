@@ -28,6 +28,9 @@ module.exports = function(app) {
         }
       })
         .then(project => {
+          if (!project) {
+            return res.status(500).send("Project not found!");
+          }
           if (project.userId === user.id || user.isAdmin) {
             project.update(fieldsToEdit).then(project => {
               return res
@@ -42,8 +45,8 @@ module.exports = function(app) {
               .send("You don't have rights for edit this project!");
           }
         })
-        .catch(() => {
-          return res.status(500).send("Project not found!");
+        .catch(message => {
+          return res.status(500).send("Error with getting project: " + message);
         });
     });
   });
@@ -56,10 +59,15 @@ module.exports = function(app) {
         }
       })
         .then(projects => {
+          if (!projects.length) {
+            return res.status(500).send("Projects not found for this user!");
+          }
           return res.status(200).send(JSON.stringify(projects));
         })
-        .catch(() => {
-          return res.status(500).send("Projects not found for this user!");
+        .catch(message => {
+          return res
+            .status(500)
+            .send("Error with getting projects: " + message);
         });
     });
   });
@@ -75,6 +83,9 @@ module.exports = function(app) {
         }
       })
         .then(project => {
+          if (!project) {
+            return res.status(500).send("Project not found!");
+          }
           if (req.fields.name !== project.name) {
             return res.status(500).send("Name check didn't pass!");
           }
