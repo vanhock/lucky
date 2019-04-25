@@ -20,6 +20,12 @@ module.exports = function(app) {
           action: function(req, res, next, name, file) {
             file.path = file.path + file.name;
           }
+        },
+        {
+          event: "end",
+          action: function(req, res, next, name, file) {
+            console.log("Upload end");
+          }
         }
       ]
     )

@@ -1,3 +1,4 @@
+const config = require("./config/db");
 const Sequelize = require("sequelize");
 const UserModel = require("./models/user");
 const ProjectModel = require("./models/project");
@@ -6,16 +7,21 @@ const CommentModel = require("./models/comment");
 const DesignModel = require("./models/design");
 const TaskModel = require("./models/task");
 
-const sequelize = new Sequelize("pixel", "root", "root", {
-  host: "localhost",
-  dialect: "mysql",
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
+const sequelize = new Sequelize(
+  config.dbName,
+  config.userName,
+  config.userPassword,
+  {
+    host: config.host,
+    dialect: "mysql",
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
-});
+);
 
 const User = UserModel(sequelize, Sequelize);
 const Project = ProjectModel(sequelize, Sequelize);

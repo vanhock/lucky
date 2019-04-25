@@ -7,7 +7,7 @@ const {
   moveFile
 } = require("../libs/helpers");
 
-const allowedParams = ["id", "name", "avatar", "email", "company"];
+const allowedParams = ["id", "name", "avatarPath", "email", "company"];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
     const fields = req.fields;
@@ -84,10 +84,19 @@ module.exports = function(app) {
         req.files.avatar.name.lastIndexOf(".") + 1
       ) + "png";
     getUserByToken(req, res, user => {
-      moveFile(tempPath, config.upload.avatarFullPath + avatarName);
+      /**
+       * Remove previous avatar first
+       */
+      removeFile(user.avatarFullPath, message => {
+        console.log(message);
+      });
+      moveFile(tempPath, config.upload.avatarFullPath + avatarName, message => {
+        console.log(message);
+      });
       user
         .update({
-          avatar: config.upload.avatarPath + avatarName
+          avatarPath: config.upload.avatarPath + avatarName,
+          avatarFullPath: config.upload.avatarFullPath + avatarName
         })
         .then(user => {
           return res
@@ -98,18 +107,21 @@ module.exports = function(app) {
           return res.status(500).send("Error: " + message);
         });
     });
-    removeFile(tempPath);
+    //removeFile(tempPath);
   });
 
   app.post("/delete-user-avatar", (req, res) => {
     getUserByToken(req, res, user => {
-      if (!user.avatar && !user.avatar.length) {
+      if (!user.avatarFullPath && !user.avatarFullPath.length) {
         return res.status(500).send("Avatar not set!");
       }
-      removeFile(config.upload.path + user.avatar);
+      removeFile(user.avatarFullPath, message => {
+        console.log(message);
+      });
       user
         .update({
-          avatar: null
+          avatarPath: null,
+          avatarFullPath: null
         })
         .then(user => {
           return res

@@ -1,3 +1,6 @@
 module.exports = {
-  url: "mongodb+srv://vanhock:17283946VaNo@perfect-wcqng.mongodb.net/"
+  host: "localhost",
+  dbName: "pixel",
+  userName: "root",
+  userPassword: "root"
 };

@@ -20,7 +20,10 @@ module.exports = function(sequelize, DataTypes) {
         unique: false,
         allowNull: true
       },
-      avatar: {
+      avatarPath: {
+        type: DataTypes.STRING
+      },
+      avatarFullPath: {
         type: DataTypes.STRING
       },
       email: {

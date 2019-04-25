@@ -5,11 +5,11 @@ module.exports = {
     figmaAccessToken: "11971-5d340a8f-7932-4e2e-9d36-3d193a64abe7"
   },
   upload: {
-    path: path.join(__dirname, "../public/"),
-    tempPath: path.join(__dirname, "../public/temp/"),
-    designImagesFullPath: path.join(__dirname, "../public/design/"),
-    designImagesPath: "/design/",
-    avatarFullPath: path.join(__dirname, "../public/avatar/"),
-    avatarPath: "/avatar/"
+    path: path.join(__dirname, "../public/images/"),
+    tempPath: path.join(__dirname, "../public/images/temp/"),
+    designImagesFullPath: path.join(__dirname, "../public/images/designs/"),
+    designImagesPath: "/images/designs/",
+    avatarFullPath: path.join(__dirname, "../public/images/avatars/"),
+    avatarPath: "/images/avatars/"
   }
 };

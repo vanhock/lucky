@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     name: DataTypes.STRING,
-    text: DataTypes.STRING,
+    text: DataTypes.TEXT,
     designBlockId: DataTypes.STRING,
     websiteNodeId: DataTypes.STRING,
     /**

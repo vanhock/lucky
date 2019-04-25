@@ -104,7 +104,7 @@ module.exports = function(app) {
                   .send(`Designs with ids: ${req.fields.ids} not found!`);
               }
               designs.forEach(design => {
-                removeFile(config.upload.path + design.image);
+                removeFile(design.imageFullPath);
               });
 
               Design.destroy({
@@ -192,10 +192,14 @@ module.exports = function(app) {
                         const splittedName = filename.split("\\");
                         const imageName =
                           splittedName[splittedName.length - 1] + ".png";
+
                         // Move file with another name
                         moveFile(filename, filename + ".png");
-                        processedDesigns[imageIndex].image =
+                        processedDesigns[imageIndex].imagePath =
                           config.upload.designImagesPath + imageName;
+                        processedDesigns[imageIndex].imagePath =
+                          config.upload.designImagesFullPath + imageName;
+
                         if (imageIndex === Object.keys(images).length - 1) {
                           /** If all design images saved => **/
                           saveDesignsToDataBase(res, processedDesigns);

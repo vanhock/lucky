@@ -9,9 +9,9 @@ const getUserByToken = function(req, res, cb) {
     req.headers.authorization,
     (message, user) => {
       if (!user) {
-        res.status(500).send("User not found");
+        return res.status(500).send("User not found");
       } else {
-        cb(user);
+        return cb(user);
       }
     }
   );
@@ -133,23 +133,24 @@ const getPairsForNode = function(node, childrenKey) {
   else return [node];
 };
 
-const removeFile = function(filePath) {
+const removeFile = function(filePath, cb) {
   /** Remove temp design file **/
-  try {
-    fs.unlinkSync(filePath);
-    //file removed
-  } catch (err) {
-    console.error(err);
+  if (fs.existsSync(filePath)) {
+    fs.unlink(filePath, message => {
+      message && cb(message);
+    });
+  } else {
+    cb("File does not exist");
   }
 };
 
-const moveFile = function(sourceName, targetName) {
-  try {
-    fs.rename(sourceName, targetName, () => {
-      // Doing nothing
+const moveFile = function(sourceName, targetName, cb) {
+  if (fs.existsSync(sourceName)) {
+    fs.rename(sourceName, targetName, message => {
+      message && cb(message);
     });
-  } catch (err) {
-    console.error(err);
+  } else {
+    cb("File does not exist");
   }
 };
 

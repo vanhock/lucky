@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     width: DataTypes.STRING,
     height: DataTypes.STRING,
     blocks: DataTypes.JSON,
-    image: DataTypes.STRING
+    imagePath: DataTypes.STRING,
+    imageFullPath: DataTypes.STRING
   });
 };
