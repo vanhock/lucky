@@ -15,7 +15,7 @@
 <script>
 import { mapGetters, mapState } from "vuex";
 import { simplifyDom, addToLocal, removeClass } from "../atoms/utils";
-import { getFoundNodesFromApi } from "../api";
+import { getFoundNodesFromApi } from "../api/api";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/WebsiteInspector";
 import DesignInspector from "../organisms/DesignInspector";
