@@ -1,5 +1,5 @@
 <template>
-  <section
+  <form
     class="form-group"
     ref="thisFormGroup"
     :class="{ changed: childrenChanged }"
@@ -7,23 +7,21 @@
     <div class="form-items">
       <slot v-if="!parentLoading"></slot>
     </div>
-  </section>
+  </form>
 </template>
 
 <script>
 export default {
   name: "FormGroup",
   mounted() {
-    /*this.$children.forEach(children => {
-      children.$on("inputChanged", this.handleChildrenChanged);
-    });*/
-	  this.$children[0].$on('inputChanged', this.handleChildrenChanged)
+    this.$children.forEach(children => {
+      children.$on("onchange", this.handleChildrenChanged);
+    });
   },
   beforeDestroy() {
-    /*this.$children.forEach(children => {
-      children.$off("inputChanged", this.handleChildrenChanged);
-    });*/
-	  this.$children[0].$on('inputChanged', this.handleChildrenChanged)
+    this.$children.forEach(children => {
+      children.$off("onchange", this.handleChildrenChanged);
+    });
   },
   data: () => ({
     name: "FormGroup",
@@ -51,12 +49,13 @@ export default {
     handleChildrenChanged() {
       const object = {};
       this.changedItemsArray = this.$children
-        .filter(children => children.changed)
+        .filter(children => children.$children[0].changed)
         .map(item => {
-          object[item.name] = item.inputValue;
+          object[item.$children[0].name] = item.$children[0].inputValue;
           return {
-            name: item.name,
-            value: item.inputValue
+            name: item.$children[0].name,
+            value: item.$children[0].inputValue,
+            valid: item.$children[0].valid
           };
         });
       this.changedItems = object;

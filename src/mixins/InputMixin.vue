@@ -1,5 +1,4 @@
 <script>
-import _ from "lodash";
 export default {
   mounted() {
     /** Set value from prop **/
@@ -40,13 +39,33 @@ export default {
     maskPattern: String
   },
   computed: {
-    changed: _.debounce(function() {
-      this.$emit("inputChanged", this.inputValue);
+    changed() {
       return (
         this.inputValue !== this.value &&
         this.inputValue.toString() !== this.value.toString()
       );
-    }, 400)
+    }
+  },
+  watch: {
+    $listeners: {
+      handler(newListeners, oldListeners = {}) {
+        this.$nextTick(() => {
+          Object.entries(oldListeners).forEach(([event, fn]) => {
+            if (oldListeners[event] === newListeners[event]) {
+              return;
+            }
+            this.$emit(event, fn);
+          });
+          Object.entries(newListeners).forEach(([event, fn]) => {
+            if (oldListeners[event] === newListeners[event]) {
+              return;
+            }
+            this.$off(event, fn);
+          });
+        });
+      },
+      immediate: true
+    }
   },
   methods: {
     resetValue() {

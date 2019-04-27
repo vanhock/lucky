@@ -1,6 +1,7 @@
 <template>
   <div class="v-input-bordered">
     <v-input
+      ref="input"
       :type="type"
       :name="name"
       :label="label"
@@ -10,10 +11,17 @@
 </template>
 
 <script>
+import _ from "lodash";
 import VInput from "../../atoms/VInput";
 export default {
   name: "VInputWithoutBorder",
   components: { VInput },
+  mounted() {
+    const self = this;
+    this.$refs.input.$on("onchange", () => {
+      self.$emit("onchange");
+    });
+  },
   extends: VInput
 };
 </script>

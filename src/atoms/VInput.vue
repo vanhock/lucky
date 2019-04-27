@@ -12,11 +12,12 @@
         :name="name"
         :placeholder="placeholder"
         :id="`input-${name}`"
+        :ref="`input-${name}`"
         v-bind="$listeners"
         v-model="inputValue"
         :class="{ valid: changed && valid, invalid: changed && !valid }"
-        @keyup="$emit('onchange')"
-        @past="$emit('onchange')"
+        @keyup="onChange"
+        @past="onChange"
         @focus="onFocus"
         @blur="onBlur"
         :disabled="disabled"
@@ -26,6 +27,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 import { mapState } from "vuex";
 /** Mixins: **/
 import InputMixin from "../mixins/InputMixin.vue";
@@ -33,7 +35,7 @@ import InputValidationMixin from "../mixins/InputValidationMixin.js";
 import InputMaskMixin from "../mixins/InputMaskMixin.js";
 
 export default {
-  name: "InputGeneral",
+  name: "VInput",
   mixins: [InputMixin, InputValidationMixin, InputMaskMixin],
   data: () => ({
     /** from InputMixin **/
@@ -47,6 +49,9 @@ export default {
     /** from InputMixin **/
   },
   methods: {
+    onChange: _.debounce(function() {
+      this.$emit("onchange");
+    }, 200),
     onFocus() {
       this.focused = true;
     },
