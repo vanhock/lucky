@@ -16,7 +16,8 @@ $color-1: #606060;
 $color-2: #ebebeb;
 $color-3: #42b983;
 $color-4: #070707;
-html, body {
+html,
+body {
   height: 100%;
 }
 body {

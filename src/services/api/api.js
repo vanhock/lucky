@@ -1,5 +1,5 @@
 import axios from "axios";
-import config from "../config";
+import config from "../../config";
 
 class PixelApi {
   constructor() {
@@ -33,9 +33,9 @@ class PixelApi {
     document.location = path;
   };
 
-  get(path, callback) {
+  get(path, payload, callback) {
     return this.api
-      .get(config.serverUrl + path)
+      .get(config.serverUrl + path, payload.data)
       .then(response => callback(response.status, response.data));
   }
 
@@ -45,7 +45,7 @@ class PixelApi {
         method: "PATCH",
         url: config.serverUrl + path,
         responseType: "json",
-        data: payload
+        data: payload.data
       })
       .then(response => callback(response.status, response.data));
   }
@@ -56,7 +56,7 @@ class PixelApi {
         method: "POST",
         url: config.serverUrl + path,
         responseType: "json",
-        data: payload
+        data: payload.data
       })
       .then(response => callback(response.status, response.data));
   }

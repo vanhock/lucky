@@ -7,6 +7,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    user: {},
     appTheme: "white",
     currentFrame: null,
     currentProject: null,
@@ -103,6 +104,9 @@ export default new Vuex.Store({
     targetElement: state => state.targetElement
   },
   mutations: {
+    SET_USER_DATA(state, { user }) {
+      state.user = user;
+    },
     SET_DESIGN(state, { blocks, image, params }) {
       if (!blocks || !blocks.hasOwnProperty("children")) {
         return;
@@ -211,6 +215,9 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    setUserData({ commit }, payload) {
+      commit("SET_USER_DATA", payload);
+    },
     setDesign({ commit }, payload) {
       commit("SET_DESIGN", payload);
     },
