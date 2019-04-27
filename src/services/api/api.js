@@ -17,13 +17,13 @@ class PixelApi {
   handleError = error => {
     switch (error.response.status) {
       case 401:
-        this.redirectTo(document, "/");
+        //this.redirectTo(document, "/");
         break;
       case 404:
-        this.redirectTo(document, "/404");
+        //this.redirectTo(document, "/404");
         break;
       default:
-        this.redirectTo(document, "/500");
+        //this.redirectTo(document, "/500");
         break;
     }
     return Promise.reject(error);

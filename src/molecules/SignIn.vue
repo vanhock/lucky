@@ -1,7 +1,7 @@
 <template>
   <div class="sign-in">
     <v-input-bordered name="email" label="Email" />
-    <v-input-bordered name="password" label="Password" />
+    <v-input-bordered name="password" type="password" label="Password" />
     <v-button class="submit" @click="auth">Sign In</v-button>
   </div>
 </template>
