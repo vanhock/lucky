@@ -1,5 +1,5 @@
 <template>
-  <div class="v-input" :class="appTheme">
+  <div class="v-input" :class="[appTheme, { focused: focused }]">
     <div class="label">
       <label :for="`input-${name}`">{{ label }}</label>
     </div>
@@ -8,15 +8,17 @@
         {{ validationMessage }}
       </div>
       <input
-        :class="{ valid: changed && valid, invalid: changed && !valid }"
-        v-model="inputValue"
         :type="type"
-        :id="`input-${name}`"
         :name="name"
         :placeholder="placeholder"
+        :id="`input-${name}`"
+        v-bind="$listeners"
+        v-model="inputValue"
+        :class="{ valid: changed && valid, invalid: changed && !valid }"
         @keyup="$emit('onchange')"
         @past="$emit('onchange')"
-        v-bind="$props"
+        @focus="onFocus"
+        @blur="onBlur"
         :disabled="disabled"
       />
     </div>
@@ -35,19 +37,29 @@ export default {
   mixins: [InputMixin, InputValidationMixin, InputMaskMixin],
   data: () => ({
     /** from InputMixin **/
-    componentType: "general"
+    componentType: "general",
+    focused: false
   }),
   computed: {
     ...mapState(["appTheme"])
   },
   props: {
     /** from InputMixin **/
+  },
+  methods: {
+    onFocus() {
+      this.focused = true;
+    },
+    onBlur() {
+      this.inputValue === "" ? (this.focused = false) : "";
+    }
   }
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .v-input {
+  position: relative;
   display: block;
   font-size: 18px;
   @include clearfix();
@@ -56,7 +68,7 @@ export default {
     font-size: 24px;
     input {
       width: calc(100% - 10px);
-      padding: 3px 10px 3px 0;
+      padding: 3px 10px 3px 6px;
       border: 0;
       border-bottom: 2px solid;
       border-bottom-color: $color-b3;
@@ -75,23 +87,42 @@ export default {
         border-color: transparent;
       }
     }
+    .validation-message {
+      position: absolute;
+      right: 46px;
+      top: -20px;
+      font-size: 12px;
+      color: $color-red;
+    }
   }
   .label {
-    display: flex;
-    align-items: flex-end;
-    text-align: left;
-    width: 190px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    float: left;
+    font-size: 21px;
+    font-weight: 300;
+    left: 5px;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transition: 0.2s;
+    user-select: none;
+    white-space: nowrap;
+    color: $color-b3;
+  }
+  &.focused {
+    .label {
+      font-size: 14px;
+      top: -20px;
+      color: $color-b4;
+    }
   }
   &.white {
-    .label, input {
+    .label,
+    input {
       color: $color-b2;
     }
   }
   &.black {
-    .label, input {
+    .label,
+    input {
       color: #fff;
     }
   }

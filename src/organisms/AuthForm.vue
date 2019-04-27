@@ -34,7 +34,7 @@ export default {
   }
 
   .v-input {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
 }
 .toggles {
@@ -53,6 +53,7 @@ export default {
     &:not(.active) {
       cursor: pointer;
       color: $color-b3;
+      font-weight: 500;
     }
   }
 }
