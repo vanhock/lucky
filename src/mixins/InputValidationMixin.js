@@ -1,6 +1,9 @@
 export default {
   computed: {
     valid() {
+      if (!this.required) {
+        return true;
+      }
       let defaultRule = null;
       switch (this.name) {
         case "email":
@@ -15,8 +18,6 @@ export default {
         case "url":
           defaultRule = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=]+$/g;
           break;
-        default:
-          return null;
       }
       const rule = this.validationRule || defaultRule;
 

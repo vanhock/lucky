@@ -234,3 +234,47 @@
   ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
 }
+
+@mixin loading-spinner(
+  $activeColor: "#EF6565",
+  $selector: "&::before",
+  $time: 1.5s
+) {
+  // Animation Keyframes
+  @keyframes spinner {
+    0% {
+      transform: translate3d(-50%, -50%, 0) rotate(0deg);
+    }
+    100% {
+      transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    }
+  }
+
+  // These styles are being applied the element
+  // where we include the mixin. I'd recommend for
+  // maintainability to keep these as minimal as possible.
+  position: relative;
+
+  // Styles to fade out spinner when loaded
+  &.-loaded {
+    opacity: 0;
+    transition: opacity linear 0.1s;
+  }
+
+  #{$selector} {
+    animation: $time linear infinite spinner;
+    border: solid 3px #eee;
+    border-bottom-color: #{$activeColor};
+    border-radius: 50%;
+    content: "";
+    height: 15px;
+    width: 15px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    transform-origin: center;
+    will-change: transform;
+    opacity: 0.8;
+  }
+}

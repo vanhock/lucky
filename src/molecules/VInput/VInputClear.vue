@@ -1,6 +1,12 @@
 <template>
   <div class="v-input-clear">
-    <v-input :type="type" :name="name" :label="label" :placeholder="placeholder" />
+    <v-input
+      :type="type"
+      :name="name"
+      :label="label"
+      :placeholder="placeholder"
+      :required="required"
+    />
   </div>
 </template>
 

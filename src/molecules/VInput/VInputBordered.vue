@@ -6,6 +6,7 @@
       :name="name"
       :label="label"
       :placeholder="placeholder"
+      :required="required"
     />
   </div>
 </template>
@@ -50,7 +51,7 @@ export default {
       color: $color-b4;
       font-weight: 500;
     }
-    &.focused {
+    &.focus {
       .label {
         top: 9px;
         font-size: 11px;

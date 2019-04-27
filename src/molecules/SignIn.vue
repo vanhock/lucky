@@ -1,8 +1,13 @@
 <template>
   <div class="sign-in">
     <form-group>
-      <v-input-bordered name="email" label="Email" />
-      <v-input-bordered name="password" type="password" label="Password" />
+      <v-input-bordered name="email" label="Email" required />
+      <v-input-bordered
+        name="password"
+        type="password"
+        label="Password"
+        required
+      />
     </form-group>
     <v-button class="submit" @click="auth">Sign In</v-button>
   </div>

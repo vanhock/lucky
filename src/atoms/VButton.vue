@@ -1,12 +1,19 @@
 <template>
-  <button @click="$emit('click')" @touchmove="$emit('click')">
+  <button
+    @click="$emit('click')"
+    @touchmove="$emit('click')"
+    :class="{ loading: loading }"
+  >
     <slot></slot>
   </button>
 </template>
 
 <script>
 export default {
-  name: "Button"
+  name: "Button",
+  props: {
+    loading: Boolean
+  }
 };
 </script>
 
@@ -24,6 +31,11 @@ button {
   @include box-shadow(deep);
   &[disabled] {
     opacity: 0.7;
+    pointer-events: none;
+  }
+  &.loading {
+    color: $color-w1;
+    @include loading-spinner($time: 1.4s);
     pointer-events: none;
   }
 }

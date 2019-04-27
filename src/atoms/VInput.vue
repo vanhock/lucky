@@ -1,11 +1,11 @@
 <template>
-  <div class="v-input" :class="[appTheme, { focused: focused }]">
+  <div class="v-input" :class="[appTheme, { focus: focus }]">
     <div class="label">
       <label :for="`input-${name}`">{{ label }}</label>
     </div>
     <div class="input">
-      <div class="validation-message" v-if="!valid">
-        {{ validationMessage }}
+      <div class="validation-message" v-if="!valid && focused">
+        Required
       </div>
       <input
         :type="type"
@@ -40,6 +40,7 @@ export default {
   data: () => ({
     /** from InputMixin **/
     componentType: "general",
+    focus: false,
     focused: false
   }),
   computed: {
@@ -53,10 +54,11 @@ export default {
       this.$emit("onchange");
     }, 200),
     onFocus() {
-      this.focused = true;
+      this.focus = true;
     },
     onBlur() {
-      this.inputValue === "" ? (this.focused = false) : "";
+      this.inputValue === "" ? (this.focus = false) : "";
+      this.focused = true;
     }
   }
 };
@@ -94,9 +96,9 @@ export default {
     }
     .validation-message {
       position: absolute;
-      right: 46px;
-      top: -20px;
-      font-size: 12px;
+      right: 10px;
+      top: 10px;
+      font-size: 10px;
       color: $color-red;
     }
   }
@@ -112,7 +114,7 @@ export default {
     white-space: nowrap;
     color: $color-b3;
   }
-  &.focused {
+  &.focus {
     .label {
       font-size: 14px;
       top: -20px;

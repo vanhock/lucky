@@ -1,13 +1,17 @@
 <template>
-  <div class="sign-in">
+  <div class="sign-up">
     <form-group ref="form">
-      <v-input-bordered name="name" label="Name" />
-      <v-input-bordered name="email" label="Email" />
-      <v-input-bordered name="password" type="password" label="Password" />
+      <v-input-bordered name="name" label="Name" required />
+      <v-input-bordered name="email" label="Email" required />
+      <v-input-bordered
+        name="password"
+        type="password"
+        label="Password"
+        required
+      />
       <v-input-bordered name="company" label="Company" />
     </form-group>
-
-    <v-button class="submit" @click="auth">Sign Up</v-button>
+    <v-button class="submit" @click="auth" :loading="loading">Sign Up</v-button>
   </div>
 </template>
 
@@ -24,6 +28,9 @@ import {
 export default {
   name: "SignUp",
   components: { FormGroup, VButton, VInputBordered },
+  data: () => ({
+    loading: false
+  }),
   props: {
     redirectTo: String
   },
@@ -34,7 +41,9 @@ export default {
       if (!formValid) {
         return console.log("form not valid");
       }
+      this.loading = true;
       Registration(fields, (error, user) => {
+        this.loading = false;
         if (error) {
           return UserRegistrationError(this, error);
         }

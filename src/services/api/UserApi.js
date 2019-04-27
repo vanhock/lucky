@@ -1,8 +1,8 @@
 import PixelApi from "./api";
 export function Registration(payload, cb) {
-  PixelApi.post("/registration", payload, (status, message) => {
+  PixelApi.post("/registration", { data: payload }, (status, message) => {
     if (status !== 200) {
-      return;
+      return cb(status);
     }
     cb(null, message);
   });

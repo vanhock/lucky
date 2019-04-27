@@ -31,6 +31,7 @@ export default {
       type: Boolean,
       default: false
     },
+    required: Boolean,
     description: String,
     placeholder: String,
     validationRule: String,

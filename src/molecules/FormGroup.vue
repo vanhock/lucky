@@ -5,7 +5,7 @@
     :class="{ changed: childrenChanged }"
   >
     <div class="form-items">
-      <slot v-if="!parentLoading"></slot>
+      <slot></slot>
     </div>
   </form>
 </template>
