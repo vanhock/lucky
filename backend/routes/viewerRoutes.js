@@ -54,7 +54,7 @@ module.exports = function(app) {
         res.status(200).send(found);
       })
       .catch(error => {
-        res.status(500).send(error);
+        res.status(400).send(error);
       });
   });
 };

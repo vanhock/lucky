@@ -15,11 +15,11 @@ module.exports = function(app) {
 
   app.post("/edit-project", (req, res) => {
     if (!req.fields.id) {
-      return res.status(500).send("Id did not provide!");
+      return res.status(400).send("Id did not provide!");
     }
     getUserByToken(req, res, user => {
       if (req.fields.name === "") {
-        return res.status(500).send("Name can't have an empty value!");
+        return res.status(400).send("Name can't have an empty value!");
       }
       const fieldsToEdit = filterObject(req.fields, ["name"]);
       Project.findOne({
@@ -29,7 +29,7 @@ module.exports = function(app) {
       })
         .then(project => {
           if (!project) {
-            return res.status(500).send("Project not found!");
+            return res.status(400).send("Project not found!");
           }
           if (project.userId === user.id || user.isAdmin) {
             project.update(fieldsToEdit).then(project => {
@@ -41,12 +41,12 @@ module.exports = function(app) {
             });
           } else {
             return res
-              .status(500)
+              .status(403)
               .send("You don't have rights for edit this project!");
           }
         })
         .catch(message => {
-          return res.status(500).send("Error with getting project: " + message);
+          return res.status(400).send("Error with getting project: " + message);
         });
     });
   });
@@ -60,13 +60,13 @@ module.exports = function(app) {
       })
         .then(projects => {
           if (!projects.length) {
-            return res.status(500).send("Projects not found for this user!");
+            return res.status(400).send("Projects not found for this user!");
           }
           return res.status(200).send(JSON.stringify(projects));
         })
         .catch(message => {
           return res
-            .status(500)
+            .status(400)
             .send("Error with getting projects: " + message);
         });
     });
@@ -74,7 +74,7 @@ module.exports = function(app) {
 
   app.post("/delete-project", (req, res) => {
     if (!req.fields.id) {
-      return res.status(500).send("Id did not provide!");
+      return res.status(400).send("Id did not provide!");
     }
     getUserByToken(req, res, user => {
       Project.findOne({
@@ -84,10 +84,10 @@ module.exports = function(app) {
       })
         .then(project => {
           if (!project) {
-            return res.status(500).send("Project not found!");
+            return res.status(400).send("Project not found!");
           }
           if (req.fields.name !== project.name) {
-            return res.status(500).send("Name check didn't pass!");
+            return res.status(400).send("Name check didn't pass!");
           }
           if (project.userId === user.id || user.isAdmin) {
             project.destroy();
@@ -104,12 +104,12 @@ module.exports = function(app) {
             return res.status(200).send("Project deleted!");
           } else {
             res
-              .status(500)
+              .status(403)
               .send("You don't have rights for delete this project!");
           }
         })
         .catch(() => {
-          return res.status(500).send("Projects not found for this user!");
+          return res.status(400).send("Projects not found for this user!");
         });
     });
   });

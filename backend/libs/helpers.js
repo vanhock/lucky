@@ -35,7 +35,7 @@ function checkAllowChangesToPage(req, res, cb) {
             if (project.userId === user.id || user.isAdmin) {
               cb(page, project, user);
             } else {
-              res.status(500).send("You don't have rights to edit this page!");
+              res.status(403).send("You don't have rights to edit this page!");
             }
           })
           .catch(() => {
