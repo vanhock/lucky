@@ -41,10 +41,10 @@ module.exports = function(app) {
   });
 
   app.get("/authorization", (req, res) => {
-    if (!Object.keys(req.fields).length) {
+    if (!Object.keys(req.query).length) {
       return;
     }
-    const fields = req.fields;
+    const fields = req.query;
     if (!fields.email || !fields.password) {
       return;
     }
@@ -55,7 +55,7 @@ module.exports = function(app) {
         if (!response) {
           return res.status(200).send(JSON.stringify(object));
         } else {
-          return res.status(400).send("Error: " + response);
+          return res.error(response);
         }
       }
     );

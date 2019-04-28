@@ -25,7 +25,7 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-comments", (req, res) => {
-    if (!req.fields.pageId) {
+    if (!req.query.pageId) {
       getUserByToken(req, res, user => {
         Comment.findAll({
           where: {
@@ -46,7 +46,7 @@ module.exports = function(app) {
       checkAllowChangesToPage(req, res, () => {
         Comment.findAll({
           where: {
-            pageId: req.fields.pageId
+            pageId: req.query.pageId
           }
         })
           .then(comments => {

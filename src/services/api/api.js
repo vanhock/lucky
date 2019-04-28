@@ -30,7 +30,12 @@ class PixelApi {
 
   get(path, payload, callback) {
     return this.api
-      .get(config.serverUrl + path, payload.data)
+      .request({
+        method: "GET",
+        url: config.serverUrl + path,
+        responseType: "json",
+        data: payload.data
+      })
       .then(response => callback(response.status, response.data))
       .catch(response => {
         callback(response.status, response);

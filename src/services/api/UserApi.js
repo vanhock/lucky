@@ -9,11 +9,15 @@ export function Registration(payload, cb) {
 }
 
 export function Authorization(payload, cb) {
-  PixelApi.get("/authorization", payload, (status, user) => {
-    if (status !== 200) {
-      return;
+  PixelApi.get(
+    `/authorization?email=${payload.email}&password=${payload.password}`,
+    { data: "" },
+    (status, data) => {
+      if (status !== 200) {
+        return cb(data);
+      }
+      localStorage.setItem("authorization", data.token);
+      cb(null, data);
     }
-    localStorage.setItem("authorization", user.token);
-    cb(null, user);
-  });
+  );
 }

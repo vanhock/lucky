@@ -58,10 +58,10 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-pages", (req, res) => {
-    if (!req.fields.projectId) {
+    if (!req.query.projectId) {
       return res.status(400).send("Project id did not provide!");
     }
-    const projectId = req.fields.projectId;
+    const projectId = req.query.projectId;
     getUserByToken(req, res, user => {
       Project.findOne({
         where: {

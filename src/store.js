@@ -104,8 +104,8 @@ export default new Vuex.Store({
     targetElement: state => state.targetElement
   },
   mutations: {
-    SET_USER_DATA(state, { user }) {
-      state.user = user;
+    SET_USER_DATA(state, payload) {
+      state.user = payload;
     },
     SET_DESIGN(state, { blocks, image, params }) {
       if (!blocks || !blocks.hasOwnProperty("children")) {

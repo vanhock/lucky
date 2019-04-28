@@ -25,13 +25,13 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-tasks", (req, res) => {
-    if (!req.fields.pageId) {
+    if (!req.query.pageId) {
       return res.status(400).send("Page id did not provide!");
     }
     checkAllowChangesToPage(req, res, () => {
       Task.findAll({
         where: {
-          pageId: req.fields.pageId
+          pageId: req.query.pageId
         }
       })
         .then(tasks => {
