@@ -21,14 +21,14 @@ const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
 
 module.exports = function(app) {
   app.get("/get-project-designs", (req, res) => {
-    if (!req.query.projectId) {
+    if (!req.fields.projectId) {
       return res.status(400).send("Project id did not provide!");
     }
 
     getUserByToken(req, res, user => {
       Project.findOne({
         where: {
-          id: req.query.projectId
+          id: req.fields.projectId
         }
       })
         .then(project => {
@@ -38,7 +38,7 @@ module.exports = function(app) {
           if (project.userId === user.id) {
             Design.findAll({
               where: {
-                projectId: req.query.projectId
+                projectId: req.fields.projectId
               }
             })
               .then(designs => {
