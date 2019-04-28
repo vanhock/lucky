@@ -17,7 +17,7 @@ module.exports = function(app) {
       !fields.email ||
       !fields.password
     ) {
-      return res.status(400).send("Required fields did not provide!");
+      return res.error("Required fields did not provide!");
     }
 
     User.options.classMethods.createNewUser(
@@ -27,8 +27,15 @@ module.exports = function(app) {
         password: fields.password,
         company: fields.company
       },
-      () => {
-        return res.status(200).send("User created");
+      (fail, success) => {
+        if (fail) {
+          return res.error(fail);
+        }
+        return res.status(200).send(
+          JSON.stringify({
+            message: success
+          })
+        );
       }
     );
   });

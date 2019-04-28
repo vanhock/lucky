@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import "vuejs-noty/dist/vuejs-noty.css";
 export default {};
 </script>
 
@@ -12,6 +13,8 @@ export default {};
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
 @import "./assets/normalize.scss";
+@import "./assets/animation.scss";
+@import "./assets/notification.scss";
 $color-1: #606060;
 $color-2: #ebebeb;
 $color-3: #42b983;

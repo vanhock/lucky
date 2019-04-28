@@ -106,16 +106,29 @@ module.exports = function(sequelize, DataTypes) {
       },
       classMethods: {
         createNewUser: function(user, done) {
-          return User.create(
-            {
-              name: user.name,
-              company: user.company,
-              email: user.email,
-              password: user.password,
-              tempPassword: this.generatePassword()
-            },
-            done()
-          );
+          User.findAll({
+            where: {
+              email: user.email
+            }
+          })
+            .then(users => {
+              if (users.length) {
+                return done("User with same email already exist!");
+              }
+              return User.create(
+                {
+                  name: user.name,
+                  company: user.company,
+                  email: user.email,
+                  password: user.password,
+                  tempPassword: this.generatePassword()
+                },
+                done(null, "User created!")
+              );
+            })
+            .catch(message => {
+              console.log(message);
+            });
         },
         generatePassword: function() {
           return crypto.randomBytes(tempPasswordLength).toString("hex");

@@ -11,22 +11,17 @@ class PixelApi {
   }
 
   static handleSuccess(response) {
-    return response;
+    return { status: response.status, data: response.data };
   }
 
   handleError = error => {
     switch (error.response.status) {
-      case 401:
-        //this.redirectTo(document, "/");
-        break;
-      case 404:
-        //this.redirectTo(document, "/404");
-        break;
       default:
-        //this.redirectTo(document, "/500");
-        break;
+        return {
+          status: error.response.status,
+          data: error.response.data.errors[0].title
+        };
     }
-    return Promise.reject(error);
   };
 
   redirectTo = (document, path) => {
@@ -36,7 +31,10 @@ class PixelApi {
   get(path, payload, callback) {
     return this.api
       .get(config.serverUrl + path, payload.data)
-      .then(response => callback(response.status, response.data));
+      .then(response => callback(response.status, response.data))
+      .catch(response => {
+        callback(response.status, response);
+      });
   }
 
   patch(path, payload, callback) {
@@ -47,7 +45,7 @@ class PixelApi {
         responseType: "json",
         data: payload.data
       })
-      .then(response => callback(response.status, response.data));
+      .then(response => callback(response.status, response));
   }
 
   post(path, payload, callback) {

@@ -1,0 +1,13 @@
+#noty_layout__topCenter {
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  transform: none;
+  .noty_theme__mint.noty_bar {
+	margin: 0;
+	.noty_body {
+	  text-align: center;
+	}
+  }
+}

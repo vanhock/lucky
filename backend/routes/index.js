@@ -1,5 +1,6 @@
 const config = require("../config/config");
 const formidableMiddleware = require("express-formidable");
+const errorHandlerMiddleware = require("express-json-errors");
 const viewerRoutes = require("./viewerRoutes");
 const userRoutes = require("./userRoutes");
 const projectRoutes = require("./projectRoutes");
@@ -24,12 +25,13 @@ module.exports = function(app) {
         {
           event: "end",
           action: function(req, res, next, name, file) {
-            console.log("Upload end");
+            console.log("Request end");
           }
         }
       ]
     )
   );
+  app.use(errorHandlerMiddleware());
   viewerRoutes(app);
   userRoutes(app);
   projectRoutes(app);

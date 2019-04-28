@@ -1,6 +1,6 @@
 <template>
   <div class="sign-up">
-    <form-group ref="form">
+    <form-group ref="form" :loading="loading">
       <v-input-bordered name="name" label="Name" required />
       <v-input-bordered name="email" label="Email" required />
       <v-input-bordered
@@ -11,11 +11,14 @@
       />
       <v-input-bordered name="company" label="Company" />
     </form-group>
-    <v-button class="submit" @click="auth" :loading="loading">Sign Up</v-button>
+    <v-button class="submit" @click="registration" :loading="loading"
+      >Sign Up</v-button
+    >
   </div>
 </template>
 
 <script>
+import _ from "lodash";
 import VInputBordered from "./VInput/VInputBordered";
 import VButton from "../atoms/VButton";
 import FormGroup from "./FormGroup";
@@ -35,22 +38,22 @@ export default {
     redirectTo: String
   },
   methods: {
-    auth() {
+    registration: _.debounce(function() {
       const formValid = this.$refs.form.valid;
       const fields = this.$refs.form.changedItems;
       if (!formValid) {
-        return console.log("form not valid");
+        this.$refs.form.showValidation();
+        return UserRegistrationError(this, "Form not valid!");
       }
       this.loading = true;
-      Registration(fields, (error, user) => {
+      Registration(fields, (error, success) => {
         this.loading = false;
         if (error) {
           return UserRegistrationError(this, error);
         }
-        UserRegistrationSuccess(this, this.redirectTo);
-        this.$store.dispatch("setUserData", user);
+        UserRegistrationSuccess(this, success.message);
       });
-    }
+    }, 300)
   }
 };
 </script>

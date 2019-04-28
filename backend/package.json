@@ -15,6 +15,7 @@
     "cors-anywhere": "^0.4.1",
     "express": "^4.16.4",
     "express-formidable": "^1.2.0",
+    "express-json-errors": "^1.0.5",
     "find-free-port": "^2.0.0",
     "formidable": "^1.2.1",
     "http-proxy": "^1.17.0",

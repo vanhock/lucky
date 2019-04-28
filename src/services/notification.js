@@ -1,11 +1,16 @@
 import Vue from "vue";
 import VueNoty from "vuejs-noty";
-
 Vue.use(VueNoty, {
   timeout: 4000,
+  dismissQueue: true,
+  maxVisible: 2,
   progressBar: false,
   layout: "topCenter",
-  theme: "nest"
+  theme: "mint",
+  animation: {
+    open: "slide-in-bck-top",
+    close: "slide-bck-top"
+  }
 });
 
 export function UserLoginSuccess(instance, payload) {
@@ -17,16 +22,7 @@ export function UserLoginError(instance, payload) {
 }
 
 export function UserRegistrationSuccess(instance, payload) {
-  instance.$noty.success("Registration success!", {
-    callbacks: {
-      afterShow: () => {
-        if (!payload) {
-          return;
-        }
-        document.location = payload;
-      }
-    }
-  });
+  instance.$noty.success(payload);
 }
 
 export function UserRegistrationError(instance, payload) {

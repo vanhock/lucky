@@ -2,7 +2,7 @@
   <form
     class="form-group"
     ref="thisFormGroup"
-    :class="{ changed: childrenChanged }"
+    :class="{ changed: childrenChanged, loading: loading }"
   >
     <div class="form-items">
       <slot></slot>
@@ -28,6 +28,10 @@ export default {
     changedItemsArray: [],
     changedItems: {}
   }),
+  props: {
+    editableMode: Boolean,
+    loading: Boolean
+  },
   computed: {
     parentLoading() {
       return this.$parent && this.$parent.loading;
@@ -48,8 +52,11 @@ export default {
   methods: {
     handleChildrenChanged() {
       const object = {};
+      const self = this;
       this.changedItemsArray = this.$children
-        .filter(children => children.$children[0].changed)
+        .filter(children =>
+          self.editableMode ? children.$children[0].changed : true
+        )
         .map(item => {
           object[item.$children[0].name] = item.$children[0].inputValue;
           return {
@@ -65,7 +72,22 @@ export default {
         child.resetValue();
       });
       this.changedItemsArray = [];
+    },
+    showValidation() {
+      this.$children.forEach(child => {
+        child.$children[0].focused = true;
+      });
     }
   }
 };
 </script>
+<style lang="scss">
+.form-group {
+  &.loading {
+    input {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  }
+}
+</style>
