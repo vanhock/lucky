@@ -14,7 +14,7 @@
 <script>
 import Zodicon from "vue-zondicons";
 export default {
-  name: "Toggle",
+  name: "VToggle",
   components: { Zodicon },
   data: () => ({
     hover: false

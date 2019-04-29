@@ -13,6 +13,5 @@ export default {
 <style lang="scss" scoped>
 .menu-item {
   display: block;
-  padding: 4px 10px;
 }
 </style>

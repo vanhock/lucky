@@ -1,28 +1,28 @@
 <template>
   <div class="design-params">
     <panel-control>
-      <toggle
+      <v-toggle
         :active="showAllBlocks"
         :icon="(showFoundBlocks && 'target') || 'layers'"
         :text="(showFoundBlocks && 'Found layers') || 'All layers'"
         :show-text="false"
         @click="toggleLayersViewMode"
       />
-      <toggle icon="border-none" text="Guides" :show-text="false" />
-      <toggle icon="repost" text="Change design" />
+      <v-toggle icon="border-none" text="Guides" :show-text="false" />
+      <v-toggle icon="repost" text="Change design" />
     </panel-control>
   </div>
 </template>
 
 <script>
 import PanelControl from "../atoms/PanelControl";
-import Toggle from "../atoms/Toggle";
+import VToggle from "../atoms/VToggle";
 import ViewMixin from "../mixins/ViewMixin";
 
 export default {
   name: "DesignParams",
   mixins: [ViewMixin],
-  components: { PanelControl, Toggle },
+  components: { PanelControl, VToggle },
   computed: {
     showAllBlocks() {
       return this.getViewParam("showAllDesignBlocks");

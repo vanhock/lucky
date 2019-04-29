@@ -10,7 +10,7 @@
         <project-toolbar />
       </div>
       <view-params @reloadView="$emit('reloadView')" class="right" />
-      <toggle
+      <v-toggle
         class="right"
         icon="inbox-full"
         :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
@@ -27,7 +27,7 @@
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
 import ViewParams from "../molecules/ViewToolbar";
-import Toggle from "../atoms/Toggle";
+import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/DesignToolbar";
 import ProjectToolbar from "../molecules/ProjectToolbar";
 export default {
@@ -35,7 +35,7 @@ export default {
   components: {
     ProjectToolbar,
     DesignParams,
-    Toggle,
+    VToggle,
     ViewParams,
     TaskList
   },

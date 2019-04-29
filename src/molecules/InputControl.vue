@@ -2,14 +2,14 @@
   <div class="input-control">
     <div class="title" v-if="title">{{ title }}</div>
     <label>
-      <toggle
+      <v-toggle
         v-if="showPlusMinus"
         icon="minus-outline"
         icon-hover="minus-solid"
         @click="inputValue > 0 && --inputValue"
       />
       <input type="text" v-model="inputValue" />
-      <toggle
+      <v-toggle
         v-if="showPlusMinus"
         icon="add-outline"
         icon-hover="add-solid"
@@ -21,10 +21,10 @@
 
 <script>
 import _ from "lodash";
-import Toggle from "../atoms/Toggle";
+import VToggle from "../atoms/VToggle";
 export default {
   name: "InputControl",
-  components: { Toggle },
+  components: { VToggle },
   mounted() {
     this.inputValue = this.value;
   },

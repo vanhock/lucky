@@ -4,7 +4,7 @@ import Router from "vue-router";
 import AuthView from "./views/AuthView";
 
 import store from "./services/store/store";
-import DashboardView from "./views/DashboardView";
+import DashboardView from "./views/UserPanelView";
 Vue.use(Router);
 const ifNotAuthenticated = (to, from, next) => {
   if (!store.getters.isAuthenticated) {
@@ -27,9 +27,14 @@ export default new Router({
   routes: [
     {
       path: "/",
-      name: "dashboard",
       component: DashboardView,
-      beforeEnter: ifAuthenticated
+      beforeEnter: ifAuthenticated,
+      children: [
+        {
+          path: "",
+          name: "dashboard"
+        }
+      ]
     },
     {
       path: "/inspectors",
