@@ -110,15 +110,15 @@ export default {
             };
             function setUpFrame() {
               self.$store.dispatch(
-                "setCurrentFrame",
+                "INSPECTOR_SET_CURRENT_FRAME",
                 document.querySelector("iframe[data-perfect-pixel]")
               );
               self.preventAllLinks(frameWindow);
               self.applyAdditionalFrameStyles();
               self.$emit("websiteInspectorReady");
-              /** If viewParams not set, emmit setViewParams **/
+              /** If viewParams not set, emmit INSPECTOR_SET_VIEW_PARAMS **/
               if (!self.viewParams) {
-                self.$emit("setViewParams");
+                self.$emit("INSPECTOR_SET_VIEW_PARAMS");
               }
               self.currentFrame.contentDocument.onscroll = () => {
                 if (!self.syncScroll) {
@@ -280,7 +280,7 @@ export default {
           designIndex: parseInt(foundNode.designBlockIndex),
           foundNodeIndex: parseInt(foundNodeIndex)
         };
-        self.$store.dispatch("setTargetElement", targetElement);
+        self.$store.dispatch("INSPECTOR_SET_TARGET_ELEMENT", targetElement);
         self.focusOnElement(targetElement);
         self.noScroll = true;
         e.stopPropagation();

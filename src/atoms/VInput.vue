@@ -21,6 +21,7 @@
         @focus="onFocus"
         @blur="onBlur"
         :disabled="disabled"
+        :autocomplete="autocomplete"
       />
     </div>
   </div>
@@ -48,6 +49,7 @@ export default {
   },
   props: {
     /** from InputMixin **/
+    autocomplete: String
   },
   methods: {
     onChange: _.debounce(function() {

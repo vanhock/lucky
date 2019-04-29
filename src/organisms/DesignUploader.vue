@@ -17,7 +17,7 @@
         <div class="dimensions">
           {{ designParams.width }}x{{ designParams.height }}
         </div>
-        <div class="action" @click="$store.dispatch('resetDesign')">
+        <div class="action" @click="$store.dispatch('INSPECTOR_RESET_DESIGN')">
           Удалить
         </div>
       </div>
@@ -71,7 +71,7 @@ export default {
         if (!design) {
           return;
         }
-        self.$store.dispatch("setFrameParams", {
+        self.$store.dispatch("INSPECTOR_SET_FRAME_PARAMS", {
           width: design.document.width,
           height: design.document.height
         });
@@ -81,7 +81,7 @@ export default {
          * Compress and set design image
          */
         const image = psd.image.toPng();
-        self.$store.dispatch("setDesign", {
+        self.$store.dispatch("INSPECTOR_SET_DESIGN", {
           blocks: design,
           image: image.src,
           params: params

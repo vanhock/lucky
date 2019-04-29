@@ -1,11 +1,12 @@
 <template>
   <div class="sign-in">
     <form-group ref="form" :loading="loading">
-      <v-input-bordered name="email" label="Email" required />
+      <v-input-bordered name="email" label="Email" autocomplete="username" required />
       <v-input-bordered
         name="password"
         type="password"
         label="Password"
+        autocomplete="current-password"
         required
       />
     </form-group>
@@ -19,9 +20,9 @@
 import _ from "lodash";
 import VInputBordered from "../molecules/VInput/VInputBordered";
 import VButton from "../atoms/VButton";
-import FormGroup from "./FormGroup";
-import { Authorization } from "../services/api/UserApi";
+import FormGroup from "../molecules/FormGroup";
 import { UserLoginError, UserLoginSuccess } from "../services/notification";
+import { AUTH_REQUEST } from "../services/store/mutation-types";
 
 export default {
   name: "SignIn",
@@ -34,6 +35,7 @@ export default {
   },
   methods: {
     authorization: _.debounce(function() {
+      const self = this;
       const formValid = this.$refs.form.valid;
       const fields = this.$refs.form.changedItems;
       if (!formValid) {
@@ -41,14 +43,18 @@ export default {
         return UserLoginError(this, "Form not valid!");
       }
       this.loading = true;
-      Authorization(fields, (error, user) => {
-        this.loading = false;
-        if (error) {
-          return UserLoginError(this, error);
-        }
-        this.$store.dispatch("setUserData", user);
-        UserLoginSuccess(this, user.name);
-      });
+      this.$store
+        .dispatch(AUTH_REQUEST, fields)
+        .then(user => {
+          UserLoginSuccess(this, user.name);
+          setTimeout(() => {
+            self.$router.push("/");
+          }, 2000);
+        })
+        .catch(error => {
+          this.loading = false;
+          UserLoginError(this, error);
+        });
     }, 300)
   }
 };

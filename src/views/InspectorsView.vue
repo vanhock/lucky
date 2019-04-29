@@ -88,7 +88,7 @@ export default {
     getFoundNodes() {
       this.clearFrame();
       this.gettingFoundNodeData = true;
-      this.$store.dispatch("setFoundNodes", {});
+      this.$store.dispatch("INSPECTOR_SET_FOUND_NODES", {});
       const body = document.querySelector("iframe[data-perfect-pixel]")
         .contentWindow.document.body;
       this.frameNodes = [...body.getElementsByTagName("*")];
@@ -106,7 +106,7 @@ export default {
         }
         this.$refs.websiteInspector.processNodes(this.frameNodes, foundNodes);
         this.$store
-          .dispatch("setFoundNodes", foundNodes)
+          .dispatch("INSPECTOR_SET_FOUND_NODES", foundNodes)
           .then(currentProject => {
             this.saveProjectToLocal(currentProject);
           });
@@ -116,9 +116,9 @@ export default {
     saveProjectToLocal(currentProject) {
       addToLocal("recentProjects", currentProject.id, currentProject);
     },
-    setViewParams() {
+    INSPECTOR_SET_VIEW_PARAMS() {
       const viewParams = this.defaultViewParams;
-      this.$store.dispatch("setViewParams", viewParams);
+      this.$store.dispatch("INSPECTOR_SET_VIEW_PARAMS", viewParams);
     },
     clearFrame() {
       if (!this.currentFrameDocument) {

@@ -59,8 +59,8 @@ export default {
     noScroll: false
   }),
   methods: {
-    setTargetElement(nodeIndex, designIndex, foundNodeIndex) {
-      this.$store.dispatch("setTargetElement", {
+    INSPECTOR_SET_TARGET_ELEMENT(nodeIndex, designIndex, foundNodeIndex) {
+      this.$store.dispatch("INSPECTOR_SET_TARGET_ELEMENT", {
         nodeIndex: parseInt(nodeIndex),
         designIndex: parseInt(designIndex),
         foundNodeIndex: parseInt(foundNodeIndex)

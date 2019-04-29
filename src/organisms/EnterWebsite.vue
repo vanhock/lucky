@@ -29,11 +29,11 @@ export default {
           return;
         }
 
-        this.$store.dispatch("setSiteUrl", url.inputValue);
-        this.setProjectInfo(url.inputValue);
+        this.$store.dispatch("INSPECTOR_SET_WEBSITE_URL", url.inputValue);
+        this.PROJECT_SET_PROJECT_INFO(url.inputValue);
       });
     },
-    setProjectInfo(url) {
+    PROJECT_SET_PROJECT_INFO(url) {
       const projectId = url
         .replace(/(http|https):\/\//, "")
         .replace(/\?.*/, "")
@@ -45,7 +45,7 @@ export default {
         id: projectId,
         name: (isProjectExist && recentProjects[projectId].name) || url.replace(/(http|https):\/\//, "").replace(/\?.*/, "")
       };
-      this.$store.dispatch("setProjectInfo", projectInfo);
+      this.$store.dispatch("PROJECT_SET_PROJECT_INFO", projectInfo);
     }
   }
 };

@@ -1,12 +1,23 @@
 <template>
   <div class="sign-up">
     <form-group ref="form" :loading="loading">
-      <v-input-bordered name="name" label="Name" required />
-      <v-input-bordered name="email" label="Email" required />
+      <v-input-bordered
+        name="name"
+        label="Name"
+        autocomplete="username"
+        required
+      />
+      <v-input-bordered
+        name="email"
+        label="Email"
+        autocomplete="email"
+        required
+      />
       <v-input-bordered
         name="password"
         type="password"
         label="Password"
+        autocomplete="new-password"
         required
       />
       <v-input-bordered name="company" label="Company" />
@@ -19,9 +30,9 @@
 
 <script>
 import _ from "lodash";
-import VInputBordered from "./VInput/VInputBordered";
+import VInputBordered from "../molecules/VInput/VInputBordered";
 import VButton from "../atoms/VButton";
-import FormGroup from "./FormGroup";
+import FormGroup from "../molecules/FormGroup";
 import { Registration } from "../services/api/UserApi";
 import {
   UserRegistrationError,
@@ -51,6 +62,7 @@ export default {
         if (error) {
           return UserRegistrationError(this, error);
         }
+        this.$router.push("/sign-in");
         UserRegistrationSuccess(this, success.message);
       });
     }, 300)

@@ -7,6 +7,7 @@
       :label="label"
       :placeholder="placeholder"
       :required="required"
+      :autocomplete="autocomplete"
     />
   </div>
 </template>

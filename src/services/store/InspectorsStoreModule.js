@@ -1,14 +1,19 @@
 import Vue from "vue";
-import Vuex from "vuex";
-import config from "./config";
-import { getParentAndChild } from "./atoms/utils";
+import config from "../../config";
+import { getParentAndChild } from "../../atoms/utils";
+import {
+  INSPECTOR_RESET_DESIGN,
+  INSPECTOR_SET_CURRENT_FRAME,
+  INSPECTOR_SET_DESIGN,
+  INSPECTOR_SET_FOUND_NODES,
+  INSPECTOR_SET_FRAME_PARAMS,
+  INSPECTOR_SET_TARGET_ELEMENT,
+  INSPECTOR_SET_VIEW_PARAMS,
+  INSPECTOR_SET_WEBSITE_URL
+} from "./mutation-types";
 
-Vue.use(Vuex);
-
-export default new Vuex.Store({
+export default {
   state: {
-    user: {},
-    appTheme: "white",
     currentFrame: null,
     currentProject: null,
     /**
@@ -104,10 +109,7 @@ export default new Vuex.Store({
     targetElement: state => state.targetElement
   },
   mutations: {
-    SET_USER_DATA(state, payload) {
-      state.user = payload;
-    },
-    SET_DESIGN(state, { blocks, image, params }) {
+    [INSPECTOR_SET_DESIGN](state, { blocks, image, params }) {
       if (!blocks || !blocks.hasOwnProperty("children")) {
         return;
       }
@@ -147,7 +149,7 @@ export default new Vuex.Store({
       Vue.set(state.currentProject, "designImage", image);
       Vue.set(state.currentProject, "designParams", params);
     },
-    SET_FRAME_PARAMS(state, payload) {
+    [INSPECTOR_SET_FRAME_PARAMS](state, payload) {
       if (!payload || typeof payload !== "object") {
         return;
       }
@@ -171,7 +173,7 @@ export default new Vuex.Store({
         }
       }
     },
-    SET_VIEW_PARAMS(state, payload) {
+    [INSPECTOR_SET_VIEW_PARAMS](state, payload) {
       if (!state.currentProject) {
         state.currentProject = {};
       }
@@ -184,83 +186,59 @@ export default new Vuex.Store({
         }
       }
     },
-    SET_PROJECT_INFO(state, payload) {
-      payload.id ? (state.currentProject.id = payload.id) : "";
-      payload.name ? (state.currentProject.name = payload.name) : "";
-      state.currentProject.date = Date.now();
-    },
-    SET_FOUND_NODES(state, payload) {
+    [INSPECTOR_SET_FOUND_NODES](state, payload) {
       if (!state.currentProject) {
         state.currentProject = {};
       }
       Vue.set(state.currentProject, "foundNodes", payload);
     },
-    SET_CURRENT_PROJECT(state, payload) {
-      state.currentProject = payload;
-    },
-    SET_CURRENT_FRAME(state, payload) {
+    [INSPECTOR_SET_CURRENT_FRAME](state, payload) {
       state.currentFrame = payload;
     },
-    RESET_DESIGN(state) {
+    [INSPECTOR_RESET_DESIGN](state) {
       Vue.delete(state.currentProject, "designBlocks");
       Vue.delete(state.currentProject, "designImage");
       Vue.delete(state.currentProject, "designParams");
     },
-    RESET_HOMEPAGE_STATE(state) {
-      state.currentProject = null;
-      state.currentFrame = null;
-    },
-    SET_TARGET_ELEMENT(state, payload) {
+    [INSPECTOR_SET_TARGET_ELEMENT](state, payload) {
       state.targetElement = payload;
     }
   },
   actions: {
-    setUserData({ commit }, payload) {
-      commit("SET_USER_DATA", payload);
+    [INSPECTOR_SET_DESIGN]: ({ commit }, payload) => {
+      commit("INSPECTOR_SET_DESIGN", payload);
     },
-    setDesign({ commit }, payload) {
-      commit("SET_DESIGN", payload);
-    },
-    setSiteUrl({ commit }, payload) {
+    [INSPECTOR_SET_WEBSITE_URL]: ({ commit }, payload) => {
       const url =
         "https://" + payload.replace("http://", "").replace("https://", "");
       return new Promise(resolve => {
-        commit("SET_FRAME_PARAMS", { websiteUrl: url });
+        commit("INSPECTOR_SET_WEBSITE_URL", { websiteUrl: url });
         resolve(url);
       });
     },
-    setFrameParams({ commit }, payload) {
-      commit("SET_FRAME_PARAMS", payload);
+    [INSPECTOR_SET_FRAME_PARAMS]: ({ commit }, payload) => {
+      commit("INSPECTOR_SET_FRAME_PARAMS", payload);
     },
-    setViewParams({ commit }, payload) {
-      commit("SET_VIEW_PARAMS", payload);
+    [INSPECTOR_SET_VIEW_PARAMS]: ({ commit }, payload) => {
+      commit("INSPECTOR_SET_VIEW_PARAMS", payload);
     },
-    setFoundNodes({ commit, state }, payload) {
+    [INSPECTOR_SET_FOUND_NODES]: ({ commit, state }, payload) => {
       return new Promise(resolve => {
-        commit("SET_FOUND_NODES", payload);
+        commit("INSPECTOR_SET_FOUND_NODES", payload);
         resolve(state.currentProject);
       });
     },
-    setProjectInfo({ commit }, payload) {
-      commit("SET_PROJECT_INFO", payload);
+    [INSPECTOR_SET_CURRENT_FRAME]: ({ commit }, payload) => {
+      commit("INSPECTOR_SET_CURRENT_FRAME", payload);
     },
-    setCurrentProject({ commit }, payload) {
-      commit("SET_CURRENT_PROJECT", payload);
+    [INSPECTOR_RESET_DESIGN]: ({ commit }) => {
+      commit("INSPECTOR_RESET_DESIGN");
     },
-    setCurrentFrame({ commit }, payload) {
-      commit("SET_CURRENT_FRAME", payload);
-    },
-    resetDesign({ commit }) {
-      commit("RESET_DESIGN");
-    },
-    resetHomepageState({ commit }) {
-      commit("RESET_HOMEPAGE_STATE");
-    },
-    setTargetElement({ commit }, payload) {
-      commit("SET_TARGET_ELEMENT", payload);
+    [INSPECTOR_SET_TARGET_ELEMENT]: ({ commit }, payload) => {
+      commit("INSPECTOR_SET_TARGET_ELEMENT", payload);
     }
   }
-});
+};
 
 function getObjectValue(object, key) {
   return object && object.hasOwnProperty(key) && object[key];

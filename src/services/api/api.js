@@ -4,7 +4,7 @@ import config from "../../config";
 class PixelApi {
   constructor() {
     let api = axios.create({
-      headers: { authorization: localStorage.getItem("authorization") || "" }
+      headers: { authorization: localStorage.getItem("user-token") || "" }
     });
     api.interceptors.response.use(PixelApi.handleSuccess, this.handleError);
     this.api = api;
@@ -16,6 +16,9 @@ class PixelApi {
 
   handleError = error => {
     switch (error.response.status) {
+      case 401:
+        document.location = "/log-out";
+        break;
       default:
         return {
           status: error.response.status,

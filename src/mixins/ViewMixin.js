@@ -20,7 +20,7 @@ export default {
       }
       const param = {};
       param[name] = value;
-      this.$store.dispatch("setViewParams", param);
+      this.$store.dispatch("INSPECTOR_SET_VIEW_PARAMS", param);
     }
   }
 };

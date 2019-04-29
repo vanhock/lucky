@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     toggleSyncScroll() {
-      this.$store.dispatch("setViewParams", { syncScroll: !this.syncScroll });
+      this.$store.dispatch("INSPECTOR_SET_VIEW_PARAMS", { syncScroll: !this.syncScroll });
     }
   }
 };

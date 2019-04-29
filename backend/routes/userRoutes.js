@@ -40,11 +40,11 @@ module.exports = function(app) {
     );
   });
 
-  app.get("/authorization", (req, res) => {
-    if (!Object.keys(req.query).length) {
+  app.post("/authorization", (req, res) => {
+    if (!Object.keys(req.fields).length) {
       return;
     }
-    const fields = req.query;
+    const fields = req.fields;
     if (!fields.email || !fields.password) {
       return;
     }

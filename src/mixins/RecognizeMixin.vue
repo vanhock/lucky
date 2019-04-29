@@ -55,7 +55,7 @@ export default {
               console.log(error);
             });
         });
-        this.$store.dispatch("setFoundNodes", this.recognize.foundNodes);
+        this.$store.dispatch("INSPECTOR_SET_FOUND_NODES", this.recognize.foundNodes);
         resolve(this.recognize.foundNodes);
       });
     },

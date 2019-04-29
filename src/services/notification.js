@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueNoty from "vuejs-noty";
 Vue.use(VueNoty, {
-  timeout: 4000,
+  timeout: 1500,
   dismissQueue: true,
   maxVisible: 2,
   progressBar: false,

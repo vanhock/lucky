@@ -20,6 +20,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
+  background-color: $color-bg3;
   &-container {
     max-width: 500px;
     max-height: 500px;

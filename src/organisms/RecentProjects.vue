@@ -26,7 +26,7 @@ export default {
       this.projects = getFromLocal("recentProjects");
     },
     loadProject(project) {
-      this.$store.dispatch("setCurrentProject", project).then(() => {
+      this.$store.dispatch("PROJECT_SET_CURRENT_PROJECT", project).then(() => {
         this.$router.push({ name: "view" });
       });
     }
