@@ -45,7 +45,7 @@ export default {
         id: projectId,
         name: (isProjectExist && recentProjects[projectId].name) || url.replace(/(http|https):\/\//, "").replace(/\?.*/, "")
       };
-      this.$store.dispatch("PROJECT_SET_PROJECT_INFO", projectInfo);
+      this.$store.dispatch("PROJECT_EDIT_PROJECT", projectInfo);
     }
   }
 };

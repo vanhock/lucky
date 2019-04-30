@@ -4,7 +4,7 @@ import {
   AUTH_ERROR,
   AUTH_LOGOUT
 } from "./mutation-types";
-import PixelApi from "../api/api";
+import { Authorization } from "../api/UserApi";
 export default {
   state: {
     user: {},
@@ -33,18 +33,18 @@ export default {
     }
   },
   actions: {
-    [AUTH_REQUEST]: ({ commit }, user) => {
+    [AUTH_REQUEST]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
         commit(AUTH_REQUEST);
-        PixelApi.post("/authorization", { data: user }, (status, data) => {
-          if (status !== 200) {
-            commit(AUTH_ERROR, data);
+        Authorization(payload, (error, user) => {
+          if (error) {
+            commit(AUTH_ERROR, error);
             localStorage.removeItem("user-token");
-            return reject(data);
+            return reject(error);
           }
-          localStorage.setItem("user-token", data.token);
-          commit(AUTH_SUCCESS, data);
-          resolve(data);
+          localStorage.setItem("user-token", user.token);
+          commit(AUTH_SUCCESS, user);
+          resolve(user);
         });
       });
     },

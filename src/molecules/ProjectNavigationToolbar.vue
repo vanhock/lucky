@@ -1,21 +1,28 @@
 <template>
-  <div class="project-toolbar">
-    <div class="project-selector" v-show="!editing">Default project</div><span class="divider"></span>
-    <div class="page-rename" :contenteditable="editing">
+  <div class="project-toolbar" v-if="currentProject">
+    <div class="project-selector" v-show="!editing">
       {{ currentProject.name }}
     </div>
+    <!-- ToDo: Need to project selector dropdown here -->
+    <template v-if="currentPage">
+      <span class="divider"></span>
+      <div class="page-rename" :contenteditable="editing">
+        {{ currentPage.name }}
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
-import { mapState } from "vuex";
 export default {
-  name: "ProjectToolbar",
+  name: "ProjectNavigationToolbar",
   data: () => ({
     editing: false
   }),
-  computed: {
-    ...mapState(["currentProject"])
+  props: {
+    currentProject: { type: Object, default: () => {} },
+    currentPage: { type: Object, default: () => {} },
+    projects: { type: Array, default: () => [] }
   }
 };
 </script>

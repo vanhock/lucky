@@ -22,7 +22,7 @@ export default {
 
 <style lang="scss">
 .sidebar {
-  width: 90px;
+  width: 95px;
   height: 100%;
   background-color: $color-bg1;
   &-container {

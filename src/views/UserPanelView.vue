@@ -15,7 +15,14 @@ export default {
   data: () => ({
     menu: [
       { text: "Projects", icon: "folder-outline", to: "projects" },
-      { text: "Account", icon: "user-solid-circle", to: "account", label: "soon", disabled: true }
+      {
+        text: "Account",
+        icon: "user-solid-circle",
+        to: "account",
+        label: "soon",
+        disabled: true
+      },
+      { text: "Log out", icon: "stand-by", to: "logOut" }
     ]
   })
 };
@@ -27,7 +34,6 @@ export default {
   display: flex;
   box-sizing: border-box;
   &-content {
-
   }
   &-container {
     padding: 30px;

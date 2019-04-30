@@ -29,7 +29,7 @@ import { mapGetters } from "vuex";
 import ViewParams from "../molecules/ViewToolbar";
 import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/DesignToolbar";
-import ProjectToolbar from "../molecules/ProjectToolbar";
+import ProjectToolbar from "../molecules/ProjectNavigationToolbar";
 export default {
   name: "TopPanel",
   components: {
