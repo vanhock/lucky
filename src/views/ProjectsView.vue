@@ -1,5 +1,7 @@
 <template>
-  <div class="projects-view"></div>
+  <div class="projects-view">
+    This is the Projects view
+  </div>
 </template>
 
 <script>

@@ -8,6 +8,7 @@
   >
     <Zodicon v-if="icon" :icon="currentIcon" class="icon" />
     <div class="text" v-if="text">{{ text }}</div>
+    <div class="label" v-if="label && label.length">{{ label }}</div>
   </div>
 </template>
 
@@ -29,7 +30,8 @@ export default {
     icon: String,
     iconHover: String,
     text: String,
-    showText: { type: Boolean, default: true }
+    showText: { type: Boolean, default: true },
+    label: String
   }
 };
 </script>
@@ -39,7 +41,6 @@ export default {
   position: relative;
   padding: 0 14px;
   height: inherit;
-
   display: flex;
   justify-content: center;
   align-items: center;
@@ -53,6 +54,17 @@ export default {
   .text {
     font-size: 10px;
     margin-left: 7px;
+  }
+  .label {
+    position: absolute;
+    right: 6px;
+    top: 10px;
+    padding: 1px 4px;
+    background-color: $color-b4;
+    color: $color-w1;
+    border-radius: 16px;
+    font-size: 10px;
+    font-weight: 500;
   }
   &:not(.show-text) {
     .text {

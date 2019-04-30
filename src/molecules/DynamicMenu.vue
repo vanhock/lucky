@@ -2,8 +2,18 @@
   <div class="dynamic-menu">
     <v-menu :align="align">
       <menu-item v-for="(item, index) in items" :key="index">
-        <router-link tag="div" :to="{ name: item.to }">
-          <v-toggle :icon="item.icon" :text="item.text" :show-text="showText" />
+        <router-link
+          tag="div"
+          :to="{ name: item.to }"
+          :disabled="item.disabled"
+        >
+          <v-toggle
+            :icon="item.icon"
+            :active="$route.name === item.to"
+            :text="item.text"
+            :show-text="showText"
+            :label="item.label"
+          />
         </router-link>
       </menu-item>
     </v-menu>
@@ -20,6 +30,7 @@ export default {
   props: {
     items: {
       type: Array,
+      default: () => [],
       required: true
     },
     showText: Boolean,
@@ -30,5 +41,3 @@ export default {
   }
 };
 </script>
-
-<style scoped></style>

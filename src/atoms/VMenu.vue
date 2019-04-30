@@ -16,7 +16,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .menu {
   display: block;
   &.horizontal {
@@ -26,7 +26,21 @@ export default {
   }
   &.vertical {
     .menu-item {
-      padding: 10px 4px;
+      padding: 0;
+      .toggle {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 14px 0;
+        .icon {
+          width: 24px;
+          height: 25px;
+        }
+        .text {
+          margin: 7px 0 0;
+          font-size: 12px;
+        }
+      }
     }
   }
 }

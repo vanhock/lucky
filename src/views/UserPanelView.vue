@@ -1,7 +1,9 @@
 <template>
-  <div class="dashboard-view">
-    <side-bar></side-bar>
-    <h1>This is the dashboard</h1>
+  <div class="user-panel">
+    <side-bar :menu="menu"></side-bar>
+    <div class="user-panel-content">
+      <div class="user-panel-container"><router-view /></div>
+    </div>
   </div>
 </template>
 
@@ -9,8 +11,26 @@
 import SideBar from "../organisms/SideBar";
 export default {
   name: "UserPanelView",
-  components: { SideBar }
+  components: { SideBar },
+  data: () => ({
+    menu: [
+      { text: "Projects", icon: "folder-outline", to: "projects" },
+      { text: "Account", icon: "user-solid-circle", to: "account", label: "soon", disabled: true }
+    ]
+  })
 };
 </script>
 
-<style scoped></style>
+<style lang="scss">
+.user-panel {
+  height: 100%;
+  display: flex;
+  box-sizing: border-box;
+  &-content {
+
+  }
+  &-container {
+    padding: 30px;
+  }
+}
+</style>

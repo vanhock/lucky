@@ -4,7 +4,7 @@ import Router from "vue-router";
 import AuthView from "./views/AuthView";
 
 import store from "./services/store/store";
-import DashboardView from "./views/UserPanelView";
+import UserPanelView from "./views/UserPanelView";
 Vue.use(Router);
 const ifNotAuthenticated = (to, from, next) => {
   if (!store.getters.isAuthenticated) {
@@ -27,12 +27,14 @@ export default new Router({
   routes: [
     {
       path: "/",
-      component: DashboardView,
+      component: UserPanelView,
       beforeEnter: ifAuthenticated,
       children: [
         {
           path: "",
-          name: "dashboard"
+          name: "projects",
+          component: () =>
+            import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
         }
       ]
     },
