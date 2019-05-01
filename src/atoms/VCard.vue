@@ -54,6 +54,9 @@ export default {
         margin-bottom: 10px;
       }
     }
+    .name {
+      font-weight: bold;
+    }
     .actions {
       display: flex;
       margin-top: auto;

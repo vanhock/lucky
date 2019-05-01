@@ -40,7 +40,7 @@ export default {
     max-width: 1000px;
   }
   &-container {
-    padding: 30px;
+    padding: 45px;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
