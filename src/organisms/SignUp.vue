@@ -1,5 +1,5 @@
 <template>
-  <div class="sign-up">
+  <div class="sign-up" @keydown.enter="registration">
     <form-group ref="form" :loading="loading">
       <v-input-bordered
         name="name"
@@ -41,7 +41,7 @@ import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 
 export default {
   name: "SignUp",
-  components: {VButtonPrimary, FormGroup, VInputBordered },
+  components: { VButtonPrimary, FormGroup, VInputBordered },
   data: () => ({
     loading: false
   }),

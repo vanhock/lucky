@@ -44,7 +44,7 @@ import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 export default {
   name: "ProjectsView",
-  created() {
+  mounted() {
     this.getAllProjects();
   },
   components: {

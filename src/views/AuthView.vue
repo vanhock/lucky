@@ -45,7 +45,7 @@ export default {
     border-radius: 8px;
 
     button.submit {
-      margin-top: 30px;
+      margin: 30px auto 0;
     }
 
     .v-input {
