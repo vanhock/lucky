@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { getFromLocal } from "../atoms/utils";
+import { getFromLocal } from "../utils";
 import ProjectCard from "../molecules/ProjectCard";
 export default {
   name: "RecentProjects",

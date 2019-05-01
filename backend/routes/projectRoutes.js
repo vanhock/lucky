@@ -59,9 +59,6 @@ module.exports = function(app) {
         }
       })
         .then(projects => {
-          if (!projects.length) {
-            return res.status(400).send("Projects not found for this user!");
-          }
           return res.status(200).send(JSON.stringify(projects));
         })
         .catch(message => {

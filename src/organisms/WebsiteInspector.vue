@@ -29,7 +29,7 @@ import {
   getElementBounding,
   relToAbs,
   scrollTo
-} from "../atoms/utils";
+} from "../utils";
 import ViewMixin from "../mixins/ViewMixin";
 export default {
   name: "WebsiteInspector",

@@ -11,17 +11,26 @@
 </template>
 
 <script>
-import ProjectItem from "../molecules/ProjectItem";
+import ProjectItem from "../molecules/Project/ProjectItem";
 export default {
   name: "ProjectsList",
   components: { ProjectItem },
   props: {
     projects: {
       type: Array,
-      default: () => []
+      default: () => [],
+      required: true
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.projects-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 20px;
+  margin-top: 30px;
+  justify-items: stretch;
+}
+</style>

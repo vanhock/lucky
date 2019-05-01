@@ -18,7 +18,10 @@ export default {
     projects: [],
     status: ""
   },
-  getters: {},
+  getters: {
+    projects: state => state.projects,
+    hasProjects: state => state.projects && state.projects.length
+  },
   mutations: {
     [PROJECT_EDIT_PROJECT](state, payload) {
       if (state.currentProject.id === payload.id)
@@ -44,11 +47,14 @@ export default {
       if (projectIndex !== -1) {
         state.projects.splice(projectIndex, 1);
       }
+    },
+    [PROJECT_GET_ALL_PROJECTS](state, payload) {
+      state.projects = payload;
     }
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
-      commit("PROJECT_SET_CURRENT_PROJECT", payload);
+      commit(PROJECT_SET_CURRENT_PROJECT, payload);
     },
     [PROJECT_CREATE_PROJECT]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
@@ -56,7 +62,7 @@ export default {
           if (error) {
             return reject(error);
           }
-          commit("PROJECT_CREATE_PROJECT", project);
+          commit(PROJECT_CREATE_PROJECT, project);
           resolve(project);
         });
       });
@@ -67,7 +73,7 @@ export default {
           if (error) {
             return reject(error);
           }
-          commit("PROJECT_EDIT_PROJECT", project);
+          commit(PROJECT_EDIT_PROJECT, project);
           resolve(project);
         });
       });
@@ -78,7 +84,7 @@ export default {
           if (error) {
             return reject(error);
           }
-          commit("PROJECT_DELETE_PROJECT", payload);
+          commit(PROJECT_DELETE_PROJECT, payload);
           resolve(success);
         });
       });
@@ -89,7 +95,7 @@ export default {
           if (error) {
             return reject(error);
           }
-          commit("PROJECT_GET_ALL_PROJECTS", projects);
+          commit(PROJECT_GET_ALL_PROJECTS, projects);
           resolve(projects);
         });
       });

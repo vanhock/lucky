@@ -1,7 +1,12 @@
 <template>
   <div class="sign-in">
     <form-group ref="form" :loading="loading">
-      <v-input-bordered name="email" label="Email" autocomplete="username" required />
+      <v-input-bordered
+        name="email"
+        label="Email"
+        autocomplete="username"
+        required
+      />
       <v-input-bordered
         name="password"
         type="password"
@@ -10,8 +15,8 @@
         required
       />
     </form-group>
-    <v-button class="submit" @click="authorization" :loading="loading"
-      >Sign In</v-button
+    <v-button-primary class="submit" @click="authorization" :loading="loading"
+      >Sign In</v-button-primary
     >
   </div>
 </template>
@@ -19,14 +24,14 @@
 <script>
 import _ from "lodash";
 import VInputBordered from "../molecules/VInput/VInputBordered";
-import VButton from "../atoms/VButton";
 import FormGroup from "../molecules/FormGroup";
 import { UserLoginError, UserLoginSuccess } from "../services/notification";
 import { AUTH_REQUEST } from "../services/store/mutation-types";
+import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 
 export default {
   name: "SignIn",
-  components: { FormGroup, VButton, VInputBordered },
+  components: { VButtonPrimary, FormGroup, VInputBordered },
   data: () => ({
     loading: false
   }),

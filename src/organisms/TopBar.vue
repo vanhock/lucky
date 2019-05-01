@@ -1,10 +1,14 @@
 <template>
   <div class="top-bar">
-    <project-navigation-toolbar
-      :current-project="currentProject"
-      :current-page="currentPage"
-      :projects="Projects"
-    />
+    <div class="top-bar-left">
+      <slot name="left"></slot>
+      <project-navigation-toolbar
+        :current-project="currentProject"
+        :current-page="currentPage"
+        :projects="projects"
+      />
+    </div>
+    <div class="top-bar-right"><slot name="right"></slot></div>
   </div>
 </template>
 

@@ -12,9 +12,9 @@ export default {};
 <style lang="scss">
 @import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
-@import "./assets/normalize.scss";
-@import "./assets/animation.scss";
-@import "./assets/notification.scss";
+@import "assets/styles/normalize";
+@import "assets/styles/animation";
+@import "assets/styles/notification";
 $color-1: #606060;
 $color-2: #ebebeb;
 $color-3: #42b983;

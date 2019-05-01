@@ -22,8 +22,8 @@
       />
       <v-input-bordered name="company" label="Company" />
     </form-group>
-    <v-button class="submit" @click="registration" :loading="loading"
-      >Sign Up</v-button
+    <v-button-primary class="submit" @click="registration" :loading="loading"
+      >Sign Up</v-button-primary
     >
   </div>
 </template>
@@ -31,17 +31,17 @@
 <script>
 import _ from "lodash";
 import VInputBordered from "../molecules/VInput/VInputBordered";
-import VButton from "../atoms/VButton";
 import FormGroup from "../molecules/FormGroup";
 import { Registration } from "../services/api/UserApi";
 import {
   UserRegistrationError,
   UserRegistrationSuccess
 } from "../services/notification";
+import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 
 export default {
   name: "SignUp",
-  components: { FormGroup, VButton, VInputBordered },
+  components: {VButtonPrimary, FormGroup, VInputBordered },
   data: () => ({
     loading: false
   }),

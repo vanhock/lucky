@@ -1,7 +1,7 @@
 <template>
   <div
     class="toggle"
-    :class="{ active: active, 'show-text': showText }"
+    :class="{ active: active, 'show-text': showText, theme }"
     @click="$emit('click')"
     @mouseenter="hover = true"
     @mouseleave="hover = false"
@@ -31,7 +31,8 @@ export default {
     iconHover: String,
     text: String,
     showText: { type: Boolean, default: true },
-    label: String
+    label: String,
+    theme: { type: String, default: "white" }
   }
 };
 </script>

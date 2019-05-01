@@ -11,7 +11,7 @@
         :type="type"
         :name="name"
         :placeholder="placeholder"
-        :id="`input-${name}`"
+        :id="id || `input-${name}`"
         :ref="`input-${name}`"
         v-bind="$listeners"
         v-model="inputValue"

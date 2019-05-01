@@ -4,6 +4,8 @@ node_modules
 /backend/log
 /backend/public
 
+/src/assets/styles/_sprites.scss
+
 /tests/e2e/videos/
 /tests/e2e/screenshots/
 

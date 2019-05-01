@@ -33,10 +33,17 @@ export default {
   height: 100%;
   display: flex;
   box-sizing: border-box;
+  background-color: $color-b5;
   &-content {
+    width: 100%;
+    height: 100%;
+    max-width: 1000px;
   }
   &-container {
     padding: 30px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
   }
 }
 </style>

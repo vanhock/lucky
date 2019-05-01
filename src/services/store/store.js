@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import AuthStoreModule from "./AuthStoreModule";
 import InspectorsStoreModule from "./InspectorsStoreModule";
+import ProjectsStoreModule from "./ProjectsStoreModule";
 Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
@@ -9,6 +10,7 @@ export default new Vuex.Store({
   },
   modules: {
     auth: AuthStoreModule,
-    inspectors: InspectorsStoreModule
+    inspectors: InspectorsStoreModule,
+    projects: ProjectsStoreModule
   }
 });

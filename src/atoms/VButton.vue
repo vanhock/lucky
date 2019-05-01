@@ -21,10 +21,9 @@ export default {
 button {
   display: block;
   padding: 10px 37px;
-  margin: 0 auto;
   font-weight: bold;
   border-radius: 26px;
-  font-size: 20px;
+  font-size: 16px;
   background-color: $color-w1;
   color: #fff;
   cursor: pointer;

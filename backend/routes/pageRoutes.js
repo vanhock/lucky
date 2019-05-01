@@ -76,11 +76,6 @@ module.exports = function(app) {
               }
             })
               .then(pages => {
-                if (!pages.length) {
-                  return res
-                    .status(400)
-                    .send("Have no pages found for this project!");
-                }
                 return res.status(200).send(JSON.stringify(pages));
               })
               .catch(() => {

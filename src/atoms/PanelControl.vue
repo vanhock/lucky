@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { parents } from "./utils";
+import { parents } from "../utils";
 
 export default {
   name: "PanelControl",

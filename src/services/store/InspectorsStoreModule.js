@@ -1,6 +1,6 @@
 import Vue from "vue";
 import config from "../../config";
-import { getParentAndChild } from "../../atoms/utils";
+import { getParentAndChild } from "../../utils";
 import {
   INSPECTOR_RESET_DESIGN,
   INSPECTOR_SET_CURRENT_FRAME,

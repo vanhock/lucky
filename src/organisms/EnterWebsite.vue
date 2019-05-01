@@ -12,7 +12,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { getFromLocal } from "../atoms/utils";
+import { getFromLocal } from "../utils";
 import _ from "lodash";
 import FormInput from "../atoms/VInput";
 export default {

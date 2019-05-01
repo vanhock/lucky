@@ -16,6 +16,7 @@ export default {
       type: String,
       required: true
     },
+    id: String,
     label: {
       type: String
     },

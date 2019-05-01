@@ -31,18 +31,14 @@ class PixelApi {
     document.location = path;
   };
 
-  get(path, payload, callback) {
+  get(path, callback) {
     return this.api
       .request({
         method: "GET",
         url: config.serverUrl + path,
-        responseType: "json",
-        data: payload.data
+        responseType: "json"
       })
-      .then(response => callback(response.status, response.data))
-      .catch(response => {
-        callback(response.status, response);
-      });
+      .then(response => callback(response.status, response.data));
   }
 
   patch(path, payload, callback) {

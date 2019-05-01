@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { scrollTo } from "../atoms/utils";
+import { scrollTo } from "../utils";
 import { mapGetters } from "vuex";
 export default {
   name: "TaskList",

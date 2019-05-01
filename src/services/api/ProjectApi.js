@@ -14,7 +14,7 @@ export function editProject(payload, cb) {
 }
 
 export function getAllProjects(cb) {
-  PixelApi.get("/get-all-projects", null,(status, data) => {
+  PixelApi.get("/get-all-projects", (status, data) => {
     generalCallback(status, data, cb);
   });
 }

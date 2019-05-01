@@ -13,6 +13,13 @@ Vue.use(VueNoty, {
   }
 });
 
+export function notification(instance, type, message) {
+  if (!instance || !type || !message) {
+    return;
+  }
+  instance.$noty[type](message);
+}
+
 export function UserLoginSuccess(instance, payload) {
   instance.$noty.success("Welcome back, " + payload);
 }

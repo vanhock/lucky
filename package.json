@@ -38,6 +38,7 @@
     "noty": "^3.2.0-beta",
     "sass-loader": "^7.1.0",
     "style-resources-loader": "^1.2.1",
+    "svg-spritemap-webpack-plugin": "^3.3.0",
     "vue-class-component": "^7.0.2",
     "vue-cli-plugin-coffeescript": "^0.0.3",
     "vue-cli-plugin-style-resources-loader": "^0.1.3",

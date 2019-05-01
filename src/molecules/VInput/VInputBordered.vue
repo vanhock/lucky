@@ -16,7 +16,7 @@
 import _ from "lodash";
 import VInput from "../../atoms/VInput";
 export default {
-  name: "VInputWithoutBorder",
+  name: "VInputBordered",
   components: { VInput },
   mounted() {
     const self = this;
