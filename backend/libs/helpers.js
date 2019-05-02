@@ -3,7 +3,7 @@ const fs = require("fs");
 const getUserByToken = function(req, res, cb) {
   const { User } = require("../sequelize");
   if (!req.headers.authorization) {
-    return;
+    return res.error("Auth token did not provide!");
   }
   User.options.classMethods.findByToken(
     req.headers.authorization,

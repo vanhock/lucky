@@ -60,8 +60,12 @@ import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import UserPanelMixin from "../mixins/UserPanelMixin";
 export default {
   name: "ProjectsView",
-  mounted() {
+  created() {
     this.getAllProjects();
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.getAllProjects();
+    next();
   },
   mixins: [UserPanelMixin],
   components: {
@@ -166,5 +170,4 @@ export default {
 };
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

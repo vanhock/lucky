@@ -4,6 +4,7 @@ import {
   AUTH_ERROR,
   AUTH_LOGOUT
 } from "./mutation-types";
+import PixelApi from "../api/api";
 import { Authorization } from "../api/UserApi";
 export default {
   state: {
@@ -43,8 +44,10 @@ export default {
             return reject(error);
           }
           localStorage.setItem("user-token", user.token);
-          commit(AUTH_SUCCESS, user);
-          resolve(user);
+          PixelApi.setToken(user.token, () => {
+            commit(AUTH_SUCCESS, user);
+            resolve(user);
+          });
         });
       });
     },

@@ -5,10 +5,12 @@
 </template>
 
 <script>
+import { AUTH_LOGOUT } from "../services/store/mutation-types";
+
 export default {
   name: "LogOutView",
   mounted() {
-    this.$store.dispatch("AUTH_LOGOUT").then(() => {
+    this.$store.dispatch(AUTH_LOGOUT).then(() => {
       this.$nextTick(() => {
         this.$router.push("/sign-in");
       });

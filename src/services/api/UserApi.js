@@ -13,7 +13,6 @@ export function Authorization(payload, cb) {
     if (status !== 200) {
       return cb(data);
     }
-    localStorage.setItem("authorization", data.token);
     cb(null, data);
   });
 }

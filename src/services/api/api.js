@@ -4,7 +4,7 @@ import config from "../../config";
 class PixelApi {
   constructor() {
     let api = axios.create({
-      headers: { authorization: localStorage.getItem("user-token") || "" }
+      headers: { authorization: localStorage.getItem("user-token") }
     });
     api.interceptors.response.use(PixelApi.handleSuccess, this.handleError);
     this.api = api;
@@ -30,6 +30,11 @@ class PixelApi {
   redirectTo = (document, path) => {
     document.location = path;
   };
+
+  setToken(token, callback) {
+    this.api.defaults.headers["authorization"] = token;
+    callback();
+  }
 
   get(path, callback) {
     return this.api
