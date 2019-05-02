@@ -1,0 +1,12 @@
+<svg id="Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 142.14 47.09">
+  <defs/>
+  <text transform="translate(46.5 47.49)" fill="#7012e5" font-size="40" font-family="Montserrat-SemiBold,Montserrat SemiBold">
+    <tspan letter-spacing="-.01em">P</tspan><tspan x="28.44" y="0">i</tspan><tspan x="40" y="0" letter-spacing="-.02em">x</tspan><tspan x="62.2" y="0">el</tspan>
+  </text>
+  <text transform="translate(48.69 11.9)" font-size="14" fill="#404241" font-family="Montserrat-Regular,Montserrat">
+    <tspan letter-spacing="-.01em">P</tspan><tspan class="cls-6" x="9.87" y="0">er</tspan><tspan x="23.94" y="0" letter-spacing="-.01em">f</tspan><tspan x="28.56" y="0">e</tspan><tspan x="37.02" y="0" letter-spacing=".01em">c</tspan><tspan class="cls-6" x="44.98" y="0">t</tspan>
+  </text>
+  <circle cx="17.5" cy="26.19" r="17.5" fill="#7012e5"/>
+  <path fill="#2e302f" d="M7.47 18.12h18.16v18.16H7.47z"/>
+  <path fill="#fff" d="M12.33 15.98h15.29v15.29H12.33z"/>
+</svg>
