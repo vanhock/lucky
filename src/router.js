@@ -32,7 +32,7 @@ export default new Router({
       children: [
         {
           path: "",
-          name: "projects",
+          name: "Projects",
           component: () =>
             import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
         }
@@ -40,7 +40,7 @@ export default new Router({
     },
     {
       path: "/inspectors",
-      name: "inspectors",
+      name: "Inspectors",
       component: () =>
         import(/* webpackChunkName: "InspectorsView" */ "./views/InspectorsView")
     },
@@ -51,13 +51,13 @@ export default new Router({
       children: [
         {
           path: "",
-          name: "signIn",
+          name: "SignIn",
           component: () =>
             import(/* webpackChunkName: "SignIn" */ "./organisms/SignIn")
         },
         {
           path: "/sign-up",
-          name: "signUp",
+          name: "SignUp",
           component: () =>
             import(/* webpackChunkName: "SignUp" */ "./organisms/SignUp")
         }
@@ -65,7 +65,7 @@ export default new Router({
     },
     {
       path: "/log-out",
-      name: "logOut",
+      name: "LogOut",
       component: () =>
         import(/* webpackChunkName: "LogOut" */ "./views/LogOutView")
     }

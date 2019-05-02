@@ -58,11 +58,11 @@ export default {
   }
   .label {
     position: absolute;
-    right: 6px;
     top: 10px;
+    margin-left: 26px;
     padding: 1px 4px;
     background-color: $color-b4;
-    color: $color-w1;
+    color: $color-b2;
     border-radius: 16px;
     font-size: 10px;
     font-weight: 500;
@@ -105,7 +105,7 @@ export default {
     }
   }
   &:hover {
-    background-color: rgba(0, 0, 0, 0.24);
+    //background-color: rgba(0, 0, 0, 0.24);
   }
   &:not(.active) {
     &:hover {

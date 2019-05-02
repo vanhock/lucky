@@ -2,6 +2,7 @@
   <form
     class="form-group"
     ref="thisFormGroup"
+    @submit.prevent="$emit('submit')"
     :class="{ changed: childrenChanged, loading: loading }"
   >
     <div class="form-items">

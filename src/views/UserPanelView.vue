@@ -2,7 +2,10 @@
   <div class="user-panel">
     <side-bar :menu="menu"></side-bar>
     <div class="user-panel-content">
-      <div class="user-panel-container"><router-view /></div>
+      <div class="user-panel-container">
+        <div class="user-panel-title">{{ $route.name }}</div>
+        <router-view class="user-panel-view" />
+      </div>
     </div>
   </div>
 </template>
@@ -14,15 +17,16 @@ export default {
   components: { SideBar },
   data: () => ({
     menu: [
-      { text: "Projects", icon: "folder-outline", to: "projects" },
+      { text: "Projects", icon: "folder-outline", to: "Projects" },
       {
         text: "Account",
         icon: "user-solid-circle",
-        to: "account",
+        to: "Account",
         label: "soon",
         disabled: true
       },
-      { text: "Log out", icon: "stand-by", to: "logOut" }
+      { text: "Trash", icon: "trash", label: "soon", disabled: true },
+      { text: "Log out", icon: "stand-by", to: "LogOut" }
     ]
   })
 };
@@ -44,10 +48,17 @@ export default {
     }
   }
   &-container {
-    padding: 45px;
+    margin: 20px 70px;
     width: 100%;
-    height: 100%;
     box-sizing: border-box;
+  }
+  &-title {
+    font-size: 27px;
+    margin-bottom: 30px;
+  }
+  &-view {
+    border-radius: 7px;
+    @include box-shadow(medium);
   }
 }
 </style>

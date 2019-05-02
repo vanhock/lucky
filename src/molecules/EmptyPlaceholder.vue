@@ -30,10 +30,13 @@ export default {
   display: flex;
   max-width: 600px;
   min-height: 500px;
+  margin: 0 auto;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   text-align: center;
+  background-color: #fff;
+  border-radius: 7px;
 
   .image {
     background-size: cover;

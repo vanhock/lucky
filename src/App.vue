@@ -57,7 +57,7 @@ body {
   color: $color-3;
 }
 
-.logo {
+.website-logo {
   position: absolute;
   width: 70px;
   height: 60px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="sign-in" @keydown.enter="authorization">
+  <div class="sign-in" @keypress.enter="authorization">
     <form-group ref="form" :loading="loading">
       <v-input-bordered
         name="email"

@@ -1,5 +1,5 @@
 <template>
-  <v-button class="v-button-primary" @click="$emit('click')"
+  <v-button class="v-button-primary" @click="$emit('click')" :loading="loading"
     ><slot></slot
   ></v-button>
 </template>
@@ -8,7 +8,8 @@
 import VButton from "../../atoms/VButton";
 export default {
   name: "VButtonPrimary",
-  components: { VButton }
+  components: { VButton },
+  extends: VButton
 };
 </script>
 
