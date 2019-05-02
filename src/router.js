@@ -35,6 +35,12 @@ export default new Router({
           name: "Projects",
           component: () =>
             import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
+        },
+        {
+          path: "/trash",
+          name: "Trash",
+          component: () =>
+            import(/* webpackChunkName: "TrashView" */ "./views/TrashView")
         }
       ]
     },

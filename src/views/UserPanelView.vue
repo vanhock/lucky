@@ -25,7 +25,7 @@ export default {
         label: "soon",
         disabled: true
       },
-      { text: "Trash", icon: "trash", label: "soon", disabled: true },
+      { text: "Trash", icon: "trash", to: "Trash" },
       { text: "Log out", icon: "stand-by", to: "LogOut" }
     ]
   })
