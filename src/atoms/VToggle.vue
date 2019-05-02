@@ -1,18 +1,24 @@
 <template>
   <div
     class="toggle"
-    :class="{ active: active, 'show-text': showText, theme }"
+    :class="[{ active: active, 'show-text': showText }, appTheme]"
     @click="$emit('click')"
     @mouseenter="hover = true"
     @mouseleave="hover = false"
   >
-    <Zodicon v-if="icon" :icon="currentIcon" class="icon" />
+    <Zodicon
+      v-if="icon"
+      :icon="currentIcon"
+      class="icon"
+      :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
+    />
     <div class="text" v-if="text">{{ text }}</div>
     <div class="label" v-if="label && label.length">{{ label }}</div>
   </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
 import Zodicon from "vue-zondicons";
 export default {
   name: "VToggle",
@@ -21,6 +27,7 @@ export default {
     hover: false
   }),
   computed: {
+    ...mapState(["appTheme"]),
     currentIcon() {
       return (this.iconHover && this.hover && this.iconHover) || this.icon;
     }
@@ -32,7 +39,9 @@ export default {
     text: String,
     showText: { type: Boolean, default: true },
     label: String,
-    theme: { type: String, default: "white" }
+    theme: { type: String, default: "white" },
+    iconSize: { type: String, default: "16px" },
+    textSize: { type: String, default: "10px" }
   }
 };
 </script>
@@ -48,13 +57,11 @@ export default {
   cursor: pointer;
   color: $color-b5;
   .icon {
-    width: 18px;
-    height: 18px;
     fill: $color-b5;
   }
   .text {
-    font-size: 10px;
     margin-left: 7px;
+    font-weight: 600;
   }
   .label {
     position: absolute;

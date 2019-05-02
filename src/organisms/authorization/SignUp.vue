@@ -30,14 +30,14 @@
 
 <script>
 import _ from "lodash";
-import VInputBordered from "../molecules/VInput/VInputBordered";
-import FormGroup from "../molecules/FormGroup";
-import { Registration } from "../services/api/UserApi";
+import VInputBordered from "../../molecules/VInput/VInputBordered";
+import FormGroup from "../../molecules/FormGroup";
+import { Registration } from "../../services/api/UserApi";
 import {
   UserRegistrationError,
   UserRegistrationSuccess
-} from "../services/notification";
-import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
+} from "../../services/notification";
+import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
 
 export default {
   name: "SignUp",

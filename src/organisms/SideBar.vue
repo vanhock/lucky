@@ -1,6 +1,8 @@
 <template>
   <div class="sidebar" :class="appTheme">
-    <div class="logo"></div>
+    <div class="logo">
+      <img src="/logo.png" style="width: 104px" alt="PerfectPixel" />
+    </div>
     <slot name="top"></slot>
     <dynamic-menu :items="menu" align="vertical" show-text />
     <slot name="bottom"></slot>
@@ -10,9 +12,10 @@
 <script>
 import DynamicMenu from "../molecules/DynamicMenu";
 import { mapState } from "vuex";
+import VIcon from "../atoms/VIcon/VIcon";
 export default {
   name: "SideBar",
-  components: { DynamicMenu },
+  components: { VIcon, DynamicMenu },
   props: {
     menu: {
       type: Array,
@@ -30,7 +33,11 @@ export default {
   width: 120px;
   height: 100%;
   .logo {
-    height: 70px;
+    height: 81px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 13px;
   }
   &-container {
     height: 100%;

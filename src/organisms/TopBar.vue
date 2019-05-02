@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import ProjectNavigationToolbar from "../molecules/ProjectNavigationToolbar";
+import ProjectNavigationToolbar from "../molecules/Toolbars/ProjectNavigationToolbar";
 export default {
   name: "TopBar",
   components: { ProjectNavigationToolbar },

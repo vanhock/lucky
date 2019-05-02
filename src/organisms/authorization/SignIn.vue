@@ -23,11 +23,11 @@
 
 <script>
 import _ from "lodash";
-import VInputBordered from "../molecules/VInput/VInputBordered";
-import FormGroup from "../molecules/FormGroup";
-import { UserLoginError, UserLoginSuccess } from "../services/notification";
-import { AUTH_REQUEST } from "../services/store/mutation-types";
-import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
+import VInputBordered from "../../molecules/VInput/VInputBordered";
+import FormGroup from "../../molecules/FormGroup";
+import { UserLoginError, UserLoginSuccess } from "../../services/notification";
+import { AUTH_REQUEST } from "../../services/store/mutation-types";
+import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
 
 export default {
   name: "SignIn",

@@ -1,5 +1,9 @@
 <template>
-  <v-button class="v-button-primary" @click="$emit('click')" :loading="loading"
+  <v-button
+    class="v-button-primary"
+    @click="$emit('click')"
+    :loading="loading"
+    :theme="appTheme"
     ><slot></slot
   ></v-button>
 </template>

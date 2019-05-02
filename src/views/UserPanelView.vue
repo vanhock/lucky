@@ -48,17 +48,16 @@ export default {
     }
   }
   &-container {
-    margin: 20px 70px;
+    margin: 25px 70px;
     width: 100%;
     box-sizing: border-box;
   }
   &-title {
-    font-size: 27px;
-    margin-bottom: 30px;
+    font-size: 30px;
+    margin-bottom: 35px;
   }
   &-view {
     border-radius: 7px;
-    @include box-shadow(medium);
   }
 }
 </style>

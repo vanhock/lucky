@@ -15,9 +15,9 @@
 </template>
 
 <script>
-import PanelControl from "../atoms/PanelControl";
-import VToggle from "../atoms/VToggle";
-import ViewMixin from "../mixins/ViewMixin";
+import PanelControl from "../../atoms/PanelControl";
+import VToggle from "../../atoms/VToggle";
+import ViewMixin from "../../mixins/ViewMixin";
 
 export default {
   name: "DesignParams",

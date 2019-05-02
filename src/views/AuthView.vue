@@ -1,5 +1,6 @@
 <template>
   <div class="auth-view">
+    <div class="logo"><img src="/logo.png" /></div>
     <div class="auth-view-container">
       <div class="auth-form">
         <div class="toggles">
@@ -27,8 +28,16 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   height: 100%;
   background-color: $color-bg3;
+  .logo {
+    img {
+      width: 134px;
+      margin-bottom: 50px;
+      opacity: 0.3;
+    }
+  }
   &-container {
     max-width: 500px;
     max-height: 500px;
@@ -63,7 +72,7 @@ export default {
       font-weight: bold;
       font-size: 18px;
       &.router-link-exact-active {
-        color: $color-w1;
+        color: $color-w3;
       }
       &:not(.router-link-exact-active) {
         cursor: pointer;

@@ -70,13 +70,13 @@
 </template>
 
 <script>
-import ViewMixin from "../mixins/ViewMixin";
-import PanelControl from "../atoms/PanelControl";
-import VToggle from "../atoms/VToggle";
+import ViewMixin from "../../mixins/ViewMixin";
+import PanelControl from "../../atoms/PanelControl";
+import VToggle from "../../atoms/VToggle";
 
-import VMenu from "../atoms/VMenu";
-import MenuItem from "../atoms/MenuItem";
-import InputControl from "../molecules/InputControl";
+import VMenu from "../../atoms/VMenu";
+import MenuItem from "../../atoms/MenuItem";
+import InputControl from "../InputControl";
 export default {
   name: "ViewParams",
   mixins: [ViewMixin],

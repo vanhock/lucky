@@ -17,8 +17,8 @@ import { mapGetters, mapState } from "vuex";
 import { simplifyDom, addToLocal, removeClass } from "../utils";
 import { getFoundNodesFromApi } from "../services/api/api";
 import TopPanel from "../organisms/TopPanel";
-import WebsiteInspector from "../organisms/WebsiteInspector";
-import DesignInspector from "../organisms/DesignInspector";
+import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
+import DesignInspector from "../organisms/inspectors/DesignInspector";
 export default {
   name: "ViewScreen",
   components: { DesignInspector, WebsiteInspector, TopPanel },

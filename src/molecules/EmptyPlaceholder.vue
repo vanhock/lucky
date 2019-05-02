@@ -28,7 +28,7 @@ export default {
 <style lang="scss" scoped>
 .empty-placeholder {
   display: flex;
-  max-width: 600px;
+  width: 100%;
   min-height: 500px;
   margin: 0 auto;
   justify-content: center;
@@ -37,6 +37,7 @@ export default {
   text-align: center;
   background-color: #fff;
   border-radius: 7px;
+  @include box-shadow(medium);
 
   .image {
     background-size: cover;

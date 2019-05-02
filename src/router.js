@@ -53,13 +53,13 @@ export default new Router({
           path: "",
           name: "SignIn",
           component: () =>
-            import(/* webpackChunkName: "SignIn" */ "./organisms/SignIn")
+            import(/* webpackChunkName: "SignIn" */ "./organisms/authorization/SignIn")
         },
         {
           path: "/sign-up",
           name: "SignUp",
           component: () =>
-            import(/* webpackChunkName: "SignUp" */ "./organisms/SignUp")
+            import(/* webpackChunkName: "SignUp" */ "./organisms/authorization/SignUp")
         }
       ]
     },

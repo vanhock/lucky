@@ -26,10 +26,10 @@
 <script>
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
-import ViewParams from "../molecules/ViewToolbar";
+import ViewParams from "../molecules/Toolbars/ViewToolbar";
 import VToggle from "../atoms/VToggle";
-import DesignParams from "../molecules/DesignToolbar";
-import ProjectToolbar from "../molecules/ProjectNavigationToolbar";
+import DesignParams from "../molecules/Toolbars/DesignToolbar";
+import ProjectToolbar from "../molecules/Toolbars/ProjectNavigationToolbar";
 export default {
   name: "TopPanel",
   components: {

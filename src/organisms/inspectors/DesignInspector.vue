@@ -25,9 +25,9 @@
 </template>
 
 <script>
-import ViewMixin from "../mixins/ViewMixin.js";
+import ViewMixin from "../../mixins/ViewMixin.js";
 import { mapGetters } from "vuex";
-import { addClass, removeClass, scrollTo } from "../utils";
+import { addClass, removeClass, scrollTo } from "../../utils";
 
 export default {
   name: "DesignInspector",

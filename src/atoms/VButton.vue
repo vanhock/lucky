@@ -2,17 +2,25 @@
   <button
     @click="$emit('click')"
     @touchmove="$emit('click')"
-    :class="{ loading: loading }"
+    :class="[{ loading: loading }, appTheme]"
   >
     <slot></slot>
   </button>
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "VButton",
   props: {
-    loading: Boolean
+    loading: Boolean,
+    theme: {
+      type: String,
+      default: "white"
+    }
+  },
+  computed: {
+    ...mapState(["appTheme"])
   }
 };
 </script>
@@ -20,22 +28,34 @@ export default {
 <style lang="scss" scoped>
 button {
   display: block;
-  padding: 10px 37px;
-  font-weight: bold;
+  padding: 8px 38px;
+  font-weight: 600;
   border-radius: 26px;
-  font-size: 16px;
-  background-color: $color-w1;
-  color: #fff;
+  font-size: 14px;
   cursor: pointer;
+  color: #fff;
   @include box-shadow(deep);
   &[disabled] {
     opacity: 0.7;
     pointer-events: none;
   }
   &.loading {
-    color: $color-w1;
-    @include loading-spinner($time: 1.4s);
     pointer-events: none;
+  }
+
+  &.dark {
+    background-color: $color-w1;
+    &.loading {
+      @include loading-spinner($activeColor: $color-w1, $time: 1.4s);
+      color: $color-w1;
+    }
+  }
+  &.white {
+    background-color: $color-w3;
+    &.loading {
+      @include loading-spinner($activeColor: $color-w4, $time: 1.4s);
+      color: $color-w3;
+    }
   }
 }
 </style>

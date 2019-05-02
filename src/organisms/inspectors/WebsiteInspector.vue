@@ -20,7 +20,7 @@
 
 <script>
 import axios from "axios";
-import config from "../config";
+import config from "../../config";
 import { mapGetters } from "vuex";
 import {
   addClass,
@@ -29,8 +29,8 @@ import {
   getElementBounding,
   relToAbs,
   scrollTo
-} from "../utils";
-import ViewMixin from "../mixins/ViewMixin";
+} from "../../utils";
+import ViewMixin from "../../mixins/ViewMixin";
 export default {
   name: "WebsiteInspector",
   mixins: [ViewMixin],

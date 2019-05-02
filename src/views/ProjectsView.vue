@@ -21,8 +21,8 @@
       </empty-placeholder>
     </template>
     <v-modal
-      ref="newProjectModal"
-      class="project-operational-modal"
+      ref="operationalModal"
+      class="operational-modal"
       :title="currentModalTitle"
       @open="setFocus"
     >
@@ -30,7 +30,7 @@
         <v-input-clear
           id="projectName"
           name="name"
-          :value="selectedProjectName"
+          :value="selectedName"
           label="Project title"
           required
         />
@@ -57,11 +57,13 @@ import {
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
+import UserPanelMixin from "../mixins/UserPanelMixin";
 export default {
   name: "ProjectsView",
   mounted() {
     this.getAllProjects();
   },
+  mixins: [UserPanelMixin],
   components: {
     EmptyPlaceholder,
     VInputClear,
@@ -82,22 +84,10 @@ export default {
         action: "editProject",
         buttonName: "Save"
       }
-    },
-    selectedModal: "create",
-    currentAction: null,
-    projectForOperations: {}
+    }
   }),
   computed: {
-    ...mapGetters(["projects", "hasProjects"]),
-    currentModalTitle() {
-      return this.modals && this.modals[this.selectedModal].title;
-    },
-    currentModalButtonName() {
-      return this.modals && this.modals[this.selectedModal].buttonName;
-    },
-    selectedProjectName() {
-      return this.projectForOperations && this.projectForOperations.name;
-    }
+    ...mapGetters(["projects", "hasProjects"])
   },
   methods: {
     createProject() {
@@ -114,7 +104,7 @@ export default {
           this.$refs.createProjectForm.changedItems
         )
         .then(project => {
-          this.$refs.newProjectModal.showModal = false;
+          this.$refs.operationalModal.showModal = false;
           return notification(
             this,
             "success",
@@ -143,10 +133,10 @@ export default {
       this.$store
         .dispatch(PROJECT_EDIT_PROJECT, {
           ...this.$refs.createProjectForm.changedItems,
-          id: this.projectForOperations.id
+          id: this.dataForOperations.id
         })
         .then(() => {
-          this.$refs.newProjectModal.showModal = false;
+          this.$refs.operationalModal.showModal = false;
           return notification(this, "success", "Project successfully edited");
         })
         .then(error => notification(this, "error", error));
@@ -170,28 +160,10 @@ export default {
       this.$nextTick(() => {
         document.getElementById("projectName").focus();
       });
-    },
-    openModal(action, project) {
-      if (project) {
-        this.projectForOperations = project;
-      } else {
-        this.projectForOperations = {};
-      }
-      this.selectedModal = action;
-      this.$refs.newProjectModal.showModal = true;
-      const actionName = this.modals[this.selectedModal].action;
-      if (typeof this[actionName] === "function") {
-        this.currentAction = this[actionName];
-      }
     }
   }
 };
 </script>
 
 <style lang="scss">
-.project-operational-modal {
-  button {
-    margin-top: 25px;
-  }
-}
 </style>
