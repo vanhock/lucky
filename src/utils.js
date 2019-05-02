@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const hasClass = function(el, className) {
   return (" " + el.className + " ").indexOf(" " + className + " ") > -1;
 };
@@ -559,5 +561,13 @@ export const simplifyDom = function(dom, currentWindow) {
       obj[p] = node[p];
     }
     return obj;
+  }
+};
+
+export const normalizeData = function(date) {
+  if (moment().diff(moment(date), "hours") <= 24) {
+    return moment(date).fromNow();
+  } else {
+    return moment(date).format("D.MM.YY");
   }
 };

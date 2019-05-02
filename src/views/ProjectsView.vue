@@ -9,7 +9,7 @@
       </div>
       <projects-list
         :projects="projects"
-        @delete="deleteProject"
+        @delete="deleteProject($event)"
         @edit="openModal('edit', $event)"
       />
     </template>
@@ -52,7 +52,8 @@ import { mapGetters } from "vuex";
 import {
   PROJECT_CREATE_PROJECT,
   PROJECT_EDIT_PROJECT,
-  PROJECT_GET_ALL_PROJECTS
+  PROJECT_GET_ALL_PROJECTS,
+  PROJECT_MOVE_TO_TRASH
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
@@ -150,7 +151,21 @@ export default {
         })
         .then(error => notification(this, "error", error));
     },
-    deleteProject() {},
+    deleteProject(project) {
+      if (!project) {
+        return;
+      }
+      this.$store
+        .dispatch(PROJECT_MOVE_TO_TRASH, project)
+        .then(() => {
+          return notification(
+            this,
+            "success",
+            `"${project.name}" moved to trash`
+          );
+        })
+        .then(error => notification(this, "error", error));
+    },
     setFocus() {
       this.$nextTick(() => {
         document.getElementById("projectName").focus();

@@ -1,14 +1,16 @@
 <template>
   <div class="v-card">
-    <div class="v-card-image-container" v-if="image">
-      <img class="image" :src="image" :alt="name" />
+    <div class="v-card-content">
+      <div class="v-card-image-container" v-if="image">
+        <img class="image" :src="image" :alt="name" />
+      </div>
+      <div class="v-card-text-container">
+        <div class="name">{{ name }}</div>
+        <div class="caption">{{ caption }}</div>
+        <div class="text">{{ text }}</div>
+      </div>
     </div>
-    <div class="v-card-text-container">
-      <div class="name">{{ name }}</div>
-      <div class="caption">{{ caption }}</div>
-      <div class="text">{{ text }}</div>
-      <div class="actions"><slot></slot></div>
-    </div>
+    <div class="actions"><slot></slot></div>
   </div>
 </template>
 
@@ -29,12 +31,23 @@ export default {
 
 <style lang="scss" scoped>
 .v-card {
-  border-radius: 5px;
-  @include box-shadow(medium);
-  will-change: box-shadow, background-color;
-  transition: box-shadow, background-color 0.1s ease-out;
-  cursor: pointer;
-  background-color: #fff;
+  position: relative;
+  &-content {
+    position: relative;
+    border-radius: 5px;
+    @include box-shadow(medium);
+    will-change: box-shadow, background-color;
+    transition: box-shadow 0.2s ease-out;
+    cursor: pointer;
+    background-color: #fff;
+    &:hover {
+      background-color: $color-base;
+      @include box-shadow(deep);
+    }
+    &:active {
+      top: 1px;
+    }
+  }
   &-image-container {
     position: relative;
     display: flex;
@@ -57,15 +70,30 @@ export default {
     .name {
       font-weight: bold;
     }
-    .actions {
-      display: flex;
-      margin-top: auto;
-      margin-left: auto;
+    .caption {
+      position: absolute;
+      bottom: 7px;
+      font-weight: 600;
+      color: $color-b4;
+      font-size: 11px;
+    }
+    .text {
+      font-size: 12px;
+      font-weight: 500;
+      color: $color-b3;
     }
   }
-  &:hover {
-    background-color: $color-base;
-    @include box-shadow(deep);
+  .actions {
+    position: absolute;
+    right: 5px;
+    bottom: 0;
+    display: flex;
+    margin-top: auto;
+    margin-left: auto;
+
+    & > * {
+      cursor: pointer;
+    }
   }
 }
 </style>

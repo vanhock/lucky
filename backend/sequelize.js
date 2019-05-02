@@ -74,5 +74,6 @@ module.exports = {
   Page,
   Design,
   Comment,
-  Task
+  Task,
+  Trash
 };

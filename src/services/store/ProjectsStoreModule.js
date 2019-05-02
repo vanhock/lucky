@@ -3,14 +3,14 @@ import {
   PROJECT_SET_CURRENT_PROJECT,
   PROJECT_EDIT_PROJECT,
   PROJECT_CREATE_PROJECT,
-  PROJECT_DELETE_PROJECT,
-  PROJECT_GET_ALL_PROJECTS
+  PROJECT_GET_ALL_PROJECTS,
+  PROJECT_MOVE_TO_TRASH
 } from "./mutation-types";
 import {
   createProject,
-  deleteProject,
   editProject,
-  getAllProjects
+  getAllProjects,
+  moveProjectToTrash
 } from "../api/ProjectApi";
 
 export default {
@@ -43,7 +43,7 @@ export default {
     [PROJECT_CREATE_PROJECT](state, payload) {
       state.projects.push(payload);
     },
-    [PROJECT_DELETE_PROJECT](state, payload) {
+    [PROJECT_MOVE_TO_TRASH](state, payload) {
       const projectIndex = state.projects.indexOf(payload);
       if (projectIndex !== -1) {
         state.projects.splice(projectIndex, 1);
@@ -79,13 +79,13 @@ export default {
         });
       });
     },
-    [PROJECT_DELETE_PROJECT]: ({ commit }, payload) => {
+    [PROJECT_MOVE_TO_TRASH]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        deleteProject(payload, (error, success) => {
+        moveProjectToTrash({ id: payload.id }, (error, success) => {
           if (error) {
             return reject(error);
           }
-          commit(PROJECT_DELETE_PROJECT, payload);
+          commit(PROJECT_MOVE_TO_TRASH, payload);
           resolve(success);
         });
       });

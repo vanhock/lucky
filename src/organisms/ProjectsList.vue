@@ -5,7 +5,7 @@
       :key="project.id"
       :project="project"
       :name="project.name"
-      :caption="project.updatedAt"
+      :caption="normalizeData(project.updatedAt)"
       :text="`Pages: ${project.pagesCount || 0}`"
       @delete="$emit('delete', project)"
       @edit="$emit('edit', project)"
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { normalizeData } from "../utils";
 import ProjectItem from "../molecules/Project/ProjectItem";
 export default {
   name: "ProjectsList",
@@ -23,6 +24,11 @@ export default {
       type: Array,
       default: () => [],
       required: true
+    }
+  },
+  methods: {
+    normalizeData(date) {
+      return normalizeData(date);
     }
   }
 };

@@ -27,13 +27,12 @@ export default {
 <style lang="scss">
 .project-item {
   .actions {
-    margin-right: -20px;
     svg {
-      width: 17px;
-      height: 17px;
+      width: 15px;
+      height: 15px;
       padding: 12px;
-      margin: 0 5px;
-      opacity: 0.3;
+      margin: 0 2px;
+      opacity: 0.2;
       &:hover {
         opacity: 0.6;
       }

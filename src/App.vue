@@ -5,6 +5,9 @@
 </template>
 
 <script>
+import Vue from "vue";
+import moment from "vue-moment";
+Vue.use(moment);
 import "vuejs-noty/dist/vuejs-noty.css";
 export default {};
 </script>

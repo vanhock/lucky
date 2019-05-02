@@ -1,4 +1,4 @@
-const { Project, Page, Design } = require("../sequelize");
+const { Project, Page, Design, Trash } = require("../sequelize");
 const { getUserByToken, filterObject } = require("../libs/helpers");
 
 module.exports = function(app) {
@@ -51,7 +51,8 @@ module.exports = function(app) {
     getUserByToken(req, res, user => {
       Project.findAll({
         where: {
-          userId: user.id
+          userId: user.id,
+          trashId: null
         }
       })
         .then(projects => {
@@ -65,6 +66,62 @@ module.exports = function(app) {
     });
   });
 
+  app.post("/move-project-to-trash", (req, res) => {
+    if (!req.fields.id) {
+      return res.error("Id did not provide!");
+    }
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          id: req.fields.id
+        }
+      })
+        .then(project => {
+          if (!project) {
+            return res.error("Project not found");
+          }
+          if (project.userId === user.id || user.isAdmin) {
+            Trash.create().then(trash => {
+              project.update({ trashId: trash.id });
+              res.status(200).send(JSON.stringify(project));
+            });
+          } else {
+            return res.error("You don't have rights for delete this project!");
+          }
+        })
+        .catch(error => res.error(error));
+    });
+  });
+
+  app.post("/restore-project-from-trash", (req, res) => {
+    if (!req.fields.id) {
+      return res.error("Id did not provide!");
+    }
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          id: req.fields.id
+        }
+      }).then(project => {
+        if (project.userId === user.id || user.isAdmin) {
+          Trash.destroy({
+            where: {
+              id: project.trashId
+            }
+          });
+          project
+            .update({ trashId: null })
+            .then(project =>
+              res.status(200).send(JSON.stringify(project.dataValues))
+            );
+        } else {
+          res
+            .status(403)
+            .send("You don't have rights for update this project!");
+        }
+      });
+    });
+  });
   app.post("/delete-project", (req, res) => {
     if (!req.fields.id) {
       return res.error("Id did not provide!");
