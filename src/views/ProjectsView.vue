@@ -84,7 +84,8 @@ export default {
         action: "editProject",
         buttonName: "Save"
       }
-    }
+    },
+    selectedModal: "create"
   }),
   computed: {
     ...mapGetters(["projects", "hasProjects"])

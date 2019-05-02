@@ -4,7 +4,6 @@
 export default {
   name: "UserPanelMixin",
   data: () => ({
-    selectedModal: "create",
     currentAction: null,
     dataForOperations: {}
   }),
