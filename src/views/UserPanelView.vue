@@ -38,6 +38,10 @@ export default {
     width: 100%;
     height: 100%;
     max-width: 1000px;
+    .title {
+      margin-top: 30px;
+      font-weight: 500;
+    }
   }
   &-container {
     padding: 45px;

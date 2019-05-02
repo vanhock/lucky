@@ -15,11 +15,11 @@ module.exports = function(app) {
 
   app.post("/edit-project", (req, res) => {
     if (!req.fields.id) {
-      return res.status(400).send("Id did not provide!");
+      return res.error("Id did not provide!");
     }
     getUserByToken(req, res, user => {
       if (req.fields.name === "") {
-        return res.status(400).send("Name can't have an empty value!");
+        return res.error("Name can't have an empty value!");
       }
       const fieldsToEdit = filterObject(req.fields, ["name"]);
       Project.findOne({
@@ -29,15 +29,11 @@ module.exports = function(app) {
       })
         .then(project => {
           if (!project) {
-            return res.status(400).send("Project not found!");
+            return res.error("Project not found!");
           }
           if (project.userId === user.id || user.isAdmin) {
             project.update(fieldsToEdit).then(project => {
-              return res
-                .status(200)
-                .send(
-                  JSON.stringify(filterObject(project.dataValues, ["name"]))
-                );
+              return res.status(200).send(JSON.stringify(project.dataValues));
             });
           } else {
             return res
@@ -46,7 +42,7 @@ module.exports = function(app) {
           }
         })
         .catch(message => {
-          return res.status(400).send("Error with getting project: " + message);
+          return res.error("Error with getting project: " + message);
         });
     });
   });
@@ -71,7 +67,7 @@ module.exports = function(app) {
 
   app.post("/delete-project", (req, res) => {
     if (!req.fields.id) {
-      return res.status(400).send("Id did not provide!");
+      return res.error("Id did not provide!");
     }
     getUserByToken(req, res, user => {
       Project.findOne({
@@ -81,10 +77,10 @@ module.exports = function(app) {
       })
         .then(project => {
           if (!project) {
-            return res.status(400).send("Project not found!");
+            return res.error("Project not found!");
           }
           if (req.fields.name !== project.name) {
-            return res.status(400).send("Name check didn't pass!");
+            return res.error("Name check didn't pass!");
           }
           if (project.userId === user.id || user.isAdmin) {
             project.destroy();
@@ -106,7 +102,7 @@ module.exports = function(app) {
           }
         })
         .catch(() => {
-          return res.status(400).send("Projects not found for this user!");
+          return res.error("Projects not found for this user!");
         });
     });
   });

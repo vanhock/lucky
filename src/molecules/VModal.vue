@@ -85,7 +85,7 @@ export default {
 
   &-title {
     margin-top: 0;
-    margin-bottom: 0;
+    margin-bottom: 2.5rem;
     font-weight: 600;
     font-size: 1.25rem;
     line-height: 1.25;
@@ -107,7 +107,7 @@ export default {
   }
 
   &-content {
-    margin-top: 2rem;
+    margin-top: 0;
     margin-bottom: 2rem;
     line-height: 1.5;
     color: rgba(0, 0, 0, 0.8);

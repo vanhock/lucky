@@ -1,20 +1,26 @@
 <template>
   <div class="project-item">
     <v-card :name="name" :image="image" :caption="caption" :text="text">
-      <zondicon icon="trash" @click="$emit('remove')" />
-      <zondicon icon="edit-pencil" @click="$emit('rename')" />
+      <div @click="$emit('delete', project)">
+        <zondicon icon="trash" />
+      </div>
+      <div @click="$emit('edit', project)">
+        <zondicon icon="edit-pencil" />
+      </div>
     </v-card>
   </div>
 </template>
 
 <script>
 import VCard from "../../atoms/VCard";
-import VToggle from "../../atoms/VToggle";
 import Zondicon from "vue-zondicons/src/components/Zondicon";
 export default {
   name: "ProjectItem",
-  components: { Zondicon, VToggle, VCard },
-  extends: VCard
+  components: { Zondicon, VCard },
+  extends: VCard,
+  props: {
+    project: Object
+  }
 };
 </script>
 

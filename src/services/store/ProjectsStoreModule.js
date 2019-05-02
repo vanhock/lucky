@@ -1,3 +1,4 @@
+import Vue from "vue";
 import {
   PROJECT_SET_CURRENT_PROJECT,
   PROJECT_EDIT_PROJECT,
@@ -31,7 +32,7 @@ export default {
           state.projects.hasOwnProperty(key) &&
           state.projects[key].id === payload.id
         ) {
-          state.projects[key] = payload;
+          Vue.set(state.projects, key, payload);
           break;
         }
       }

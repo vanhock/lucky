@@ -63,7 +63,7 @@ module.exports = function(app) {
 
   app.post("/change-user-info", (req, res) => {
     if (!Object.keys(req.fields).length) {
-      return res.status(400).send("Fields are empty!");
+      return res.error("Fields are empty!");
     }
     const fields = req.fields;
 
@@ -76,13 +76,13 @@ module.exports = function(app) {
             .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
         })
         .catch(message => {
-          return res.status(400).send("Error: " + message);
+          return res.error("Error: " + message);
         });
     });
   });
   app.post("/set-user-avatar", (req, res) => {
     if (!Object.keys(req.files).length || !req.files.avatar) {
-      return res.status(400).send("Avatar did not provide!");
+      return res.error("Avatar did not provide!");
     }
     const tempPath = req.files.avatar.path;
     const avatarName =
@@ -111,7 +111,7 @@ module.exports = function(app) {
             .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
         })
         .catch(message => {
-          return res.status(400).send("Error: " + message);
+          return res.error("Error: " + message);
         });
     });
     //removeFile(tempPath);
@@ -120,7 +120,7 @@ module.exports = function(app) {
   app.post("/delete-user-avatar", (req, res) => {
     getUserByToken(req, res, user => {
       if (!user.avatarFullPath && !user.avatarFullPath.length) {
-        return res.status(400).send("Avatar not set!");
+        return res.error("Avatar not set!");
       }
       removeFile(user.avatarFullPath, message => {
         console.log(message);
@@ -136,7 +136,7 @@ module.exports = function(app) {
             .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
         })
         .catch(message => {
-          return res.status(400).send("Error: " + message);
+          return res.error("Error: " + message);
         });
     });
   });

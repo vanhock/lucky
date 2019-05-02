@@ -5,6 +5,7 @@
       :type="type"
       :id="id"
       :name="name"
+      :value="value"
       :label="label"
       :placeholder="placeholder"
       :required="required"

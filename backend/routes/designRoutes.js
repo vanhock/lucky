@@ -22,7 +22,7 @@ const fileTypes = ["image/vnd.adobe.photoshop", "application/octet-stream"];
 module.exports = function(app) {
   app.get("/get-project-designs", (req, res) => {
     if (!req.fields.projectId) {
-      return res.status(400).send("Project id did not provide!");
+      return res.error("Project id did not provide!");
     }
 
     getUserByToken(req, res, user => {
@@ -33,7 +33,7 @@ module.exports = function(app) {
       })
         .then(project => {
           if (!project) {
-            return res.status(400).send("Project not found!");
+            return res.error("Project not found!");
           }
           if (project.userId === user.id) {
             Design.findAll({
@@ -69,14 +69,14 @@ module.exports = function(app) {
           }
         })
         .catch(() => {
-          return res.status(400).send("Project not found by id!");
+          return res.error("Project not found by id!");
         });
     });
   });
 
   app.post("/delete-designs", (req, res) => {
     if (!req.fields.ids || !req.fields.projectId) {
-      return res.status(400).send("Required params did not provide!");
+      return res.error("Required params did not provide!");
     }
 
     const ids = req.fields.ids.split(",");
@@ -88,7 +88,7 @@ module.exports = function(app) {
         }
       }).then(project => {
         if (!project) {
-          return res.status(400).send("Project not found!");
+          return res.error("Project not found!");
         }
         if (project.userId === user.id) {
           Design.findAll({
@@ -135,7 +135,7 @@ module.exports = function(app) {
 
   app.get("/get-figma-designs", (req, res) => {
     if (!req.fields.projectId || !req.fields.fileUrl) {
-      return res.status(400).send("Required fields did not provide!");
+      return res.error("Required fields did not provide!");
     }
     const pageId = req.fields.fileUrl
       .match(/\/file\/(.*)\//)
@@ -209,13 +209,13 @@ module.exports = function(app) {
                   }
                 })
                 .catch(message => {
-                  return res.status(400).send(message);
+                  return res.error(message);
                 });
             });
           }
         })
         .catch(() => {
-          return res.status(400).send("User not found or wrong api key");
+          return res.error("User not found or wrong api key");
         });
     });
 
@@ -241,10 +241,10 @@ module.exports = function(app) {
   app.post("/upload-design", (req, res) => {
     const designFile = req.files.design;
     if (!designFile || !req.fields.projectId) {
-      return res.status(400).send("Required params did not provide!");
+      return res.error("Required params did not provide!");
     }
     if (!fileTypes.includes(designFile.type)) {
-      return res.status(400).send("Unsupported format or empty!");
+      return res.error("Unsupported format or empty!");
     }
     const tempPath = designFile.path;
     getUserByToken(req, res, user => {
@@ -257,7 +257,7 @@ module.exports = function(app) {
           if (project.userId === user.id) {
             upload(designFile, (message, designs) => {
               if (message) {
-                return res.status(400).send(message);
+                return res.error(message);
               }
               const responseDesigns = [];
               designs.forEach((design, index) => {
@@ -294,7 +294,7 @@ module.exports = function(app) {
         })
         .catch(() => {
           removeFile(tempPath);
-          return res.status(400).send("Project not found!");
+          return res.error("Project not found!");
         });
     });
   });
