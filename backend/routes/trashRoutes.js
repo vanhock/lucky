@@ -1,5 +1,7 @@
+const sequelize = require("sequelize");
+
 const { Project, Page, Trash } = require("../sequelize");
-const { getUserByToken, filterObject } = require("../libs/helpers");
+const { getUserByToken } = require("../libs/helpers");
 
 module.exports = function(app) {
   app.get("/get-projects-trash", (req, res) => {
@@ -8,7 +10,7 @@ module.exports = function(app) {
         where: {
           userId: user.id,
           trashId: {
-            [Op.ne]: null
+            [sequelize.Op.not]: null
           }
         }
       })
@@ -139,7 +141,7 @@ function removeItemFromTrash(id, callback) {
       }
     });
     return callback("success");
-  } catch {
+  } catch (error) {
     return callback("fail");
   }
 }

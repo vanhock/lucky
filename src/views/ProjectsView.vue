@@ -63,10 +63,6 @@ export default {
   created() {
     this.getAllProjects();
   },
-  beforeRouteUpdate(to, from, next) {
-    this.getAllProjects();
-    next();
-  },
   mixins: [UserPanelMixin],
   components: {
     EmptyPlaceholder,

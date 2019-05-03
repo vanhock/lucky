@@ -19,9 +19,17 @@ export default {
 
 <style lang="scss" scoped>
 .v-button-inline {
-  background-color: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  color: $color-w3;
+  &.white,
+  &.dark {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+  }
+  &.white {
+    color: $color-w3;
+  }
+  &.dark {
+    color: $color-w1;
+  }
 }
 </style>

@@ -1,12 +1,15 @@
 <template>
-  <div class="trash-list" v-if="trashes && trashes.length">
+  <div class="trash-list" v-if="trash && trash.length">
     <div class="title">{{ title }}</div>
     <v-card-table
-      v-for="trash in trashes"
-      :key="trash.id"
-      :name="trash.name"
-      :caption="trash.updatedAt"
+      class="trash-list-item"
+      v-for="item in trash"
+      :key="item.id"
+      :name="item.name"
+      :caption="item.updatedAt"
       :actions="actions"
+      @restore="$emit('restore', item)"
+      @delete="$emit('delete', item)"
     />
   </div>
 </template>
@@ -29,7 +32,7 @@ export default {
     ]
   }),
   props: {
-    trashes: {
+    trash: {
       type: Array,
       default: () => []
     },
@@ -38,4 +41,44 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="scss">
+.trash-list {
+  .title {
+    margin-bottom: 20px;
+  }
+  &-item {
+    &:not(:last-child):not(:nth-child(2)) {
+      .v-card-content {
+        border-radius: 0;
+      }
+    }
+    &:nth-child(2) {
+      .v-card-content {
+        border-radius: 7px 7px 0 0;
+      }
+    }
+    &:last-child {
+      .v-card-content {
+        border-radius: 0 0 7px 7px;
+      }
+    }
+    &:not(:last-child) {
+      &:after {
+        content: "";
+        position: absolute;
+        height: 1px;
+        width: calc(100% - 40px);
+        bottom: 0;
+        @include galign();
+        background-color: $color-b4;
+      }
+    }
+    .v-card-content {
+      cursor: default;
+      &:active {
+        top: 0;
+      }
+    }
+  }
+}
+</style>

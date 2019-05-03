@@ -3,8 +3,11 @@ import {
   TRASH_GET_PROJECTS_TRASH,
   TRASH_RESTORE_PROJECT
 } from "./mutation-types";
-import { getProjectsTrash, restoreProject } from "../api/TrashApi";
-import { deleteProject } from "../api/ProjectApi";
+import {
+  getProjectsTrash,
+  restoreProject,
+  deleteProject
+} from "../api/TrashApi";
 
 export default {
   state: {
@@ -14,10 +17,7 @@ export default {
   },
   getters: {
     projectsTrash: state => state.projectsTrash,
-    hasProjectsTrash: state =>
-      state.projectsTrash && state.projectsTrash.length,
-    pagesTrash: state => state.pagesTrash,
-    hasPagesTrash: state => state.pagesTrash && state.pagesTrash.length
+    pagesTrash: state => state.pagesTrash
   },
   mutations: {
     [TRASH_RESTORE_PROJECT](state, payload) {
@@ -55,13 +55,16 @@ export default {
     },
     [TRASH_DELETE_PROJECT]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        deleteProject({ id: payload.id }, (error, success) => {
-          if (error) {
-            return reject(error);
+        deleteProject(
+          { id: payload.id, name: payload.name },
+          (error, success) => {
+            if (error) {
+              return reject(error);
+            }
+            commit(TRASH_DELETE_PROJECT, payload);
+            resolve(success);
           }
-          commit(TRASH_DELETE_PROJECT, payload);
-          resolve(success);
-        });
+        );
       });
     }
   }

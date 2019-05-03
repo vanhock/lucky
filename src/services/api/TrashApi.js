@@ -7,14 +7,14 @@ export function getProjectsTrash(cb) {
   });
 }
 
-export function moveProjectToTrash(payload, cb) {
-  PixelApi.post("/move-project-to-trash", { data: payload }, (status, data) => {
+export function restoreProject(payload, cb) {
+  PixelApi.post("/restore-project", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);
   });
 }
 
-export function restoreProject(payload, cb) {
-  PixelApi.post("/restore-project", { data: payload }, (status, data) => {
+export function deleteProject(payload, cb) {
+  PixelApi.post("/delete-project", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);
   });
 }

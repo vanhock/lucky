@@ -8,6 +8,7 @@ const pageRoutes = require("./pageRoutes");
 const designRoutes = require("./designRoutes");
 const taskRoutes = require("./taskRoutes");
 const commentRoutes = require("./commentRoutes");
+const trashRoutes = require("./trashRoutes");
 module.exports = function(app) {
   app.use(
     formidableMiddleware(
@@ -39,4 +40,5 @@ module.exports = function(app) {
   designRoutes(app);
   taskRoutes(app);
   commentRoutes(app);
+  trashRoutes(app);
 };

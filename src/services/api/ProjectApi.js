@@ -19,8 +19,8 @@ export function getAllProjects(cb) {
   });
 }
 
-export function deleteProject(payload, cb) {
-  PixelApi.post("/delete-project", (status, data) => {
+export function moveProjectToTrash(payload, cb) {
+  PixelApi.post("/move-project-to-trash", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);
   });
 }

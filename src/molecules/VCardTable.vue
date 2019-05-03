@@ -36,14 +36,17 @@ export default {
 .v-card.v-card-table {
   .v-card-text-container {
     flex-direction: row;
-    height: 60px;
-    .caption {
-      bottom: 3px;
+    height: 70px;
+    padding: 0 20px;
+    align-items: center;
+    .name {
+      margin-top: -10px;
+      color: $color-b3;
     }
-    .actions {
-      right: 10px;
-      @include valign();
-    }
+  }
+  .actions {
+    right: 0;
+    @include valign();
   }
 }
 </style>
