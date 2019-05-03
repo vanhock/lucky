@@ -13,8 +13,8 @@ export function moveProjectToTrash(payload, cb) {
   });
 }
 
-export function deleteProject(payload, cb) {
-  PixelApi.post("/delete-project", (status, data) => {
+export function restoreProject(payload, cb) {
+  PixelApi.post("/restore-project", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);
   });
 }

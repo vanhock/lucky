@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import AuthStoreModule from "./AuthStoreModule";
 import InspectorsStoreModule from "./InspectorsStoreModule";
 import ProjectsStoreModule from "./ProjectsStoreModule";
+import TrashStoreModude from "./TrashStoreModule";
 Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
@@ -11,6 +12,7 @@ export default new Vuex.Store({
   modules: {
     auth: AuthStoreModule,
     inspectors: InspectorsStoreModule,
-    projects: ProjectsStoreModule
+    projects: ProjectsStoreModule,
+    trash: TrashStoreModude
   }
 });

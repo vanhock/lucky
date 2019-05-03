@@ -9,6 +9,8 @@
 <script>
 import UserPanelMixin from "../mixins/UserPanelMixin";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
+import {TRASH_GET_PROJECTS_TRASH, TRASH_RESTORE_PROJECT} from "../services/store/mutation-types";
+import { notification } from "../services/notification";
 
 export default {
   name: "TrashView",
@@ -33,7 +35,20 @@ export default {
   }),
   methods: {
     getProjectsTrash() {
-
+      this.$store.dispatch(TRASH_GET_PROJECTS_TRASH);
+    },
+    restoreProject() {
+      this.$store
+        .dispatch(TRASH_RESTORE_PROJECT)
+        .then(() => {
+          notification(this, "success", "Project restored");
+        })
+        .catch(error => {
+          notification(this, "error", error);
+        });
+    },
+    deleteProject() {
+      this.$store.dispatch(PROJECT_)
     }
   }
 };
