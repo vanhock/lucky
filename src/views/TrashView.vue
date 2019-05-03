@@ -3,9 +3,6 @@
     <v-button-primary @click="openModal('create')"
       >Empty trash</v-button-primary
     >
-    <template>
-      <div class="title">Projects</div>
-    </template>
   </div>
 </template>
 
@@ -33,7 +30,12 @@ export default {
       }
     },
     selectedModal: "deleteAll"
-  })
+  }),
+  methods: {
+    getProjectsTrash() {
+
+    }
+  }
 };
 </script>
 

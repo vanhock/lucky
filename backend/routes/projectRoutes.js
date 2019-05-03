@@ -36,9 +36,10 @@ module.exports = function(app) {
               return res.status(200).send(JSON.stringify(project.dataValues));
             });
           } else {
-            return res
-              .status(403)
-              .send("You don't have rights for edit this project!");
+            return res.error({
+              title: "You don't have rights for edit this project!",
+              code: 403
+            });
           }
         })
         .catch(message => {
@@ -59,69 +60,11 @@ module.exports = function(app) {
           return res.status(200).send(JSON.stringify(projects));
         })
         .catch(message => {
-          return res
-            .status(400)
-            .send("Error with getting projects: " + message);
+          return res.error("Error with getting projects: " + message);
         });
     });
   });
 
-  app.post("/move-project-to-trash", (req, res) => {
-    if (!req.fields.id) {
-      return res.error("Id did not provide!");
-    }
-    getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          id: req.fields.id
-        }
-      })
-        .then(project => {
-          if (!project) {
-            return res.error("Project not found");
-          }
-          if (project.userId === user.id || user.isAdmin) {
-            Trash.create().then(trash => {
-              project.update({ trashId: trash.id });
-              res.status(200).send(JSON.stringify(project));
-            });
-          } else {
-            return res.error("You don't have rights for delete this project!");
-          }
-        })
-        .catch(error => res.error(error));
-    });
-  });
-
-  app.post("/restore-project-from-trash", (req, res) => {
-    if (!req.fields.id) {
-      return res.error("Id did not provide!");
-    }
-    getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          id: req.fields.id
-        }
-      }).then(project => {
-        if (project.userId === user.id || user.isAdmin) {
-          Trash.destroy({
-            where: {
-              id: project.trashId
-            }
-          });
-          project
-            .update({ trashId: null })
-            .then(project =>
-              res.status(200).send(JSON.stringify(project.dataValues))
-            );
-        } else {
-          res
-            .status(403)
-            .send("You don't have rights for update this project!");
-        }
-      });
-    });
-  });
   app.post("/delete-project", (req, res) => {
     if (!req.fields.id) {
       return res.error("Id did not provide!");
@@ -153,9 +96,10 @@ module.exports = function(app) {
             });
             return res.status(200).send("Project deleted!");
           } else {
-            res
-              .status(403)
-              .send("You don't have rights for delete this project!");
+            res.error({
+              title: "You don't have rights for delete this project!",
+              code: 403
+            });
           }
         })
         .catch(() => {

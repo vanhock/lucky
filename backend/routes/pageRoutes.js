@@ -58,35 +58,36 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-pages", (req, res) => {
-    if (!req.fields.projectId) {
+    if (!req.query.projectId) {
       return res.error("Project id did not provide!");
     }
-    const projectId = req.fields.projectId;
+    const projectId = req.query.projectId;
     getUserByToken(req, res, user => {
       Project.findOne({
         where: {
-          id: projectId
+          id: projectId,
+          trashId: null
         }
       })
         .then(project => {
           if (project.userId === user.id || user.isAdmin) {
             Page.findAll({
               where: {
-                projectId: projectId
+                projectId: projectId,
+                trashId: null
               }
             })
               .then(pages => {
                 return res.status(200).send(JSON.stringify(pages));
               })
               .catch(() => {
-                return res
-                  .status(400)
-                  .send("Have no pages found for this project!");
+                return res.error("Have no pages found for this project!");
               });
           } else {
-            res
-              .status(403)
-              .send("You don't have rights to view pages of this project!");
+            res.error({
+              title: "You don't have rights to view pages of this project!",
+              code: 403
+            });
           }
         })
         .catch(() => {
@@ -120,9 +121,10 @@ module.exports = function(app) {
             return res.error("Project of this page not found!");
           }
           if (user.id !== targetProject.userId) {
-            res
-              .status(400)
-              .send("You don't allow to move the page to this project");
+            res.error({
+              title: "You don't allow to move the page to this project",
+              code: 403
+            });
           }
           page
             .update({
