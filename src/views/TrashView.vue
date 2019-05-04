@@ -1,24 +1,29 @@
 <template>
   <div class="trash-view">
-    <v-button-primary @click="openModal('create')"
-      >Empty trash</v-button-primary
-    >
-    <trash-list
-      :trash="projectsTrash"
-      title="Projects"
-      @restore="restoreProject"
-      @delete="openModal('deleteProject', $event)"
-    />
-    <v-modal
-      ref="operationalModal"
-      class="operational-modal"
-      :title="currentModalTitle"
-      :description="currentModalDescription"
-    >
-      <v-button-primary @click="currentAction">{{
-        currentModalButtonName
-      }}</v-button-primary>
-    </v-modal>
+    <template v-if="trashLength">
+      <v-button-primary @click="openModal('create')"
+        >Empty trash</v-button-primary
+      >
+      <trash-list
+        :trash="projectsTrash"
+        title="Projects"
+        @restore="restoreProject"
+        @delete="openModal('deleteProject', $event)"
+      />
+      <v-modal
+        ref="operationalModal"
+        class="operational-modal"
+        :title="currentModalTitle"
+        :description="currentModalDescription"
+      >
+        <v-button-primary @click="currentAction">{{
+          currentModalButtonName
+        }}</v-button-primary>
+      </v-modal>
+    </template>
+    <template v-if="!trashLength">
+      <empty-placeholder title="Trash is empty" icon="garbage" />
+    </template>
   </div>
 </template>
 
@@ -34,10 +39,11 @@ import { notification } from "../services/notification";
 import TrashList from "../organisms/TrashList";
 import { mapGetters } from "vuex";
 import VModal from "../molecules/VModal";
+import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 export default {
   name: "TrashView",
   mixins: [UserPanelMixin],
-  components: { TrashList, VButtonPrimary, VModal },
+  components: {EmptyPlaceholder, TrashList, VButtonPrimary, VModal },
   created() {
     this.getProjectsTrash();
   },
@@ -59,7 +65,10 @@ export default {
     selectedModal: "deleteAll"
   }),
   computed: {
-    ...mapGetters(["projectsTrash"])
+    ...mapGetters(["projectsTrash"]),
+    trashLength() {
+      return this.projectsTrash.length;
+    }
   },
   methods: {
     getProjectsTrash() {

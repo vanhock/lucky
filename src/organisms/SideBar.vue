@@ -32,6 +32,8 @@ export default {
 .sidebar {
   width: 120px;
   height: 100%;
+  position: sticky;
+  top: 0;
   .logo {
     height: 81px;
     display: flex;

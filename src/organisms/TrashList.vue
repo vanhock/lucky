@@ -58,12 +58,15 @@ export default {
         border-radius: 0;
       }
     }
-    &:nth-child(2) {
+    &:nth-child(2):last-child {
+      border-radius: 7px;
+    }
+    &:nth-child(2):not(:last-child) {
       .v-card-content {
         border-radius: 7px 7px 0 0;
       }
     }
-    &:last-child {
+    &:last-child:not(:nth-child(2)) {
       .v-card-content {
         border-radius: 0 0 7px 7px;
       }
