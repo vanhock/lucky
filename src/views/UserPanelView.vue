@@ -46,7 +46,6 @@ export default {
     min-width: 700px;
     padding-right: 125px;
     .title {
-      margin-top: 30px;
       font-weight: 500;
     }
   }

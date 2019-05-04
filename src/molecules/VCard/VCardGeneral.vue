@@ -1,10 +1,16 @@
 <template>
   <div class="project-item">
-    <v-card :name="name" :image="image" :caption="caption" :text="text">
-      <div @click="$emit('delete', project)">
+    <v-card
+      :name="name"
+      :image="image"
+      :caption="caption"
+      :text="text"
+      @click="$emit('click')"
+    >
+      <div @click="$emit('delete', item)">
         <zondicon icon="trash" />
       </div>
-      <div @click="$emit('edit', project)">
+      <div @click="$emit('edit', item)">
         <zondicon icon="edit-pencil" />
       </div>
     </v-card>
@@ -15,11 +21,11 @@
 import VCard from "../../atoms/VCard";
 import Zondicon from "vue-zondicons/src/components/Zondicon";
 export default {
-  name: "ProjectItem",
+  name: "VCardGeneral",
   components: { Zondicon, VCard },
   extends: VCard,
   props: {
-    project: Object
+    item: Object
   }
 };
 </script>

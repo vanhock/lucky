@@ -10,6 +10,7 @@ import {
   createProject,
   editProject,
   getAllProjects,
+  getProject,
   moveProjectToTrash
 } from "../api/ProjectApi";
 
@@ -21,7 +22,8 @@ export default {
   },
   getters: {
     projects: state => state.projects,
-    hasProjects: state => state.projects && state.projects.length
+    hasProjects: state => state.projects && state.projects.length,
+    currentProject: state => state.currentProject
   },
   mutations: {
     [PROJECT_EDIT_PROJECT](state, payload) {
@@ -55,7 +57,15 @@ export default {
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
-      commit(PROJECT_SET_CURRENT_PROJECT, payload);
+      return new Promise((resolve, reject) => {
+        getProject(payload, (error, project) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(PROJECT_SET_CURRENT_PROJECT, payload);
+          resolve(project);
+        });
+      });
     },
     [PROJECT_CREATE_PROJECT]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {

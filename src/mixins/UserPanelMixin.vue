@@ -44,5 +44,10 @@ export default {
   button {
     margin-top: 25px;
   }
+  .v-input-bordered {
+    &:not(:last-child) {
+      margin-bottom: 15px;
+    }
+  }
 }
 </style>

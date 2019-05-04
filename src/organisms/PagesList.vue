@@ -1,15 +1,14 @@
 <template>
-  <div class="projects-list">
+  <div class="pages-list">
     <card-general-list :title="title">
       <v-card-general
-        v-for="project in projects"
-        :key="project.id"
-        :name="project.name"
-        :caption="normalizeData(project.updatedAt)"
-        :text="`Pages: ${project.pagesCount || 0}`"
-        @delete="$emit('delete', project)"
-        @edit="$emit('edit', project)"
-        @click="$router.push(`${project.id}/pages`)"
+        v-for="page in pages"
+        :key="page.id"
+        :name="page.name"
+        :caption="normalizeData(page.updatedAt)"
+        :text="`Pages: ${page.pagesCount || 0}`"
+        @delete="$emit('delete', page)"
+        @edit="$emit('edit', page)"
       />
     </card-general-list>
   </div>
@@ -20,10 +19,10 @@ import CardGeneralList from "../molecules/CardGeneralList";
 import VCardGeneral from "../molecules/VCard/VCardGeneral";
 import { normalizeData } from "../utils";
 export default {
-  name: "ProjectsList",
+  name: "PagesList",
   components: { VCardGeneral, CardGeneralList },
   props: {
-    projects: {
+    pages: {
       type: Array,
       default: () => []
     },

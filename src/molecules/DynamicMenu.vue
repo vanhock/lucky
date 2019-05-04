@@ -9,7 +9,6 @@
         >
           <v-toggle
             :icon="item.icon"
-            :active="$route.name === item.to"
             :text="item.text"
             :show-text="showText"
             :label="item.label"

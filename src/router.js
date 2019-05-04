@@ -37,6 +37,13 @@ export default new Router({
             import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
         },
         {
+          path: ":projectId/pages",
+          name: "Pages",
+          props: true,
+          component: () =>
+            import(/* webpackChunkName: "PagesView" */ "./views/PagesView")
+        },
+        {
           path: "/trash",
           name: "Trash",
           component: () =>
@@ -49,6 +56,10 @@ export default new Router({
       name: "Inspectors",
       component: () =>
         import(/* webpackChunkName: "InspectorsView" */ "./views/InspectorsView")
+    },
+    {
+      path: "/account",
+      name: "Account"
     },
     {
       path: "/sign-in",

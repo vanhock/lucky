@@ -4,7 +4,7 @@
       <div class="v-card-image-container" v-if="image">
         <img class="image" :src="image" :alt="name" />
       </div>
-      <div class="v-card-text-container">
+      <div class="v-card-text-container" @click="$emit('click')">
         <div class="name">{{ name }}</div>
         <div class="text">{{ text }}</div>
         <div class="caption">{{ caption }}</div>

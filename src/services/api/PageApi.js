@@ -1,20 +1,26 @@
-import axios from "axios";
-import config from "../../config";
+import PixelApi from "./api";
+import { generalCallback } from "./helpers";
 
-export function getFoundNodesFromApi(design, nodes, cb) {
-  const options = {
-    headers: {
-      "Content-Type": "multipart/form-data"
-    }
-  };
+export function getAllPages(payload, cb) {
+  PixelApi.get(`/get-all-pages?projectId=${payload}`, (status, pages) => {
+    generalCallback(status, pages, cb);
+  });
+}
 
-  const formData = new FormData();
-  formData.append("design", JSON.stringify(design));
-  formData.append("nodes", JSON.stringify(nodes));
-  axios
-    .post(config.serverUrl + "/get-found-nodes", formData, options)
-    .then(response => {
-      const foundNodes = response.data;
-      cb(foundNodes);
-    });
+export function createPage(payload, cb) {
+  PixelApi.post("/create-page", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
+
+export function editPage(payload, cb) {
+  PixelApi.post("/edit-page", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
+
+export function movePageToTrash(payload, cb) {
+  PixelApi.post("/move-page-to-trash", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
 }

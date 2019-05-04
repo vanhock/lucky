@@ -1,0 +1,182 @@
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
+  <div class="pages-view">
+    <content-with-sidebar>
+      <empty-placeholder v-if="!hasPages" icon="pages">
+        <v-button-primary @click="openModal('create')"
+          >New page</v-button-primary
+        >
+      </empty-placeholder>
+      <template v-if="hasPages">
+        <v-button-primary @click="openModal('create')"
+          >New page</v-button-primary
+        >
+        <pages-list
+          :pages="pages"
+          title="Active pages"
+          @delete="deletePage($event)"
+          @edit="openModal('edit', $event)"
+        />
+      </template>
+      <template v-slot:sidebar>
+        <div class="title">Collaborators</div>
+      </template>
+    </content-with-sidebar>
+    <v-modal
+      ref="operationalModal"
+      class="operational-modal"
+      :title="currentModalTitle"
+    >
+      <form-group ref="operationalForm">
+        <v-input-bordered
+          id="pageName"
+          name="name"
+          :value="selectedName"
+          label="Page title"
+          required
+        />
+        <v-input-bordered
+          id="pageWebsite"
+          name="websiteUrl"
+          :value="selectedPageWebsite"
+          label="Website URL"
+          required
+        />
+      </form-group>
+      <v-button-primary @click="currentAction">{{
+        currentModalButtonName
+      }}</v-button-primary>
+    </v-modal>
+  </div>
+</template>
+
+<script>
+import ContentWithSidebar from "../layouts/ContentWithSidebar";
+import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
+import {
+  PAGE_CREATE_PAGE,
+  PAGE_EDIT_PAGE,
+  PAGE_GET_ALL_PAGES,
+  PAGE_MOVE_TO_TRASH,
+  PROJECT_SET_CURRENT_PROJECT
+} from "../services/store/mutation-types";
+import { notification } from "../services/notification";
+import { mapGetters } from "vuex";
+import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
+import VModal from "../molecules/VModal";
+import FormGroup from "../molecules/FormGroup";
+import PagesList from "../organisms/PagesList";
+import UserPanelMixin from "../mixins/UserPanelMixin";
+import VInputBordered from "../molecules/VInput/VInputBordered";
+export default {
+  name: "PagesView",
+  mixins: [UserPanelMixin],
+  components: {
+    VInputBordered,
+    PagesList,
+    FormGroup,
+    VModal,
+    EmptyPlaceholder,
+    VButtonPrimary,
+    ContentWithSidebar
+  },
+  props: {
+    projectId: String
+  },
+  created() {
+    this.getProject();
+    this.getAllPages();
+  },
+  data: () => ({
+    modals: {
+      create: {
+        title: "Create page",
+        action: "createPage",
+        buttonName: "Create"
+      },
+      edit: {
+        title: "Edit page",
+        action: "editPage",
+        buttonName: "Save"
+      }
+    },
+    selectedModal: "create"
+  }),
+  computed: {
+    ...mapGetters(["hasPages", "pages", "currentProject"]),
+    selectedPageWebsite() {
+      return this.dataForOperations && this.dataForOperations.website;
+    }
+  },
+  methods: {
+    getProject() {
+      this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
+        projectId: this.projectId
+      });
+    },
+    getAllPages() {
+      this.$store
+        .dispatch(PAGE_GET_ALL_PAGES, { projectId: this.projectId })
+        .catch(error => notification(this, "error", error));
+    },
+    createPage() {
+      if (!this.$refs.operationalForm.valid) {
+        return notification(
+          this,
+          "error",
+          "Page name did not provide or not valid!"
+        );
+      }
+      this.$store
+        .dispatch(PAGE_CREATE_PAGE, {
+          ...this.$refs.operationalForm.changedItems,
+          projectId: this.currentProject.id
+        })
+        .then(page => {
+          this.$refs.operationalModal.showModal = false;
+          return notification(
+            this,
+            "success",
+            `Page "${page.name}" successfully created!`
+          );
+        })
+        .catch(error => notification(this, "error", error));
+    },
+    editPage() {
+      if (!this.$refs.operationalForm.childrenChanged) {
+        return;
+      }
+      if (!this.$refs.operationalForm.valid) {
+        return notification(
+          this,
+          "error",
+          "Page name did not provide or not valid!"
+        );
+      }
+      this.$store
+        .dispatch(PAGE_EDIT_PAGE, {
+          ...this.$refs.operationalForm.changedItems,
+          id: this.dataForOperations.id,
+          projectId: this.currentProject.id
+        })
+        .then(() => {
+          this.$refs.operationalModal.showModal = false;
+          return notification(this, "success", "Page successfully edited");
+        })
+        .then(error => notification(this, "error", error));
+    },
+    deletePage(page) {
+      if (!page) {
+        return;
+      }
+      this.$store
+        .dispatch(PAGE_MOVE_TO_TRASH, page)
+        .then(() => {
+          return notification(this, "success", `"${page.name}" moved to trash`);
+        })
+        .then(error => notification(this, "error", error));
+    }
+  }
+};
+</script>
+
+<style scoped></style>

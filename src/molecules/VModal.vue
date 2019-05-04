@@ -68,7 +68,6 @@ export default {
     background-color: #fff;
     padding: 30px;
     min-width: 350px;
-    min-height: 350px;
     max-width: 500px;
     max-height: 70vh;
     left: 50%;
@@ -84,7 +83,7 @@ export default {
   &-header {
     display: flex;
     flex-direction: column;
-    min-height: 80px;
+    min-height: 54px;
   }
 
   &-title {

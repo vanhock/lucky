@@ -19,6 +19,12 @@ export function getAllProjects(cb) {
   });
 }
 
+export function getProject(payload, cb) {
+  PixelApi.get(`/get-project?id=${payload}`, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
+
 export function moveProjectToTrash(payload, cb) {
   PixelApi.post("/move-project-to-trash", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);

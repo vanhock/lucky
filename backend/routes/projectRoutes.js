@@ -48,6 +48,26 @@ module.exports = function(app) {
     });
   });
 
+  app.get("/get-project", (req, res) => {
+    if (!req.query.id) {
+      return res.error("Project id did not provide!");
+    }
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          userId: user.id,
+          id: req.query.id
+        }
+      })
+        .then(project => {
+          return res.status(200).send(JSON.stringify(project));
+        })
+        .catch(message => {
+          return res.error("Error with getting project: " + message);
+        });
+    });
+  });
+
   app.get("/get-all-projects", (req, res) => {
     getUserByToken(req, res, user => {
       Project.findAll({

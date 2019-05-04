@@ -49,14 +49,16 @@ export default {
   &.dark {
     background-color: $color-bg1;
     .dynamic-menu {
-      .toggle {
-        &.active {
+      .menu-item > .router-link-exact-active {
+        .toggle {
           color: #fff;
           .icon {
             fill: #fff;
           }
         }
-        &:not(.active) {
+      }
+      .menu-item > :not(.router-link-exact-active) {
+        .toggle {
           color: $color-b3;
           .icon {
             fill: $color-b3;
@@ -78,14 +80,16 @@ export default {
   }
   &.white {
     .dynamic-menu {
-      .toggle {
-        &.active {
+      .menu-item > .router-link-exact-active {
+        .toggle {
           color: $color-w3;
           .icon {
             fill: $color-w3;
           }
         }
-        &:not(.active) {
+      }
+      .menu-item > :not(.router-link-exact-active) {
+        .toggle {
           color: $color-b3;
           .icon {
             fill: $color-b3;
@@ -97,10 +101,10 @@ export default {
             }
           }
         }
-      }
-      [disabled] {
-        .toggle {
-          opacity: 0.4;
+        [disabled] {
+          .toggle {
+            opacity: 0.4;
+          }
         }
       }
     }

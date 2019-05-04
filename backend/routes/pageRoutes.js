@@ -57,6 +57,45 @@ module.exports = function(app) {
     });
   });
 
+  app.get("/get-page", (req, res) => {
+    if (!req.query.projectId || !req.query.id) {
+      return res.error("Required fields did not provide!");
+    }
+    const projectId = req.query.projectId;
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          id: projectId,
+          trashId: null
+        }
+      })
+        .then(project => {
+          if (project.userId === user.id || user.isAdmin) {
+            Page.findAll({
+              where: {
+                projectId: projectId,
+                trashId: null
+              }
+            })
+              .then(pages => {
+                return res.status(200).send(JSON.stringify(pages));
+              })
+              .catch(() => {
+                return res.error("Have no pages found for this project!");
+              });
+          } else {
+            res.error({
+              title: "You don't have rights to view pages of this project!",
+              code: 403
+            });
+          }
+        })
+        .catch(() => {
+          return res.error("Project not found by id!");
+        });
+    });
+  });
+
   app.get("/get-all-pages", (req, res) => {
     if (!req.query.projectId) {
       return res.error("Project id did not provide!");

@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import VCard from "../atoms/VCard";
-import VButtonInline from "./VButton/VButtonInline";
+import VCard from "../../atoms/VCard";
+import VButtonInline from "../VButton/VButtonInline";
 export default {
   name: "VCardTable",
   components: { VButtonInline, VCard },
