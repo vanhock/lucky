@@ -44,7 +44,7 @@ export default {
     height: 100%;
     max-width: 1300px;
     min-width: 700px;
-    padding-right: 80px;
+    padding-right: 125px;
     .title {
       margin-top: 30px;
       font-weight: 500;

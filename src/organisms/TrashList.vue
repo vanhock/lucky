@@ -6,7 +6,7 @@
       v-for="item in trash"
       :key="item.id"
       :name="item.name"
-      :caption="item.updatedAt"
+      :caption="normalizeData(item.updatedAt)"
       :actions="actions"
       @restore="$emit('restore', item)"
       @delete="$emit('delete', item)"
@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { normalizeData } from "../utils";
 import VCardTable from "../molecules/VCardTable";
 export default {
   name: "TrashList",
@@ -37,6 +38,11 @@ export default {
       default: () => []
     },
     title: String
+  },
+  methods: {
+    normalizeData(date) {
+      return normalizeData(date);
+    }
   }
 };
 </script>
@@ -75,6 +81,12 @@ export default {
     }
     .v-card-content {
       cursor: default;
+      .caption {
+        position: absolute;
+        bottom: 18px;
+        margin: 0;
+        padding: 0;
+      }
       &:active {
         top: 0;
       }
