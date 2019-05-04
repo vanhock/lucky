@@ -3,7 +3,9 @@
     <side-bar :menu="menu"></side-bar>
     <div class="user-panel-content">
       <div class="user-panel-container">
-        <div class="user-panel-title">{{ $route.name }}</div>
+        <div class="user-panel-title">
+          {{ $route.name }}
+        </div>
         <router-view class="user-panel-view" />
       </div>
     </div>
@@ -12,6 +14,7 @@
 
 <script>
 import SideBar from "../organisms/SideBar";
+import { mapGetters } from "vuex";
 export default {
   name: "UserPanelView",
   components: { SideBar },
@@ -28,7 +31,10 @@ export default {
       { text: "Trash", icon: "trash", to: "Trash" },
       { text: "Log out", icon: "stand-by", to: "LogOut" }
     ]
-  })
+  }),
+  computed: {
+    ...mapGetters(["currentProject"])
+  }
 };
 </script>
 

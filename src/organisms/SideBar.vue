@@ -71,11 +71,6 @@ export default {
           }
         }
       }
-      [disabled] {
-        .toggle {
-          opacity: 0.4;
-        }
-      }
     }
   }
   &.white {
@@ -101,12 +96,13 @@ export default {
             }
           }
         }
-        [disabled] {
-          .toggle {
-            opacity: 0.4;
-          }
-        }
       }
+    }
+  }
+
+  [disabled] {
+    .toggle {
+      opacity: 0.4;
     }
   }
 }

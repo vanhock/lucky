@@ -58,11 +58,11 @@ export default {
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        getProject(payload, (error, project) => {
+        getProject(payload.projectId, (error, project) => {
           if (error) {
             return reject(error);
           }
-          commit(PROJECT_SET_CURRENT_PROJECT, payload);
+          commit(PROJECT_SET_CURRENT_PROJECT, project);
           resolve(project);
         });
       });

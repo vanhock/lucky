@@ -47,7 +47,7 @@ export default {
     }
     .label {
       font-size: 15px;
-      top: 16px;
+      top: 15px;
       left: 10px;
       color: $color-b4;
       font-weight: 500;

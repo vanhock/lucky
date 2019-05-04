@@ -1,3 +1,5 @@
+const { checkAllowChangesToPage } = require("../libs/helpers");
+
 const sequelize = require("sequelize");
 
 const { Project, Page, Trash } = require("../sequelize");
@@ -129,6 +131,34 @@ module.exports = function(app) {
         .catch(() => {
           return res.error("Project not found by id!");
         });
+    });
+  });
+
+  app.post("/move-page-to-trash", (req, res) => {
+    if (!req.fields.pageId || !req.fields.projectId) {
+      return res.error("Required fields did not provide!");
+    }
+    checkAllowChangesToPage(req, res, page => {
+      Trash.create().then(trash => {
+        page.update({ trashId: trash.id });
+        res.status(200).send(JSON.stringify(page.dataValues));
+      });
+    });
+  });
+
+  app.post("/restore-page", (req, res) => {
+    if (!req.fields.pageId || !req.fields.projectId) {
+      return res.error("Required fields did not provide!");
+    }
+    checkAllowChangesToPage(req, res, page => {
+      removeItemFromTrash(page.trashId, status => {
+        if (status === "fail") {
+          return res.error(null, 500);
+        }
+        page.update({ trashId: null }).then(page => {
+          return res.status(200).send(JSON.stringify(page.dataValues));
+        });
+      });
     });
   });
 };
