@@ -37,9 +37,13 @@ export default {
 <style lang="scss" scoped>
 .projects-list {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-column-gap: 20px;
+  grid-row-gap: 20px;
   margin-top: 20px;
   justify-items: stretch;
+  @media (max-width: 1400px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 </style>

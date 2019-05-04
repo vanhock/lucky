@@ -38,10 +38,13 @@ export default {
   display: flex;
   box-sizing: border-box;
   background-color: $color-b5;
+  overflow-x: hidden;
   &-content {
     width: 100%;
     height: 100%;
-    max-width: 1000px;
+    max-width: 1300px;
+    min-width: 700px;
+    padding-right: 80px;
     .title {
       margin-top: 30px;
       font-weight: 500;

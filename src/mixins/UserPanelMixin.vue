@@ -11,6 +11,9 @@ export default {
     currentModalTitle() {
       return this.modals && this.modals[this.selectedModal].title;
     },
+    currentModalDescription() {
+      return this.modals && this.modals[this.selectedModal].description;
+    },
     currentModalButtonName() {
       return this.modals && this.modals[this.selectedModal].buttonName;
     },
@@ -19,9 +22,9 @@ export default {
     }
   },
   methods: {
-    openModal(action, project) {
-      if (project) {
-        this.dataForOperations = project;
+    openModal(action, data) {
+      if (data) {
+        this.dataForOperations = data;
       } else {
         this.dataForOperations = {};
       }

@@ -10,6 +10,9 @@
       <div class="modal-close" @click="showModal = false"></div>
       <div class="modal-header">
         <div class="modal-title">{{ title }}</div>
+        <div class="modal-description" v-if="description">
+          {{ description }}
+        </div>
       </div>
       <div class="modal-content" v-if="showModal">
         <slot style="display: none" v-show="showModal"></slot>
@@ -27,7 +30,8 @@ export default {
     showModal: false
   }),
   props: {
-    title: String
+    title: String,
+    description: String
   },
   watch: {
     showModal(value) {
@@ -79,18 +83,21 @@ export default {
 
   &-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    min-height: 80px;
   }
 
   &-title {
     margin-top: 0;
-    margin-bottom: 2.5rem;
     font-weight: 600;
     font-size: 1.25rem;
     line-height: 1.25;
     color: #000;
     box-sizing: border-box;
+  }
+
+  &-description {
+    margin-top: 15px;
   }
 
   &-close {
@@ -111,6 +118,10 @@ export default {
     margin-bottom: 2rem;
     line-height: 1.5;
     color: rgba(0, 0, 0, 0.8);
+    .v-button-primary {
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   &-content {

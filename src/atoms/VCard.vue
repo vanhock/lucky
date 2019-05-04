@@ -6,8 +6,8 @@
       </div>
       <div class="v-card-text-container">
         <div class="name">{{ name }}</div>
-        <div class="caption">{{ caption }}</div>
         <div class="text">{{ text }}</div>
+        <div class="caption">{{ caption }}</div>
       </div>
     </div>
     <div class="actions"><slot></slot></div>
@@ -60,8 +60,9 @@ export default {
     display: flex;
     flex-direction: column;
     padding: 20px 20px 0;
-    height: 145px;
+    height: 190px;
     box-sizing: border-box;
+    margin-top: auto;
     & > * {
       &:not(:last-child) {
         margin-bottom: 10px;
@@ -71,8 +72,8 @@ export default {
       font-weight: bold;
     }
     .caption {
-      position: absolute;
-      bottom: 7px;
+      margin: auto 0 17px;
+      padding-right: 40px;
       font-weight: 600;
       color: $color-b4;
       font-size: 11px;

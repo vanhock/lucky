@@ -7,8 +7,18 @@
       :trash="projectsTrash"
       title="Projects"
       @restore="restoreProject"
-      @delete="deleteProject"
+      @delete="openModal('deleteProject', $event)"
     />
+    <v-modal
+      ref="operationalModal"
+      class="operational-modal"
+      :title="currentModalTitle"
+      :description="currentModalDescription"
+    >
+      <v-button-primary @click="currentAction">{{
+        currentModalButtonName
+      }}</v-button-primary>
+    </v-modal>
   </div>
 </template>
 
@@ -23,10 +33,11 @@ import {
 import { notification } from "../services/notification";
 import TrashList from "../organisms/TrashList";
 import { mapGetters } from "vuex";
+import VModal from "../molecules/VModal";
 export default {
   name: "TrashView",
   mixins: [UserPanelMixin],
-  components: { TrashList, VButtonPrimary },
+  components: { TrashList, VButtonPrimary, VModal },
   created() {
     this.getProjectsTrash();
   },
@@ -64,14 +75,16 @@ export default {
           notification(this, "error", error);
         });
     },
-    deleteProject(project) {
+    deleteProject() {
       this.$store
-        .dispatch(TRASH_DELETE_PROJECT, project)
+        .dispatch(TRASH_DELETE_PROJECT, this.dataForOperations)
         .then(() => {
           notification(this, "success", "Project deleted permanently");
+          this.$refs.operationalModal.showModal = false;
         })
         .catch(error => {
           notification(this, "error", error);
+          this.$refs.operationalModal.showModal = false;
         });
     }
   }
