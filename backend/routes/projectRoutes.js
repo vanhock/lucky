@@ -1,6 +1,6 @@
 const { Project, Page, Design, Trash } = require("../sequelize");
 const { getUserByToken, filterObject } = require("../libs/helpers");
-
+const sequelize = require("sequelize");
 module.exports = function(app) {
   app.post("/create-project", (req, res) => {
     getUserByToken(req, res, user => {
@@ -74,7 +74,20 @@ module.exports = function(app) {
         where: {
           userId: user.id,
           trashId: null
-        }
+        },
+        attributes: [
+          "name",
+          "id",
+          "updatedAt",
+          "createdAt",
+          [
+            sequelize.literal(
+              "(SELECT COUNT(*) FROM Pages WHERE Pages.projectId = Project.id AND Pages.trashId IS NULL)"
+            ),
+            "pagesCount"
+          ]
+        ],
+        order: [[sequelize.literal("pagesCount"), "DESC"]]
       })
         .then(projects => {
           return res.status(200).send(JSON.stringify(projects));

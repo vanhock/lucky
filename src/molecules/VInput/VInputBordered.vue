@@ -5,6 +5,7 @@
       :type="type"
       :name="name"
       :label="label"
+      :value="value"
       :placeholder="placeholder"
       :required="required"
       :autocomplete="autocomplete"
@@ -13,7 +14,6 @@
 </template>
 
 <script>
-import _ from "lodash";
 import VInput from "../../atoms/VInput";
 export default {
   name: "VInputBordered",

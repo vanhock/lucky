@@ -44,6 +44,11 @@ export default {
     focus: false,
     focused: false
   }),
+  mounted() {
+    if (this.value && this.value.length) {
+      this.focus = true;
+    }
+  },
   computed: {
     ...mapState(["appTheme"])
   },
@@ -54,7 +59,7 @@ export default {
   methods: {
     onChange: _.debounce(function() {
       this.$emit("onchange");
-    }, 200),
+    }, 300),
     onFocus() {
       this.focus = true;
     },

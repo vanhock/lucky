@@ -14,7 +14,7 @@ export function createPage(payload, cb) {
 }
 
 export function editPage(payload, cb) {
-  PixelApi.post("/edit-page", { data: payload }, (status, data) => {
+  PixelApi.post("/set-page-params", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);
   });
 }

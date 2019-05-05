@@ -7,7 +7,7 @@ const {
 
 module.exports = function(app) {
   app.post("/create-comment", (req, res) => {
-    if (!req.fields.pageId || !req.fields.text) {
+    if (!req.fields.id || !req.fields.text) {
       return res.error("Required fields did not provide!");
     }
     checkAllowChangesToPage(req, res, (page, project, user) => {
@@ -25,7 +25,7 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-comments", (req, res) => {
-    if (!req.fields.pageId) {
+    if (!req.fields.id) {
       getUserByToken(req, res, user => {
         Comment.findAll({
           where: {
@@ -46,7 +46,7 @@ module.exports = function(app) {
       checkAllowChangesToPage(req, res, () => {
         Comment.findAll({
           where: {
-            pageId: req.fields.pageId
+            id: req.fields.id
           }
         })
           .then(comments => {

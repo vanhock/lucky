@@ -6,7 +6,7 @@
         :key="page.id"
         :name="page.name"
         :caption="normalizeData(page.updatedAt)"
-        :text="`Pages: ${page.pagesCount || 0}`"
+        :text="`Tasks: ${page.tasks || 0}`"
         @delete="$emit('delete', page)"
         @edit="$emit('edit', page)"
       />

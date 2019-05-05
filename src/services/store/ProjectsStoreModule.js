@@ -27,8 +27,6 @@ export default {
   },
   mutations: {
     [PROJECT_EDIT_PROJECT](state, payload) {
-      if (state.currentProject.id === payload.id)
-        state.currentProject = payload;
       for (let key in state.projects) {
         if (
           state.projects.hasOwnProperty(key) &&
@@ -37,6 +35,9 @@ export default {
           Vue.set(state.projects, key, payload);
           break;
         }
+      }
+      if (state.currentProject && state.currentProject.id === payload.id) {
+        state.currentProject = payload;
       }
     },
     [PROJECT_SET_CURRENT_PROJECT](state, payload) {
@@ -57,6 +58,9 @@ export default {
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
+      if (!payload.projectId) {
+        commit(PROJECT_SET_CURRENT_PROJECT, {});
+      }
       return new Promise((resolve, reject) => {
         getProject(payload.projectId, (error, project) => {
           if (error) {

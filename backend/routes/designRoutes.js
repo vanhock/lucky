@@ -137,7 +137,7 @@ module.exports = function(app) {
     if (!req.fields.projectId || !req.fields.fileUrl) {
       return res.error("Required fields did not provide!");
     }
-    const pageId = req.fields.fileUrl
+    const id = req.fields.fileUrl
       .match(/\/file\/(.*)\//)
       .pop()
       .replace("/file/", "");
@@ -150,7 +150,7 @@ module.exports = function(app) {
       })
         .then(project => {
           if (project.userId === user.id) {
-            figma.get(`/files/${pageId}`).then(response => {
+            figma.get(`/files/${id}`).then(response => {
               if (!response.data) {
                 return;
               }
@@ -170,7 +170,7 @@ module.exports = function(app) {
                   height: artboard.absoluteBoundingBox.height
                 });
               });
-              const imagesUrl = `/images/${pageId}?ids=${designIds.join(",")}`;
+              const imagesUrl = `/images/${id}?ids=${designIds.join(",")}`;
               figma
                 .get(imagesUrl)
                 .then(response => {

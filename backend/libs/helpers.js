@@ -22,7 +22,7 @@ function checkAllowChangesToPage(req, res, cb) {
   getUserByToken(req, res, user => {
     Page.findOne({
       where: {
-        id: req.fields.pageId
+        id: req.fields.id
       }
     })
       .then(page => {
@@ -33,17 +33,20 @@ function checkAllowChangesToPage(req, res, cb) {
         })
           .then(project => {
             if (project.userId === user.id || user.isAdmin) {
-              cb(page, project, user);
+              return cb(page, project, user);
             } else {
-              res.status(403).send("You don't have rights to edit this page!");
+              return res.error.send({
+                title: "You don't have rights to edit this page!",
+                status: 403
+              });
             }
           })
           .catch(() => {
-            res.status(500).send("Project of this page not found!");
+            return res.error("Project of this page not found!");
           });
       })
       .catch(() => {
-        res.status(500).send("Page not found!");
+        return res.error("Page not found!");
       });
   });
 }

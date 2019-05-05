@@ -94,48 +94,36 @@ module.exports = function(app) {
   });
 
   app.get("/get-pages-trash", (req, res) => {
-    if (!req.query.projectId) {
-      return res.error("Project id did not provide!");
-    }
-    const projectId = req.query.projectId;
     getUserByToken(req, res, user => {
-      Project.findOne({
+      Project.findAll({
         where: {
-          id: projectId,
+          userId: user.id,
           trashId: null
+        },
+        include: {
+          model: Page,
+          as: "pages",
+          where: {
+            trashId: {
+              [sequelize.Op.not]: null
+            }
+          }
         }
       })
-        .then(project => {
-          if (project.userId === user.id || user.isAdmin) {
-            Page.findAll({
-              where: {
-                projectId: projectId,
-                trashId: {
-                  [Op.ne]: null
-                }
-              }
-            })
-              .then(pages => {
-                return res.status(200).send(JSON.stringify(pages));
-              })
-              .catch(() => {
-                return res.error("Have no pages found for this project!");
-              });
-          } else {
-            res.error({
-              title: "You don't have rights to view pages of this project!",
-              code: 403
-            });
-          }
+        .then(projects => {
+          const pagesTrash = [];
+          projects.forEach(project =>
+            project.pages.forEach(page => pagesTrash.push(page.dataValues))
+          );
+          return res.status(200).send(JSON.stringify(pagesTrash));
         })
         .catch(() => {
-          return res.error("Project not found by id!");
+          return res.error("Have no pages found for this project!");
         });
     });
   });
-
   app.post("/move-page-to-trash", (req, res) => {
-    if (!req.fields.pageId || !req.fields.projectId) {
+    if (!req.fields.id || !req.fields.projectId) {
       return res.error("Required fields did not provide!");
     }
     checkAllowChangesToPage(req, res, page => {
@@ -147,18 +135,36 @@ module.exports = function(app) {
   });
 
   app.post("/restore-page", (req, res) => {
-    if (!req.fields.pageId || !req.fields.projectId) {
-      return res.error("Required fields did not provide!");
+    if (!req.fields.id) {
+      return res.error("Page id did not provide!");
     }
-    checkAllowChangesToPage(req, res, page => {
-      removeItemFromTrash(page.trashId, status => {
-        if (status === "fail") {
-          return res.error(null, 500);
+    getUserByToken(req, res, user => {
+      Project.findAll({
+        where: {
+          userId: user.id,
+          trashId: null
+        },
+        include: {
+          model: Page,
+          where: {
+            id: req.fields.id
+          }
         }
-        page.update({ trashId: null }).then(page => {
-          return res.status(200).send(JSON.stringify(page.dataValues));
+      })
+        .then(projects => {
+          const page = projects[0].pages[0];
+          removeItemFromTrash(page.dataValues.trashId, status => {
+            if (status === "fail") {
+              return res.error(null, 500);
+            }
+            page.update({ trashId: null }).then(page => {
+              return res.status(200).send(JSON.stringify(page.dataValues));
+            });
+          });
+        })
+        .catch(() => {
+          return res.error("Page not found!");
         });
-      });
     });
   });
 };

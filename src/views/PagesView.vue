@@ -67,12 +67,10 @@ import FormGroup from "../molecules/FormGroup";
 import PagesList from "../organisms/PagesList";
 import UserPanelMixin from "../mixins/UserPanelMixin";
 import VInputBordered from "../molecules/VInput/VInputBordered";
-import TopBar from "../organisms/TopBar";
 export default {
   name: "PagesView",
   mixins: [UserPanelMixin],
   components: {
-    TopBar,
     VInputBordered,
     PagesList,
     FormGroup,
@@ -109,7 +107,7 @@ export default {
   computed: {
     ...mapGetters(["hasPages", "pages", "currentProject", "projects"]),
     selectedPageWebsite() {
-      return this.dataForOperations && this.dataForOperations.website;
+      return this.dataForOperations && this.dataForOperations.websiteUrl;
     }
   },
   methods: {

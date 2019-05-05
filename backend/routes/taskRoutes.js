@@ -7,7 +7,7 @@ const {
 
 module.exports = function(app) {
   app.post("/create-task", (req, res) => {
-    if (!req.fields.pageId || !req.fields.name) {
+    if (!req.fields.id || !req.fields.name) {
       return res.error("Required fields did not provide!");
     }
     checkAllowChangesToPage(req, res, (page, project, user) => {
@@ -25,13 +25,13 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-tasks", (req, res) => {
-    if (!req.fields.pageId) {
+    if (!req.fields.id) {
       return res.error("Page id did not provide!");
     }
     checkAllowChangesToPage(req, res, () => {
       Task.findAll({
         where: {
-          pageId: req.fields.pageId
+          id: req.fields.id
         }
       })
         .then(tasks => {
@@ -62,7 +62,7 @@ module.exports = function(app) {
         if (user.id === task.userId || user.isAdmin) {
           task
             .update({
-              ...filterObject(req.fields, null, ["id", "userId", "pageId"])
+              ...filterObject(req.fields, null, ["id", "userId", "id"])
             })
             .then(task => {
               return res.status(200).send(JSON.stringify(task));

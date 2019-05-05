@@ -136,7 +136,7 @@ module.exports = function(app) {
   });
 
   app.post("/delete-page", (req, res) => {
-    if (!req.fields.pageId) {
+    if (!req.fields.id) {
       return res.error("Page id did not provide!");
     }
     checkAllowChangesToPage(req, res, page => {
@@ -146,7 +146,7 @@ module.exports = function(app) {
   });
 
   app.post("/move-page", (req, res) => {
-    if (!req.fields.pageId || !req.fields.projectId) {
+    if (!req.fields.id || !req.fields.projectId) {
       return res.error("Required fields did not provide!");
     }
     checkAllowChangesToPage(req, res, (page, project, user) => {

@@ -1,12 +1,18 @@
 import {
+  TRASH_DELETE_PAGE,
   TRASH_DELETE_PROJECT,
+  TRASH_GET_PAGES_TRASH,
   TRASH_GET_PROJECTS_TRASH,
+  TRASH_RESTORE_PAGE,
   TRASH_RESTORE_PROJECT
 } from "./mutation-types";
 import {
   getProjectsTrash,
   restoreProject,
-  deleteProject
+  deleteProject,
+  getPagesTrash,
+  restorePage,
+  deletePage
 } from "../api/TrashApi";
 
 export default {
@@ -28,6 +34,15 @@ export default {
     },
     [TRASH_GET_PROJECTS_TRASH](state, projects) {
       state.projectsTrash = projects;
+    },
+    [TRASH_RESTORE_PAGE](state, payload) {
+      removeTrashElement(state, payload, "pages");
+    },
+    [TRASH_DELETE_PAGE](state, payload) {
+      removeTrashElement(state, payload, "pages");
+    },
+    [TRASH_GET_PAGES_TRASH](state, pages) {
+      state.pagesTrash = pages;
     }
   },
   actions: {
@@ -65,6 +80,39 @@ export default {
             resolve(success);
           }
         );
+      });
+    },
+    [TRASH_GET_PAGES_TRASH]: ({ commit }) => {
+      return new Promise((resolve, reject) => {
+        getPagesTrash((error, projects) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(TRASH_GET_PAGES_TRASH, projects);
+          resolve(projects);
+        });
+      });
+    },
+    [TRASH_RESTORE_PAGE]: ({ commit }, payload) => {
+      return new Promise((resolve, reject) => {
+        restorePage({ id: payload.id }, (error, success) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(TRASH_RESTORE_PAGE, payload);
+          resolve(success);
+        });
+      });
+    },
+    [TRASH_DELETE_PAGE]: ({ commit }, payload) => {
+      return new Promise((resolve, reject) => {
+        deletePage({ id: payload.id, name: payload.name }, (error, success) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(TRASH_DELETE_PAGE, payload);
+          resolve(success);
+        });
       });
     }
   }
