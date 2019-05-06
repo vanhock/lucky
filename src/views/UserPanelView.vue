@@ -6,6 +6,7 @@
         <div class="user-panel-title">
           {{ $route.name }}
         </div>
+
         <router-view class="user-panel-view" />
       </div>
     </div>
@@ -15,9 +16,10 @@
 <script>
 import SideBar from "../organisms/SideBar";
 import { mapGetters } from "vuex";
+import Preloader from "../atoms/Preloader";
 export default {
   name: "UserPanelView",
-  components: { SideBar },
+  components: { Preloader, SideBar },
   data: () => ({
     menu: [
       { text: "Projects", icon: "folder-outline", to: "Projects" },
@@ -30,7 +32,8 @@ export default {
       },
       { text: "Trash", icon: "trash", to: "Trash" },
       { text: "Log out", icon: "stand-by", to: "LogOut" }
-    ]
+    ],
+    showPreloader: false
   }),
   computed: {
     ...mapGetters(["currentProject"])

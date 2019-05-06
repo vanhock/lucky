@@ -17,8 +17,7 @@ import {
 export default {
   state: {
     currentProject: {},
-    projects: [],
-    status: ""
+    projects: []
   },
   getters: {
     projects: state => state.projects,

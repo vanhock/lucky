@@ -15,7 +15,10 @@
 export default {
   name: "FormGroup",
   mounted() {
-    this.$children.forEach(children => {
+    this.$children.forEach((children, index) => {
+      if (index === 0) {
+        children.$el.querySelector("input").focus();
+      }
       children.$on("onchange", this.handleChildrenChanged);
     });
   },

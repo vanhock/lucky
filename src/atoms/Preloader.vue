@@ -1,12 +1,18 @@
 <template>
-  <div class="preloader" :class="{ show: show, dark: dark }">
-    <div class="pp-fading-spinner">
-      <div
-        class="pp-circle"
-        :class="'pp-circle' + (i + 1)"
-        v-for="i in 12"
-        :key="i"
-      ></div>
+  <div class="preloader">
+    <slot></slot>
+    <div
+      class="preloader-container"
+      :class="{ show: showPreloader || show, dark: dark }"
+    >
+      <div class="pp-fading-spinner">
+        <div
+          class="pp-circle"
+          :class="'pp-circle' + (i + 1)"
+          v-for="i in 12"
+          :key="i"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
@@ -15,8 +21,21 @@
 export default {
   name: "Preloader",
   data: () => ({
-    timer: 30000
+    timer: 10000,
+    showPreloader: false
   }),
+  mounted() {
+    const self = this;
+    this.$router.beforeEach((from, to, next) => {
+      self.showPreloader = true;
+      next();
+    });
+    this.$router.afterEach((from, to, next) => {
+      setTimeout(() => {
+        self.showPreloader = false;
+      }, 500);
+    });
+  },
   props: {
     show: {
       type: Boolean,
@@ -43,27 +62,29 @@ export default {
 
 <style lang="scss" scoped>
 .preloader {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: inherit;
-  opacity: 0;
-  z-index: -5;
-  transition: opacity 0.5s ease-in-out;
-  &.show {
-    opacity: 1;
-    z-index: 9999;
-    transition: opacity 1s ease-in-out;
-  }
+  &-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: $color-b5;
+    opacity: 0;
+    z-index: -5;
+    transition: opacity 0.1s ease-in-out;
+    &.show {
+      opacity: 1;
+      z-index: 9999;
+      transition: opacity 0.1s ease-in-out;
+    }
 
-  &.dark {
-    background-color: $color-bg1;
-    .pp-fading-spinner {
-      .pp-circle {
-        &:before {
-          background-color: #fff;
+    &.dark {
+      background-color: $color-bg1;
+      .pp-fading-spinner {
+        .pp-circle {
+          &:before {
+            background-color: #fff;
+          }
         }
       }
     }

@@ -1,6 +1,6 @@
 <template>
   <div class="projects-view">
-    <template v-if="hasProjects">
+    <template v-if="hasProjects && loaded">
       <v-button-primary @click="openModal('create')"
         >New project</v-button-primary
       >
@@ -14,7 +14,7 @@
       />
     </template>
     <empty-placeholder
-      v-if="!hasProjects"
+      v-if="!hasProjects && loaded"
       title="Have no projects yet"
       icon="project"
     >
@@ -26,7 +26,6 @@
       ref="operationalModal"
       class="operational-modal"
       :title="currentModalTitle"
-      @open="setFocus"
     >
       <form-group ref="operationalForm">
         <v-input-clear
@@ -75,6 +74,7 @@ export default {
     VButtonPrimary
   },
   data: () => ({
+    loaded: false,
     modals: {
       create: {
         title: "Create project",
@@ -107,8 +107,13 @@ export default {
     getAllProjects(params) {
       this.$store
         .dispatch(PROJECT_GET_ALL_PROJECTS, params || "")
-        .then(() => {})
-        .catch(error => notification(this, "error", error));
+        .then(() => {
+          this.loaded = true;
+        })
+        .catch(error => {
+          notification(this, "error", error);
+          this.loaded = true;
+        });
     },
     createProject() {
       if (!this.$refs.operationalForm.valid) {
@@ -169,11 +174,6 @@ export default {
           );
         })
         .then(error => notification(this, "error", error));
-    },
-    setFocus() {
-      this.$nextTick(() => {
-        document.getElementById("projectName").focus();
-      });
     }
   }
 };

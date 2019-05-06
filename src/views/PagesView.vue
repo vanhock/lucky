@@ -1,12 +1,12 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div class="pages-view">
     <content-with-sidebar>
-      <empty-placeholder v-if="!hasPages" icon="pages">
+      <empty-placeholder v-if="!hasPages && loaded" icon="pages">
         <v-button-primary @click="openModal('create')"
           >New page</v-button-primary
         >
       </empty-placeholder>
-      <template v-if="hasPages">
+      <template v-if="hasPages && loaded">
         <v-button-primary @click="openModal('create')"
           >New page</v-button-primary
         >
@@ -90,6 +90,7 @@ export default {
     this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {});
   },
   data: () => ({
+    loaded: false,
     modals: {
       create: {
         title: "Create page",
@@ -119,7 +120,13 @@ export default {
     getAllPages() {
       this.$store
         .dispatch(PAGE_GET_ALL_PAGES, { projectId: this.projectId })
-        .catch(error => notification(this, "error", error));
+        .then(() => {
+          this.loaded = true;
+        })
+        .catch(error => {
+          notification(this, "error", error);
+          this.loaded = true;
+        });
     },
     createPage() {
       if (!this.$refs.operationalForm.valid) {
