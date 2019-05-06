@@ -69,6 +69,8 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-projects", (req, res) => {
+    const sort = req.query.sort || "updatedAt";
+    const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
     getUserByToken(req, res, user => {
       Project.findAll({
         where: {
@@ -87,7 +89,7 @@ module.exports = function(app) {
             "pagesCount"
           ]
         ],
-        order: [[sequelize.literal("pagesCount"), "DESC"]]
+        order: [[sequelize.literal(sort), orderBy]]
       })
         .then(projects => {
           return res.status(200).send(JSON.stringify(projects));

@@ -1,5 +1,6 @@
 import PixelApi from "./api";
 import { generalCallback } from "./helpers";
+import { serializeObject } from "../../utils";
 
 export function createProject(payload, cb) {
   PixelApi.post("/create-project", { data: payload }, (status, data) => {
@@ -13,8 +14,8 @@ export function editProject(payload, cb) {
   });
 }
 
-export function getAllProjects(cb) {
-  PixelApi.get("/get-all-projects", (status, data) => {
+export function getAllProjects(payload, cb) {
+  PixelApi.get(`/get-all-projects?${payload}`, (status, data) => {
     generalCallback(status, data, cb);
   });
 }

@@ -1,6 +1,10 @@
 <template>
   <div class="projects-list">
-    <card-general-list :title="title">
+    <card-general-list
+      :title="title"
+      :sort="sort"
+      @filtersChange="$emit('filtersChange', $event)"
+    >
       <v-card-general
         v-for="project in projects"
         :key="project.id"
@@ -27,7 +31,8 @@ export default {
       type: Array,
       default: () => []
     },
-    title: String
+    title: String,
+    sort: Array
   },
   methods: {
     normalizeData(date) {

@@ -140,6 +140,17 @@ export const serialize = function(form) {
   return obj;
 };
 
+export const serializeObject = function(object) {
+  const parameters = [];
+  for (let property in object) {
+    if (object.hasOwnProperty(property)) {
+      parameters.push(encodeURI(property + "=" + object[property]));
+    }
+  }
+
+  return parameters.join("&");
+};
+
 export const getChild = function(elem, classname) {
   for (let i = 0; i < elem.childNodes.length; i++) {
     if (

@@ -1,6 +1,21 @@
 <template>
   <div class="card-general-list">
-    <div class="title" v-if="title">{{ title }}</div>
+    <div class="header">
+      <div class="title" v-if="title">{{ title }}</div>
+      <filters-bar
+        v-if="sort.length"
+        @filtersChange="$emit('filtersChange', $event)"
+      >
+        <v-select-clear
+          v-for="(item, index) in sort"
+          :key="index"
+          :name="item.name"
+          :label="item.label"
+          :options="item.options"
+        />
+      </filters-bar>
+    </div>
+
     <div class="card-general-list-container">
       <slot></slot>
     </div>
@@ -8,18 +23,38 @@
 </template>
 
 <script>
+import FiltersBar from "../organisms/FiltersBar";
+import VSelectClear from "../molecules/VSelectClear";
 export default {
   name: "CardGeneralList",
+  components: { FiltersBar, VSelectClear },
+  data: () => ({
+    activeFilters: {}
+  }),
   props: {
-    title: String
+    title: String,
+    sort: {
+      /**
+       * Array of objects
+       * name: String,
+       * options: Array
+       * * name: String,
+       * * value: String
+       */
+      type: Array,
+      default: () => []
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .card-general-list {
-  .title {
+  .header {
     margin-top: 30px;
+    display: flex;
+  }
+  .title {
   }
   &-container {
     display: grid;

@@ -104,9 +104,9 @@ export default {
         });
       });
     },
-    [PROJECT_GET_ALL_PROJECTS]: ({ commit }) => {
+    [PROJECT_GET_ALL_PROJECTS]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        getAllProjects((error, projects) => {
+        getAllProjects(payload, (error, projects) => {
           if (error) {
             return reject(error);
           }

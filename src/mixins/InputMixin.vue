@@ -42,6 +42,9 @@ export default {
   },
   computed: {
     changed() {
+      if (!this.inputValue) {
+        return;
+      }
       return (
         this.inputValue !== this.value &&
         this.inputValue.toString() !== this.value.toString()

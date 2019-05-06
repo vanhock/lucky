@@ -7,8 +7,10 @@
       <project-list
         title="Active projects"
         :projects="projects"
+        :sort="sort"
         @delete="deleteProject($event)"
         @edit="openModal('edit', $event)"
+        @filtersChange="getAllProjects($event)"
       />
     </template>
     <empty-placeholder
@@ -85,15 +87,26 @@ export default {
         buttonName: "Save"
       }
     },
-    selectedModal: "create"
+    selectedModal: "create",
+    sort: [
+      {
+        name: "sort",
+        label: "Sort",
+        options: [
+          { name: "by Activity", value: "updatedAt" },
+          { name: "by Pages count", value: "pagesCount" },
+          { name: "A-Z", value: "name" }
+        ]
+      }
+    ]
   }),
   computed: {
     ...mapGetters(["projects", "hasProjects"])
   },
   methods: {
-    getAllProjects() {
+    getAllProjects(params) {
       this.$store
-        .dispatch(PROJECT_GET_ALL_PROJECTS)
+        .dispatch(PROJECT_GET_ALL_PROJECTS, params || "")
         .then(() => {})
         .catch(error => notification(this, "error", error));
     },
