@@ -5,10 +5,10 @@
       <div class="auth-form">
         <div class="toggles">
           <router-link tag="div" class="sign-in-toggle" to="/sign-in">
-            Sign In
+            {{ $t("signIn") }}
           </router-link>
           <router-link tag="div" class="sign-up-toggle" to="/sign-up">
-            Sign Up
+            {{ $t("signUp") }}
           </router-link>
         </div>
         <router-view />
@@ -16,6 +16,19 @@
     </div>
   </div>
 </template>
+
+<i18n>
+  {
+    "en": {
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "ru": {
+      "signIn": "Вход",
+      "signUp": "Регистрация"
+    }
+  }
+</i18n>
 
 <script>
 export default {

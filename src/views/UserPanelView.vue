@@ -3,10 +3,8 @@
     <side-bar :menu="menu"></side-bar>
     <div class="user-panel-content">
       <div class="user-panel-container">
-        <div class="user-panel-title">
-          {{ $route.name }}
-        </div>
-
+        <breadcrumbs />
+        <div class="user-panel-title">{{ $route.name }}</div>
         <router-view class="user-panel-view" />
       </div>
     </div>
@@ -16,10 +14,10 @@
 <script>
 import SideBar from "../organisms/SideBar";
 import { mapGetters } from "vuex";
-import Preloader from "../atoms/Preloader";
+import Breadcrumbs from "../molecules/Breadcrumbs";
 export default {
   name: "UserPanelView",
-  components: { Preloader, SideBar },
+  components: { Breadcrumbs, SideBar },
   data: () => ({
     menu: [
       { text: "Projects", icon: "folder-outline", to: "Projects" },

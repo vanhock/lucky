@@ -1,45 +1,48 @@
 <template>
   <div class="projects-view">
-    <template v-if="hasProjects && loaded">
-      <v-button-primary @click="openModal('create')"
-        >New project</v-button-primary
-      >
-      <project-list
-        title="Active projects"
-        :projects="projects"
-        :sort="sort"
-        @delete="deleteProject($event)"
-        @edit="openModal('edit', $event)"
-        @filtersChange="getAllProjects($event)"
-      />
-    </template>
-    <empty-placeholder
-      v-if="!hasProjects && loaded"
-      title="Have no projects yet"
-      icon="project"
-    >
-      <v-button-primary @click="openModal('create')"
-        >New project</v-button-primary
-      >
-    </empty-placeholder>
-    <v-modal
-      ref="operationalModal"
-      class="operational-modal"
-      :title="currentModalTitle"
-    >
-      <form-group ref="operationalForm">
-        <v-input-clear
-          id="projectName"
-          name="name"
-          :value="selectedName"
-          label="Project title"
-          required
+    <router-view v-if="$route.name === 'Pages'"></router-view>
+    <template v-else>
+      <template v-if="hasProjects && loaded">
+        <v-button-primary @click="openModal('create')"
+          >New project</v-button-primary
+        >
+        <project-list
+          title="Active projects"
+          :projects="projects"
+          :sort="sort"
+          @delete="deleteProject($event)"
+          @edit="openModal('edit', $event)"
+          @filtersChange="getAllProjects($event)"
         />
-      </form-group>
-      <v-button-primary @click="currentAction">{{
-        currentModalButtonName
-      }}</v-button-primary>
-    </v-modal>
+      </template>
+      <empty-placeholder
+        v-if="!hasProjects && loaded"
+        title="Have no projects yet"
+        icon="project"
+      >
+        <v-button-primary @click="openModal('create')"
+          >New project</v-button-primary
+        >
+      </empty-placeholder>
+      <v-modal
+        ref="operationalModal"
+        class="operational-modal"
+        :title="currentModalTitle"
+      >
+        <form-group ref="operationalForm">
+          <v-input-clear
+            id="projectName"
+            name="name"
+            :value="selectedName"
+            label="Project title"
+            required
+          />
+        </form-group>
+        <v-button-primary @click="currentAction">{{
+          currentModalButtonName
+        }}</v-button-primary>
+      </v-modal>
+    </template>
   </div>
 </template>
 

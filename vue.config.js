@@ -21,6 +21,12 @@ module.exports = {
         path.resolve(__dirname, "src/assets/styles/_sprites.scss"),
         path.resolve(__dirname, "src/assets/styles/_vars.scss")
       ]
+    },
+    i18n: {
+      locale: "en",
+      fallbackLocale: "en",
+      localeDir: "locales",
+      enableInSFC: true
     }
   }
 };

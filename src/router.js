@@ -21,6 +21,7 @@ const ifAuthenticated = (to, from, next) => {
   }
   next("/sign-in");
 };
+
 export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
@@ -34,15 +35,21 @@ export default new Router({
           path: "",
           name: "Projects",
           component: () =>
-            import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
+            import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView"),
+          children: [
+            {
+              path: ":projectId/pages",
+              name: "Pages",
+              props: true,
+              component: () =>
+                import(/* webpackChunkName: "PagesView" */ "./views/PagesView"),
+              meta: {
+                getter: "currentProject"
+              }
+            }
+          ]
         },
-        {
-          path: ":projectId/pages",
-          name: "Pages",
-          props: true,
-          component: () =>
-            import(/* webpackChunkName: "PagesView" */ "./views/PagesView")
-        },
+
         {
           path: "/trash",
           name: "Trash",
