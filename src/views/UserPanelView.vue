@@ -18,19 +18,22 @@ import Breadcrumbs from "../molecules/Breadcrumbs";
 export default {
   name: "UserPanelView",
   components: { Breadcrumbs, SideBar },
-  data: () => ({
-    menu: [
-      { text: "Projects", icon: "folder-outline", to: "Projects" },
+  created() {
+    this.menu = [
+      { text: this.$t("projects"), icon: "folder-outline", to: "Projects" },
       {
-        text: "Account",
+        text: this.$t("account"),
         icon: "user-solid-circle",
         to: "Account",
         label: "soon",
         disabled: true
       },
-      { text: "Trash", icon: "trash", to: "Trash" },
-      { text: "Log out", icon: "stand-by", to: "LogOut" }
-    ],
+      { text: this.$t("trash"), icon: "trash", to: "Trash" },
+      { text: this.$t("logOut"), icon: "stand-by", to: "LogOut" }
+    ];
+  },
+  data: () => ({
+    menu: [],
     showPreloader: false
   }),
   computed: {

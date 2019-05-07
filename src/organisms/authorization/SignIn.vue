@@ -3,20 +3,23 @@
     <form-group ref="form" :loading="loading">
       <v-input-bordered
         name="email"
-        label="Email"
+        :label="$t('email')"
         autocomplete="username"
         required
       />
       <v-input-bordered
         name="password"
         type="password"
-        label="Password"
+        :label="$t('password')"
         autocomplete="current-password"
         required
       />
     </form-group>
-    <v-button-primary class="submit" @click="authorization" :loading="loading"
-      >Sign In</v-button-primary
+    <v-button-primary
+      class="submit"
+      @click="authorization"
+      :loading="loading"
+      >{{ $t("signIn") }}</v-button-primary
     >
   </div>
 </template>

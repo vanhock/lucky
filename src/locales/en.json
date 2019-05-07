@@ -2,5 +2,20 @@
   "projects": "Projects",
   "account": "Account",
   "trash": "Trash",
-  "logOut": "Log out"
+  "logOut": "Log out",
+  "email": "Email",
+  "password": "Password",
+  "name": "Name",
+  "company": "Company",
+  "required": "Required",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "sort": "Sort",
+  "byActivity": "By Activity",
+  "byPagesCount": "By Pages count",
+  "A-Z": "A-Z",
+  "createProject": "Create project",
+  "editProject": "Edit project",
+  "save": "Save",
+  "create": "Create"
 }

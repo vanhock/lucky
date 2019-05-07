@@ -2,5 +2,20 @@
   "projects": "Проекты",
   "account": "Аккаунт",
   "trash": "Корзина",
-  "logOut": "Выйти"
+  "logOut": "Выйти",
+  "email": "Email",
+  "password": "Пароль",
+  "name": "Имя",
+  "company": "Компания",
+  "required": "Обязательно",
+  "signIn": "Вход",
+  "signUp": "Регистрация",
+  "sort": "Сортировка",
+  "byActivity": "По Активности",
+  "byPagesCount": "По Кол-ву страниц",
+  "A-Z": "А-Я",
+  "createProject": "Создать проект",
+  "editProject": "Изменить проект",
+  "save": "Сохранить",
+  "create": "Создать"
 }

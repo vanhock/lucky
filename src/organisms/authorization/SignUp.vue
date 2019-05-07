@@ -3,28 +3,28 @@
     <form-group ref="form" :loading="loading">
       <v-input-bordered
         name="name"
-        label="Name"
+        :label="$t('name')"
         autocomplete="username"
         required
       />
       <v-input-bordered
         name="email"
-        label="Email"
+        :label="$t('email')"
         autocomplete="email"
         required
       />
       <v-input-bordered
         name="password"
         type="password"
-        label="Password"
+        :label="$t('password')"
         autocomplete="new-password"
         required
       />
-      <v-input-bordered name="company" label="Company" />
+      <v-input-bordered name="company" :label="$t('company')" />
     </form-group>
-    <v-button-primary class="submit" @click="registration" :loading="loading"
-      >Sign Up</v-button-primary
-    >
+    <v-button-primary class="submit" @click="registration" :loading="loading">{{
+      $t("signUp")
+    }}</v-button-primary>
   </div>
 </template>
 

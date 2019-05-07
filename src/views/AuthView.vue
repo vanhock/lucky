@@ -17,19 +17,6 @@
   </div>
 </template>
 
-<i18n>
-  {
-    "en": {
-      "signIn": "Sign In",
-      "signUp": "Sign Up"
-    },
-    "ru": {
-      "signIn": "Вход",
-      "signUp": "Регистрация"
-    }
-  }
-</i18n>
-
 <script>
 export default {
   name: "AuthView"

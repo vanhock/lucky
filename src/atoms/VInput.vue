@@ -5,7 +5,7 @@
     </div>
     <div class="input">
       <div class="validation-message" v-if="!valid && focused">
-        Required
+        {{ $t("required") }}
       </div>
       <input
         :type="type"

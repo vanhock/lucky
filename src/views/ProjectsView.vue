@@ -3,11 +3,11 @@
     <router-view v-if="$route.name === 'Pages'"></router-view>
     <template v-else>
       <template v-if="hasProjects && loaded">
-        <v-button-primary @click="openModal('create')"
-          >New project</v-button-primary
-        >
+        <v-button-primary @click="openModal('create')">{{
+          $t("newProject")
+        }}</v-button-primary>
         <project-list
-          title="Active projects"
+          :title="$t('activeProjects')"
           :projects="projects"
           :sort="sort"
           @delete="deleteProject($event)"
@@ -17,11 +17,11 @@
       </template>
       <empty-placeholder
         v-if="!hasProjects && loaded"
-        title="Have no projects yet"
+        :title="$t('Have no projects yet')"
         icon="project"
       >
         <v-button-primary @click="openModal('create')"
-          >New project</v-button-primary
+          >$t("newProject")</v-button-primary
         >
       </empty-placeholder>
       <v-modal
@@ -34,7 +34,7 @@
             id="projectName"
             name="name"
             :value="selectedName"
-            label="Project title"
+            :label="$t('projectTitle')"
             required
           />
         </form-group>
@@ -45,7 +45,22 @@
     </template>
   </div>
 </template>
-
+<i18n>
+  {
+    "en": {
+      "newProject": "New project",
+      "activeProjects": "Active projects",
+      "projectTitle": "Project title",
+      "Have no projects yet": "Have no projects yet"
+    },
+    "ru": {
+      "newProject": "Новый проект",
+      "activeProjects": "Активные проекты",
+      "projectTitle": "Название проекта",
+      "Have no projects yet": "Пока нет проектов"
+    }
+  }
+</i18n>
 <script>
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import ProjectList from "../organisms/ProjectsList";
@@ -66,6 +81,29 @@ export default {
   name: "ProjectsView",
   created() {
     this.getAllProjects();
+    this.sort = [
+      {
+        name: "sort",
+        label: this.$t("sort"),
+        options: [
+          { name: this.$t("byActivity"), value: "updatedAt" },
+          { name: this.$t("byPagesCount"), value: "pagesCount" },
+          { name: this.$t("A-Z"), value: "name" }
+        ]
+      }
+    ];
+    this.modals = {
+      create: {
+        title: this.$t("createProject"),
+        action: "createProject",
+        buttonName: this.$t("create")
+      },
+      edit: {
+        title: this.$t("editProject"),
+        action: "editProject",
+        buttonName: this.$t("save")
+      }
+    };
   },
   mixins: [UserPanelMixin],
   components: {
@@ -78,30 +116,9 @@ export default {
   },
   data: () => ({
     loaded: false,
-    modals: {
-      create: {
-        title: "Create project",
-        action: "createProject",
-        buttonName: "Create"
-      },
-      edit: {
-        title: "Edit project",
-        action: "editProject",
-        buttonName: "Save"
-      }
-    },
+    modals: {},
     selectedModal: "create",
-    sort: [
-      {
-        name: "sort",
-        label: "Sort",
-        options: [
-          { name: "by Activity", value: "updatedAt" },
-          { name: "by Pages count", value: "pagesCount" },
-          { name: "A-Z", value: "name" }
-        ]
-      }
-    ]
+    sort: []
   }),
   computed: {
     ...mapGetters(["projects", "hasProjects"])
