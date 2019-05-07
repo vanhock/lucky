@@ -1,3 +1,6 @@
 {
-  "message": "hello i18n !!"
+  "projects": "Projects",
+  "account": "Account",
+  "trash": "Trash",
+  "logOut": "Log out"
 }
