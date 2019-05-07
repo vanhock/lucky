@@ -1,11 +1,14 @@
 import Vue from "vue";
+import i18n from "./i18n";
 import Router from "vue-router";
-
 import AuthView from "./views/AuthView";
 
 import store from "./services/store/store";
 import UserPanelView from "./views/UserPanelView";
 Vue.use(Router);
+
+i18n.locale = localStorage.getItem("locale") || "en";
+
 const ifNotAuthenticated = (to, from, next) => {
   if (!store.getters.isAuthenticated) {
     next();
@@ -34,6 +37,9 @@ export default new Router({
         {
           path: "",
           name: "Projects",
+          meta: {
+            title: i18n.t("projects")
+          },
           component: () =>
             import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView"),
           children: [
@@ -44,17 +50,20 @@ export default new Router({
               component: () =>
                 import(/* webpackChunkName: "PagesView" */ "./views/PagesView"),
               meta: {
+                title: i18n.t("pages"),
                 getter: "currentProject"
               }
             }
           ]
         },
-
         {
           path: "/trash",
           name: "Trash",
           component: () =>
-            import(/* webpackChunkName: "TrashView" */ "./views/TrashView")
+            import(/* webpackChunkName: "TrashView" */ "./views/TrashView"),
+          meta: {
+            title: i18n.t("trash")
+          }
         }
       ]
     },
@@ -66,7 +75,8 @@ export default new Router({
     },
     {
       path: "/account",
-      name: "Account"
+      name: "Account",
+      meta: i18n.t("account")
     },
     {
       path: "/sign-in",

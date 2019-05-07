@@ -4,7 +4,7 @@
     <div class="user-panel-content">
       <div class="user-panel-container">
         <breadcrumbs />
-        <div class="user-panel-title">{{ $route.name }}</div>
+        <div class="user-panel-title">{{ $route.meta.title }}</div>
         <router-view class="user-panel-view" />
       </div>
     </div>
@@ -25,7 +25,7 @@ export default {
         text: this.$t("account"),
         icon: "user-solid-circle",
         to: "Account",
-        label: "soon",
+        label: this.$t("soon"),
         disabled: true
       },
       { text: this.$t("trash"), icon: "trash", to: "Trash" },

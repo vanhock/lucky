@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import Vue from "vue";
 export default {
   name: "LanguageToggle",
   created() {
@@ -23,8 +24,8 @@ export default {
   }),
   methods: {
     setLocale(locale) {
-      this.$i18n.locale = locale;
       localStorage.setItem("locale", locale);
+      location.reload();
     },
     getLocale() {
       const locale = localStorage.getItem("locale");
@@ -43,7 +44,7 @@ export default {
   justify-content: center;
   position: fixed;
   top: 15px;
-  right: 15px;
+  right: 30px;
   background-color: #fff;
   @include box-shadow(medium);
   z-index: 10;

@@ -15,6 +15,19 @@
   </div>
 </template>
 
+<i18n>
+  {
+    "en": {
+      "Restore": "Restore",
+      "Delete forever": "Delete forever"
+    },
+    "ru": {
+      "Restore": "Восстановить",
+      "Delete forever": "Удалить навсегда"
+    }
+  }
+</i18n>
+
 <script>
 import { normalizeData } from "../utils";
 import VCardTable from "../molecules/VCard/VCardTable";
@@ -22,17 +35,20 @@ import CardTableList from "../molecules/CardTableList";
 export default {
   name: "TrashList",
   components: { CardTableList, VCardTable },
-  data: () => ({
-    actions: [
+  created() {
+    this.actions = [
       {
         name: "restore",
-        title: "Restore"
+        title: this.$t("Restore")
       },
       {
         name: "delete",
-        title: "Delete forever"
+        title: this.$t("Delete forever")
       }
-    ]
+    ];
+  },
+  data: () => ({
+    actions: []
   }),
   props: {
     trash: {

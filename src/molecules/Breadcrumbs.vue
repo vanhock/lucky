@@ -1,9 +1,12 @@
 <template>
-  <div class="breadcrumb" v-if="items.length">
+  <div class="breadcrumb" v-if="items && items.length">
     <div class="breadcrumb-item" v-for="(route, index) in items" :key="index">
-      <router-link :to="{ name: route }">{{ route }}</router-link>
+      <router-link :to="{ name: route.name }">{{ route.title }}</router-link>
     </div>
-    <div class="breadcrumb-item" v-if="Object.keys(currentProject).length">
+    <div
+      class="breadcrumb-item"
+      v-if="currentProject && Object.keys(currentProject).length"
+    >
       {{ currentProject.name }}
     </div>
   </div>
@@ -25,9 +28,12 @@ export default {
   computed: {
     ...mapGetters(["currentProject"]),
     items() {
+      if (!this.tree) {
+        return;
+      }
       return this.tree
         .filter(r => r.path !== "" && r.name !== this.$route.name)
-        .map(r => r.name);
+        .map(r => ({ name: r.name, title: r.meta.title }));
     }
   },
   methods: {

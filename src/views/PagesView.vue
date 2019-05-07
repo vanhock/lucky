@@ -2,23 +2,23 @@
   <div class="pages-view">
     <content-with-sidebar>
       <empty-placeholder v-if="!hasPages && loaded" icon="pages">
-        <v-button-primary @click="openModal('create')"
-          >New page</v-button-primary
-        >
+        <v-button-primary @click="openModal('create')">{{
+          $t("newPage")
+        }}</v-button-primary>
       </empty-placeholder>
       <template v-if="hasPages && loaded">
-        <v-button-primary @click="openModal('create')"
-          >New page</v-button-primary
-        >
+        <v-button-primary @click="openModal('create')">{{
+          $t("newPage")
+        }}</v-button-primary>
         <pages-list
           :pages="pages"
-          title="Active pages"
+          :title="$t('activePages')"
           @delete="deletePage($event)"
           @edit="openModal('edit', $event)"
         />
       </template>
       <template v-slot:sidebar>
-        <div class="title">Collaborators</div>
+        <div class="title">{{ $t("collaborators") }}</div>
       </template>
     </content-with-sidebar>
     <v-modal
@@ -48,6 +48,25 @@
     </v-modal>
   </div>
 </template>
+
+<i18n>
+  {
+    "en": {
+      "createPage": "Create page",
+      "editPage": "Edit Page",
+      "newPage": "New Page",
+      "activePages": "Active pages",
+      "collaborators": "Collaborators"
+    },
+    "ru": {
+      "createPage": "Создать страницу",
+      "editPage": "Изменить страницу",
+      "newPage": "Новая страница",
+      "activePages": "Активные страницы",
+      "collaborators": "Работают над проектом"
+    }
+  }
+</i18n>
 
 <script>
 import ContentWithSidebar from "../layouts/ContentWithSidebar";
@@ -85,24 +104,25 @@ export default {
   created() {
     this.getProject();
     this.getAllPages();
+    this.modals = {
+      create: {
+        title: this.$t("createPage"),
+        action: "createPage",
+        buttonName: this.$t("create")
+      },
+      edit: {
+        title: this.$t("editPage"),
+        action: "editPage",
+        buttonName: this.$t("save")
+      }
+    };
   },
   beforeDestroy() {
     this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {});
   },
   data: () => ({
     loaded: false,
-    modals: {
-      create: {
-        title: "Create page",
-        action: "createPage",
-        buttonName: "Create"
-      },
-      edit: {
-        title: "Edit page",
-        action: "editPage",
-        buttonName: "Save"
-      }
-    },
+    modals: {},
     selectedModal: "create"
   }),
   computed: {

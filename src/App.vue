@@ -7,11 +7,15 @@
 
 <script>
 import Vue from "vue";
-import moment from "vue-moment";
-Vue.use(moment);
+import moment from "moment";
+import VueMoment from "vue-moment";
+Vue.use(VueMoment);
 import "vuejs-noty/dist/vuejs-noty.css";
 import LanguageToggle from "./molecules/LanguageToggle";
 export default {
+  created() {
+    moment.locale(this.$i18n.locale);
+  },
   components: { LanguageToggle }
 };
 </script>

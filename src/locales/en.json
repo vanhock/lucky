@@ -1,5 +1,6 @@
 {
   "projects": "Projects",
+  "pages": "Pages",
   "account": "Account",
   "trash": "Trash",
   "logOut": "Log out",
@@ -16,6 +17,8 @@
   "A-Z": "A-Z",
   "createProject": "Create project",
   "editProject": "Edit project",
+
   "save": "Save",
-  "create": "Create"
+  "create": "Create",
+  "soon": "soon"
 }

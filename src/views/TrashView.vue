@@ -1,18 +1,18 @@
 <template>
   <div class="trash-view">
     <template v-if="trashLength">
-      <v-button-primary @click="openModal('create')"
-        >Empty trash</v-button-primary
-      >
+      <v-button-primary @click="openModal('create')">{{
+        $t("Empty trash")
+      }}</v-button-primary>
       <trash-list
         :trash="projectsTrash"
-        title="Projects"
+        :title="$t('projects')"
         @restore="restoreProject"
         @delete="openModal('deleteProject', $event)"
       />
       <trash-list
         :trash="pagesTrash"
-        title="Pages"
+        :title="$t('pages')"
         @restore="restorePage"
         @delete="openModal('deletePage', $event)"
       />
@@ -32,6 +32,33 @@
     </template>
   </div>
 </template>
+
+<i18n>
+  {
+    "en": {
+      "Empty trash": "Empty trash",
+      "Restore": "Restore",
+      "Delete forever": "Delete forever",
+      "Empty all in trash": "Empty all in trash",
+      "All documents in trash will be deleted permanently!": "All documents in trash will be deleted permanently!",
+      "Delete project": "Delete project",
+      "Delete page": "Delete page",
+      "The Project will be deleted permanently!": "The Project will be deleted permanently!",
+      "The Page will be deleted permanently!": "The Page will be deleted permanently!"
+    },
+    "ru": {
+      "Empty trash": "Очистить корзину",
+      "Restore": "Восстановить",
+      "Delete forever": "Удалить навсегда",
+      "Empty all in trash": "Удалить все содержимое корзины",
+      "All documents in trash will be deleted permanently!": "Все документы в корзине удалятся без возможности восстановления!",
+      "Delete project": "Удалить проект",
+      "Delete page": "Удалить страницу",
+      "The Project will be deleted permanently!": "Проект будет удален без возможности восстановления!",
+      "The Page will be deleted permanently!": "Страница будет удалена без возможности восстановления!"
+    }
+  }
+</i18n>
 
 <script>
 import UserPanelMixin from "../mixins/UserPanelMixin";
@@ -56,28 +83,31 @@ export default {
   created() {
     this.getProjectsTrash();
     this.getPagesTrash();
-  },
-  data: () => ({
-    modals: {
+    this.modals = {
       deleteAll: {
-        title: "Empty all in trash",
-        description: "All documents in trash will be deleted permanently!",
+        title: this.$t("Empty all in trash"),
+        description: this.$t(
+          "All documents in trash will be deleted permanently!"
+        ),
         action: "deleteAll",
-        buttonName: "Empty trash"
+        buttonName: this.$t("Empty trash")
       },
       deleteProject: {
-        title: "Delete project",
-        description: "The Project will be deleted permanently!",
+        title: this.$t("Delete project"),
+        description: this.$t("The Project will be deleted permanently!"),
         action: "deleteProject",
-        buttonName: "Delete project"
+        buttonName: this.$t("Delete project")
       },
       deletePage: {
-        title: "Delete page",
-        description: "The Page will be deleted permanently!",
+        title: this.$t("Delete page"),
+        description: this.$t("The Page will be deleted permanently!"),
         action: "deletePage",
-        buttonName: "Delete page"
+        buttonName: this.$t("Delete page")
       }
-    },
+    };
+  },
+  data: () => ({
+    modals: {},
     selectedModal: "deleteAll"
   }),
   computed: {
