@@ -1,8 +1,7 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const db = require("./config/db");
-const path = require("path");
+const fallback = require("express-history-api-fallback");
 const port = 3000;
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -14,7 +13,9 @@ app.use(function(req, res, next) {
 });
 app.use(bodyParser.urlencoded({ extended: true }));
 require("./routes")(app);
-app.use("/", express.static("public"));
+const root = `${__dirname}/public`;
+app.use(express.static(root));
+app.use(fallback("index.html", { root }));
 app.listen(port, () => {
   console.log("We are live on " + port);
 });

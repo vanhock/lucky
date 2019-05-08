@@ -8,7 +8,11 @@ import PagesStoreModule from "./PagesStoreModule";
 Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
-    appTheme: "white"
+    appTheme: "white",
+    inspector: false
+  },
+  getters: {
+    inspector: state => state.inspector
   },
   modules: {
     auth: AuthStoreModule,
@@ -16,5 +20,15 @@ export default new Vuex.Store({
     projects: ProjectsStoreModule,
     pages: PagesStoreModule,
     trash: TrashStoreModude
+  },
+  mutations: {
+    startInspector(state) {
+      state.inspector = true;
+    }
+  },
+  actions: {
+    startInspector({ commit }, cb) {
+      commit("startInspector", cb);
+    }
   }
 });

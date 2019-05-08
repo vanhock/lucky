@@ -1,11 +1,13 @@
 const path = require("path");
 const SVGSpritemapPlugin = require("svg-spritemap-webpack-plugin");
 module.exports = {
-  outputDir: "backend/public",
+  outputDir: "backend/public/",
   lintOnSave: false,
+
   devServer: {
     proxy: "http://localhost:3000"
   },
+
   configureWebpack: {
     plugins: [
       new SVGSpritemapPlugin("src/assets/img/icons/*.svg", {
@@ -13,6 +15,7 @@ module.exports = {
       })
     ]
   },
+
   pluginOptions: {
     "style-resources-loader": {
       preProcessor: "scss",
@@ -27,6 +30,35 @@ module.exports = {
       fallbackLocale: "en",
       localeDir: "locales",
       enableInSFC: true
+    },
+    browserExtension: {
+      registry: undefined,
+      components: {
+        background: true,
+        contentScripts: true
+      },
+      api: "browser",
+      usePolyfill: true,
+      autoImportPolyfill: true,
+      componentOptions: {
+        background: {
+          entry: "src/extension/background.js"
+        },
+        contentScripts: {
+          entries: {
+            "content_scripts/content-script": [
+              "src/extension/content_scripts/content-script.js",
+              "src/extension/content_scripts/style.css"
+            ]
+          }
+        }
+      }
+    }
+  },
+  pages: {
+    index: {
+      template: "public/index.html",
+      entry: "src/main.js"
     }
   }
 };

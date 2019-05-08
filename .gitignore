@@ -27,3 +27,9 @@ yarn-error.log*
 *.sln
 *.sw*
 *.lock
+
+# Vue Browser Extension Output
+*.pem
+*.pub
+*.zip
+/dist-zip
