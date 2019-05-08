@@ -19,9 +19,13 @@ browser.browserAction.onClicked.addListener(function(tab) {
   currentTabId = tab.id;
 });
 
-browser.runtime.onMessage.addListener(response => {
-  const data = response && JSON.parse(response);
-  if (!data) {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  handleMessages(request);
+});
+
+function handleMessages(request) {
+  const data = request && JSON.parse(request);
+  if (!data || !data.token) {
     return;
   }
   const name = Object.keys(data)[0];
@@ -32,8 +36,9 @@ browser.runtime.onMessage.addListener(response => {
         browser.tabs.remove(authTabId);
         browser.tabs.update(currentTabId, { active: true });
       }
+      runInspectors();
   }
-});
+}
 
 function getToken(cb) {
   browser.storage.local.get("user-token").then(token => {

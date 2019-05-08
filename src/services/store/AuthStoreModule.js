@@ -43,8 +43,9 @@ export default {
             localStorage.removeItem("user-token");
             return reject(error);
           }
-          localStorage.setItem("user-token", user.token);
           PixelApi.setToken(user.token, () => {
+            localStorage.setItem("user-token", user.token);
+            window.postMessage({ token: user.token }, "*");
             commit(AUTH_SUCCESS, user);
             resolve(user);
           });
