@@ -47,8 +47,10 @@ module.exports = {
         contentScripts: {
           entries: {
             "content_scripts/content-script": [
-              "src/extension/content_scripts/content-script.js",
-              "src/extension/content_scripts/style.css"
+              "src/extension/content_scripts/content-script.js"
+            ],
+            "content_scripts/auth-script": [
+              "src/extension/content_scripts/auth-script.js"
             ]
           }
         }
