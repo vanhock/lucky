@@ -86,9 +86,12 @@ module.exports = function(sequelize, DataTypes) {
             .update(plain)
             .digest("hex");
         },
-        isTokenOutdated: function() {
+        isTokenOutdated: function(user) {
+          if (!user) {
+            return;
+          }
           const currentDate = new Date(),
-            tokenAge = (currentDate - this.tokenCreatedAt) / 1000;
+            tokenAge = (currentDate - user.tokenCreatedAt) / 1000;
 
           return tokenAge > config.authorization.token_out_of_date;
         },
@@ -189,10 +192,14 @@ module.exports = function(sequelize, DataTypes) {
               token: token
             }
           }).then(function(foundUser) {
-            return done(
-              null,
-              !foundUser || foundUser.isTokenOutdated() ? false : foundUser
-            );
+            if (!foundUser) {
+              return done(null, false);
+            } else if (
+              User.options.instanceMethods.isTokenOutdated(foundUser)
+            ) {
+              return done("tokenOutdated");
+            }
+            return done(null, foundUser);
           }, done);
         },
         findByToken: function(token, done) {

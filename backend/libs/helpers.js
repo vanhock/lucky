@@ -5,14 +5,17 @@ const getUserByToken = function(req, res, cb) {
   if (!req.headers.authorization) {
     return res.error("Auth token did not provide!");
   }
-  User.options.classMethods.findByToken(
+  User.options.classMethods.authByToken(
     req.headers.authorization,
     (message, user) => {
-      if (!user) {
-        return res.status(500).send("User not found");
-      } else {
-        return cb(user);
+      if (message && message === "tokenOutdated") {
+        return res.error({ title: "Token outdated!", code: 401 });
       }
+      if (!user) {
+        return res.error({ title: "User not found", code: 404 });
+      }
+
+      cb(user);
     }
   );
 };

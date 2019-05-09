@@ -17,7 +17,9 @@ export default {
   props: {
     title: {
       type: String,
-      default: "Have no data here"
+      default: function() {
+        return this.$t("Have no data here");
+      }
     },
     text: String,
     icon: String

@@ -49,14 +49,14 @@ export default {
       font-size: 15px;
       top: 15px;
       left: 10px;
-      color: $color-b3;
+      color: $color-b21;
       font-weight: 500;
     }
     &.focus {
       .label {
         top: 10px;
         font-size: 11px;
-        color: $color-b4;
+        color: $color-b3;
       }
     }
   }

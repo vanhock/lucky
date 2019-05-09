@@ -58,40 +58,29 @@ module.exports = function(app) {
   });
 
   app.get("/get-page", (req, res) => {
-    if (!req.query.projectId || !req.query.id) {
-      return res.error("Required fields did not provide!");
+    if (!req.query.websiteUrl && !req.query.id) {
+      return res.error("Required field did not provide!");
     }
-    const projectId = req.query.projectId;
+    const params = { trashId: null };
+    if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
+    if (req.query.id) params.id = req.query.id;
+
     getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          id: projectId,
-          trashId: null
-        }
+      Page.findOne({
+        where: params
       })
-        .then(project => {
-          if (project.userId === user.id || user.isAdmin) {
-            Page.findAll({
-              where: {
-                projectId: projectId,
-                trashId: null
-              }
-            })
-              .then(pages => {
-                return res.status(200).send(JSON.stringify(pages));
-              })
-              .catch(() => {
-                return res.error("Have no pages found for this project!");
-              });
+        .then(page => {
+          if (page.userId === user.id || user.isAdmin) {
+            return res.status(200).send(JSON.stringify(page));
           } else {
             res.error({
-              title: "You don't have rights to view pages of this project!",
+              title: "You don't have rights to view this page!",
               code: 403
             });
           }
         })
         .catch(() => {
-          return res.error("Project not found by id!");
+          return res.error({ title: "Page not found!", code: 404 });
         });
     });
   });
@@ -102,35 +91,18 @@ module.exports = function(app) {
     }
     const projectId = req.query.projectId;
     getUserByToken(req, res, user => {
-      Project.findOne({
+      Page.findAll({
         where: {
-          id: projectId,
+          userId: user.id,
+          projectId: projectId,
           trashId: null
         }
       })
-        .then(project => {
-          if (project.userId === user.id || user.isAdmin) {
-            Page.findAll({
-              where: {
-                projectId: projectId,
-                trashId: null
-              }
-            })
-              .then(pages => {
-                return res.status(200).send(JSON.stringify(pages));
-              })
-              .catch(() => {
-                return res.error("Have no pages found for this project!");
-              });
-          } else {
-            res.error({
-              title: "You don't have rights to view pages of this project!",
-              code: 403
-            });
-          }
+        .then(pages => {
+          return res.status(200).send(JSON.stringify(pages));
         })
         .catch(() => {
-          return res.error("Project not found by id!");
+          return res.error("Have no pages found for this project!");
         });
     });
   });

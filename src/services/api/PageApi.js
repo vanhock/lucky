@@ -7,6 +7,12 @@ export function getAllPages(payload, cb) {
   });
 }
 
+export function getPage(payload, cb) {
+  PixelApi.get(`/get-page?${payload}`, (status, page) => {
+    generalCallback(status, page, cb);
+  });
+}
+
 export function createPage(payload, cb) {
   PixelApi.post("/create-page", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);

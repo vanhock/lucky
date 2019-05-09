@@ -2,7 +2,7 @@
 
 <script>
 export default {
-  name: "UserPanelMixin",
+  name: "ModalMixin",
   data: () => ({
     currentAction: null,
     dataForOperations: {}

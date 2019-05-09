@@ -20,9 +20,9 @@
         :title="$t('Have no projects yet')"
         icon="project"
       >
-        <v-button-primary @click="openModal('create')"
-          >$t("newProject")</v-button-primary
-        >
+        <v-button-primary @click="openModal('create')">{{
+          $t("newProject")
+        }}</v-button-primary>
       </empty-placeholder>
       <v-modal
         ref="operationalModal"
@@ -76,7 +76,7 @@ import {
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
-import UserPanelMixin from "../mixins/UserPanelMixin";
+import UserPanelMixin from "../mixins/ModalMixin";
 export default {
   name: "ProjectsView",
   created() {

@@ -31,14 +31,14 @@
           id="pageName"
           name="name"
           :value="selectedName"
-          label="Page title"
+          :label="$t('Page title')"
           required
         />
         <v-input-bordered
           id="pageWebsite"
           name="websiteUrl"
           :value="selectedPageWebsite"
-          label="Website URL"
+          :label="$t('Website URL')"
           required
         />
       </form-group>
@@ -56,14 +56,18 @@
       "editPage": "Edit Page",
       "newPage": "New Page",
       "activePages": "Active pages",
-      "collaborators": "Collaborators"
+      "collaborators": "Collaborators",
+      "Page title": "Page title",
+      "Website URL": "Website URL"
     },
     "ru": {
       "createPage": "Создать страницу",
       "editPage": "Изменить страницу",
       "newPage": "Новая страница",
       "activePages": "Активные страницы",
-      "collaborators": "Работают над проектом"
+      "collaborators": "Работают над проектом",
+      "Page title": "Заголовок страницы",
+      "Website URL": "Адрес сайта"
     }
   }
 </i18n>
@@ -84,7 +88,7 @@ import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import VModal from "../molecules/VModal";
 import FormGroup from "../molecules/FormGroup";
 import PagesList from "../organisms/PagesList";
-import UserPanelMixin from "../mixins/UserPanelMixin";
+import UserPanelMixin from "../mixins/ModalMixin";
 import VInputBordered from "../molecules/VInput/VInputBordered";
 export default {
   name: "PagesView",

@@ -1,40 +1,33 @@
 <template>
-  <div class="view">
+  <div class="pp-inspectors-app">
     <top-panel @getFoundNodes="getFoundNodes" @reloadView="getFoundNodes" />
     <design-inspector ref="designInspector" @designScrollTop="scrollWebsite" />
     <website-inspector
       ref="websiteInspector"
       @getFoundNodes="getFoundNodes"
-      @websiteInspectorReady="initView"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
     />
+    <v-modal ref="operationalModal" :show="showPageSelectModal"> </v-modal>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from "vuex";
 import { simplifyDom, addToLocal, removeClass } from "../utils";
-import { getFoundNodesFromApi } from "../services/api/api";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
+import {
+  INSPECTOR_SET_VIEW_PARAMS,
+  PAGE_GET_PAGE
+} from "../services/store/mutation-types";
+import VModal from "../molecules/VModal";
 export default {
   name: "ViewScreen",
-  components: { DesignInspector, WebsiteInspector, TopPanel },
+  components: { VModal, DesignInspector, WebsiteInspector, TopPanel },
   created() {
-    !this.viewerReady && this.$router.push({ name: "home" });
-  },
-  mounted() {
-    this.currentFrame && this.initView();
-  },
-  beforeRouteUpdate(from, to, next) {
-    if (!this.viewerReady) {
-      next(false);
-      this.$router.push({ name: "home" });
-    } else {
-      next(true);
-    }
+    this.initView();
   },
   data: () => ({
     gettingFoundNodeData: true,
@@ -45,7 +38,8 @@ export default {
       websiteInspectorHeight: window.innerHeight / 2 - 24,
       showAllDesignBlocks: true,
       showFoundDesignBlocks: true
-    }
+    },
+    showPageSelectModal: false
   }),
   computed: {
     ...mapState(["currentProject"]),
@@ -67,23 +61,17 @@ export default {
   },
   methods: {
     initView() {
-      this.gettingFoundNodeData = true;
-
-      const body = document.querySelector("iframe[data-perfect-pixel]")
-        .contentWindow.document.body;
-      this.frameNodes = [...body.getElementsByTagName("*")];
-      if (!this.frameNodes.length) {
-        return;
-      }
-      if (this.isFoundNodes) {
-        this.$refs.websiteInspector.processNodes(
-          this.frameNodes,
-          this.foundNodes
-        );
-        this.gettingFoundNodeData = false;
-      } else {
-        this.getFoundNodes();
-      }
+      this.getPage();
+    },
+    getPage() {
+      this.$store
+        .dispatch(PAGE_GET_PAGE, { websiteUrl: location.href })
+        .then(() => {
+          this.showPageSelectModal = true;
+        })
+        .catch(() => {
+          this.showPageSelectModal = true;
+        });
     },
     getFoundNodes() {
       this.clearFrame();
@@ -96,7 +84,7 @@ export default {
         this.frameNodes,
         this.currentFrameWindow
       );
-      getFoundNodesFromApi(this.designBlocks, simplifiedNodes, foundNodes => {
+      /*getFoundNodesFromApi(this.designBlocks, simplifiedNodes, foundNodes => {
         if (
           !foundNodes ||
           typeof foundNodes !== "object" ||
@@ -111,14 +99,14 @@ export default {
             this.saveProjectToLocal(currentProject);
           });
         this.gettingFoundNodeData = false;
-      });
+      });*/
     },
     saveProjectToLocal(currentProject) {
       addToLocal("recentProjects", currentProject.id, currentProject);
     },
-    INSPECTOR_SET_VIEW_PARAMS() {
+    setViewParams() {
       const viewParams = this.defaultViewParams;
-      this.$store.dispatch("INSPECTOR_SET_VIEW_PARAMS", viewParams);
+      this.$store.dispatch(INSPECTOR_SET_VIEW_PARAMS, viewParams);
     },
     clearFrame() {
       if (!this.currentFrameDocument) {
@@ -153,7 +141,32 @@ export default {
         return;
       }
       this.$refs.designInspector.scrollDocument(value);
+    },
+    setModalsContent() {
+      this.modals = {
+        newPage: {
+          title: this.$t("Create new page"),
+          action: "createProject",
+          buttonName: this.$t("create")
+        },
+        foundPages: {
+          title: this.$t("Select page"),
+          description: this.$t("We found pages, associated with this URL:"),
+          action: "changeModal"
+        }
+      };
     }
   }
 };
 </script>
+<style lang="scss">
+.pp-inspectors-app {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $color-bg1;
+  z-index: 99999;
+}
+</style>

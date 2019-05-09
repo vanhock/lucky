@@ -4,14 +4,17 @@ import {
   PAGE_CREATE_PAGE,
   PAGE_GET_ALL_PAGES,
   PAGE_MOVE_TO_TRASH,
-  PAGE_EDIT_PAGE
+  PAGE_EDIT_PAGE,
+  PAGE_GET_PAGE
 } from "./mutation-types";
 import {
   createPage,
   editPage,
   getAllPages,
+  getPage,
   movePageToTrash
 } from "../api/PageApi";
+import { serializeObject } from "../../utils";
 
 export default {
   state: {
@@ -51,6 +54,9 @@ export default {
     },
     [PAGE_GET_ALL_PAGES](state, payload) {
       state.pages = payload;
+    },
+    [PAGE_GET_PAGE](state, payload) {
+      state.currentPage = payload;
     }
   },
   actions: {
@@ -101,6 +107,17 @@ export default {
           }
           commit(PAGE_GET_ALL_PAGES, pages);
           resolve(pages);
+        });
+      });
+    },
+    [PAGE_GET_PAGE]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        getPage(serializeObject(payload), (error, page) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(PAGE_GET_PAGE, page);
+          resolve(page);
         });
       });
     }

@@ -1,7 +1,7 @@
 const path = require("path");
 module.exports = {
   authorization: {
-    token_out_of_date: 2419200 /** 4 weeks **/,
+    token_out_of_date: 604800 /** 1 week **/,
     figmaAccessToken: "11971-5d340a8f-7932-4e2e-9d36-3d193a64abe7"
   },
   upload: {

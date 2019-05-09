@@ -1,17 +1,10 @@
 <template>
-  <div
-    v-if="websiteUrl"
-    class="site-viewer"
-    :class="{
-      hidden: !websiteUrl || websiteUrl === '',
-      active: viewActive
-    }"
-  >
+  <div class="site-viewer">
     <div class="frame" :style="frameStyles">
       <iframe
         data-perfect-pixel
         :width="frameStyles.width"
-        :height="frameStyles.height"
+        :height="frameStyles.height || defaultViewParams.websiteInspectorHeight"
         sandbox="allow-same-origin allow-scripts"
       ></iframe>
     </div>
@@ -20,17 +13,19 @@
 
 <script>
 import axios from "axios";
-import config from "../../config";
 import { mapGetters } from "vuex";
 import {
   addClass,
   removeClass,
   detectMouseButton,
   getElementBounding,
-  relToAbs,
   scrollTo
 } from "../../utils";
 import ViewMixin from "../../mixins/ViewMixin";
+import {
+  INSPECTOR_SET_CURRENT_FRAME,
+  INSPECTOR_SET_VIEW_PARAMS
+} from "../../services/store/mutation-types";
 export default {
   name: "WebsiteInspector",
   mixins: [ViewMixin],
@@ -44,6 +39,9 @@ export default {
       height: "Высота",
       left: "Смещение слева",
       top: "Смещение сверху"
+    },
+    defaultViewParams: {
+      websiteInspectorHeight: window.innerHeight / 2 - 24
     },
     noScroll: false,
     foundNodesEventHandlers: []
@@ -64,9 +62,6 @@ export default {
       "viewParams",
       "targetElement"
     ]),
-    viewActive() {
-      return this.viewerReady && this.$route.name === "view";
-    },
     frameStyles() {
       if (!this.frameParams) {
         return;
@@ -92,7 +87,7 @@ export default {
       this.$nextTick(() => {
         const frame = document.querySelector("iframe[data-perfect-pixel]");
         axios
-          .get(self.websiteUrlProxy)
+          .get(location.href)
           .then(r => {
             self.loadFrameHtml(r.data, frame);
             const frameWindow = document.querySelector(
@@ -110,7 +105,7 @@ export default {
             };
             function setUpFrame() {
               self.$store.dispatch(
-                "INSPECTOR_SET_CURRENT_FRAME",
+                INSPECTOR_SET_CURRENT_FRAME,
                 document.querySelector("iframe[data-perfect-pixel]")
               );
               self.preventAllLinks(frameWindow);
@@ -118,7 +113,9 @@ export default {
               self.$emit("websiteInspectorReady");
               /** If viewParams not set, emmit INSPECTOR_SET_VIEW_PARAMS **/
               if (!self.viewParams) {
-                self.$emit("INSPECTOR_SET_VIEW_PARAMS");
+                self.$emit(INSPECTOR_SET_VIEW_PARAMS, {
+                  websiteInspectorWidth: frameWindow.innerWidth
+                });
               }
               self.currentFrame.contentDocument.onscroll = () => {
                 if (!self.syncScroll) {
@@ -152,21 +149,6 @@ export default {
         const frames = frame.contentWindow.document.querySelectorAll("iframe");
         for (let i = 0; i < frames.length; i++) {
           frames[i].remove();
-        }
-        const links = frame.contentWindow.document.querySelectorAll(
-          "*:not(iframe)"
-        );
-        for (let i = 0; i < links.length; i++) {
-          if (links[i].tagName === "BASE") continue;
-          links[i].href &&
-            replaceUrl(relToAbs(links[i].href, config.serverUrl));
-          links[i].src && replaceUrl(relToAbs(links[i].src, config.serverUrl));
-        }
-        function replaceUrl(oldUrl) {
-          return oldUrl.replace(
-            self.websiteUrl,
-            `${config.serverUrl}/proxy/${self.websiteUrl}`
-          );
         }
       }, 100);
     },

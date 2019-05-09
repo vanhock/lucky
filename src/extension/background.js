@@ -1,7 +1,15 @@
 import config from "../config";
 let currentTabId = null;
 let authTabId = null;
+let appActive = false;
 browser.browserAction.onClicked.addListener(function(tab) {
+  if (appActive) {
+    appActive = false;
+    return browser.tabs.sendMessage(
+      tab.id,
+      JSON.stringify({ reloadPage: true })
+    );
+  }
   getToken((error, token) => {
     if (token) {
       return runInspectors();
@@ -55,6 +63,7 @@ function runInspectors() {
     return;
   }
   browser.tabs.executeScript(currentTabId, {
-    file: "content_scripts/content-script.js"
+    file: "content_scripts/inspectors-view.js"
   });
+  appActive = true;
 }

@@ -61,7 +61,7 @@
 </i18n>
 
 <script>
-import UserPanelMixin from "../mixins/UserPanelMixin";
+import UserPanelMixin from "../mixins/ModalMixin";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import {
   TRASH_DELETE_PAGE,

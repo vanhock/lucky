@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_extName__",
   "homepage_url": "http://localhost/",
-  "description": "A Vue Browser Extension",
+  "description": "Quick find website layout errors and share it",
   "default_locale": "en",
   "icons": {
     "16": "icons/16.png",

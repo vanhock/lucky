@@ -50,6 +50,7 @@ Project.belongsTo(Trash);
 Page.hasMany(Comment);
 Page.belongsTo(Design);
 Page.belongsTo(Project);
+Page.belongsTo(User);
 Page.hasMany(Task);
 Page.belongsTo(Trash);
 

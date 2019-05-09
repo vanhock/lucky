@@ -68,12 +68,6 @@ export default new Router({
       ]
     },
     {
-      path: "/inspectors",
-      name: "Inspectors",
-      component: () =>
-        import(/* webpackChunkName: "InspectorsView" */ "./views/InspectorsView")
-    },
-    {
       path: "/account",
       name: "Account",
       meta: i18n.t("account")

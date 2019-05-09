@@ -35,7 +35,7 @@ export default {
     img {
       width: 134px;
       margin-bottom: 50px;
-      opacity: 0.3;
+      opacity: 0.7;
     }
   }
   &-container {

@@ -17,6 +17,7 @@ class PixelApi {
   handleError = error => {
     switch (error.response.status) {
       case 401:
+        window.postMessage("logOut", "*");
         document.location = "/log-out";
         break;
       default:
