@@ -1,8 +1,8 @@
 import PixelApi from "./api";
 import { generalCallback } from "./helpers";
 
-export function getAllPages(payload, cb) {
-  PixelApi.get(`/get-all-pages?projectId=${payload}`, (status, pages) => {
+export function getPages(payload, cb) {
+  PixelApi.get(`/get-pages?${payload}`, (status, pages) => {
     generalCallback(status, pages, cb);
   });
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="site-viewer">
+  <div class="site-viewer active">
     <div class="frame" :style="frameStyles">
       <iframe
         data-perfect-pixel
@@ -41,7 +41,7 @@ export default {
       top: "Смещение сверху"
     },
     defaultViewParams: {
-      websiteInspectorHeight: window.innerHeight / 2 - 24
+      websiteInspectorHeight: window.innerHeight - 24
     },
     noScroll: false,
     foundNodesEventHandlers: []
@@ -63,12 +63,9 @@ export default {
       "targetElement"
     ]),
     frameStyles() {
-      if (!this.frameParams) {
-        return;
-      }
       return {
-        width: (this.frameParams.width || "100%") + "px",
-        height: this.viewParams && this.viewParams.websiteInspectorHeight + "px"
+        width: (this.frameParams && this.frameParams.width + "px") || "100%",
+        height: this.defaultViewParams.websiteInspectorHeight
       };
     },
     syncScroll() {
@@ -580,10 +577,10 @@ export default {
           return false;
         };
       }
-      frameWindow.onbeforeunload = e => {
+      /*frameWindow.onbeforeunload = e => {
         e.preventDefault();
         e.returnValue = "";
-      };
+      };*/
     },
     scrollToTargetElement(element) {
       if (!element || !this.currentFrameDocument) {

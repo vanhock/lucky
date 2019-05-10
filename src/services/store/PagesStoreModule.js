@@ -2,7 +2,7 @@ import Vue from "vue";
 import {
   PAGE_SET_CURRENT_PAGE,
   PAGE_CREATE_PAGE,
-  PAGE_GET_ALL_PAGES,
+  PAGE_GET_PAGES,
   PAGE_MOVE_TO_TRASH,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGE
@@ -10,7 +10,7 @@ import {
 import {
   createPage,
   editPage,
-  getAllPages,
+  getPages,
   getPage,
   movePageToTrash
 } from "../api/PageApi";
@@ -52,7 +52,7 @@ export default {
       }
       state.currentPage.id === payload.id ? (state.currentPage = {}) : "";
     },
-    [PAGE_GET_ALL_PAGES](state, payload) {
+    [PAGE_GET_PAGES](state, payload) {
       state.pages = payload;
     },
     [PAGE_GET_PAGE](state, payload) {
@@ -99,13 +99,13 @@ export default {
         );
       });
     },
-    [PAGE_GET_ALL_PAGES]: ({ commit }, payload) => {
+    [PAGE_GET_PAGES]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        getAllPages(payload.projectId, (error, pages) => {
+        getPages(serializeObject(payload), (error, pages) => {
           if (error) {
             return reject(error);
           }
-          commit(PAGE_GET_ALL_PAGES, pages);
+          commit(PAGE_GET_PAGES, pages);
           resolve(pages);
         });
       });

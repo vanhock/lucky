@@ -78,7 +78,7 @@ import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import {
   PAGE_CREATE_PAGE,
   PAGE_EDIT_PAGE,
-  PAGE_GET_ALL_PAGES,
+  PAGE_GET_PAGES,
   PAGE_MOVE_TO_TRASH,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
@@ -107,7 +107,7 @@ export default {
   },
   created() {
     this.getProject();
-    this.getAllPages();
+    this.getPages();
     this.modals = {
       create: {
         title: this.$t("createPage"),
@@ -141,9 +141,9 @@ export default {
         projectId: this.projectId
       });
     },
-    getAllPages() {
+    getPages() {
       this.$store
-        .dispatch(PAGE_GET_ALL_PAGES, { projectId: this.projectId })
+        .dispatch(PAGE_GET_PAGES, { projectId: this.projectId })
         .then(() => {
           this.loaded = true;
         })

@@ -61,11 +61,12 @@ module.exports = function(app) {
     if (!req.query.websiteUrl && !req.query.id) {
       return res.error("Required field did not provide!");
     }
-    const params = { trashId: null };
-    if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
-    if (req.query.id) params.id = req.query.id;
-
     getUserByToken(req, res, user => {
+      const params = { trashId: null };
+      if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
+      if (req.query.id) params.id = req.query.id;
+      if (!user.isAdmin) params.userId = user.id;
+
       Page.findOne({
         where: params
       })
@@ -85,24 +86,24 @@ module.exports = function(app) {
     });
   });
 
-  app.get("/get-all-pages", (req, res) => {
-    if (!req.query.projectId) {
-      return res.error("Project id did not provide!");
+  app.get("/get-pages", (req, res) => {
+    if (!req.query.websiteUrl && !req.query.projectId) {
+      return res.error("Required did not provide!");
     }
-    const projectId = req.query.projectId;
     getUserByToken(req, res, user => {
+      const params = { trashId: null };
+      if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
+      if (req.query.projectId) params.id = req.query.projectId;
+      if (!user.isAdmin) params.userId = user.id;
+
       Page.findAll({
-        where: {
-          userId: user.id,
-          projectId: projectId,
-          trashId: null
-        }
+        where: params
       })
         .then(pages => {
           return res.status(200).send(JSON.stringify(pages));
         })
         .catch(() => {
-          return res.error("Have no pages found for this project!");
+          return res.error("Have no pages found!");
         });
     });
   });

@@ -56,6 +56,7 @@ export default {
   align-items: center;
   cursor: pointer;
   color: $color-b5;
+  font-size: 12px;
   .icon {
     fill: $color-b5;
   }

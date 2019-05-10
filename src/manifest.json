@@ -20,5 +20,6 @@
       "19": "icons/19.png",
       "38": "icons/38.png"
     }
-  }
+  },
+  "web_accessible_resources": ["icons/*.png"]
 }

@@ -41,7 +41,7 @@ class PixelApi {
     return this.api
       .request({
         method: "GET",
-        url: config.serverUrl + path,
+        url: config.apiUrl + path,
         responseType: "json"
       })
       .then(response => callback(response.status, response.data));
@@ -51,7 +51,7 @@ class PixelApi {
     return this.api
       .request({
         method: "PATCH",
-        url: config.serverUrl + path,
+        url: config.apiUrl + path,
         responseType: "json",
         data: payload.data
       })
@@ -62,7 +62,7 @@ class PixelApi {
     return this.api
       .request({
         method: "POST",
-        url: config.serverUrl + path,
+        url: config.apiUrl + path,
         responseType: "json",
         data: payload.data
       })

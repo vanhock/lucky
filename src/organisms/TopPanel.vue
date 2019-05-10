@@ -1,7 +1,11 @@
 <template>
   <div class="top-panel">
-    <div class="container">
-      <router-link class="site-logo" to="/"></router-link>
+    <div class="top-panel-container">
+      <a class="site-logo" :href="userPanelUrl" target="_blank"
+        ><img
+          src="chrome-extension://__MSG_@@pniajcifdcfkbcigpipdidnhhjbliglh/icons/38.png"
+        />
+      </a>
       <design-params />
       <div
         style="flex-grow: 1;
@@ -30,6 +34,7 @@ import ViewParams from "../molecules/Toolbars/ViewToolbar";
 import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/Toolbars/DesignToolbar";
 import ProjectToolbar from "../molecules/Toolbars/ProjectNavigationToolbar";
+import config from "../config";
 export default {
   name: "TopPanel",
   components: {
@@ -40,7 +45,8 @@ export default {
     TaskList
   },
   data: () => ({
-    showTasksList: true
+    showTasksList: true,
+    userPanelUrl: config.apiUrl
   }),
   computed: {
     ...mapGetters(["foundNodes"])
@@ -59,7 +65,7 @@ export default {
   height: 38px;
   width: 100%;
   background-color: $color-bg2;
-  .container {
+  &-container {
     display: flex;
     margin: 0 auto;
     align-items: center;
@@ -80,11 +86,13 @@ export default {
   }
 }
 .site-logo {
-  width: 32px;
-  height: 32px;
-  background: url(/pixel.png) no-repeat;
-  margin-left: -12px;
-  background-size: contain;
+  padding: 5px 18px;
+  margin-left: -18px;
+  display: flex;
+  img {
+    width: 28px;
+    height: 28px;
+  }
 }
 .icon-menu {
   height: 100%;
