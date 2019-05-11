@@ -11,14 +11,27 @@
         style="flex-grow: 1;
     flex-shrink: 999;"
       >
-        <project-toolbar />
+        <center-toolbar />
       </div>
-      <view-params @reloadView="$emit('reloadView')" class="right" />
+      <view-params class="right" v-if="designBlocks" />
+      <v-toggle
+        class="right"
+        icon="refresh"
+        text="Reload view"
+        :show-text="false"
+        @click="$emit('reloadView')"
+      />
+      <v-toggle
+        class="right"
+        icon="bolt"
+        :text="$t('Quick task create')"
+        :show-text="false"
+      ></v-toggle>
       <v-toggle
         class="right"
         icon="inbox-full"
         :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
-        text="Found elements"
+        :text="$t('Tasks')"
         :active="showTasksList"
         @click="toggleTasksList"
       />
@@ -33,23 +46,23 @@ import { mapGetters } from "vuex";
 import ViewParams from "../molecules/Toolbars/ViewToolbar";
 import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/Toolbars/DesignToolbar";
-import ProjectToolbar from "../molecules/Toolbars/ProjectNavigationToolbar";
+import CenterToolbar from "../molecules/Toolbars/CenterToolbar";
 import config from "../config";
 export default {
   name: "TopPanel",
   components: {
-    ProjectToolbar,
+    CenterToolbar,
     DesignParams,
     VToggle,
     ViewParams,
     TaskList
   },
   data: () => ({
-    showTasksList: true,
+    showTasksList: false,
     userPanelUrl: config.apiUrl
   }),
   computed: {
-    ...mapGetters(["foundNodes"])
+    ...mapGetters(["foundNodes", "designBlocks"])
   },
   methods: {
     toggleTasksList() {

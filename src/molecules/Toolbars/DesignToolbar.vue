@@ -1,14 +1,17 @@
 <template>
   <div class="design-params">
     <panel-control>
-      <v-toggle
-        :active="showAllBlocks"
-        :icon="(showFoundBlocks && 'target') || 'layers'"
-        :text="(showFoundBlocks && 'Found layers') || 'All layers'"
-        :show-text="false"
-        @click="toggleLayersViewMode"
-      />
-      <v-toggle icon="border-none" text="Guides" :show-text="false" />
+      <template v-if="designBlocks">
+        <v-toggle
+          :active="showAllBlocks"
+          :icon="(showFoundBlocks && 'target') || 'layers'"
+          :text="(showFoundBlocks && 'Found layers') || 'All layers'"
+          :show-text="false"
+          @click="toggleLayersViewMode"
+        />
+        <v-toggle icon="border-none" text="Guides" :show-text="false" />
+      </template>
+
       <v-toggle icon="repost" text="Change design" />
     </panel-control>
   </div>
@@ -18,12 +21,13 @@
 import PanelControl from "../../atoms/PanelControl";
 import VToggle from "../../atoms/VToggle";
 import ViewMixin from "../../mixins/ViewMixin";
-
+import { mapGetters } from "vuex";
 export default {
   name: "DesignParams",
   mixins: [ViewMixin],
   components: { PanelControl, VToggle },
   computed: {
+    ...mapGetters(["designBlocks"]),
     showAllBlocks() {
       return this.getViewParam("showAllDesignBlocks");
     },

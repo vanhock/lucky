@@ -31,12 +31,6 @@
           </v-menu>
         </template>
       </panel-control>
-      <v-toggle
-        icon="refresh"
-        text="Reload view"
-        :show-text="false"
-        @click="$emit('reloadView')"
-      />
       <panel-control :dropdown="true">
         <v-toggle icon="tuning" text="Recognize settings" :show-text="false" />
         <template v-slot:dropdown>

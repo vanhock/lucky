@@ -12,7 +12,7 @@
       class="icon"
       :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
     />
-    <div class="text" v-if="text">{{ text }}</div>
+    <div class="text" v-if="text"><span>{{ text }}</span></div>
     <div class="label" v-if="label && label.length">{{ label }}</div>
   </div>
 </template>
@@ -84,10 +84,11 @@ export default {
       margin-left: 0;
       background-color: $color-b2;
       color: #fff;
-      min-width: 70px;
+      min-width: 100px;
       padding: 5px;
       text-align: center;
       z-index: 12;
+      font-size: 12px;
       &:before {
         position: absolute;
         content: "";
