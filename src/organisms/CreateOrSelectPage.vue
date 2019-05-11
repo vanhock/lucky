@@ -6,7 +6,7 @@
     unable-closing
   >
     <template v-if="hasPages">
-      <card-general-list>
+      <card-general-list class="pp-pages-list">
         <v-card-general
           v-for="page in pages"
           :key="page.id"
@@ -135,4 +135,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.pp-pages-list {
+  background-color: $color-bg3;
+}
+</style>

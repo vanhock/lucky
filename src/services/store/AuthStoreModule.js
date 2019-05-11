@@ -49,7 +49,7 @@ export default {
           }
           PixelApi.setToken(user.token, () => {
             localStorage.setItem("pp-u-t-s", user.token);
-            window.postMessage({ token: user.token }, "*");
+            window.postMessage({ authorized: user.token }, "*");
             commit(AUTH_SUCCESS, user);
             resolve(user);
           });
@@ -63,10 +63,10 @@ export default {
         resolve();
       });
     },
-    AUTH_CHECK_AUTH({ commit }) {
+    AUTH_CHECK_AUTH({ commit }, payload) {
       console.log("auth check init");
       return new Promise((resolve, reject) => {
-        AuthByToken((error, user) => {
+        AuthByToken(payload, (error, user) => {
           if (error || !user) {
             commit(AUTH_CHECK_AUTH);
             return reject();

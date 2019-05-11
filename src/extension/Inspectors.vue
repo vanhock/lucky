@@ -34,19 +34,20 @@ export default {
   },
   created() {
     console.log("This is inspectors");
-    this.initView();
+    browser.runtime.sendMessage(JSON.stringify({ inspectorReady: true }));
     browser.runtime.onMessage.addListener(request => {
       const data = request && JSON.parse(request);
       if (!data) {
         return;
       }
-
+      console.log("Inspector received message: " + request);
       switch (Object.keys(data)[0]) {
         case "reloadPage":
           return location.reload();
-        case "pp-u-t-s":
-          sessionStorage.setItem("pp-u-t-s", data["pp-u-t-s"]);
-          this.initView();
+        case "initInspectors":
+          console.log("init inspector handler");
+          sessionStorage.setItem("pp-u-t-s", data.initInspectors);
+          this.initView(data.initInspectors);
       }
     });
   },
@@ -82,13 +83,16 @@ export default {
     }
   },
   methods: {
-    initView() {
+    initView(token) {
+      console.log("Check auth request");
       this.$store
-        .dispatch(AUTH_CHECK_AUTH)
+        .dispatch(AUTH_CHECK_AUTH, token)
         .then(() => {
+          console.log("Check auth success");
           this.getPages();
         })
         .catch(() => {
+          console.log("Check auth fail");
           browser.runtime.sendMessage(JSON.stringify({ resetToken: true }));
         });
     },

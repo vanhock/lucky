@@ -1,5 +1,6 @@
-const currentToken = localStorage.getItem("pp-u-t-s");
-if (currentToken) {
+const currentToken =
+  localStorage.getItem("pp-u-t-s") || sessionStorage.getItem("pp-u-t-s");
+if (currentToken && !location.href.includes("sign-in")) {
   browser.runtime.sendMessage(JSON.stringify({ token: currentToken }));
 }
 
@@ -8,7 +9,9 @@ window.addEventListener("message", function(event) {
   // We only accept messages from ourselves
   if (event.source !== window) return;
 
-  if (event.data.token) {
-    browser.runtime.sendMessage(JSON.stringify({ token: event.data.token }));
+  if (event.data.authorized) {
+    browser.runtime.sendMessage(
+      JSON.stringify({ token: event.data.authorized })
+    );
   }
 });

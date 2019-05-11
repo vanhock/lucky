@@ -4,28 +4,35 @@ const maxAuthRequestsCount = 3;
 
 let currentTabId = null;
 let authTabId = null;
-let appActive = false;
 let authRequestsCount = 0;
 
-const init = _.debounce(function(tab) {
-  if (appActive) {
-    appActive = false;
-    authRequestsCount = 0;
-    return browser.tabs.sendMessage(
-      tab.id,
-      JSON.stringify({ reloadPage: true })
-    );
-  }
-  getToken();
-  currentTabId = tab.id;
+const init = _.debounce(function() {
+  runInspectors();
 }, 300);
 
 browser.browserAction.onClicked.addListener(function(tab) {
-  init(tab);
+  currentTabId = tab.id;
+  checkExtensionActive(tab);
 });
 
+let lastMessage = null;
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (sender.tab.id !== currentTabId && sender.tab.id !== authTabId) {
+    return;
+  }
+  if (
+    lastMessage &&
+    lastMessage.tabId === sender.tab.id &&
+    lastMessage.message === request
+  ) {
+    return;
+  }
   handleMessages(request);
+  lastMessage = {
+    tabId: sender.tab.id,
+    message: request
+  };
 });
 
 function handleMessages(request) {
@@ -40,28 +47,46 @@ function handleMessages(request) {
       if (authTabId) {
         browser.tabs.remove(authTabId);
         browser.tabs.update(currentTabId, { active: true });
+        authTabId = null;
         browser.tabs.sendMessage(
           currentTabId,
-          JSON.stringify({ "pp-u-t-s": data.token })
+          JSON.stringify({ initInspectors: data.token })
         );
-        authTabId = null;
       }
-      return runInspectors();
+      break;
     case "resetToken":
       browser.storage.local.remove("pp-u-t-s");
-      runAuthScript();
+      return runAuthScript();
+    case "isActive":
+      toggleActive(currentTabId);
+      if (!data.isActive) {
+        init();
+      } else {
+        authRequestsCount = 0;
+        browser.tabs.sendMessage(
+          currentTabId,
+          JSON.stringify({ reloadPage: true })
+        );
+      }
+      break;
+    case "inspectorReady":
+      getToken();
   }
 }
 
-function getToken(cb) {
-  browser.storage.local.get("pp-u-t-s").then(token => {
+function getToken() {
+  browser.storage.local.get("pp-u-t-s").then(response => {
+    const token = response["pp-u-t-s"];
     if (token) {
-      return runInspectors();
-    }
-    if (!token["pp-u-t-s"]) {
-      runAuthScript();
+      console.log("Try to send inspector init...");
+      browser.tabs.sendMessage(
+        currentTabId,
+        JSON.stringify({ initInspectors: token })
+      );
+      console.log("Inspector init sent!");
     } else {
-      cb(null, token["pp-u-t-s"]);
+      console.log("Token not found. Running auth script...");
+      runAuthScript();
     }
   });
 }
@@ -71,7 +96,7 @@ function runAuthScript() {
     return;
   }
   browser.tabs
-    .create({ url: config.apiUrl })
+    .create({ url: config.apiUrl + config.authUrl })
     .then(tab => {
       browser.tabs.executeScript(tab.id, {
         file: "content_scripts/auth-script.js"
@@ -83,11 +108,16 @@ function runAuthScript() {
 }
 
 function runInspectors() {
-  if (!currentTabId) {
-    return;
-  }
   browser.tabs.executeScript(currentTabId, {
     file: "content_scripts/inspectors-view.js"
   });
-  appActive = true;
+}
+
+function checkExtensionActive(tab) {
+  console.log("Sent active check request to tab " + tab.id);
+  browser.tabs.sendMessage(tab.id, "checkActive");
+}
+
+function toggleActive() {
+  browser.tabs.sendMessage(currentTabId, "toggleActive");
 }

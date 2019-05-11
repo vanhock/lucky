@@ -10,7 +10,7 @@ Vue.use(Router);
 i18n.locale = localStorage.getItem("locale") || "en";
 
 const ifNotAuthenticated = (to, from, next) => {
-  if (!store.getters.isAuthenticated) {
+  if (!store.getters.isAuthenticated || to.query.redirect === "disabled") {
     next();
     return;
   }
