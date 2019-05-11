@@ -4,7 +4,10 @@ import config from "../../config";
 class PixelApi {
   constructor() {
     let api = axios.create({
-      headers: { authorization: localStorage.getItem("user-token") }
+      headers: {
+        authorization:
+          localStorage.getItem("pp-u-t-s") || sessionStorage.getItem("pp-u-t-s")
+      }
     });
     api.interceptors.response.use(PixelApi.handleSuccess, this.handleError);
     this.api = api;
@@ -18,14 +21,14 @@ class PixelApi {
     switch (error.response.status) {
       case 401:
         window.postMessage("logOut", "*");
-        document.location = "/log-out";
-        break;
-      default:
-        return {
-          status: error.response.status,
-          data: error.response.data.errors[0].title
-        };
+        if (location.href.includes(config.apiUrl)) {
+          document.location = "/log-out";
+        }
     }
+    return {
+      status: error.response.status || error.response.code,
+      data: error.response.data.errors[0].title
+    };
   };
 
   redirectTo = (document, path) => {

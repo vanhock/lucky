@@ -8,85 +8,47 @@
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
     />
-    <v-modal
-      ref="operationalModal"
-      :show="showPageSelectModal"
-      :title="pageModalTitle"
-      :description="pageModalDescription"
-    >
-      <template v-if="hasPages">
-        <card-general-list>
-          <v-card-general v-for="page in pages" :key="page.id" />
-        </card-general-list>
-        <div class="pages-selector-action">
-          <span>{{ $t("Or you can ") }}</span>
-          <v-button-inline>{{ $t("create new page") }}</v-button-inline>
-        </div>
-      </template>
-      <template v-if="(hasPages && showPageModalCreationBlock) || true">
-        <form-group>
-          <v-input-bordered
-            name="websiteUrl"
-            :label="$t('Website URL')"
-            :value="currentWebsiteUrl"
-            disabled
-          />
-          <v-input-bordered
-            name="name"
-            :label="$t('Page name')"
-            :value="currentWebsiteUrl"
-            required
-          />
-          <v-input-bordered
-            name="projectName"
-            :label="$t('Project name')"
-            :value="currentHostname"
-          />
-        </form-group>
-        <v-button-primary>{{ $t("create") }}</v-button-primary>
-      </template>
-    </v-modal>
+    <create-or-select-page ref="pageModal" />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import {
-  simplifyDom,
-  addToLocal,
-  removeClass,
-  extractHostname
-} from "../utils";
+import { simplifyDom, addToLocal, removeClass } from "../utils";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
+  AUTH_CHECK_AUTH,
   INSPECTOR_SET_VIEW_PARAMS,
   PAGE_GET_PAGES
 } from "../services/store/mutation-types";
-import VModal from "../molecules/VModal";
-import CardGeneralList from "../molecules/CardGeneralList";
-import VCardGeneral from "../molecules/VCard/VCardGeneral";
-import FormGroup from "../molecules/FormGroup";
-import VInputBordered from "../molecules/VInput/VInputBordered";
-import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
-import VButtonInline from "../molecules/VButton/VButtonInline";
+import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
 export default {
   name: "ViewScreen",
   components: {
-    VButtonInline,
-    VButtonPrimary,
-    VInputBordered,
-    FormGroup,
-    VCardGeneral,
-    CardGeneralList,
-    VModal,
+    CreateOrSelectPage,
     DesignInspector,
     WebsiteInspector,
     TopPanel
   },
   created() {
+    console.log("This is inspectors");
     this.initView();
+    browser.runtime.onMessage.addListener(request => {
+      const data = request && JSON.parse(request);
+      if (!data) {
+        return;
+      }
+
+      switch (Object.keys(data)[0]) {
+        case "reloadPage":
+          return location.reload();
+        case "pp-u-t-s":
+          sessionStorage.setItem("pp-u-t-s", data["pp-u-t-s"]);
+          this.initView();
+      }
+    });
   },
   data: () => ({
     gettingFoundNodeData: true,
@@ -97,10 +59,7 @@ export default {
       websiteInspectorHeight: window.innerHeight / 2 - 24,
       showAllDesignBlocks: true,
       showFoundDesignBlocks: true
-    },
-    showPageSelectModal: false,
-    showPageModalCreationBlock: false,
-    currentWebsiteUrl: location.href
+    }
   }),
   computed: {
     ...mapState(["currentProject"]),
@@ -120,35 +79,27 @@ export default {
         this.currentProject.hasOwnProperty("designBlocks") &&
         this.currentProject.designBlocks
       );
-    },
-    pageModalTitle() {
-      return (
-        (this.hasPages && this.$t("Select page")) || this.$t("Create new page")
-      );
-    },
-    pageModalDescription() {
-      return (
-        (this.hasPages &&
-          this.$t("We found pages, associated with this URL:")) ||
-        null
-      );
-    },
-    currentHostname() {
-      return this.currentWebsiteUrl && extractHostname(this.currentWebsiteUrl);
     }
   },
   methods: {
     initView() {
-      this.getPages();
+      this.$store
+        .dispatch(AUTH_CHECK_AUTH)
+        .then(() => {
+          this.getPages();
+        })
+        .catch(() => {
+          browser.runtime.sendMessage(JSON.stringify({ resetToken: true }));
+        });
     },
     getPages() {
       this.$store
         .dispatch(PAGE_GET_PAGES, { websiteUrl: location.href })
         .then(() => {
-          this.showPageSelectModal = true;
+          this.$refs.pageModal.toggleModal(true);
         })
         .catch(() => {
-          this.showPageSelectModal = true;
+          this.$refs.pageModal.toggleModal(true);
         });
     },
     getFoundNodes() {

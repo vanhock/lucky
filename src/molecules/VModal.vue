@@ -1,20 +1,27 @@
 <template>
   <div
-    class="modal"
+    class="pp-modal"
     style="display: none"
     v-show="showModal"
     :class="{ show: showModal }"
   >
-    <div class="modal-overlay" @click="showModal = false"></div>
-    <div class="modal-container">
-      <div class="modal-close" @click="showModal = false"></div>
-      <div class="modal-header">
-        <div class="modal-title">{{ title }}</div>
-        <div class="modal-description" v-if="description">
+    <div
+      class="pp-modal-overlay"
+      @click="!unableClosing ? (showModal = false) : ''"
+    ></div>
+    <div class="pp-modal-container">
+      <div
+        v-if="!unableClosing"
+        class="pp-modal-close"
+        @click="showModal = false"
+      ></div>
+      <div class="pp-modal-header">
+        <div class="pp-modal-title">{{ title }}</div>
+        <div class="pp-modal-description" v-if="description">
           {{ description }}
         </div>
       </div>
-      <div class="modal-content" v-if="showModal">
+      <div class="pp-modal-content" v-if="showModal">
         <slot style="display: none" v-show="showModal"></slot>
       </div>
     </div>
@@ -31,7 +38,8 @@ export default {
   }),
   props: {
     title: String,
-    description: String
+    description: String,
+    unableClosing: Boolean
   },
   watch: {
     showModal(value) {
@@ -47,8 +55,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.modal {
+<style lang="scss">
+.pp-modal {
   position: absolute;
   &-overlay {
     position: fixed;
@@ -89,8 +97,7 @@ export default {
   &-title {
     margin-top: 0;
     font-weight: 600;
-    font-size: 1.25rem;
-    line-height: 1.25;
+    font-size: 18px;
     color: #000;
     box-sizing: border-box;
   }
@@ -113,7 +120,6 @@ export default {
   }
 
   &-content {
-    margin-top: 0;
     margin-bottom: 2rem;
     line-height: 1.5;
     color: rgba(0, 0, 0, 0.8);
@@ -121,13 +127,14 @@ export default {
       margin-left: auto;
       margin-right: auto;
     }
-  }
-
-  &-content {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    line-height: 1.5;
-    color: rgba(0, 0, 0, 0.8);
+    .form-group {
+      margin-bottom: 25px;
+    }
+    .v-input {
+      &:not(:last-child) {
+        margin-bottom: 15px;
+      }
+    }
   }
 
   &-btn {

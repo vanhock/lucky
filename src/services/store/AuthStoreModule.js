@@ -2,14 +2,15 @@ import {
   AUTH_REQUEST,
   AUTH_SUCCESS,
   AUTH_ERROR,
-  AUTH_LOGOUT
+  AUTH_LOGOUT,
+  AUTH_CHECK_AUTH
 } from "./mutation-types";
 import PixelApi from "../api/api";
-import { Authorization } from "../api/UserApi";
+import { AuthByToken, Authorization } from "../api/UserApi";
 export default {
   state: {
     user: {},
-    userToken: localStorage.getItem("user-token"),
+    userToken: localStorage.getItem("pp-u-t-s"),
     status: ""
   },
   getters: {
@@ -31,6 +32,9 @@ export default {
     [AUTH_LOGOUT]: state => {
       state.user = {};
       state.userToken = null;
+    },
+    [AUTH_CHECK_AUTH]: (state, payload = null) => {
+      state.userToken = payload;
     }
   },
   actions: {
@@ -40,11 +44,11 @@ export default {
         Authorization(payload, (error, user) => {
           if (error) {
             commit(AUTH_ERROR, error);
-            localStorage.removeItem("user-token");
+            localStorage.removeItem("pp-u-t-s");
             return reject(error);
           }
           PixelApi.setToken(user.token, () => {
-            localStorage.setItem("user-token", user.token);
+            localStorage.setItem("pp-u-t-s", user.token);
             window.postMessage({ token: user.token }, "*");
             commit(AUTH_SUCCESS, user);
             resolve(user);
@@ -55,8 +59,21 @@ export default {
     [AUTH_LOGOUT]: ({ commit }) => {
       return new Promise(resolve => {
         commit(AUTH_LOGOUT);
-        localStorage.removeItem("user-token"); // clear your user's token from localstorage
+        localStorage.removeItem("pp-u-t-s"); // clear your user's token from localstorage
         resolve();
+      });
+    },
+    AUTH_CHECK_AUTH({ commit }) {
+      console.log("auth check init");
+      return new Promise((resolve, reject) => {
+        AuthByToken((error, user) => {
+          if (error || !user) {
+            commit(AUTH_CHECK_AUTH);
+            return reject();
+          }
+          commit(AUTH_CHECK_AUTH, user.token);
+          return resolve(user);
+        });
       });
     }
   }

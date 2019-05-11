@@ -12,7 +12,7 @@ const getUserByToken = function(req, res, cb) {
         return res.error({ title: "Token outdated!", code: 401 });
       }
       if (!user) {
-        return res.error({ title: "User not found", code: 404 });
+        return res.error({ title: "User not found", code: 401 });
       }
 
       cb(user);

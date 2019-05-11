@@ -1,16 +1,16 @@
 <template>
-  <div class="v-input-bordered">
-    <v-input
-      ref="input"
-      :type="type"
-      :name="name"
-      :label="label"
-      :value="value"
-      :placeholder="placeholder"
-      :required="required"
-      :autocomplete="autocomplete"
-    />
-  </div>
+  <v-input
+    class="v-input-bordered"
+    ref="input"
+    :type="type"
+    :name="name"
+    :label="label"
+    :value="value"
+    :placeholder="placeholder"
+    :required="required"
+    :autocomplete="autocomplete"
+    :disabled="disabled"
+  />
 </template>
 
 <script>
@@ -29,35 +29,33 @@ export default {
 </script>
 
 <style lang="scss">
-.v-input-bordered {
-  .v-input {
-    .input {
-      height: 50px;
-      input {
-        border: 1px solid $color-b4;
-        border-radius: 3px;
-        padding: 17px 10px 0;
-        font-size: 14px;
-        height: 100%;
-        letter-spacing: 0.2px;
-        outline: none;
-        width: 100%;
-        box-sizing: border-box;
-      }
+.v-input-bordered.v-input {
+  .input {
+    height: 50px;
+    input {
+      border: 1px solid $color-b4;
+      border-radius: 3px;
+      padding: 17px 10px 0;
+      font-size: 14px;
+      height: 100%;
+      letter-spacing: 0.2px;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
     }
+  }
+  .label {
+    font-size: 15px;
+    top: 15px;
+    left: 10px;
+    color: $color-b21;
+    font-weight: 500;
+  }
+  &.focus {
     .label {
-      font-size: 15px;
-      top: 15px;
-      left: 10px;
-      color: $color-b21;
-      font-weight: 500;
-    }
-    &.focus {
-      .label {
-        top: 10px;
-        font-size: 11px;
-        color: $color-b3;
-      }
+      top: 10px;
+      font-size: 11px;
+      color: $color-b3;
     }
   }
 }

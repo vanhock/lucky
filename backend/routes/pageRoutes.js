@@ -15,30 +15,29 @@ module.exports = function(app) {
       let projectId = req.fields.projectId;
 
       if (projectId) {
-        return createPage();
-      } else {
-        /** Get the last project if a project id didn't provide **/
-        Project.findAll({
-          limit: 1,
+        Project.findOne({
           where: {
+            id: projectId,
             userId: user.id
-          },
-          order: [["createdAt", "DESC"]]
+          }
         })
-          .then(project => {
-            projectId = project[0].dataValues.id;
+          .then(() => {
             return createPage();
           })
           .catch(() => {
-            /** If projects not found create new Untitled project **/
-            Project.create({
-              name: req.fields.url || "Untitled",
-              userId: user.id
-            }).then(project => {
-              projectId = project.id;
-              createPage();
-            });
+            return res.error("You don't have rights for change this project!");
           });
+      } else {
+        /** Get the last project if a project id didn't provide **/
+
+        /** If projects not found create new Untitled project **/
+        Project.create({
+          name: req.fields.url || "Untitled",
+          userId: user.id
+        }).then(project => {
+          projectId = project.id;
+          createPage();
+        });
       }
       function createPage() {
         Page.create({

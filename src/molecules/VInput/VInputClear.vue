@@ -1,17 +1,17 @@
 <template>
-  <div class="v-input-clear">
-    <v-input
-      ref="input"
-      :type="type"
-      :id="id"
-      :name="name"
-      :value="value"
-      :label="label"
-      :placeholder="placeholder"
-      :required="required"
-      :autocomplete="autocomplete"
-    />
-  </div>
+  <v-input
+    class="v-input-clear"
+    ref="input"
+    :type="type"
+    :id="id"
+    :name="name"
+    :value="value"
+    :label="label"
+    :placeholder="placeholder"
+    :required="required"
+    :autocomplete="autocomplete"
+    :disabled="disabled"
+  />
 </template>
 
 <script>

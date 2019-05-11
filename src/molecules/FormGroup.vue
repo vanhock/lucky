@@ -17,7 +17,8 @@ export default {
   mounted() {
     this.$children.forEach((children, index) => {
       if (index === 0) {
-        children.$el.querySelector("input").focus();
+        const targetEl = children.$el.querySelector("input:not([disabled])");
+        targetEl && targetEl.focus();
       }
       children.$on("onchange", this.handleChildrenChanged);
     });

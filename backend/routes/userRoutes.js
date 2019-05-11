@@ -40,6 +40,12 @@ module.exports = function(app) {
     );
   });
 
+  app.get("/auth-by-token", (req, res) => {
+    getUserByToken(req, res, user => {
+      res.status(200).send(JSON.stringify(user.dataValues));
+    });
+  });
+
   app.post("/authorization", (req, res) => {
     if (!Object.keys(req.fields).length) {
       return;
