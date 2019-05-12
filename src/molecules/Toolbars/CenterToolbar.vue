@@ -26,19 +26,31 @@
 import PanelControl from "../../atoms/PanelControl";
 import VToggle from "../../atoms/VToggle";
 import { mapGetters } from "vuex";
+import {
+  PAGE_GET_PAGES,
+  PROJECT_GET_ALL_PROJECTS
+} from "../../services/store/mutation-types";
 export default {
   name: "CenterToolbar",
   components: { VToggle, PanelControl },
   data: () => ({
     editing: false
   }),
-  props: {
-    currentProject: { type: Object, default: () => {} },
-    currentPage: { type: Object, default: () => {} },
-    projects: { type: Array, default: () => [] }
-  },
   computed: {
-    ...mapGetters(["targetElement"])
+    ...mapGetters([
+      "targetElement",
+      "currentProject",
+      "currentPage",
+      "projects"
+    ])
+  },
+  methods: {
+    getProjects() {
+      this.$store.dispatch(PROJECT_GET_ALL_PROJECTS);
+    },
+    getPages(projectId) {
+      this.$store.dispatch(PAGE_GET_PAGES, { projectId: projectId });
+    }
   }
 };
 </script>
@@ -66,10 +78,15 @@ export default {
     cursor: default;
   }
   .page-rename {
+    height: 14px;
+    max-width: 250px;
     color: $color-b6;
     font-size: 14px;
     margin-top: 2px;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>

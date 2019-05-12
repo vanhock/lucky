@@ -1,19 +1,23 @@
 <template>
   <v-modal
+    :class="{ 'popup-wide': !showPageCreation }"
     ref="operationalModal"
     :title="pageModalTitle"
     :description="pageModalDescription"
+    @close="closeExtension"
     unable-closing
   >
-    <template v-if="hasPages">
+    <template v-if="hasPages && !showPageCreation">
       <card-general-list class="pp-pages-list">
-        <v-card-general
+        <v-card-clear
           v-for="page in pages"
           :key="page.id"
           :name="page.name"
+          :caption="normalizeDate(page.updatedAt)"
+          @click="selectPage(page)"
         />
       </card-general-list>
-      <div class="pages-selector-action">
+      <div class="pp-pages-selector-action">
         <span>{{ $t("Or you can ") }}</span>
         <v-button-inline @click="toggleCreate = true">{{
           $t("create new page")
@@ -43,6 +47,12 @@
       <v-button-primary @click="createPage">{{
         $t("create")
       }}</v-button-primary>
+      <div class="pp-pages-selector-action" v-if="hasPages">
+        <span>{{ $t("Or you can ") }}</span>
+        <v-button-inline @click="toggleCreate = false">{{
+          $t("select from Found pages")
+        }}</v-button-inline>
+      </div>
     </template>
   </v-modal>
 </template>
@@ -50,7 +60,7 @@
 <script>
 import { mapGetters } from "vuex";
 import VModal from "../molecules/VModal";
-import VCardGeneral from "../molecules/VCard/VCardGeneral";
+import VCardClear from "../molecules/VCard/VCardClear";
 import CardGeneralList from "../molecules/CardGeneralList";
 import VButtonInline from "../molecules/VButton/VButtonInline";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
@@ -59,20 +69,24 @@ import FormGroup from "../molecules/FormGroup";
 import { notification } from "../services/notification";
 import {
   PAGE_CREATE_PAGE,
-  PAGE_SET_CURRENT_PAGE
+  PAGE_SET_CURRENT_PAGE,
+  PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
-import { extractHostname } from "../utils";
+import { extractHostname, normalizeDate } from "../utils";
 
 export default {
   name: "CreateOrSelectPage",
   components: {
+    VCardClear,
     VModal,
     FormGroup,
     VInputBordered,
     VButtonPrimary,
     VButtonInline,
-    CardGeneralList,
-    VCardGeneral
+    CardGeneralList
+  },
+  mounted() {
+    console.log("I'm a 'Create or select' component");
   },
   data: () => ({
     toggleCreate: false,
@@ -85,12 +99,13 @@ export default {
     },
     pageModalTitle() {
       return (
-        (this.hasPages && this.$t("Select page")) || this.$t("Create new page")
+        (!this.showPageCreation && this.$t("Select page")) ||
+        this.$t("Create new page")
       );
     },
     pageModalDescription() {
       return (
-        (this.hasPages &&
+        (!this.showPageCreation &&
           this.$t("We found pages, associated with this URL:")) ||
         null
       );
@@ -103,10 +118,11 @@ export default {
     createPage() {
       this.$store
         .dispatch(PAGE_CREATE_PAGE, {
-          ...this.$refs.operationalForm.changedItems
+          ...this.$refs.operationalForm.getFormFields()
         })
         .then(page => {
           this.$refs.operationalModal.showModal = false;
+          this.$store.dispatch(PAGE_SET_CURRENT_PAGE, page);
           return notification(
             this,
             "success",
@@ -117,6 +133,10 @@ export default {
     },
     selectPage(page) {
       this.$store.dispatch(PAGE_SET_CURRENT_PAGE, page);
+      this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
+        projectId: page.projectId
+      });
+      this.$refs.operationalModal.showModal = false;
     },
     toggleModal(open = false) {
       this.$refs.operationalModal.showModal = open;
@@ -130,13 +150,34 @@ export default {
           nameField.select();
         }, 400);
       });
+    },
+    normalizeDate(date) {
+      return normalizeDate(date);
+    },
+    closeExtension() {
+      browser.runtime.sendMessage(JSON.stringify({ closeExtension: true }));
     }
   }
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+.pp-modal.popup-wide {
+  .pp-modal-container {
+    max-width: 700px;
+  }
+}
+
 .pp-pages-list {
-  background-color: $color-bg3;
+  background-color: $color-b5;
+  padding: 0 20px 20px;
+  border-radius: 5px;
+}
+.pp-pages-selector-action {
+  display: flex;
+  flex-direction: column;
+  margin-top: 25px;
+  text-align: center;
+  align-items: center;
 }
 </style>

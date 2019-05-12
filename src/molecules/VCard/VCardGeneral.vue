@@ -32,6 +32,15 @@ export default {
 
 <style lang="scss">
 .project-item {
+  .v-card-text-container {
+    .name {
+      max-height: 50px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 250px;
+    }
+  }
   .actions {
     svg {
       width: 15px;

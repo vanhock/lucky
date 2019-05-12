@@ -72,6 +72,10 @@ export default {
         });
       this.changedItems = object;
     },
+    getFormFields() {
+      this.handleChildrenChanged();
+      return this.changedItems;
+    },
     resetFormGroup() {
       this.$children.forEach(child => {
         child.resetValue();

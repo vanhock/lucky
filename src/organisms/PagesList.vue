@@ -17,7 +17,7 @@
 <script>
 import CardGeneralList from "../molecules/CardGeneralList";
 import VCardGeneral from "../molecules/VCard/VCardGeneral";
-import { normalizeData } from "../utils";
+import { normalizeDate } from "../utils";
 export default {
   name: "PagesList",
   components: { VCardGeneral, CardGeneralList },
@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     normalizeData(date) {
-      return normalizeData(date);
+      return normalizeDate(date);
     }
   }
 };

@@ -29,7 +29,7 @@
 </i18n>
 
 <script>
-import { normalizeData } from "../utils";
+import { normalizeDate } from "../utils";
 import VCardTable from "../molecules/VCard/VCardTable";
 import CardTableList from "../molecules/CardTableList";
 export default {
@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     normalizeData(date) {
-      return normalizeData(date);
+      return normalizeDate(date);
     }
   }
 };

@@ -42,6 +42,9 @@ export default {
       outline: none;
       width: 100%;
       box-sizing: border-box;
+      &[disabled] {
+        opacity: 0.7;
+      }
     }
   }
   .label {
@@ -53,7 +56,7 @@ export default {
   }
   &.focus {
     .label {
-      top: 10px;
+      top: 8px;
       font-size: 11px;
       color: $color-b3;
     }

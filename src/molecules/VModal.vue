@@ -11,9 +11,8 @@
     ></div>
     <div class="pp-modal-container">
       <div
-        v-if="!unableClosing"
         class="pp-modal-close"
-        @click="showModal = false"
+        @click="unableClosing ? $emit('close') : (showModal = false)"
       ></div>
       <div class="pp-modal-header">
         <div class="pp-modal-title">{{ title }}</div>
@@ -77,7 +76,7 @@ export default {
     padding: 30px;
     min-width: 350px;
     max-width: 500px;
-    max-height: 70vh;
+    max-height: 150vh;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -174,23 +173,23 @@ export default {
     color: #fff;
   }
 
-  .modal-overlay,
-  .modal-content {
+  .pp-modal-overlay,
+  .pp-modal-content {
     will-change: transform;
   }
   &.show {
-    .modal-overlay {
+    .pp-modal-overlay {
       animation: mmfadeIn 0.3s cubic-bezier(0, 0, 0.2, 1);
     }
-    .modal-content {
+    .pp-modal-content {
       animation: mmslideIn 0.3s cubic-bezier(0, 0, 0.2, 1);
     }
   }
   &:not(.show) {
-    .modal-overlay {
+    .pp-modal-overlay {
       animation: mmfadeOut 0.3s cubic-bezier(0, 0, 0.2, 1);
     }
-    .modal-content {
+    .pp-modal-content {
       animation: mmslideOut 0.3s cubic-bezier(0, 0, 0.2, 1);
     }
   }

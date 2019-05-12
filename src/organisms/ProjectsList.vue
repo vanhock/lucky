@@ -9,7 +9,7 @@
         v-for="project in projects"
         :key="project.id"
         :name="project.name"
-        :caption="normalizeData(project.updatedAt)"
+        :caption="normalizeDate(project.updatedAt)"
         :text="`Pages: ${project.pagesCount || 0}`"
         @delete="$emit('delete', project)"
         @edit="$emit('edit', project)"
@@ -22,7 +22,7 @@
 <script>
 import CardGeneralList from "../molecules/CardGeneralList";
 import VCardGeneral from "../molecules/VCard/VCardGeneral";
-import { normalizeData } from "../utils";
+import { normalizeDate } from "../utils";
 export default {
   name: "ProjectsList",
   components: { VCardGeneral, CardGeneralList },
@@ -35,8 +35,8 @@ export default {
     sort: Array
   },
   methods: {
-    normalizeData(date) {
-      return normalizeData(date);
+    normalizeDate(date) {
+      return normalizeDate(date);
     }
   }
 };

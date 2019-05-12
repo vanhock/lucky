@@ -18,7 +18,7 @@ browser.browserAction.onClicked.addListener(function(tab) {
 let lastMessage = null;
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (sender.tab.id !== currentTabId && sender.tab.id !== authTabId) {
+  if (sender.id !== config.extensionId) {
     return;
   }
   if (
@@ -28,11 +28,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   ) {
     return;
   }
-  handleMessages(request);
+  currentTabId = sender.tab.id;
   lastMessage = {
     tabId: sender.tab.id,
     message: request
   };
+  handleMessages(request);
 });
 
 function handleMessages(request) {
@@ -62,13 +63,11 @@ function handleMessages(request) {
       if (!data.isActive) {
         init();
       } else {
-        authRequestsCount = 0;
-        browser.tabs.sendMessage(
-          currentTabId,
-          JSON.stringify({ reloadPage: true })
-        );
+        closeExtension();
       }
       break;
+    case "closeExtension":
+      return closeExtension();
     case "inspectorReady":
       getToken();
   }
@@ -120,4 +119,9 @@ function checkExtensionActive(tab) {
 
 function toggleActive() {
   browser.tabs.sendMessage(currentTabId, "toggleActive");
+}
+
+function closeExtension() {
+  authRequestsCount = 0;
+  browser.tabs.sendMessage(currentTabId, JSON.stringify({ reloadPage: true }));
 }

@@ -32,7 +32,7 @@ module.exports = function(app) {
 
         /** If projects not found create new Untitled project **/
         Project.create({
-          name: req.fields.url || "Untitled",
+          name: req.fields.projectName || "Untitled",
           userId: user.id
         }).then(project => {
           projectId = project.id;
@@ -92,7 +92,7 @@ module.exports = function(app) {
     getUserByToken(req, res, user => {
       const params = { trashId: null };
       if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
-      if (req.query.projectId) params.id = req.query.projectId;
+      if (req.query.projectId) params.projectId = req.query.projectId;
       if (!user.isAdmin) params.userId = user.id;
 
       Page.findAll({

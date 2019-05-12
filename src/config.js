@@ -3,5 +3,6 @@ export default {
   apiUrl:
     (process.env.NODE_ENV === "development" && "http://localhost:3000") ||
     "https://perfectpixel.io",
-  authUrl: "/sign-in?redirect=disabled"
+  authUrl: "/sign-in?redirect=disabled",
+  extensionId: "pniajcifdcfkbcigpipdidnhhjbliglh"
 };
