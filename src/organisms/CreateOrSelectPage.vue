@@ -4,7 +4,7 @@
     ref="operationalModal"
     :title="pageModalTitle"
     :description="pageModalDescription"
-    @close="closeExtension"
+    @reload="closeExtension"
     unable-closing
   >
     <template v-if="hasPages && !showPageCreation">

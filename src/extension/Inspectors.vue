@@ -89,7 +89,7 @@ export default {
         .dispatch(AUTH_CHECK_AUTH, token)
         .then(() => {
           console.log("Check auth success");
-          this.getPages();
+          return this.getPages();
         })
         .catch(() => {
           console.log("Check auth fail");

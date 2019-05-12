@@ -12,7 +12,7 @@
     <div class="pp-modal-container">
       <div
         class="pp-modal-close"
-        @click="unableClosing ? $emit('close') : (showModal = false)"
+        @click="unableClosing ? $emit('reload') : (showModal = false)"
       ></div>
       <div class="pp-modal-header">
         <div class="pp-modal-title">{{ title }}</div>
