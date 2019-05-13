@@ -20,9 +20,17 @@ export function Authorization(payload, cb) {
 }
 
 export function AuthByToken(payload, cb) {
-  if (payload) PixelApi.setToken(payload);
-  PixelApi.get("/auth-by-token", (status, data) => {
-    console.log("auth response" + data);
-    generalCallback(status, data, cb);
-  });
+  if (payload) {
+    PixelApi.setToken(payload, () => {
+      send();
+    });
+  } else {
+    send();
+  }
+  function send() {
+    PixelApi.get("/auth-by-token", (status, data) => {
+      console.log("auth response" + data);
+      generalCallback(status, data, cb);
+    });
+  }
 }

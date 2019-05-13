@@ -56,7 +56,8 @@ module.exports = function(app) {
       Project.findOne({
         where: {
           userId: user.id,
-          id: req.query.id
+          id: req.query.id,
+          trashId: null
         }
       })
         .then(project => {

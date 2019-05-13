@@ -24,6 +24,7 @@ import {
   PAGE_GET_PAGES
 } from "../services/store/mutation-types";
 import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
+import clickoutside from "../directives/clickoutside";
 export default {
   name: "ViewScreen",
   components: {
@@ -31,6 +32,9 @@ export default {
     DesignInspector,
     WebsiteInspector,
     TopPanel
+  },
+  directives: {
+    clickoutside
   },
   created() {
     console.log("This is inspectors");
@@ -42,14 +46,15 @@ export default {
       }
       console.log("Inspector received message: " + request);
       switch (Object.keys(data)[0]) {
-        case "reloadPage":
-          return location.reload();
         case "initInspectors":
           console.log("init inspector handler");
           sessionStorage.setItem("pp-u-t-s", data.initInspectors);
           this.initView(data.initInspectors);
       }
     });
+  },
+  beforeDestroy() {
+    window.perfectPixelInspectorActive = false;
   },
   data: () => ({
     gettingFoundNodeData: true,
@@ -85,14 +90,15 @@ export default {
   methods: {
     initView(token) {
       console.log("Check auth request");
+      window.perfectPixelInspectorActive = true;
       this.$store
         .dispatch(AUTH_CHECK_AUTH, token)
         .then(() => {
           console.log("Check auth success");
           return this.getPages();
         })
-        .catch(() => {
-          console.log("Check auth fail");
+        .catch(message => {
+          console.log("Check auth fail: " + message);
           browser.runtime.sendMessage(JSON.stringify({ resetToken: true }));
         });
     },

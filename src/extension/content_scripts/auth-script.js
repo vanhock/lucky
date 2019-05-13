@@ -1,6 +1,6 @@
 const currentToken =
   localStorage.getItem("pp-u-t-s") || sessionStorage.getItem("pp-u-t-s");
-if (currentToken && !location.href.includes("sign-in")) {
+if (currentToken) {
   browser.runtime.sendMessage(JSON.stringify({ token: currentToken }));
 }
 

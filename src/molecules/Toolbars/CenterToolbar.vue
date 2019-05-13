@@ -6,8 +6,13 @@
       </div>
       <!-- ToDo: Need to project selector dropdown here -->
       <template v-if="currentPage">
-        <span class="divider"></span>
-        <div class="page-rename" :contenteditable="editing">
+        <span class="divider" v-show="!editing"></span>
+        <div
+          class="page-rename"
+          :contenteditable="editing"
+          @click="editing = true"
+          v-clickoutside="(editing = false)"
+        >
           {{ currentPage.name }}
         </div>
       </template>

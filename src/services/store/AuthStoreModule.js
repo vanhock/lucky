@@ -70,7 +70,7 @@ export default {
         AuthByToken(payload, (error, user) => {
           if (error || !user) {
             commit(AUTH_CHECK_AUTH);
-            return reject();
+            return reject(error);
           }
           commit(AUTH_CHECK_AUTH, user.token);
           return resolve(user);
