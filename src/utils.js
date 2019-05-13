@@ -600,3 +600,11 @@ export const normalizeDate = function(date) {
     return moment(date).format("D.MM.YY");
   }
 };
+
+export const selectElementContents = function(el) {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+};

@@ -24,7 +24,22 @@ import {
   PAGE_GET_PAGES
 } from "../services/store/mutation-types";
 import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
-import clickoutside from "../directives/clickoutside";
+import Vue from "vue";
+Vue.directive("clickoutside", {
+  bind(el, binding) {
+    el._handler = evt => {
+      if (!el.contains(evt.target) && binding.expression) {
+        binding.value(evt);
+      }
+    };
+
+    document.addEventListener("click", el._handler);
+  },
+  unbind(el, binding) {
+    document.removeEventListener("click", el._handler);
+  }
+});
+
 export default {
   name: "ViewScreen",
   components: {
@@ -32,9 +47,6 @@ export default {
     DesignInspector,
     WebsiteInspector,
     TopPanel
-  },
-  directives: {
-    clickoutside
   },
   created() {
     console.log("This is inspectors");

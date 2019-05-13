@@ -9,9 +9,11 @@
         <span class="divider" v-show="!editing"></span>
         <div
           class="page-rename"
+          ref="pageName"
           :contenteditable="editing"
-          @click="editing = true"
-          v-clickoutside="(editing = false)"
+          @click="openEdit"
+          v-clickoutside="renamePage"
+          @keydown.enter="renamePage"
         >
           {{ currentPage.name }}
         </div>
@@ -32,9 +34,11 @@ import PanelControl from "../../atoms/PanelControl";
 import VToggle from "../../atoms/VToggle";
 import { mapGetters } from "vuex";
 import {
+  PAGE_EDIT_PAGE,
   PAGE_GET_PAGES,
   PROJECT_GET_ALL_PROJECTS
 } from "../../services/store/mutation-types";
+import { selectElementContents } from "../../utils";
 export default {
   name: "CenterToolbar",
   components: { VToggle, PanelControl },
@@ -55,6 +59,25 @@ export default {
     },
     getPages(projectId) {
       this.$store.dispatch(PAGE_GET_PAGES, { projectId: projectId });
+    },
+    openEdit(e) {
+      this.editing = true;
+      this.$nextTick(() => {
+        const el = e.target;
+        el.focus();
+        selectElementContents(el);
+      });
+    },
+    renamePage() {
+      const name = this.$refs.pageName.innerText;
+      this.editing = false;
+      if (!name || name === "") {
+        return;
+      }
+      this.$store.dispatch(PAGE_EDIT_PAGE, {
+        id: this.currentPage.id,
+        name: name
+      });
     }
   }
 };
@@ -83,7 +106,9 @@ export default {
     cursor: default;
   }
   .page-rename {
-    height: 14px;
+    height: auto;
+    max-height: 20px;
+
     max-width: 250px;
     color: $color-b6;
     font-size: 14px;
@@ -92,6 +117,14 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border-radius: 2px;
+    padding: 4px 0;
+    &[contenteditable="true"] {
+      background-color: #fff;
+      color: $color-b2;
+      padding: 5px 10px 4px;
+      margin-top: 0;
+    }
   }
 }
 </style>
