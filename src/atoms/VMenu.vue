@@ -65,19 +65,28 @@ export default {
       .menu-item {
         position: relative;
         margin-left: -15px;
-        padding-left: 12px;
-        &:not(:last-child) {
-          margin-bottom: 5px;
+        padding-left: 10px;
+        //background-color: #fff;
+        border-radius: 0 5px 5px 0;
+        .router-link {
           &:before {
             position: absolute;
             content: "";
-            height: 1px;
-            width: 10px;
+            height: 3.5px;
+            width: 3.5px;
             left: 15px;
             bottom: -5px;
             @include valign();
-            background-color: $color-b41;
+            background-color: $color-b3;
           }
+          &-exact-active {
+            &:before {
+              background-color: $color-w3;
+            }
+          }
+        }
+        &:not(:last-child) {
+          margin-bottom: 5px;
         }
         .toggle {
           padding: 0;
