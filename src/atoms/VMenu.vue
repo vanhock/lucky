@@ -65,7 +65,7 @@ export default {
       .menu-item {
         position: relative;
         margin-left: -15px;
-        padding-left: 10px;
+        padding-left: 25px;
         //background-color: #fff;
         border-radius: 0 5px 5px 0;
         .router-link {
@@ -74,7 +74,7 @@ export default {
             content: "";
             height: 3.5px;
             width: 3.5px;
-            left: 15px;
+            left: 25px;
             bottom: -5px;
             @include valign();
             background-color: $color-b3;
@@ -92,6 +92,11 @@ export default {
           padding: 0;
           .text {
             font-weight: 500;
+            max-height: 30px;
+            max-width: 100px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
           }
         }
       }

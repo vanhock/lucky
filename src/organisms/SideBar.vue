@@ -35,6 +35,7 @@ export default {
   position: sticky;
   top: 0;
   .logo {
+    width: 100px;
     height: 81px;
     display: flex;
     align-items: center;
