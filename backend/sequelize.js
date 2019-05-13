@@ -1,12 +1,12 @@
 const config = require("./config/db");
 const Sequelize = require("sequelize");
-const UserModel = require("./models/user");
-const ProjectModel = require("./models/project");
-const PageModel = require("./models/page");
-const CommentModel = require("./models/comment");
-const DesignModel = require("./models/design");
-const TaskModel = require("./models/task");
-const TrashModel = require("./models/trash");
+const UserModel = require("./models/userModel");
+const ProjectModel = require("./models/projectModel");
+const PageModel = require("./models/pageModel");
+const CommentModel = require("./models/commentModel");
+const DesignModel = require("./models/designModel");
+const TaskModel = require("./models/taskModel");
+const TrashModel = require("./models/trashModel");
 
 const sequelize = new Sequelize(
   config.dbName,

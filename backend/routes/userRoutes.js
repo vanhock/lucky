@@ -42,7 +42,7 @@ module.exports = function(app) {
 
   app.get("/auth-by-token", (req, res) => {
     getUserByToken(req, res, user => {
-      res.status(200).send(JSON.stringify(user.dataValues));
+      res.status(200).send(filterObject(user.dataValues, allowedParams));
     });
   });
 

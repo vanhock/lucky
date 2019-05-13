@@ -80,30 +80,7 @@ import UserPanelMixin from "../mixins/ModalMixin";
 export default {
   name: "ProjectsView",
   created() {
-    this.getAllProjects();
-    this.sort = [
-      {
-        name: "sort",
-        label: this.$t("sort"),
-        options: [
-          { name: this.$t("byActivity"), value: "updatedAt" },
-          { name: this.$t("byPagesCount"), value: "pagesCount" },
-          { name: this.$t("A-Z"), value: "name" }
-        ]
-      }
-    ];
-    this.modals = {
-      create: {
-        title: this.$t("createProject"),
-        action: "createProject",
-        buttonName: this.$t("create")
-      },
-      edit: {
-        title: this.$t("editProject"),
-        action: "editProject",
-        buttonName: this.$t("save")
-      }
-    };
+    this.initProjects();
   },
   mixins: [UserPanelMixin],
   components: {
@@ -124,6 +101,32 @@ export default {
     ...mapGetters(["projects", "hasProjects"])
   },
   methods: {
+    initProjects() {
+      this.getAllProjects();
+      this.sort = [
+        {
+          name: "sort",
+          label: this.$t("sort"),
+          options: [
+            { name: this.$t("byActivity"), value: "updatedAt" },
+            { name: this.$t("byPagesCount"), value: "pagesCount" },
+            { name: this.$t("A-Z"), value: "name" }
+          ]
+        }
+      ];
+      this.modals = {
+        create: {
+          title: this.$t("createProject"),
+          action: "createProject",
+          buttonName: this.$t("create")
+        },
+        edit: {
+          title: this.$t("editProject"),
+          action: "editProject",
+          buttonName: this.$t("save")
+        }
+      };
+    },
     getAllProjects(params) {
       this.$store
         .dispatch(PROJECT_GET_ALL_PROJECTS, params || "")
@@ -194,7 +197,8 @@ export default {
           );
         })
         .then(error => notification(this, "error", error));
-    }
+    },
+    setSort() {}
   }
 };
 </script>

@@ -13,6 +13,7 @@ import {
   getProject,
   moveProjectToTrash
 } from "../api/ProjectApi";
+import { serializeObject } from "../../utils";
 
 export default {
   state: {
@@ -21,6 +22,7 @@ export default {
   },
   getters: {
     projects: state => state.projects,
+    lastProjects: state => state.projects.filter((el, index) => index <= 5),
     hasProjects: state => state.projects && state.projects.length,
     currentProject: state => state.currentProject
   },
@@ -105,7 +107,7 @@ export default {
     },
     [PROJECT_GET_ALL_PROJECTS]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        getAllProjects(payload, (error, projects) => {
+        getAllProjects(serializeObject(payload), (error, projects) => {
           if (error) {
             return reject(error);
           }

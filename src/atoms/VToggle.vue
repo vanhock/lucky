@@ -12,8 +12,12 @@
       class="icon"
       :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
     />
-    <div class="text" v-if="text"><span>{{ text }}</span></div>
-    <div class="label" v-if="label && label.length">{{ label }}</div>
+    <div class="text-block">
+      <div class="text" v-if="text">
+        <span>{{ text }}</span>
+      </div>
+      <div class="label" v-if="label && label.length">{{ label }}</div>
+    </div>
   </div>
 </template>
 
@@ -57,6 +61,8 @@ export default {
   cursor: pointer;
   color: $color-b5;
   font-size: 12px;
+  .text-block {
+  }
   .icon {
     fill: $color-b5;
   }
@@ -65,9 +71,7 @@ export default {
     font-weight: 600;
   }
   .label {
-    position: absolute;
-    top: 10px;
-    margin-left: 26px;
+    margin-bottom: 3px;
     padding: 1px 4px;
     background-color: $color-b4;
     color: $color-b2;

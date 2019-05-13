@@ -15,29 +15,59 @@
 import SideBar from "../organisms/SideBar";
 import { mapGetters } from "vuex";
 import Breadcrumbs from "../molecules/Breadcrumbs";
+import {
+  AUTH_CHECK_AUTH,
+  PROJECT_GET_ALL_PROJECTS
+} from "../services/store/mutation-types";
 export default {
   name: "UserPanelView",
   components: { Breadcrumbs, SideBar },
   created() {
-    this.menu = [
-      { text: this.$t("projects"), icon: "folder-outline", to: "Projects" },
-      {
-        text: this.$t("account"),
-        icon: "user-solid-circle",
-        to: "Account",
-        label: this.$t("soon"),
-        disabled: true
-      },
-      { text: this.$t("trash"), icon: "trash", to: "Trash" },
-      { text: this.$t("logOut"), icon: "stand-by", to: "LogOut" }
-    ];
+    this.init();
   },
   data: () => ({
     menu: [],
     showPreloader: false
   }),
   computed: {
-    ...mapGetters(["currentProject"])
+    ...mapGetters(["currentProject", "projects", "user"])
+  },
+  methods: {
+    init() {
+      this.fillMenu();
+      this.getUser();
+      this.getProjects();
+    },
+    getProjects: async function() {
+      await this.$store.dispatch(PROJECT_GET_ALL_PROJECTS);
+    },
+    getUser: async function() {
+      await this.$store.dispatch(AUTH_CHECK_AUTH);
+    },
+    fillMenu() {
+      this.menu = [
+        {
+          text: this.$t("projects"),
+          icon: "folder-outline",
+          to: { name: "Projects" },
+          children: "lastProjects"
+        },
+        {
+          text: this.$t("account"),
+          icon: "user-solid-circle",
+          to: { name: "Account" },
+          label: this.$t("soon"),
+          disabled: true
+        },
+        { text: this.$t("trash"), icon: "trash", to: { name: "Trash" } },
+        {
+          text: this.$t("logOut"),
+          icon: "stand-by",
+          to: { name: "LogOut" },
+          label: this.user.name
+        }
+      ];
+    }
   }
 };
 </script>

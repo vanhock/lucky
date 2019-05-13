@@ -5,8 +5,6 @@
 </template>
 
 <script>
-import { serializeObject } from "../utils";
-
 export default {
   name: "FiltersBar",
   mounted() {
@@ -25,7 +23,7 @@ export default {
   methods: {
     onFilterChange(filter) {
       this.setChangedFilter(filter);
-      this.$emit("filtersChange", serializeObject(this.changedFilters));
+      this.$emit("filtersChange", this.changedFilters);
     },
     setChangedFilter(filter) {
       if (this.changedFilters.length) {

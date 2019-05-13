@@ -1,10 +1,15 @@
 <template>
   <div class="dynamic-menu">
     <v-menu :align="align">
-      <menu-item v-for="(item, index) in items" :key="index">
+      <menu-item
+        v-for="(item, index) in items"
+        :key="index"
+        :class="{ 'has-submenu': item.children }"
+      >
         <router-link
+          class="router-link"
           tag="div"
-          :to="{ name: item.to }"
+          :to="item.to"
           :disabled="item.disabled"
         >
           <v-toggle
@@ -16,6 +21,24 @@
             text-size="14px"
           />
         </router-link>
+        <v-menu class="submenu" v-if="item.children">
+          <menu-item
+            v-for="(child, index) in $store.getters[item.children]"
+            :key="index"
+          >
+            <router-link
+              class="router-link"
+              tag="div"
+              :to="`/${child.id}/pages`"
+              :disabled="child.disabled"
+            >
+              <v-toggle
+                :text="child.name"
+                :show-text="showText"
+              />
+            </router-link>
+          </menu-item>
+        </v-menu>
       </menu-item>
     </v-menu>
   </div>

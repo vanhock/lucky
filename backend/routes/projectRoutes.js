@@ -1,4 +1,4 @@
-const { Project, Page, Design, Trash } = require("../sequelize");
+const { Project, Page, Design, Comment, Trash } = require("../sequelize");
 const { getUserByToken, filterObject } = require("../libs/helpers");
 const sequelize = require("sequelize");
 module.exports = function(app) {
@@ -71,8 +71,8 @@ module.exports = function(app) {
   app.get("/get-all-projects", (req, res) => {
     const sort = req.query.sort || "updatedAt";
     const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
-    getUserByToken(req, res, user => {
-      Project.findAll({
+    const setQuery = user => {
+      const query = {
         where: {
           userId: user.id,
           trashId: null
@@ -90,7 +90,15 @@ module.exports = function(app) {
           ]
         ],
         order: [[sequelize.literal(sort), orderBy]]
-      })
+      };
+      if (req.query.limit) {
+        query.limit = parseInt(req.query.limit);
+      }
+      return query;
+    };
+
+    getUserByToken(req, res, user => {
+      Project.findAll(setQuery(user))
         .then(projects => {
           return res.status(200).send(JSON.stringify(projects));
         })

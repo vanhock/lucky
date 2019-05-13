@@ -52,6 +52,12 @@ body {
   top: 39px;
 }
 
+.router-link {
+  &:not(.router-link-exact-active) {
+    cursor: pointer;
+  }
+}
+
 #nav a {
   font-weight: normal;
   color: $color-2;

@@ -30,7 +30,7 @@ export default {
 
 <style lang="scss">
 .sidebar {
-  width: 120px;
+  width: 140px;
   height: 100%;
   position: sticky;
   top: 0;
@@ -46,55 +46,45 @@ export default {
     width: 85%;
     margin: 0 auto;
   }
+  .dynamic-menu {
+    .menu-item .router-link {
+      .toggle {
+        color: inherit;
+        .icon {
+          fill: inherit;
+        }
+      }
+    }
+  }
   &.dark {
     background-color: $color-bg1;
     .dynamic-menu {
-      .menu-item > .router-link-exact-active {
-        .toggle {
-          color: #fff;
-          .icon {
-            fill: #fff;
-          }
-        }
+      .menu-item .router-link-exact-active {
+        color: #fff;
+        fill: #fff;
       }
-      .menu-item > :not(.router-link-exact-active) {
-        .toggle {
-          color: $color-b3;
-          .icon {
-            fill: $color-b3;
-          }
-          &:hover {
-            color: #fff;
-            .icon {
-              fill: #fff;
-            }
-          }
+      .menu-item .router-link:not(.router-link-exact-active) {
+        color: $color-b3;
+        fill: $color-b3;
+        &:hover {
+          color: #fff;
+          fill: #fff;
         }
       }
     }
   }
   &.white {
     .dynamic-menu {
-      .menu-item > .router-link-exact-active {
-        .toggle {
-          color: $color-w3;
-          .icon {
-            fill: $color-w3;
-          }
-        }
+      .menu-item .router-link-exact-active {
+        color: $color-w3;
+        fill: $color-w3;
       }
-      .menu-item > :not(.router-link-exact-active) {
-        .toggle {
-          color: $color-b3;
-          .icon {
-            fill: $color-b3;
-          }
-          &:hover {
-            color: $color-w4;
-            .icon {
-              fill: $color-w4;
-            }
-          }
+      .menu-item .router-link:not(.router-link-exact-active) {
+        color: $color-b3;
+        fill: $color-b3;
+        &:hover {
+          color: $color-w4;
+          fill: $color-w4;
         }
       }
     }

@@ -91,6 +91,7 @@ export default {
     display: flex;
     flex-direction: column;
     min-height: 54px;
+    margin-bottom: 30px;
   }
 
   &-title {

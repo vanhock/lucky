@@ -15,7 +15,8 @@ export default {
   },
   getters: {
     isAuthenticated: state => state.userToken,
-    status: state => state.status
+    status: state => state.status,
+    user: state => state.user
   },
   mutations: {
     [AUTH_REQUEST]: state => {
@@ -75,6 +76,9 @@ export default {
           return resolve(user);
         });
       });
+    },
+    AUTH_GET_USER({ commit }) {
+
     }
   }
 };

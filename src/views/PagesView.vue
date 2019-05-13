@@ -106,20 +106,13 @@ export default {
     projectId: String
   },
   created() {
-    this.getProject();
-    this.getPages();
-    this.modals = {
-      create: {
-        title: this.$t("createPage"),
-        action: "createPage",
-        buttonName: this.$t("create")
-      },
-      edit: {
-        title: this.$t("editPage"),
-        action: "editPage",
-        buttonName: this.$t("save")
-      }
-    };
+    this.initPages(this.$route.params.projectId);
+  },
+  beforeRouteUpdate(to, from, next) {
+    if (from.name === "Pages" && to.name === "Pages") {
+      this.initPages(to.params.projectId);
+    }
+    next();
   },
   beforeDestroy() {
     this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {});
@@ -136,14 +129,30 @@ export default {
     }
   },
   methods: {
-    getProject() {
+    initPages(projectId) {
+      this.getProject(projectId);
+      this.getPages(projectId);
+      this.modals = {
+        create: {
+          title: this.$t("createPage"),
+          action: "createPage",
+          buttonName: this.$t("create")
+        },
+        edit: {
+          title: this.$t("editPage"),
+          action: "editPage",
+          buttonName: this.$t("save")
+        }
+      };
+    },
+    getProject(projectId) {
       this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
-        projectId: this.projectId
+        projectId: projectId
       });
     },
-    getPages() {
+    getPages(projectId) {
       this.$store
-        .dispatch(PAGE_GET_PAGES, { projectId: this.projectId })
+        .dispatch(PAGE_GET_PAGES, { projectId: projectId })
         .then(() => {
           this.loaded = true;
         })
