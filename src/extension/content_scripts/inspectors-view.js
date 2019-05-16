@@ -5,9 +5,6 @@ import i18n from "../../i18n";
 console.log(`Inspector opened for ${location.href}`);
 const port = browser.runtime.connect({ name: "inspectors" });
 port.postMessage({ message: "Inspectors connected" });
-document.body.onclick = () => {
-  port.postMessage({ testclick: "click!" });
-};
 port.onMessage.addListener(message => {
   switch (Object.keys(message)[0]) {
     case "initInspectors":

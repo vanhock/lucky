@@ -1,14 +1,58 @@
 import config from "../config";
-
+import _ from "lodash";
 const ports = {};
+
+browser.tabs.onActivated.addListener(({ tabId }) => {
+  /** Reset icon if tab changed **/
+  browser.tabs
+    .get(tabId)
+    .then(tab => {
+      if (tab.status === "complete" && tab.url) {
+        setIcon();
+      }
+      if (!tab.url) {
+        setIcon("loading");
+      }
+    })
+    .catch(error => {
+      console.log(`Error: ${error}`);
+    });
+});
+browser.tabs.onUpdated.addListener((tabId, { status }) => {
+  if (status === "loading") {
+    setIcon("loading");
+  }
+  if (status === "complete") {
+    setIcon();
+  }
+});
+
+browser.runtime.onConnect.addListener(connected);
+browser.browserAction.onClicked.addListener(
+  _.debounce(function(tab) {
+    if (!ports[tab.id]) {
+      return;
+    }
+    if (!ports[tab.id].inspectorsActive) {
+      ports[tab.id].postMessage({ initInspectors: true });
+      ports[tab.id].inspectorsActive = true;
+    } else {
+      ports[tab.id].inspectorsActive = false;
+      ports[tab.id].postMessage({ reloadPage: true });
+    }
+  }, 300)
+);
+
 function connected(p) {
   p.onMessage.addListener(handleMessages);
+  p.initInspectors = false;
   ports[p.sender.tab.id] = p;
+  isCurrentTab(p.sender.tab.id, result => {
+    if (result) {
+      setIcon();
+    }
+  });
 }
-browser.runtime.onConnect.addListener(connected);
-browser.browserAction.onClicked.addListener(function(tab) {
-  ports[tab.id].postMessage({ initInspectors: true });
-});
 
 function handleMessages(data, { sender }) {
   const name = Object.keys(data)[0];
@@ -18,9 +62,6 @@ function handleMessages(data, { sender }) {
   switch (name) {
     case "message":
       console.log(`Message: ${data.message}`);
-      break;
-    case "testclick":
-      console.log(`Click from ${sender.tab.id}`);
       break;
     case "token":
       browser.storage.local.set({ "pp-u-t-s": data.token });
@@ -40,6 +81,20 @@ function handleMessages(data, { sender }) {
     case "inspectorReady":
       return getToken(sender.tab.id);
   }
+}
+
+function beforeClosePort(tab) {
+  ports[tab.id].inspectorsActive = false;
+}
+
+function setIcon(folder) {
+  const paths = {};
+  config.iconSizes.forEach(size => {
+    paths[size] = `icons${(folder && "/" + folder) || ""}/${size}.png`;
+  });
+  browser.browserAction.setIcon({
+    path: paths
+  });
 }
 
 function getToken(tabId) {
@@ -108,4 +163,13 @@ function setSessionState(tabId, key, value) {
 
 function removeSessionState(tabId) {
   browser.storage.local.remove(tabId.toString());
+}
+
+function isCurrentTab(tabId, cb) {
+  if (!tabId) {
+    return;
+  }
+  return browser.tabs.getCurrent().then(tab => {
+    cb(tab.id === tabId);
+  });
 }
