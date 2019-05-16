@@ -1,68 +1,40 @@
 import config from "../config";
-import _ from "lodash";
-const maxAuthRequestsCount = 3;
 
-let authTabId = null;
-let authRequestsCount = 0;
-
-const init = _.debounce(function() {
-  runInspectors();
-}, 300);
-
+const ports = {};
+function connected(p) {
+  p.onMessage.addListener(handleMessages);
+  ports[p.sender.tab.id] = p;
+}
+browser.runtime.onConnect.addListener(connected);
 browser.browserAction.onClicked.addListener(function(tab) {
-  checkExtensionActive(tab);
+  ports[tab.id].postMessage({ initInspectors: true });
 });
 
-let lastMessage = null;
-
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (sender.id !== config.extensionId) {
-    return;
-  }
-  /*if (
-    lastMessage &&
-    lastMessage.tabId === sender.tab.id &&
-    lastMessage.message === request
-  ) {
-    return;
-  }*/
-  lastMessage = {
-    tabId: sender.tab.id,
-    message: request
-  };
-  handleMessages(request, sender);
-});
-
-function handleMessages(request, sender) {
-  const data = request && JSON.parse(request);
+function handleMessages(data, { sender }) {
   const name = Object.keys(data)[0];
   if (!data || !name) {
     return;
   }
   switch (name) {
+    case "message":
+      console.log(`Message: ${data.message}`);
+      break;
+    case "testclick":
+      console.log(`Click from ${sender.tab.id}`);
+      break;
     case "token":
       browser.storage.local.set({ "pp-u-t-s": data.token });
-      if (authTabId && authRequestsCount < maxAuthRequestsCount) {
-        browser.tabs.remove(authTabId);
-        browser.tabs.update(sender.tab.id, { active: true });
-        authTabId = null;
-        browser.tabs.sendMessage(
-          sender.tab.id,
-          JSON.stringify({ initInspectors: data.token })
-        );
-      }
-      authRequestsCount++;
+      browser.tabs.remove(tab);
+      browser.tabs.update(sender.tab.id, { active: true });
+      setSessionState(tab.id, "authTabId", null);
+      browser.tabs.sendMessage(
+        sender.tab.id,
+        JSON.stringify({ initInspectors: data.token })
+      );
       break;
     case "resetToken":
       browser.storage.local.remove("pp-u-t-s");
       return runAuthScript();
-    case "isActive":
-      if (!data.isActive) {
-        init();
-      } else {
-        closeExtension(sender.tab.id);
-      }
-      break;
     case "closeExtension":
       return closeExtension(sender.tab.id);
     case "inspectorReady":
@@ -82,23 +54,19 @@ function getToken(tabId) {
       console.log("Inspector init sent!");
     } else {
       console.log("Token not found. Running auth script...");
-      runAuthScript();
+      runAuthScript(tabId);
     }
   });
 }
 
-function runAuthScript() {
-  if (authRequestsCount >= maxAuthRequestsCount) {
-    return;
-  }
+function runAuthScript(tabId) {
   browser.tabs
     .create({ url: config.apiUrl + config.authUrl })
     .then(tab => {
+      setSessionState(tabId, "authTabId", tab.id);
       browser.tabs.executeScript(tab.id, {
         file: "content_scripts/auth-script.js"
       });
-      authTabId = tab.id;
-      authRequestsCount++;
     })
     .catch(error => console.log(error));
 }
@@ -109,12 +77,35 @@ function runInspectors(tabId) {
   });
 }
 
-function checkExtensionActive(tab) {
-  console.log("Sent active check request to tab " + tab.id);
-  browser.tabs.sendMessage(tab.id, JSON.stringify({ checkActive: true }));
+function closeExtension(tabId) {
+  browser.tabs.sendMessage(tabId, JSON.stringify({ reloadPage: true }));
+  removeSessionState(tabId);
+  browser.tabs.onUpdated.removeListener(closeExtension);
 }
 
-function closeExtension(tabId) {
-  authRequestsCount = 0;
-  browser.tabs.sendMessage(tabId, JSON.stringify({ reloadPage: true }));
+function getSessionState(tabId) {
+  return new Promise(resolve => {
+    browser.storage.local
+      .get(tabId.toString())
+      .then(success => {
+        resolve((Object.keys(success).length && success[tabId]) || null);
+      })
+      .catch(() => {
+        resolve(null);
+      });
+  });
+}
+
+function setSessionState(tabId, key, value) {
+  getSessionState(tabId)
+    .then(data => {
+      browser.storage.local.set({ [tabId]: { ...data, [key]: value } });
+    })
+    .catch(() => {
+      browser.storage.local.set({ [tabId]: { [key]: value } });
+    });
+}
+
+function removeSessionState(tabId) {
+  browser.storage.local.remove(tabId.toString());
 }

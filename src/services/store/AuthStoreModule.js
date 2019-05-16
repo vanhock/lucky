@@ -50,7 +50,7 @@ export default {
           }
           PixelApi.setToken(user.token, () => {
             localStorage.setItem("pp-u-t-s", user.token);
-            window.postMessage({ authorized: user.token }, "*");
+            window.postMessage({ authorized: true }, "*");
             commit(AUTH_SUCCESS, user);
             resolve(user);
           });
@@ -76,9 +76,6 @@ export default {
           return resolve(user);
         });
       });
-    },
-    AUTH_GET_USER({ commit }) {
-
     }
   }
 };

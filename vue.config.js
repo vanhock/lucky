@@ -51,9 +51,6 @@ module.exports = {
             ],
             "content_scripts/auth-script": [
               "src/extension/content_scripts/auth-script.js"
-            ],
-            "content_scripts/shadow-script": [
-              "src/extension/content_scripts/shadow-script.js"
             ]
           }
         }

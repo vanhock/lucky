@@ -62,6 +62,10 @@ export default {
           console.log("init inspector handler");
           sessionStorage.setItem("pp-u-t-s", data.initInspectors);
           this.initView(data.initInspectors);
+          break;
+        case "reloadPage":
+          window.perfectPixelInspectorActive = false;
+          location.reload();
       }
     });
   },
@@ -211,20 +215,13 @@ export default {
 };
 </script>
 <style lang="scss">
-@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
-@import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
-@import "../assets/styles/normalize";
-@import "../assets/styles/animation";
-@import "../assets/styles/notification";
-html,
-body {
-  height: 100%;
-}
-body {
-  background-color: $color-base;
-  box-sizing: border-box;
-}
 .pp-inspectors-app {
+  @import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
+  @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
+  @import "../assets/styles/normalize";
+  @import "../assets/styles/animation";
+  @import "../assets/styles/notification";
+  box-sizing: border-box;
   position: fixed;
   left: 0;
   top: 0;

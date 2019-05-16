@@ -1,7 +1,11 @@
 <template>
   <div class="center-toolbar">
     <template v-if="currentProject">
-      <div class="project-selector" v-show="!editing">
+      <div
+        class="project-selector"
+        v-show="!editing"
+        @click="$router.push(`/${currentProject.id}/pages`)"
+      >
         {{ currentProject.name }}
       </div>
       <!-- ToDo: Need to project selector dropdown here -->

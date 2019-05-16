@@ -24,7 +24,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["content_scripts/shadow-script.js"]
+      "js": ["content_scripts/inspectors-view.js"]
     }
   ],
   "web_accessible_resources": ["icons/*.png"]
