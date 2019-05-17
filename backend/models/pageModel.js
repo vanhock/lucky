@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     name: DataTypes.STRING,
-    foundNodes: DataTypes.STRING,
+    foundNodes: DataTypes.JSON,
     websiteUrl: DataTypes.STRING,
     websiteWidth: DataTypes.STRING,
     websiteHeight: DataTypes.STRING,
@@ -16,9 +16,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     showDesignInspector: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true
+      defaultValue: false
     },
-    websiteInspectorPersentage: {
+    websiteInspectorPercentage: {
       type: DataTypes.INTEGER,
       defaultValue: 50
     },

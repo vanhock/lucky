@@ -2,12 +2,13 @@
   <div class="pp-inspectors-app">
     <top-panel @getFoundNodes="getFoundNodes" @reloadView="getFoundNodes" />
     <design-inspector ref="designInspector" @designScrollTop="scrollWebsite" />
-    <website-inspector
+    <!--<website-inspector
       ref="websiteInspector"
       @getFoundNodes="getFoundNodes"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
-    />
+    />-->
+    <website-inspector-new />
     <create-or-select-page ref="pageModal" />
   </div>
 </template>
@@ -25,6 +26,7 @@ import {
 } from "../services/store/mutation-types";
 import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
 import Vue from "vue";
+import WebsiteInspectorNew from "../organisms/inspectors/WebsiteInspectorNew";
 Vue.directive("clickoutside", {
   bind(el, binding) {
     el._handler = evt => {
@@ -42,6 +44,7 @@ Vue.directive("clickoutside", {
 export default {
   name: "ViewScreen",
   components: {
+    WebsiteInspectorNew,
     CreateOrSelectPage,
     DesignInspector,
     WebsiteInspector,
@@ -115,10 +118,10 @@ export default {
       this.$store
         .dispatch(PAGE_GET_PAGES, { websiteUrl: location.href })
         .then(() => {
-          this.$refs.pageModal.toggleModal(true);
+          //this.$refs.pageModal.toggleModal(true);
         })
         .catch(() => {
-          this.$refs.pageModal.toggleModal(true);
+          //this.$refs.pageModal.toggleModal(true);
         });
     },
     getFoundNodes() {
