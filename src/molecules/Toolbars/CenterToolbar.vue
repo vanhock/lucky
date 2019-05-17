@@ -1,6 +1,6 @@
 <template>
   <div class="center-toolbar">
-    <template v-if="currentProject">
+    <template v-if="currentProject.name">
       <div
         class="project-selector"
         v-show="!editing"
@@ -9,7 +9,7 @@
         {{ currentProject.name }}
       </div>
       <!-- ToDo: Need to project selector dropdown here -->
-      <template v-if="currentPage">
+      <template v-if="currentPage.name">
         <span class="divider" v-show="!editing"></span>
         <div
           class="page-rename"

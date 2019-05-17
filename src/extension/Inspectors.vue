@@ -80,24 +80,7 @@ export default {
   }),
   computed: {
     ...mapState(["currentProject"]),
-    ...mapGetters([
-      "port",
-      "viewerReady",
-      "currentFrame",
-      "currentFrameDocument",
-      "currentFrameWindow",
-      "foundNodes",
-      "isFoundNodes",
-      "pages",
-      "hasPages"
-    ]),
-    designBlocks() {
-      return (
-        this.currentProject &&
-        this.currentProject.hasOwnProperty("designBlocks") &&
-        this.currentProject.designBlocks
-      );
-    }
+    ...mapGetters(["port", "foundNodes", "pages", "hasPages"]),
   },
   methods: {
     initView(token = null) {

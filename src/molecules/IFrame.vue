@@ -5,11 +5,13 @@ export default {
   render(h) {
     return h("iframe", {
       attrs: {
+        "data-perfect-pixel": true,
         src: this.src,
         width: this.width,
         height: this.height,
         sandbox: "allow-same-origin allow-scripts"
       },
+      ref: "perfectFrame",
       on: { load: this.initFrame }
     });
   },
@@ -28,6 +30,7 @@ export default {
     initFrame() {
       this.preventAllLinks();
       this.renderSlot();
+      this.onLoad();
     },
     renderSlot() {
       const children = this.$slots.default;
@@ -55,7 +58,21 @@ export default {
           return false;
         };
       }
+    },
+    onLoad() {
+      const frameElements = this.$el.contentDocument.body.getElementsByTagName(
+        "*"
+      );
+      this.$emit("load", {
+        frameNodes: [...frameElements],
+        frameWindow: this.$el.contentWindow
+      });
     }
   }
 };
 </script>
+<style lang="scss">
+iframe[data-perfect-pixel] {
+  background-color: #fff;
+}
+</style>
