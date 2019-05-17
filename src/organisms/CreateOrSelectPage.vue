@@ -93,7 +93,7 @@ export default {
     currentWebsiteUrl: location.href
   }),
   computed: {
-    ...mapGetters(["pages", "hasPages"]),
+    ...mapGetters(["pages", "hasPages", "port"]),
     currentHostname() {
       return this.currentWebsiteUrl && extractHostname(this.currentWebsiteUrl);
     },
@@ -155,7 +155,7 @@ export default {
       return normalizeDate(date);
     },
     closeExtension() {
-      browser.runtime.sendMessage(JSON.stringify({ closeExtension: true }));
+      this.port.postMessage({ closeExtension: true });
     }
   }
 };

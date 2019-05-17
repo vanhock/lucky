@@ -32,7 +32,6 @@ Vue.directive("clickoutside", {
         binding.value(evt);
       }
     };
-
     document.addEventListener("click", el._handler);
   },
   unbind(el, binding) {
@@ -49,28 +48,21 @@ export default {
     TopPanel
   },
   created() {
-    console.log("This is inspectors");
-    browser.runtime.sendMessage(JSON.stringify({ inspectorReady: true }));
-    browser.runtime.onMessage.addListener(request => {
-      const data = request && JSON.parse(request);
-      if (!data) {
-        return;
-      }
-      console.log("Inspector received message: " + request);
-      switch (Object.keys(data)[0]) {
-        case "initInspectors":
-          console.log("init inspector handler");
-          sessionStorage.setItem("pp-u-t-s", data.initInspectors);
-          this.initView(data.initInspectors);
-          break;
-        case "reloadPage":
-          window.perfectPixelInspectorActive = false;
-          location.reload();
-      }
+    this.$nextTick(() => {
+      this.initView();
+      this.port.postMessage({ inspectorsLoaded: true });
+      this.port.onMessage.addListener(response => {
+        switch (Object.keys(response)[0]) {
+          case "initInspectors":
+            console.log("init inspector handler");
+            sessionStorage.setItem("pp-u-t-s", response.initInspectors);
+            this.initView(response.initInspectors);
+            break;
+          case "reloadPage":
+            break;
+        }
+      });
     });
-  },
-  beforeDestroy() {
-    window.perfectPixelInspectorActive = false;
   },
   data: () => ({
     gettingFoundNodeData: true,
@@ -86,6 +78,7 @@ export default {
   computed: {
     ...mapState(["currentProject"]),
     ...mapGetters([
+      "port",
       "viewerReady",
       "currentFrame",
       "currentFrameDocument",
@@ -104,9 +97,8 @@ export default {
     }
   },
   methods: {
-    initView(token) {
+    initView(token = null) {
       console.log("Check auth request");
-      window.perfectPixelInspectorActive = true;
       this.$store
         .dispatch(AUTH_CHECK_AUTH, token)
         .then(() => {
@@ -115,7 +107,8 @@ export default {
         })
         .catch(message => {
           console.log("Check auth fail: " + message);
-          browser.runtime.sendMessage(JSON.stringify({ resetToken: true }));
+          sessionStorage.removeItem("pp-u-t-s");
+          return this.port.postMessage({ resetToken: true });
         });
     },
     getPages() {
@@ -196,20 +189,6 @@ export default {
         return;
       }
       this.$refs.designInspector.scrollDocument(value);
-    },
-    setModalsContent() {
-      this.modals = {
-        newPage: {
-          title: this.$t("Create new page"),
-          action: "createProject",
-          buttonName: this.$t("create")
-        },
-        foundPages: {
-          title: this.$t("Select page"),
-          description: this.$t("We found pages, associated with this URL:"),
-          action: "changeModal"
-        }
-      };
     }
   }
 };

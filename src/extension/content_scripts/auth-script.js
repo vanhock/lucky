@@ -1,20 +1,23 @@
-const currentToken = getToken();
-if (currentToken) {
-  browser.runtime.sendMessage(JSON.stringify({ token: currentToken }));
-}
-
 console.log("AuthScript loaded");
+const port = browser.runtime.connect({ name: "auth" });
+
+port.onMessage.addListener(response => {
+  if (Object.keys(response)[0] === "getToken") {
+    getToken();
+  }
+});
+
 window.addEventListener("message", function(event) {
   // We only accept messages from ourselves
   if (event.source !== window) return;
-
   if (event.data.authorized) {
-    const token = getToken();
-    console.log("Authorized message call");
-    browser.runtime.sendMessage(JSON.stringify({ token: token }));
+    getToken();
   }
 });
 
 function getToken() {
-  localStorage.getItem("pp-u-t-s") || sessionStorage.getItem("pp-u-t-s");
+  const token = localStorage.getItem("pp-u-t-s");
+  if (token) {
+    port.postMessage({ token: token });
+  }
 }

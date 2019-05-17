@@ -18,24 +18,26 @@ browser.tabs.onActivated.addListener(({ tabId }) => {
       console.log(`Error: ${error}`);
     });
 });
-browser.tabs.onUpdated.addListener((tabId, { status }) => {
+browser.tabs.onUpdated.addListener((tabId, { status }, { url }) => {
   if (status === "loading") {
     setIcon("loading");
   }
-  if (status === "complete") {
+  if (status === "complete" && url) {
     setIcon();
   }
 });
 
 browser.runtime.onConnect.addListener(connected);
+browser.runtime.onSuspend.addListener(disconnected);
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
     if (!ports[tab.id]) {
       return;
     }
     if (!ports[tab.id].inspectorsActive) {
-      checkTokenBeforeStart(tab.id, () => {
-        ports[tab.id].postMessage({ initInspectors: true });
+      ports[tab.id].postMessage({ initVue: true });
+      checkTokenBeforeStart(tab.id, token => {
+        ports[tab.id].postMessage({ initInspectors: token });
         ports[tab.id].inspectorsActive = true;
       });
     } else {
@@ -46,10 +48,13 @@ browser.browserAction.onClicked.addListener(
 );
 
 function connected(p) {
+  if (ports[p.sender.tab.id] && ports[p.sender.tab.id].name === "auth") {
+    return;
+  }
   p.onMessage.addListener(handleMessages);
   ports[p.sender.tab.id] = p;
   switch (p.name) {
-    case "inspectors":
+    case "content-script":
       p.initInspectors = false;
       isCurrentTab(p.sender.tab.id, result => {
         if (result) {
@@ -63,11 +68,31 @@ function connected(p) {
           ports.hasOwnProperty(key) &&
           ports[key].authTabId === p.sender.tab.id
         ) {
-          return (ports[p.sender.tab.id].inspectorTabId = key);
+          return (ports[p.sender.tab.id].inspectorTabId = parseInt(key));
         }
       }
       break;
   }
+}
+
+function disconnected(p) {
+  switch (p.name) {
+    case "content-script":
+      // eslint-disable-next-line no-case-declarations
+      const authTabId = ports[p.sender.tab.id].authTabId;
+      if (authTabId && ports[authTabId]) {
+        delete ports[authTabId].inspectorTabId;
+      }
+      break;
+    case "auth":
+      // eslint-disable-next-line no-case-declarations
+      const inspectorTabId = ports[p.sender.tab.id].inspectorTabId;
+      if (inspectorTabId && ports[inspectorTabId]) {
+        delete ports[inspectorTabId].authTabId;
+      }
+      break;
+  }
+  delete ports[p.sender.tab.id];
 }
 
 function handleMessages(data, { sender }) {
@@ -87,12 +112,13 @@ function handleMessages(data, { sender }) {
       browser.tabs.update(inspectorTabId, {
         active: true
       });
-      ports[inspectorTabId].postMessage({ initInspectors: true });
+      ports[inspectorTabId].postMessage({ initInspectors: data.token });
       ports[inspectorTabId].inspectorsActive = true;
+      ports[inspectorTabId].authorization = false;
       break;
     case "resetToken":
       browser.storage.local.remove("pp-u-t-s");
-      return runAuthScript();
+      return runAuthScript(sender.tab.id);
     case "closeExtension":
       return closeExtension(sender.tab.id);
   }
@@ -102,7 +128,7 @@ function checkTokenBeforeStart(tabId, cb) {
   browser.storage.local.get("pp-u-t-s").then(response => {
     const token = response["pp-u-t-s"];
     if (token) {
-      cb();
+      cb(token);
     } else {
       console.log("Token not found. Running auth script...");
       runAuthScript(tabId);
@@ -110,17 +136,26 @@ function checkTokenBeforeStart(tabId, cb) {
   });
 }
 
-function runAuthScript(tabId) {
-  /* ToDo: Write check for auth tab connection exist and active */
-  browser.tabs
-    .create({ url: config.apiUrl + config.authUrl })
-    .then(tab => {
-      browser.tabs.executeScript(tab.id, {
-        file: "content_scripts/auth-script.js"
-      });
-      ports[tabId].authTabId = tab.id;
-    })
-    .catch(error => console.log(error));
+function runAuthScript(tabId = null) {
+  /*if (
+    tabId &&
+    ports[tabId].hasOwnProperty("authTabId") &&
+    ports[tabId].authTabId
+  ) {
+    return ports[ports[tabId].authTabId].postMessage({ getToken: true });
+  }*/
+  if (!ports[tabId].authorization) {
+    ports[tabId].authorization = true;
+    browser.tabs
+      .create({ url: config.apiUrl + config.authUrl })
+      .then(tab => {
+        browser.tabs.executeScript(tab.id, {
+          file: "content_scripts/auth-script.js"
+        });
+        ports[tabId].authTabId = tab.id;
+      })
+      .catch(error => console.log(error));
+  }
 }
 
 function closeExtension(tabId) {
