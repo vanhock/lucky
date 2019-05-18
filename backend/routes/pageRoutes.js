@@ -49,8 +49,8 @@ module.exports = function(app) {
           .then(page => {
             return res.status(200).send(JSON.stringify(page.dataValues));
           })
-          .catch(() => {
-            return res.error("Error with creating page!");
+          .catch(message => {
+            return res.error("Error with creating page!" + message);
           });
       }
     });

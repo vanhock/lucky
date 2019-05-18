@@ -1,37 +1,36 @@
 <template>
   <div class="top-panel">
     <div class="top-panel-container">
-      <a class="site-logo" :href="userPanelUrl" target="_blank"
-        ><img
-          src="chrome-extension://__MSG_@@pniajcifdcfkbcigpipdidnhhjbliglh/icons/38.png"
-        />
-      </a>
-      <design-params />
+      <v-toggle class="left" icon="menu" :icon-size="iconSize" />
+      <design-params v-if="hasDesign" />
+      <v-toggle
+        class="left"
+        icon="refresh"
+        text="Reload view"
+        :show-text="false"
+        @click="$emit('reloadView')"
+      />
       <div
         style="flex-grow: 1;
     flex-shrink: 999;"
       >
         <center-toolbar />
       </div>
-      <view-params class="right" v-if="designBlocks" />
+      <view-params class="right" v-if="hasDesign" />
       <v-toggle
         class="right"
-        icon="refresh"
-        text="Reload view"
-        :show-text="false"
-        @click="$emit('reloadView')"
-      />
-      <v-toggle
-        class="right"
-        icon="bolt"
-        :text="$t('Quick task create')"
-        :show-text="false"
+        icon="add-outline"
+        :text="$t('New task')"
+        :icon-size="iconSize"
+        background
       ></v-toggle>
       <v-toggle
         class="right"
         icon="inbox-full"
         :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
         :text="$t('Tasks')"
+        :icon-size="iconSize"
+        :show-text="false"
         :active="showTasksList"
         @click="toggleTasksList"
       />
@@ -61,8 +60,14 @@ export default {
     showTasksList: false,
     userPanelUrl: config.apiUrl
   }),
+  props: {
+    iconSize: {
+      type: String,
+      default: "20px"
+    }
+  },
   computed: {
-    ...mapGetters(["foundNodes", "designBlocks"])
+    ...mapGetters(["foundNodes", "designBlocks", "hasDesign"])
   },
   methods: {
     toggleTasksList() {
@@ -75,7 +80,7 @@ export default {
 <style lang="scss" scoped>
 .top-panel {
   display: flex;
-  height: 38px;
+  height: 50px;
   width: 100%;
   background-color: $color-bg2;
   &-container {
@@ -84,7 +89,6 @@ export default {
     align-items: center;
     width: 100%;
     height: 100%;
-    padding: 0 15px;
     & > *:not(.site-logo) {
       height: 100%;
     }
@@ -99,8 +103,7 @@ export default {
   }
 }
 .site-logo {
-  padding: 5px 18px;
-  margin-left: -18px;
+  padding: 5px 10px;
   display: flex;
   img {
     width: 28px;

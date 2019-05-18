@@ -54,7 +54,9 @@ export default {
     isFoundNodes: state => {
       return state.foundNodes && Object.entries(state.foundNodes).length;
     },
-    targetElement: state => state.targetElement
+    targetElement: state => state.targetElement,
+    hasDesign: state =>
+      state.designBlocks && Object.keys(state.designBlocks).length
   },
   mutations: {
     [INSPECTOR_SET_DESIGN](state, payload) {

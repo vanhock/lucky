@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "../../config";
-
+import store from "../store/store";
 class PixelApi {
   constructor() {
     let api = axios.create({
@@ -20,9 +20,10 @@ class PixelApi {
   handleError = error => {
     switch (error.response.status) {
       case 401:
-        window.postMessage("logOut", "*");
         if (location.href.includes(config.apiUrl)) {
           document.location = "/log-out";
+        } else if (store.getters.port) {
+          store.getters.port.postMessage({ resetToken: true });
         }
     }
     return {

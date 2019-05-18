@@ -24,7 +24,9 @@ export default {
   getters: {
     currentPage: state => state.currentPage,
     pages: state => state.pages,
-    hasPages: state => state.pages && state.pages.length
+    hasPages: state => state.pages && state.pages.length,
+    hasCurrentPage: state =>
+      state.currentPage && Object.keys(state.currentPage).length
   },
   mutations: {
     [PAGE_EDIT_PAGE](state, payload) {

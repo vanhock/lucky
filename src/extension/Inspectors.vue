@@ -2,13 +2,13 @@
   <div class="pp-inspectors-app">
     <top-panel @getFoundNodes="getFoundNodes" @reloadView="getFoundNodes" />
     <design-inspector ref="designInspector" @designScrollTop="scrollWebsite" />
-    <!--<website-inspector
+    <website-inspector
       ref="websiteInspector"
       @getFoundNodes="getFoundNodes"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
-    />-->
-    <website-inspector-new />
+    />
+    <website-inspector />
     <create-or-select-page ref="pageModal" />
   </div>
 </template>
@@ -22,11 +22,12 @@ import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
   AUTH_CHECK_AUTH,
   INSPECTOR_SET_VIEW_PARAMS,
-  PAGE_GET_PAGES
+  PAGE_GET_PAGES,
+  PAGE_SET_CURRENT_PAGE,
+  PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
 import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
 import Vue from "vue";
-import WebsiteInspectorNew from "../organisms/inspectors/WebsiteInspectorNew";
 Vue.directive("clickoutside", {
   bind(el, binding) {
     el._handler = evt => {
@@ -44,7 +45,6 @@ Vue.directive("clickoutside", {
 export default {
   name: "ViewScreen",
   components: {
-    WebsiteInspectorNew,
     CreateOrSelectPage,
     DesignInspector,
     WebsiteInspector,
@@ -79,7 +79,7 @@ export default {
   }),
   computed: {
     ...mapState(["currentProject"]),
-    ...mapGetters(["port", "foundNodes", "pages", "hasPages"]),
+    ...mapGetters(["port", "foundNodes", "pages", "hasPages"])
   },
   methods: {
     initView(token = null) {
@@ -99,11 +99,17 @@ export default {
     getPages() {
       this.$store
         .dispatch(PAGE_GET_PAGES, { websiteUrl: location.href })
-        .then(() => {
-          //this.$refs.pageModal.toggleModal(true);
-        })
-        .catch(() => {
-          //this.$refs.pageModal.toggleModal(true);
+        .then(pages => {
+          if (pages.length > 1) {
+            this.$refs.pageModal.toggleModal(true);
+          } else if (pages.length === 0) {
+            this.$refs.pageModal.toggleModal(true);
+          } else {
+            this.$store.dispatch(PAGE_SET_CURRENT_PAGE, pages[0]);
+            this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
+              projectId: pages[0].projectId
+            });
+          }
         });
     },
     getFoundNodes() {

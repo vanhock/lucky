@@ -1,7 +1,7 @@
 <template>
   <div class="design-params">
     <panel-control>
-      <template v-if="designBlocks">
+      <template v-if="designBlocks.length">
         <v-toggle
           :active="showAllBlocks"
           :icon="(showFoundBlocks && 'target') || 'layers'"
@@ -12,7 +12,7 @@
         <v-toggle icon="border-none" text="Guides" :show-text="false" />
       </template>
 
-      <v-toggle icon="repost" text="Change design" />
+      <v-toggle icon="repost" :text="$t('Add design')" />
     </panel-control>
   </div>
 </template>

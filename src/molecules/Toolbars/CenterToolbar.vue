@@ -1,6 +1,6 @@
 <template>
   <div class="center-toolbar">
-    <template v-if="currentProject.name">
+    <template v-if="hasCurrentProject">
       <div
         class="project-selector"
         v-show="!editing"
@@ -9,7 +9,7 @@
         {{ currentProject.name }}
       </div>
       <!-- ToDo: Need to project selector dropdown here -->
-      <template v-if="currentPage.name">
+      <template v-if="hasCurrentPage">
         <span class="divider" v-show="!editing"></span>
         <div
           class="page-rename"
@@ -54,7 +54,9 @@ export default {
       "targetElement",
       "currentProject",
       "currentPage",
-      "projects"
+      "projects",
+      "hasCurrentProject",
+      "hasCurrentPage"
     ])
   },
   methods: {

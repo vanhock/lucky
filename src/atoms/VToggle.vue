@@ -1,7 +1,10 @@
 <template>
   <div
     class="toggle"
-    :class="[{ active: active, 'show-text': showText }, appTheme]"
+    :class="[
+      { active: active, 'show-text': showText, background: background },
+      appTheme
+    ]"
     @click="$emit('click')"
     @mouseenter="hover = true"
     @mouseleave="hover = false"
@@ -45,7 +48,8 @@ export default {
     label: String,
     theme: { type: String, default: "white" },
     iconSize: { type: String, default: "16px" },
-    textSize: { type: String, default: "10px" }
+    textSize: { type: String, default: "10px" },
+    background: Boolean
   }
 };
 </script>
@@ -53,7 +57,7 @@ export default {
 <style lang="scss" scoped>
 .toggle {
   position: relative;
-  padding: 0 14px;
+  padding: 0 20px;
   height: inherit;
   display: flex;
   justify-content: center;
@@ -61,6 +65,15 @@ export default {
   cursor: pointer;
   color: $color-b5;
   font-size: 12px;
+  &.background {
+    background-color: $color-w3;
+    &:hover {
+      background-color: $color-w4;
+      .icon {
+        fill: $color-b6;
+      }
+    }
+  }
   .text-block {
   }
   .icon {
@@ -120,7 +133,7 @@ export default {
   &:hover {
     //background-color: rgba(0, 0, 0, 0.24);
   }
-  &:not(.active) {
+  &:not(.active):not(.background) {
     &:hover {
       color: $color-b4;
       .icon {

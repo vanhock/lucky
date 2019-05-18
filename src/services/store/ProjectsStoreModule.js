@@ -24,7 +24,9 @@ export default {
     projects: state => state.projects,
     lastProjects: state => state.projects.filter((el, index) => index <= 5),
     hasProjects: state => state.projects && state.projects.length,
-    currentProject: state => state.currentProject
+    currentProject: state => state.currentProject,
+    hasCurrentProject: state =>
+      state.currentProject && Object.keys(state.currentProject).length
   },
   mutations: {
     [PROJECT_EDIT_PROJECT](state, payload) {
@@ -59,6 +61,7 @@ export default {
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
+      console.log("Try to set current project");
       if (!payload.projectId) {
         commit(PROJECT_SET_CURRENT_PROJECT, {});
       }
