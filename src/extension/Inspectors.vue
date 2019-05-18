@@ -52,7 +52,6 @@ export default {
   },
   created() {
     this.$nextTick(() => {
-      this.initView();
       this.port.postMessage({ inspectorsLoaded: true });
       this.port.onMessage.addListener(response => {
         switch (Object.keys(response)[0]) {

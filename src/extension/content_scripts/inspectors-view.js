@@ -36,10 +36,3 @@ port.onMessage.addListener(response => {
       location.reload();
   }
 });
-
-window.addEventListener("message", function(event) {
-  if (event.source !== window) return;
-  if (event.data === "logOut") {
-    port.postMessage({ resetToken: true });
-  }
-});
