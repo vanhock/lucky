@@ -21,15 +21,21 @@ export default {
       required: true
     },
     width: String,
-    height: String
+    height: String,
+    frameStyles: {
+      type: String,
+      default: ""
+    }
   },
   beforeUpdate() {
     this.frameApp.children = Object.freeze(this.$slots.default);
   },
   methods: {
     initFrame() {
+      console.log("I`m a frame");
       this.preventAllLinks();
       this.renderSlot();
+      this.renderStyles();
       this.onLoad();
     },
     renderSlot() {
@@ -46,6 +52,19 @@ export default {
       });
       frameApp.$mount(el);
       this.frameApp = frameApp;
+    },
+    renderStyles() {
+      if (this.frameStyles !== "") {
+        const d = this.$el.contentDocument;
+        const style = d.createElement("style");
+        if (style.styleSheet) {
+          // This is required for IE8 and below.
+          style.styleSheet.cssText = this.frameStyles;
+        } else {
+          style.appendChild(d.createTextNode(this.frameStyles));
+        }
+        this.$el.contentDocument.head.appendChild(style);
+      }
     },
     preventAllLinks() {
       const anchors = this.$el.contentDocument.getElementsByTagName("a");

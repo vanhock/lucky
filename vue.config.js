@@ -3,11 +3,9 @@ const SVGSpritemapPlugin = require("svg-spritemap-webpack-plugin");
 module.exports = {
   outputDir: "backend/public/",
   lintOnSave: false,
-
   devServer: {
     proxy: "http://localhost:3000"
   },
-
   configureWebpack: {
     plugins: [
       new SVGSpritemapPlugin("src/assets/img/icons/*.svg", {

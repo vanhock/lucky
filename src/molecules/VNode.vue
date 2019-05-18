@@ -1,10 +1,21 @@
 <template>
   <div
     class="v-node"
-    :class="{ active: active }"
-    :style="{ zIndex: 20 + id, width: width, height: height, left: x, top: y }"
+    :data-id="id"
+    :data-depth="depthLevel"
+    :class="{ active: active, hover: hover }"
+    :style="{
+      zIndex: 20 + id - depthLevel,
+      width: width,
+      height: height,
+      left: x,
+      top: y,
+      display: hidden ? 'none' : 'block'
+    }"
     @click="$emit('click')"
     @dblclick="$emit('dblclick')"
+    @mouseenter="toggleHover"
+    @mouseleave="toggleHover"
   >
     <slot></slot>
   </div>
@@ -22,7 +33,8 @@ export default {
     }
   },
   data: () => ({
-    active: false
+    active: false,
+    hover: false
   }),
   props: {
     id: Number,
@@ -31,7 +43,17 @@ export default {
     height: String,
     x: String,
     y: String,
-    toggleActive: Boolean
+    depthLevel: Number,
+    toggleActive: Boolean,
+    hidden: Boolean
+  },
+  methods: {
+    toggleHover(e) {
+      if (!e) {
+        return;
+      }
+      e.type === "mouseenter" ? (this.hover = true) : (this.hover = false);
+    }
   }
 };
 </script>

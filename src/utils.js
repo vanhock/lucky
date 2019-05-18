@@ -384,6 +384,47 @@ export const getElementBounding = function(el, currentWindow) {
   };
 };
 
+export const getDomDepthLevel = function(root = document.documentElement) {
+  let level = 0;
+  const hasChild = el => {
+    return el.hasChildNodes() && el.children && el.children.length;
+  };
+  if (!hasChild(root)) {
+    return level;
+  }
+  level++;
+  traversingChildren(root.children);
+  function traversingChildren(el) {
+    let alreadySetOnThisLevel = false;
+    [...el].forEach(child => {
+      if (hasChild(child) && !alreadySetOnThisLevel) {
+        level++;
+        alreadySetOnThisLevel = true;
+        traversingChildren(child.children);
+      }
+    });
+  }
+  return level;
+};
+
+export const hasParentElementWithSameSize = function(el, currentWindow) {
+  if (!el.parentElement || el.parentElement.tagName === "body") {
+    return false;
+  }
+  const elementBounding = getElementBounding(el, currentWindow);
+  const parentElementBounding = getElementBounding(
+    el.parentElement,
+    currentWindow
+  );
+  if (
+    elementBounding.width === parentElementBounding.width &&
+    elementBounding.height === parentElementBounding.height
+  ) {
+    return true;
+  }
+  hasParentElementWithSameSize(el.parentElement, currentWindow);
+};
+
 export const getParentAndChild = function(list) {
   return list.map(getPairsForNode).reduce((arr1, arr2) => arr1.concat(arr2));
 };
