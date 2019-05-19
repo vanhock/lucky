@@ -2,9 +2,10 @@
   <div class="v-icon">
     <div
       class="v-icon-image"
-      :class="`icon-${icon}`"
+      :class="svgMode && `icon-${icon}`"
       :style="{ width: size, height: size }"
-    ></div>
+    >
+    </div>
   </div>
 </template>
 

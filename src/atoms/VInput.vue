@@ -1,5 +1,5 @@
 <template>
-  <div class="v-input" :class="[appTheme, { focus: focus }]">
+  <div class="v-input" :class="[currentTheme, { focus: focus }]">
     <div class="label">
       <label :for="`input-${name}`">{{ label }}</label>
     </div>
@@ -50,11 +50,15 @@ export default {
     }
   },
   computed: {
-    ...mapState(["appTheme"])
+    ...mapState(["appTheme"]),
+    currentTheme() {
+      return (this.theme && this.theme) || this.appTheme;
+    }
   },
   props: {
     /** from InputMixin **/
-    autocomplete: String
+    autocomplete: String,
+    theme: String
   },
   methods: {
     onChange: _.debounce(function() {
@@ -134,7 +138,7 @@ export default {
       color: $color-b2;
     }
   }
-  &.black {
+  &.dark {
     .label,
     input {
       color: #fff;

@@ -114,6 +114,7 @@ export default {
     top: 0;
     cursor: pointer;
     padding: 20px;
+    font-size: 18px;
     &:before {
       content: "\2715";
     }

@@ -11,6 +11,7 @@
     :required="required"
     :autocomplete="autocomplete"
     :disabled="disabled"
+    :theme="theme"
   />
 </template>
 

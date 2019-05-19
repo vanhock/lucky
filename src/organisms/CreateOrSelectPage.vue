@@ -36,7 +36,7 @@
           ref="pageName"
           name="name"
           :label="$t('Page name')"
-          :value="currentWebsiteUrl"
+          :value="currentWebsiteTitle"
         />
         <v-input-bordered
           name="projectName"
@@ -90,7 +90,8 @@ export default {
   },
   data: () => ({
     toggleCreate: false,
-    currentWebsiteUrl: location.href
+    currentWebsiteUrl: location.href,
+    currentWebsiteTitle: document.title
   }),
   computed: {
     ...mapGetters(["pages", "hasPages", "port"]),
@@ -123,6 +124,9 @@ export default {
         .then(page => {
           this.$refs.operationalModal.showModal = false;
           this.$store.dispatch(PAGE_SET_CURRENT_PAGE, page);
+          this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
+            projectId: page.projectId
+          });
           return notification(
             this,
             "success",

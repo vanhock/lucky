@@ -109,7 +109,11 @@ export default {
         : removeClass(el, "hover");
     },
     onDesignBlockClick(nodeIndex, designBlockIndex, foundNodeIndex) {
-      this.INSPECTOR_SET_TARGET_ELEMENT(nodeIndex, designBlockIndex, foundNodeIndex);
+      this.INSPECTOR_SET_TARGET_ELEMENT(
+        nodeIndex,
+        designBlockIndex,
+        foundNodeIndex
+      );
       this.noScroll = true;
     },
     INSPECTOR_SET_TARGET_ELEMENT(nodeIndex, designBlockIndex, foundNodeIndex) {

@@ -408,7 +408,7 @@ export const getDomDepthLevel = function(root = document.documentElement) {
 };
 
 export const hasParentElementWithSameSize = function(el, currentWindow) {
-  if (!el.parentElement || el.parentElement.tagName === "body") {
+  if (!el.parentElement) {
     return false;
   }
   const elementBounding = getElementBounding(el, currentWindow);
@@ -417,8 +417,11 @@ export const hasParentElementWithSameSize = function(el, currentWindow) {
     currentWindow
   );
   if (
-    elementBounding.width === parentElementBounding.width &&
-    elementBounding.height === parentElementBounding.height
+    (elementBounding.width ===
+      currentWindow.innerWidth - currentWindow.document.body.scrollWidth &&
+      elementBounding.height === currentWindow.innerHeight) ||
+    (elementBounding.width === parentElementBounding.width &&
+      elementBounding.height === parentElementBounding.height)
   ) {
     return true;
   }

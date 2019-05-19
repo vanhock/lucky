@@ -43,7 +43,9 @@ export default {
         recentProjects && recentProjects.hasOwnProperty(projectId);
       const projectInfo = {
         id: projectId,
-        name: (isProjectExist && recentProjects[projectId].name) || url.replace(/(http|https):\/\//, "").replace(/\?.*/, "")
+        name:
+          (isProjectExist && recentProjects[projectId].name) ||
+          url.replace(/(http|https):\/\//, "").replace(/\?.*/, "")
       };
       this.$store.dispatch("PROJECT_EDIT_PROJECT", projectInfo);
     }

@@ -36,4 +36,3 @@ export function deletePage(payload, cb) {
     generalCallback(status, data, cb);
   });
 }
-

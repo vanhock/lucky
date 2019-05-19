@@ -32,10 +32,7 @@
               :to="`/${child.id}/pages`"
               :disabled="child.disabled"
             >
-              <v-toggle
-                :text="child.name"
-                :show-text="showText"
-              />
+              <v-toggle :text="child.name" :show-text="showText" />
             </router-link>
           </menu-item>
         </v-menu>

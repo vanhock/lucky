@@ -93,5 +93,6 @@ export default {
 <style lang="scss">
 iframe[data-perfect-pixel] {
   background-color: #fff;
+  border: 0 !important;
 }
 </style>

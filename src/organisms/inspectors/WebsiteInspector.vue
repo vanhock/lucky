@@ -1,32 +1,50 @@
 <template>
-  <i-frame
-    :src="websiteUrl"
-    :width="frameWidth"
-    :height="frameHeight"
-    @load="onLoad"
-    :frame-styles="frameStyles"
-  >
-    <div class="frame-nodes" v-if="frameNodes && frameNodes.length">
-      <v-node
-        class="pp-node"
-        v-for="node in frameNodes"
-        :key="node.id"
-        :id="node.id"
-        :hidden="node.hidden"
-        :depth-level="node.depthLevel"
-        :width="node.width"
-        :height="node.height"
-        :x="node.x"
-        :y="node.y"
-      ></v-node>
-    </div>
-  </i-frame>
+  <div class="website-inspector">
+    <i-frame
+      ref="frame"
+      :src="websiteUrl"
+      :width="frameWidth"
+      :height="frameHeight"
+      @load="onLoad"
+      :frame-styles="frameStyles"
+    >
+      <div class="frame-nodes" v-show="showFrameNodes">
+        <v-node
+          class="pp-node"
+          v-for="node in frameNodes"
+          @click="selectNode(node)"
+          :key="node.id"
+          :id="node.id"
+          :hidden="node.hidden"
+          :depth-level="node.depthLevel"
+          :width="node.width"
+          :height="node.height"
+          :x="node.x"
+          :y="node.y"
+        ></v-node>
+      </div>
+    </i-frame>
+  </div>
 </template>
 
 <script>
-import IFrame from "../../molecules/IFrame";
-import {getDomDepthLevel, getElementBounding, hasParentElementWithSameSize} from "../../utils";
-import VNode from "../../molecules/VNode";
+import { mapGetters } from "vuex";
+import IFrame from "../../molecules/Inspector/IFrame";
+import {
+  getDomDepthLevel,
+  getElementBounding,
+  hasParentElementWithSameSize
+} from "../../utils";
+import VNode from "../../molecules/Inspector/VNode";
+import {
+  INSPECTOR_SET_TARGET_ELEMENT,
+  INSPECTOR_SET_TASK_CREATOR_STATE
+} from "../../services/store/mutation-types";
+import {
+  INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
+  INSPECTOR_CREATOR_STATE_SETTING_TASK,
+  INSPECTOR_STATE_CREATING
+} from "../../services/store/InspectorsStoreModule";
 export default {
   name: "WebsiteInspector",
   components: { VNode, IFrame },
@@ -36,10 +54,21 @@ export default {
   data: () => ({
     websiteUrl: location.href,
     frameWidth: window.innerWidth + "px",
-    frameHeight: window.innerHeight - 50 + "px",
+    frameHeight: window.innerHeight - 49 + "px",
     frameNodes: [],
     frameStyles: ""
   }),
+  computed: {
+    ...mapGetters(["state", "taskCreatorState"]),
+    showFrameNodes() {
+      return (
+        this.state === INSPECTOR_STATE_CREATING &&
+        this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT &&
+        this.frameNodes &&
+        this.frameNodes.length
+      );
+    }
+  },
   methods: {
     onLoad({ frameNodes, frameWindow }) {
       console.log("on frame load!");
@@ -53,9 +82,17 @@ export default {
           width: elBounding.width + "px",
           height: elBounding.height + "px",
           x: elBounding.left + "px",
-          y: elBounding.top + "px"
+          y: elBounding.top + "px",
+          node: el
         };
       });
+    },
+    selectNode(node) {
+      this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, node);
+      this.$store.dispatch(
+        INSPECTOR_SET_TASK_CREATOR_STATE,
+        INSPECTOR_CREATOR_STATE_SETTING_TASK
+      );
     },
     renderFrameStyles() {
       const style = `.pp-node {

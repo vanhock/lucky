@@ -10,11 +10,12 @@
     @mouseleave="hover = false"
   >
     <Zodicon
-      v-if="icon"
+      v-if="icon && !svg"
       :icon="currentIcon"
       class="icon"
       :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
     />
+    <v-icon class="icon" v-if="svg" :icon="icon" :size="iconSize" />
     <div class="text-block">
       <div class="text" v-if="text">
         <span>{{ text }}</span>
@@ -27,9 +28,11 @@
 <script>
 import { mapState } from "vuex";
 import Zodicon from "vue-zondicons";
+import VIcon from "./VIcon/VIcon";
 export default {
   name: "VToggle",
-  components: { Zodicon },
+  components: { VIcon, Zodicon },
+  created() {},
   data: () => ({
     hover: false
   }),
@@ -49,7 +52,8 @@ export default {
     theme: { type: String, default: "white" },
     iconSize: { type: String, default: "16px" },
     textSize: { type: String, default: "10px" },
-    background: Boolean
+    background: Boolean,
+    svg: Boolean
   }
 };
 </script>
@@ -71,16 +75,19 @@ export default {
       background-color: $color-w4;
       .icon {
         fill: $color-b6;
+        svg {
+          fill: $color-b6;
+        }
       }
     }
   }
   .text-block {
   }
   .icon {
+    margin-right: 7px;
     fill: $color-b5;
   }
   .text {
-    margin-left: 7px;
     font-weight: 600;
   }
   .label {
@@ -128,6 +135,9 @@ export default {
     color: $color-w2;
     .icon {
       fill: $color-w2;
+      svg {
+        fill: $color-w2;
+      }
     }
   }
   &:hover {
@@ -138,6 +148,9 @@ export default {
       color: $color-b4;
       .icon {
         fill: $color-b4;
+        svg {
+          fill: $color-b4;
+        }
       }
     }
   }

@@ -18,10 +18,12 @@
       </div>
       <view-params class="right" v-if="hasDesign" />
       <v-toggle
+        v-if="state === 'INSPECTOR_STATE_INSPECTING'"
         class="right"
         icon="add-outline"
         :text="$t('New task')"
         :icon-size="iconSize"
+        @click="setCreatingTaskState"
         background
       ></v-toggle>
       <v-toggle
@@ -47,6 +49,8 @@ import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/Toolbars/DesignToolbar";
 import CenterToolbar from "../molecules/Toolbars/CenterToolbar";
 import config from "../config";
+import { INSPECTOR_SET_STATE } from "../services/store/mutation-types";
+import { INSPECTOR_STATE_CREATING } from "../services/store/InspectorsStoreModule";
 export default {
   name: "TopPanel",
   components: {
@@ -67,11 +71,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["foundNodes", "designBlocks", "hasDesign"])
+    ...mapGetters(["foundNodes", "designBlocks", "hasDesign", "state"])
   },
   methods: {
     toggleTasksList() {
       this.showTasksList = !this.showTasksList;
+    },
+    setCreatingTaskState() {
+      this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_CREATING);
     }
   }
 };

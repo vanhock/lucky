@@ -1,8 +1,9 @@
 <template>
   <button
+    class="v-button"
     @click="$emit('click')"
     @touchmove="$emit('click')"
-    :class="[{ loading: loading }, appTheme]"
+    :class="[{ [$style.loading]: loading }, $style[appTheme], $style.vButton]"
   >
     <slot></slot>
   </button>
@@ -25,8 +26,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-button {
+<style lang="scss" module>
+.vButton {
   display: block;
   padding: 8px 38px;
   font-weight: 600;

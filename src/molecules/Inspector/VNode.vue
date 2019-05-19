@@ -5,7 +5,7 @@
     :data-depth="depthLevel"
     :class="{ active: active, hover: hover }"
     :style="{
-      zIndex: 20 + id - depthLevel,
+      zIndex: 20 - depthLevel,
       width: width,
       height: height,
       left: x,

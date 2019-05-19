@@ -29,6 +29,7 @@ browser.tabs.onUpdated.addListener((tabId, { status }, { url }) => {
 
 browser.runtime.onConnect.addListener(connected);
 browser.runtime.onSuspend.addListener(disconnected);
+
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
     if (!ports[tab.id]) {

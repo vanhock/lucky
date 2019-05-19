@@ -8,7 +8,6 @@
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
     />
-    <website-inspector />
     <create-or-select-page ref="pageModal" />
   </div>
 </template>
@@ -51,19 +50,18 @@ export default {
     TopPanel
   },
   created() {
-    this.$nextTick(() => {
-      this.port.postMessage({ inspectorsLoaded: true });
-      this.port.onMessage.addListener(response => {
-        switch (Object.keys(response)[0]) {
-          case "initInspectors":
-            console.log("init inspector handler");
-            sessionStorage.setItem("pp-u-t-s", response.initInspectors);
-            this.initView(response.initInspectors);
-            break;
-          case "reloadPage":
-            break;
-        }
-      });
+    this.applyInspectorsStyles();
+    this.port.postMessage({ inspectorsLoaded: true });
+    this.port.onMessage.addListener(response => {
+      switch (Object.keys(response)[0]) {
+        case "initInspectors":
+          console.log("init inspector handler");
+          sessionStorage.setItem("pp-u-t-s", response.initInspectors);
+          this.initView(response.initInspectors);
+          break;
+        case "reloadPage":
+          break;
+      }
     });
   },
   data: () => ({
@@ -147,28 +145,6 @@ export default {
       const viewParams = this.defaultViewParams;
       this.$store.dispatch(INSPECTOR_SET_VIEW_PARAMS, viewParams);
     },
-    clearFrame() {
-      if (!this.currentFrameDocument) {
-        return;
-      }
-      const tips = this.currentFrameDocument.getElementsByClassName(
-        "pp-found-node-tip"
-      );
-      const foundElements = this.currentFrameDocument.getElementsByClassName(
-        "pp-element"
-      );
-      this.$refs.websiteInspector.detachEvents();
-      if (tips && tips.length) {
-        while (tips.length) {
-          tips[tips.length - 1].remove();
-        }
-      }
-      if (foundElements && foundElements.length) {
-        while (foundElements.length) {
-          removeClass(foundElements[foundElements.length - 1], "pp-element");
-        }
-      }
-    },
     scrollWebsite(value) {
       if (!this.currentFrameDocument) {
         return;
@@ -180,17 +156,30 @@ export default {
         return;
       }
       this.$refs.designInspector.scrollDocument(value);
+    },
+    applyInspectorsStyles() {
+      const css = `body {
+        overflow: hidden !important;
+      }`;
+      const style = document.createElement("style");
+      if (style.styleSheet) {
+        // This is required for IE8 and below.
+        style.styleSheet.cssText = css;
+      } else {
+        style.appendChild(document.createTextNode(css));
+      }
+      document.head.appendChild(style);
     }
   }
 };
 </script>
 <style lang="scss">
+@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
+@import "../assets/styles/normalize";
+@import "../assets/styles/animation";
+@import "../assets/styles/notification";
 .pp-inspectors-app {
-  @import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700&subset=cyrillic");
-  @import url("https://fonts.googleapis.com/css?family=Roboto:400,700,900&subset=cyrillic");
-  @import "../assets/styles/normalize";
-  @import "../assets/styles/animation";
-  @import "../assets/styles/notification";
   box-sizing: border-box;
   position: fixed;
   left: 0;
