@@ -8,11 +8,16 @@
       @load="onLoad"
       :frame-styles="frameStyles"
     >
-      <div class="frame-nodes" v-show="showFrameNodes">
+      <div
+        class="pp-frame-nodes"
+        v-show="showFrameNodes"
+        :class="{ selected: targetElement.id }"
+      >
         <v-node
           class="pp-node"
           v-for="node in frameNodes"
           @click="selectNode(node)"
+          :active="targetElement.id === node.id"
           :key="node.id"
           :id="node.id"
           :hidden="node.hidden"
@@ -43,7 +48,8 @@ import {
 import {
   INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
   INSPECTOR_CREATOR_STATE_SETTING_TASK,
-  INSPECTOR_STATE_CREATING
+  INSPECTOR_STATE_CREATING,
+  INSPECTOR_STATE_INSPECTING
 } from "../../services/store/InspectorsStoreModule";
 export default {
   name: "WebsiteInspector",
@@ -59,13 +65,15 @@ export default {
     frameStyles: ""
   }),
   computed: {
-    ...mapGetters(["state", "taskCreatorState"]),
+    ...mapGetters(["state", "taskCreatorState", "targetElement"]),
     showFrameNodes() {
       return (
-        this.state === INSPECTOR_STATE_CREATING &&
-        this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT &&
         this.frameNodes &&
-        this.frameNodes.length
+        this.frameNodes.length &&
+        this.state !== INSPECTOR_STATE_INSPECTING &&
+        (this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT ||
+          (Object.keys(this.targetElement).length &&
+            this.taskCreatorState === INSPECTOR_CREATOR_STATE_SETTING_TASK))
       );
     }
   },
@@ -93,21 +101,33 @@ export default {
         INSPECTOR_SET_TASK_CREATOR_STATE,
         INSPECTOR_CREATOR_STATE_SETTING_TASK
       );
+      document
+        .getElementById("pp-task-creator-input")
+        .select()
+        .focus();
     },
     renderFrameStyles() {
-      const style = `.pp-node {
+      this.frameStyles = `
+      .pp-node {
         position: absolute;
         outline: 1px solid rgba(0, 85, 255, 0.15);
       }
       .pp-node.visible {
         outline: 1px solid rgba(0, 85, 255, 0.15);
       }
-      .pp-node.hover {
+      .pp-node:not(.active):hover {
         background-color: rgba(0, 85, 255, 0.15);
         outline: 1px solid rgba(0, 85, 255, 0.35);
       }
+      .pp-node.active {
+        z-index: 22;
+        background-color: transparent;
+        outline: 2px solid rgba(0, 85, 255, 0.45);
+      }
+      .pp-frame-nodes.selected .pp-node:not(.active) {
+        outline: 1px solid rgba(0, 85, 255, 0.1);
+      }
       `;
-      this.frameStyles = style;
     }
   }
 };

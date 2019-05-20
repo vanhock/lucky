@@ -19,11 +19,13 @@
       />
     </template>
     <div
-      :class="$style['task-creation-block']"
+      :class="$style['task-creator-block']"
       v-if="taskCreatorState === 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
     >
       <form-group ref="taskForm" :class="$style['task-form']" editable-mode>
         <v-input-clear
+          id="pp-task-creator-input"
+          class="task-creator-input"
           theme="dark"
           name="name"
           :placeholder="$t('Task name here')"
@@ -42,6 +44,7 @@ import VToggle from "../../atoms/VToggle";
 import { mapGetters } from "vuex";
 import {
   INSPECTOR_SET_STATE,
+  INSPECTOR_SET_TARGET_ELEMENT,
   INSPECTOR_SET_TASK_CREATOR_STATE,
   TASK_CREATE_TASK
 } from "../../services/store/mutation-types";
@@ -77,6 +80,7 @@ export default {
         INSPECTOR_SET_TASK_CREATOR_STATE,
         INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT
       );
+      this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, {});
     }
   }
 };
@@ -91,9 +95,19 @@ export default {
   height: 100%;
 }
 
-.task-creation-block {
+.task-creator-block {
   display: flex;
+  width: 50%;
   .task-form {
+    width: calc(100% - 120px);
+  }
+}
+</style>
+<style lang="scss">
+.task-creator-input {
+  .input input {
+    border: 0 !important;
+    font-size: 18px;
   }
 }
 </style>

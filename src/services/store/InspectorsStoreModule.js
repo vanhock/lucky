@@ -36,8 +36,8 @@ export default {
     },
     foundNodes: {},
     designBlocks: {},
-    designImage: null,
-    targetElement: null
+    designImage: "",
+    targetElement: {}
   },
   getters: {
     state: state => state.state,

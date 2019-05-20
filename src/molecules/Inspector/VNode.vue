@@ -24,16 +24,7 @@
 <script>
 export default {
   name: "VNode",
-  created() {
-    this.active = this.toggleActive;
-  },
-  watch: {
-    toggleActive(value) {
-      return (this.active = value);
-    }
-  },
   data: () => ({
-    active: false,
     hover: false
   }),
   props: {
@@ -45,7 +36,8 @@ export default {
     y: String,
     depthLevel: Number,
     toggleActive: Boolean,
-    hidden: Boolean
+    hidden: Boolean,
+    active: Boolean
   },
   methods: {
     toggleHover(e) {
@@ -57,16 +49,3 @@ export default {
   }
 };
 </script>
-
-<style lang="scss">
-.v-node {
-  position: absolute;
-  &.visible {
-    outline: 1px solid rgba(0, 85, 255, 0.15);
-  }
-  &:hover {
-    background-color: rgba(0, 85, 255, 0.15);
-    outline: 1px solid rgba(0, 85, 255, 0.35);
-  }
-}
-</style>
