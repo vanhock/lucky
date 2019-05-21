@@ -11,7 +11,7 @@ import {
   getAllTasks,
   moveTaskToTrash
 } from "../api/TaskApi";
-import {serializeObject} from "../../utils";
+import { serializeObject } from "../../utils";
 export default {
   state: {
     tasks: [],
@@ -29,7 +29,7 @@ export default {
       state.tasks = payload;
     },
     [TASK_CREATE_TASK](state, payload) {
-      state.tasks.push(payload);
+      state.tasks.unshift(payload);
     },
     [TASK_EDIT_TASK](state, payload) {
       for (let key in state.tasks) {

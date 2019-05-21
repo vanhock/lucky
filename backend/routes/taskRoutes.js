@@ -1,3 +1,4 @@
+const sequelize = require("sequelize");
 const { Task } = require("../sequelize");
 const {
   getUserByToken,
@@ -30,12 +31,15 @@ module.exports = function(app) {
     if (!req.query.pageId) {
       return res.error("Page id did not provide!");
     }
+    const sort = req.query.sort || "updatedAt";
+    const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
     getUserByToken(req, res, user => {
       Task.findAll({
         where: {
           pageId: req.query.pageId,
           userId: user.id
-        }
+        },
+        order: [[sequelize.literal(sort), orderBy]]
       })
         .then(tasks => {
           if (!tasks.length) {

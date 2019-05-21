@@ -70,6 +70,9 @@ export default {
         });
       },
       immediate: true
+    },
+    value(newValue) {
+      this.inputValue = newValue;
     }
   },
   methods: {

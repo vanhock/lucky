@@ -119,7 +119,7 @@ export default {
     createPage() {
       this.$store
         .dispatch(PAGE_CREATE_PAGE, {
-          ...this.$refs.operationalForm.getFormFields()
+          ...this.$refs.operationalForm.getFormChangedFields()
         })
         .then(page => {
           this.$refs.operationalModal.showModal = false;

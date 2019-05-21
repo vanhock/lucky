@@ -44,6 +44,7 @@ export default {
     showModal(value) {
       if (value) {
         addClass(document.body, "popup-open");
+        console.log("onModalOpen");
         this.$emit("open");
       } else {
         removeClass(document.body, "popup-open");
@@ -90,7 +91,7 @@ export default {
   &-header {
     display: flex;
     flex-direction: column;
-    min-height: 54px;
+    min-height: 32px;
     margin-bottom: 30px;
   }
 
@@ -121,7 +122,7 @@ export default {
   }
 
   &-content {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     line-height: 1.5;
     color: rgba(0, 0, 0, 0.8);
     .v-button-primary {

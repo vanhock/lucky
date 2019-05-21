@@ -1,18 +1,18 @@
 <template>
-  <div class="v-input" :class="[currentTheme, { focus: focus }]">
+  <div class="v-textarea" :class="[currentTheme, { focus: focus }]">
     <div class="label">
-      <label :for="`input-${name}`">{{ label }}</label>
+      <label :for="`textarea-${name}`">{{ label }}</label>
     </div>
     <div class="input">
       <div class="validation-message" v-if="!valid && focused">
         {{ $t("required") }}
       </div>
-      <input
+      <textarea
         :type="type"
         :name="name"
         :placeholder="placeholder"
-        :id="id || `input-${name}`"
-        :ref="`input-${name}`"
+        :id="id || `textarea-${name}`"
+        :ref="`textarea-${name}`"
         v-bind="$listeners"
         v-model="inputValue"
         :class="{ valid: changed && valid, invalid: changed && !valid }"
@@ -22,7 +22,7 @@
         @blur="onBlur"
         :disabled="disabled"
         :autocomplete="autocomplete"
-      />
+      ></textarea>
     </div>
   </div>
 </template>
@@ -36,7 +36,7 @@ import InputValidationMixin from "../mixins/InputValidationMixin.js";
 import InputMaskMixin from "../mixins/InputMaskMixin.js";
 
 export default {
-  name: "VInput",
+  name: "VTextarea",
   mixins: [InputMixin, InputValidationMixin, InputMaskMixin],
   data: () => ({
     /** from InputMixin **/
@@ -75,8 +75,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.v-input {
+<style lang="scss" scoped>
+.v-textarea {
   position: relative;
   display: block;
   font-size: 18px;
@@ -84,14 +84,26 @@ export default {
   .input {
     width: 100%;
     font-size: 24px;
-    input {
-      width: calc(100% - 10px);
-      padding: 3px 10px 3px 6px;
-      border: 0;
-      border-bottom: 2px solid;
+    textarea {
+      max-width: 100%;
+      min-height: 100px;
+      max-height: 200px;
       border-bottom-color: $color-b3;
       background-color: transparent;
       color: #fff;
+      border: 1px solid $color-b4;
+      border-radius: 3px;
+      padding: 25px 10px 0;
+      font-size: 14px;
+      height: 100%;
+      letter-spacing: 0.2px;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+      &[disabled] {
+        opacity: 0.7;
+      }
+
       &:focus {
         border-bottom-color: $color-b4;
       }
@@ -114,34 +126,39 @@ export default {
     }
   }
   .label {
-    font-size: 21px;
-    font-weight: 300;
-    left: 5px;
     pointer-events: none;
     position: absolute;
-    top: 0;
     transition: 0.2s;
     user-select: none;
     white-space: nowrap;
-    color: $color-b3;
+    font-size: 15px;
+    top: 15px;
+    left: 10px;
+    color: $color-b21;
+    font-weight: 500;
     will-change: top, font-size;
   }
   &.focus {
     .label {
-      font-size: 14px;
-      top: -20px;
-      color: $color-b4;
+      top: 8px;
+      font-size: 11px;
+      color: $color-b3;
     }
   }
   &.white {
     .label,
-    input {
+    textarea {
       color: $color-b2;
+    }
+    &.focus {
+      .label {
+        color: $color-b3;
+      }
     }
   }
   &.dark {
     .label,
-    input {
+    textarea {
       color: #fff;
     }
   }

@@ -31,7 +31,8 @@ export default {
   data: () => ({
     name: "FormGroup",
     changedItemsArray: [],
-    changedItems: {}
+    changedItems: {},
+    allItems: {}
   }),
   props: {
     editableMode: Boolean,
@@ -71,10 +72,21 @@ export default {
           };
         });
       this.changedItems = object;
+
+      this.$children.forEach(item => {
+        this.allItems[item.$children[0].name] =
+          item.$children[0].inputValue !== ""
+            ? item.$children[0].inputValue
+            : item.$children[0].value;
+      });
+    },
+    getFormChangedFields() {
+      this.handleChildrenChanged();
+      return this.changedItems;
     },
     getFormFields() {
       this.handleChildrenChanged();
-      return this.changedItems;
+      return this.allItems;
     },
     resetFormGroup() {
       this.$children.forEach(child => {
