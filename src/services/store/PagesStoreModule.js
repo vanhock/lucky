@@ -5,7 +5,8 @@ import {
   PAGE_GET_PAGES,
   PAGE_MOVE_TO_TRASH,
   PAGE_EDIT_PAGE,
-  PAGE_GET_PAGE
+  PAGE_GET_PAGE,
+  TASK_GET_ALL_TASKS
 } from "./mutation-types";
 import {
   createPage,
@@ -62,8 +63,10 @@ export default {
     }
   },
   actions: {
-    [PAGE_SET_CURRENT_PAGE]: ({ commit }, payload) => {
+    [PAGE_SET_CURRENT_PAGE]: ({ commit, dispatch }, payload) => {
+      console.log("Try to set current page");
       commit(PAGE_SET_CURRENT_PAGE, payload);
+      dispatch(TASK_GET_ALL_TASKS, { pageId: payload.id });
     },
     [PAGE_CREATE_PAGE]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {

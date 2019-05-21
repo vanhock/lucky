@@ -2,7 +2,7 @@
   <div class="v-icon">
     <div
       class="v-icon-image"
-      :class="svgMode && `icon-${icon}`"
+      :class="`icon-${icon}`"
       :style="{ width: size, height: size }"
     >
     </div>

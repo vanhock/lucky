@@ -33,11 +33,12 @@
         :text="$t('Tasks')"
         :icon-size="iconSize"
         :show-text="false"
+        :label="tasksCount"
         :active="showTasksList"
         @click="toggleTasksList"
       />
     </div>
-    <task-list v-show="showTasksList" :tasks="foundNodes" v-if="foundNodes" />
+    <task-list v-show="showTasksList" :tasks="tasks" />
   </div>
 </template>
 
@@ -71,7 +72,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["foundNodes", "designBlocks", "hasDesign", "state"])
+    ...mapGetters([
+      "foundNodes",
+      "designBlocks",
+      "hasDesign",
+      "state",
+      "tasks",
+      "tasksCount"
+    ])
   },
   methods: {
     toggleTasksList() {

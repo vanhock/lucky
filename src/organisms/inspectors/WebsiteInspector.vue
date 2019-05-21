@@ -101,10 +101,11 @@ export default {
         INSPECTOR_SET_TASK_CREATOR_STATE,
         INSPECTOR_CREATOR_STATE_SETTING_TASK
       );
-      document
-        .getElementById("pp-task-creator-input")
-        .select()
-        .focus();
+      this.$nextTick(() => {
+        const input = document.getElementById("pp-task-creator-input");
+        input.select();
+        input.focus();
+      });
     },
     renderFrameStyles() {
       this.frameStyles = `
@@ -122,7 +123,7 @@ export default {
       .pp-node.active {
         z-index: 22;
         background-color: transparent;
-        outline: 2px solid rgba(0, 85, 255, 0.45);
+        outline: 4px solid rgba(0, 85, 255, 0.45);
       }
       .pp-frame-nodes.selected .pp-node:not(.active) {
         outline: 1px solid rgba(0, 85, 255, 0.1);

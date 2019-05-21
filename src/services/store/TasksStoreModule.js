@@ -11,15 +11,16 @@ import {
   getAllTasks,
   moveTaskToTrash
 } from "../api/TaskApi";
+import {serializeObject} from "../../utils";
 export default {
   state: {
     tasks: [],
     currentTask: {}
   },
   getters: {
-    tasks: state => state.tasks,
+    tasks: state => state.tasks || [],
     currentTask: state => state.currentTask,
-    hasTasks: state => state.tasks && state.tasks.length,
+    tasksCount: state => (state.tasks && state.tasks.length) || "",
     hasCurrentTask: state =>
       state.currentTask && Object.keys(state.currentTask).length
   },
@@ -52,8 +53,9 @@ export default {
   },
   actions: {
     [TASK_GET_ALL_TASKS]({ commit }, payload) {
+      console.log("Try to get tasks");
       return new Promise((resolve, reject) => {
-        getAllTasks(payload, (error, tasks) => {
+        getAllTasks(serializeObject(payload), (error, tasks) => {
           if (error) {
             return reject(error);
           }
@@ -62,7 +64,7 @@ export default {
         });
       });
     },
-    [TASK_CREATE_TASK]({ commit }, payload) {
+    [TASK_CREATE_TASK]({ commit, state }, payload) {
       return new Promise((resolve, reject) => {
         createTask(payload, (error, task) => {
           if (error) {

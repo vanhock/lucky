@@ -1,5 +1,5 @@
 <template>
-  <div class="empty-placeholder">
+  <div class="empty-placeholder" :class="{ transparent: transparent }">
     <div class="image" v-if="icon">
       <v-icon :icon="icon" width="50px" size="100px" />
     </div>
@@ -22,7 +22,8 @@ export default {
       }
     },
     text: String,
-    icon: String
+    icon: String,
+    transparent: Boolean
   }
 };
 </script>
@@ -37,9 +38,12 @@ export default {
   align-items: center;
   flex-direction: column;
   text-align: center;
-  background-color: #fff;
   border-radius: 7px;
-  @include box-shadow(medium);
+
+  &:not(.transparent) {
+    background-color: #fff;
+    @include box-shadow(medium);
+  }
 
   .image {
     background-size: cover;

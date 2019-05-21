@@ -7,13 +7,15 @@ const {
 
 module.exports = function(app) {
   app.post("/create-task", (req, res) => {
-    if (!req.fields.id || !req.fields.name) {
-      return res.error("Required fields did not provide!");
+    if (!req.fields.id) {
+      return res.error("Page id did not provide!");
     }
     checkAllowChangesToPage(req, res, (page, project, user) => {
       Task.create({
         userId: user.id,
-        ...req.fields
+        pageId: req.fields.id,
+        name: req.fields.name || "Task",
+        ...filterObject(req.fields, null, ["name", "id"])
       })
         .then(task => {
           return res.status(200).send(JSON.stringify(task));
@@ -25,13 +27,14 @@ module.exports = function(app) {
   });
 
   app.get("/get-all-tasks", (req, res) => {
-    if (!req.fields.id) {
+    if (!req.query.pageId) {
       return res.error("Page id did not provide!");
     }
-    checkAllowChangesToPage(req, res, () => {
+    getUserByToken(req, res, user => {
       Task.findAll({
         where: {
-          id: req.fields.id
+          pageId: req.query.pageId,
+          userId: user.id
         }
       })
         .then(tasks => {
@@ -62,7 +65,7 @@ module.exports = function(app) {
         if (user.id === task.userId || user.isAdmin) {
           task
             .update({
-              ...filterObject(req.fields, null, ["id", "userId", "id"])
+              ...filterObject(req.fields, null, ["id", "userId"])
             })
             .then(task => {
               return res.status(200).send(JSON.stringify(task));

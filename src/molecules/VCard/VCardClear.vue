@@ -7,6 +7,7 @@
     :text="text"
     @click="$emit('click')"
   >
+    <slot></slot>
   </v-card>
 </template>
 

@@ -1,8 +1,12 @@
 <template>
   <div :class="$style['task-creator']">
-    <template
+    <div
+      class="task-creator-tools"
       v-if="taskCreatorState !== 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
     >
+      <div class="task-creator-caption">
+        {{ currentToolCaption }}
+      </div>
       <v-toggle
         icon="target"
         :icon-size="iconSize"
@@ -17,7 +21,7 @@
         :active="taskCreatorState === 'INSPECTOR_CREATOR_STATE_SELECTING_AREA'"
         @click="toggleTool('INSPECTOR_CREATOR_STATE_SELECTING_AREA')"
       />
-    </template>
+    </div>
     <div
       :class="$style['task-creator-block']"
       v-if="taskCreatorState === 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
@@ -33,7 +37,7 @@
         <template v-if="showMoreFields"></template>
       </form-group>
       <!--<v-toggle :text="$t('Show more')" />-->
-      <v-toggle :text="$t('Save task')" background />
+      <v-toggle :text="$t('Save task')" @click="createTask" background />
     </div>
     <v-toggle :text="$t('Cancel')" @click="cancelCreating" />
   </div>
@@ -51,7 +55,9 @@ import {
 import FormGroup from "../FormGroup";
 import VInputClear from "../VInput/VInputClear";
 import {
+  INSPECTOR_CREATOR_STATE_SELECTING_AREA,
   INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
+  INSPECTOR_STATE_CREATING,
   INSPECTOR_STATE_INSPECTING
 } from "../../services/store/InspectorsStoreModule";
 export default {
@@ -62,17 +68,31 @@ export default {
     showMoreFields: false
   }),
   computed: {
-    ...mapGetters(["taskCreatorState"])
+    ...mapGetters(["taskCreatorState", "currentPage"]),
+    currentToolCaption() {
+      if (this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT) {
+        return this.$t("Select element on the page");
+      } else if (
+        this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_AREA
+      ) {
+        return this.$t("Highlight target area");
+      }
+    }
   },
   methods: {
     toggleTool(state) {
       this.$store.dispatch(INSPECTOR_SET_TASK_CREATOR_STATE, state);
     },
     createTask() {
-      const fields = this.$refs.taskCreate.changedItems;
-      if (this.$refs.taskCreate.valid) {
-        this.$store.dispatch(TASK_CREATE_TASK, fields);
-      }
+      const fields = this.$refs.taskForm.changedItems;
+      this.$store.dispatch(TASK_CREATE_TASK, {
+        id: this.currentPage.id,
+        ...fields
+      });
+      this.$store.dispatch(
+        INSPECTOR_SET_TASK_CREATOR_STATE,
+        INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT
+      );
     },
     cancelCreating() {
       this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_INSPECTING);
@@ -88,6 +108,7 @@ export default {
 
 <style lang="scss" module>
 .task-creator {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -104,10 +125,26 @@ export default {
 }
 </style>
 <style lang="scss">
-.task-creator-input {
-  .input input {
-    border: 0 !important;
-    font-size: 18px;
+.task-creator {
+  &-input {
+    .input input {
+      border: 0 !important;
+      font-size: 18px;
+    }
+  }
+  &-caption {
+    color: $color-b3;
+    font-weight: 100;
+    position: absolute;
+    right: 100%;
+    width: 200%;
+    text-align: right;
+    padding-right: 20px;
+  }
+  &-tools {
+    position: relative;
+    display: flex;
+    align-items: center;
   }
 }
 </style>

@@ -6,6 +6,7 @@ import ProjectsStoreModule from "./ProjectsStoreModule";
 import TrashStoreModule from "./TrashStoreModule";
 import PagesStoreModule from "./PagesStoreModule";
 import ExtensionStoreModule from "./ExtensionStoreModule";
+import TasksStoreModule from "./TasksStoreModule";
 Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
@@ -21,6 +22,7 @@ export default new Vuex.Store({
     inspectors: InspectorsStoreModule,
     projects: ProjectsStoreModule,
     pages: PagesStoreModule,
+    tasks: TasksStoreModule,
     trash: TrashStoreModule
   },
   mutations: {

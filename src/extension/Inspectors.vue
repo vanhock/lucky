@@ -14,7 +14,7 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import { simplifyDom, addToLocal, removeClass } from "../utils";
+import { simplifyDom, addToLocal } from "../utils";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";

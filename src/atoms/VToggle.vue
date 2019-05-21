@@ -20,7 +20,7 @@
       <div class="text" v-if="text">
         <span>{{ text }}</span>
       </div>
-      <div class="label" v-if="label && label.length">{{ label }}</div>
+      <div class="label" v-if="label">{{ label }}</div>
     </div>
   </div>
 </template>
@@ -48,7 +48,9 @@ export default {
     iconHover: String,
     text: String,
     showText: { type: Boolean, default: true },
-    label: String,
+    label: {
+      type: [String, Number]
+    },
     theme: { type: String, default: "white" },
     iconSize: { type: String, default: "16px" },
     textSize: { type: String, default: "10px" },
@@ -91,13 +93,19 @@ export default {
     font-weight: 600;
   }
   .label {
+    position: absolute;
+    left: 52%;
+    top: 8px;
     margin-bottom: 3px;
-    padding: 1px 4px;
-    background-color: $color-b4;
-    color: $color-b2;
-    border-radius: 16px;
-    font-size: 10px;
-    font-weight: 500;
+    padding: 1px 5px;
+    min-width: 16px;
+    text-align: center;
+    background-color: #fff;
+    color: $color-w3;
+    border-radius: 5px;
+    font-size: 9px;
+    line-height: 10px;
+    font-weight: 800;
   }
   &:not(.show-text) {
     .text {

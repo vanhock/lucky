@@ -1,45 +1,41 @@
 <template>
   <div class="tasks" ref="tasksList">
-    <ul class="tasks-list">
-      <li
-        v-for="(task, nodeIndex, i) in tasks"
-        :key="nodeIndex"
-        :class="{
-          active: targetNodeIndex === parseInt(nodeIndex)
-        }"
-        @click="setTargetElement(nodeIndex, task.designBlockIndex, i)"
-      >
-        <div class="index">{{ i + 1 }}</div>
-        <div class="header">{{ task.name }}</div>
-        <div class="issues">
-          Node index <b>{{ nodeIndex }}</b
-          ><br />
-          Block index: <b>{{ task.designBlockIndex }}</b>
-        </div>
-      </li>
+    <ul class="tasks-list" v-if="tasks && tasks.length">
+      <v-card-clear
+        v-for="task in tasks"
+        :key="task.id"
+        :name="task.name"
+        :text="task.text"
+        :caption="normalizeDate(task.updatedAt)"
+      ></v-card-clear>
     </ul>
+    <empty-placeholder
+      v-if="!tasks || !tasks.length"
+      icon="task-list"
+      :title="$t('No tasks yet')"
+      transparent
+    />
   </div>
 </template>
 
 <script>
-import { scrollTo } from "../utils";
+import { normalizeDate, scrollTo } from "../utils";
 import { mapGetters } from "vuex";
+import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
+import VCardClear from "../molecules/VCard/VCardClear";
+
 export default {
   name: "TaskList",
+  components: { VCardClear, EmptyPlaceholder },
   props: {
     tasks: {
-      type: Object,
+      type: Array,
       required: true,
-      default: () => ({})
+      default: () => []
     }
   },
   computed: {
-    ...mapGetters([
-      "currentFrameBody",
-      "currentFrameWindow",
-      "currentFrameDocument",
-      "targetElement"
-    ]),
+    ...mapGetters(["targetElement"]),
     listElement() {
       return this.$refs.tasksList;
     },
@@ -78,6 +74,9 @@ export default {
       } else {
         this.noScroll = false;
       }
+    },
+    normalizeDate(date) {
+      return normalizeDate(date);
     }
   }
 };
@@ -86,63 +85,29 @@ export default {
 <style lang="scss" scoped>
 .tasks {
   position: absolute;
-  top: 38px;
+  top: 50px;
   right: 0;
-  width: 400px;
-  max-height: 600px;
-  background-color: #fff;
+  width: 350px;
+  height: calc(100% - 50px);
+  background-color: $color-b5;
   color: #000;
   overflow-x: hidden;
   overflow-y: auto;
-  border-radius: 0 0 0 5px;
   z-index: 10;
   transition: opacity 0.2s ease-in;
   opacity: 1;
+  @include box-shadow(medium);
   &:hover {
     opacity: 1;
   }
   .tasks-list {
     margin: 0;
     padding: 0;
-    li {
-      position: relative;
-      list-style: none;
-      padding: 13px 20px 15px 35px;
-      margin: 15px 30px;
-      border-radius: 5px;
-      border: 2px solid transparent;
-      @include box-shadow(deep);
-      will-change: box-shadow;
-      transition: box-shadow 0.1s linear;
-      cursor: pointer;
-      .header {
-        height: 13px;
-        font-size: 11px;
-        font-weight: bold;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .index {
-        position: absolute;
-        left: 8px;
-        @include valign();
-        color: $color-b3;
-        font-size: 12px;
-      }
-      .issues {
-        font-size: 12px;
-        margin-top: 10px;
-        b {
-          color: $color-red;
-        }
-      }
-      &:not(.active):hover {
-        @include box-shadow(very-deep);
-      }
-      &.active {
-        border-color: $color-w1;
-      }
+    .v-card {
+      margin: 10px 15px;
+    }
+    .v-card-text-container {
+      height: 110px;
     }
   }
 }
