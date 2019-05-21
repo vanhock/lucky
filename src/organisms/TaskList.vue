@@ -100,6 +100,10 @@ export default {
   &:hover {
     opacity: 1;
   }
+}
+</style>
+<style lang="scss">
+.tasks {
   .tasks-list {
     margin: 0;
     padding: 0;
