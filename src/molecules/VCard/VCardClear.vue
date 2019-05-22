@@ -7,7 +7,12 @@
     :text="text"
     @click="$emit('click')"
   >
-    <slot></slot>
+    <template v-slot
+      ><slot></slot
+    ></template>
+    <template v-slot:menu
+      ><slot name="menu"></slot
+    ></template>
   </v-card>
 </template>
 

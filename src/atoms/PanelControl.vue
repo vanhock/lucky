@@ -3,6 +3,7 @@
     class="panel-control"
     ref="panel"
     :class="{ 'dropdown-open': showDropdown }"
+    @mouseleave="showDropdown = false"
   >
     <div
       class="panel-control-content"
@@ -29,6 +30,7 @@ export default {
     if (!this.dropdown) {
       return;
     }
+    console.log("test click outside panel control dropdown");
     this.$nextTick(() => {
       document.body.onclick = e => {
         if (

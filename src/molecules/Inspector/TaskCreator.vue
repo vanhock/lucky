@@ -163,6 +163,8 @@ export default {
         INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT
       );
       this.closeAllFieldsModal();
+      this.$refs.allFieldsForm.resetFormGroup();
+      this.$refs.quickCreateForm.resetFormGroup();
     },
     cancelCreating() {
       this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_INSPECTING);
@@ -172,6 +174,8 @@ export default {
       );
       this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, {});
       this.closeAllFieldsModal();
+      this.$refs.allFieldsForm.resetFormGroup();
+      this.$refs.quickCreateForm.resetFormGroup();
     },
     showAllFields() {
       this.$refs.operationalModal.showModal = true;
@@ -220,13 +224,14 @@ export default {
     }
   }
   &-caption {
-    color: $color-b4;
-    font-weight: 100;
     position: absolute;
     right: 100%;
     width: 200%;
     text-align: right;
     padding-right: 20px;
+    font-size: 14px;
+    color: $color-b4;
+    font-weight: 100;
   }
   &-tools {
     position: relative;

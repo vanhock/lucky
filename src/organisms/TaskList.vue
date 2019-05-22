@@ -7,7 +7,18 @@
         :name="task.name"
         :text="task.text"
         :caption="normalizeDate(task.updatedAt)"
-      ></v-card-clear>
+      >
+        <template v-slot:menu>
+          <v-menu>
+            <menu-item
+              ><v-toggle icon="edit-pencil" icon-size="14px" :text="$t('Edit task')"
+            /></menu-item>
+            <menu-item
+              ><v-toggle icon="trash" icon-size="14px" :text="$t('Move to trash')"
+            /></menu-item>
+          </v-menu>
+        </template>
+      </v-card-clear>
     </ul>
     <empty-placeholder
       v-if="!tasks || !tasks.length"
@@ -23,10 +34,13 @@ import { normalizeDate, scrollTo } from "../utils";
 import { mapGetters } from "vuex";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import VCardClear from "../molecules/VCard/VCardClear";
+import VMenu from "../atoms/VMenu";
+import MenuItem from "../atoms/MenuItem";
+import VToggle from "../atoms/VToggle";
 
 export default {
   name: "TaskList",
-  components: { VCardClear, EmptyPlaceholder },
+  components: { VToggle, MenuItem, VMenu, VCardClear, EmptyPlaceholder },
   props: {
     tasks: {
       type: Array,
@@ -105,7 +119,7 @@ export default {
 <style lang="scss">
 .tasks {
   .tasks-list {
-    margin: 0;
+    margin: 25px 0;
     padding: 0;
     .v-card {
       margin: 10px 15px;
