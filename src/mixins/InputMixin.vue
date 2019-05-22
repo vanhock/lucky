@@ -78,6 +78,10 @@ export default {
   methods: {
     resetValue() {
       this.value ? (this.inputValue = this.value) : (this.inputValue = "");
+    },
+    clearValue() {
+      this.value = "";
+      this.inputValue = "";
     }
   }
 };

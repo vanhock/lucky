@@ -1,17 +1,17 @@
 <template>
-  <div class="v-card">
+  <div class="v-card" :class="{ selected: selected }">
     <div class="v-card-content">
       <div class="v-card-image-container" v-if="image">
         <img class="image" :src="image" :alt="name" />
       </div>
-      <div class="v-card-text-container" @click="$emit('click')">
+      <div class="v-card-text-container" @click="onclick">
         <div class="name">{{ name }}</div>
         <div class="text">{{ text | truncate(70) }}</div>
         <div class="caption">{{ caption }}</div>
       </div>
     </div>
     <div class="v-card-menu">
-      <panel-control class="" dropdown>
+      <panel-control v-if="!selectingMode" dropdown>
         <v-toggle icon="navigation-more" icon-size="25px" />
         <template v-slot:dropdown>
           <slot name="menu"></slot>
@@ -31,6 +31,9 @@ export default {
   name: "VCard",
   components: { PanelControl, VToggle },
   mixins: [Filters],
+  data: () => ({
+    selected: false
+  }),
   props: {
     name: {
       type: String,
@@ -38,7 +41,17 @@ export default {
     },
     image: String,
     caption: String,
-    text: String
+    text: String,
+    selectingMode: Boolean
+  },
+  methods: {
+    onclick(e) {
+      if (e.ctrlKey || this.selectingMode) {
+        this.$emit("select");
+        return (this.selected = !this.selected);
+      }
+      this.$emit("click");
+    }
   }
 };
 </script>
@@ -54,12 +67,18 @@ export default {
     transition: box-shadow 0.2s ease-out;
     cursor: pointer;
     background-color: #fff;
+    border: 2px solid transparent;
     &:hover {
       background-color: $color-base;
       @include box-shadow(deep);
     }
     &:active {
       top: 1px;
+    }
+  }
+  &.selected {
+    .v-card-content {
+      border-color: $color-w3;
     }
   }
   &-image-container {
@@ -131,7 +150,7 @@ export default {
       .panel-control-content {
         & > .toggle {
           position: absolute;
-          display: block;
+          display: flex;
           z-index: 12;
           top: 0;
           right: 0;
@@ -140,6 +159,7 @@ export default {
           width: 40px;
           .icon {
             fill: $color-b4;
+            margin-right: 0;
           }
         }
       }

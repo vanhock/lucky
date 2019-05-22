@@ -2,19 +2,35 @@
   <div class="tasks" ref="tasksList">
     <ul class="tasks-list" v-if="tasks && tasks.length">
       <v-card-clear
-        v-for="task in tasks"
+        ref="taskItem"
+        v-for="(task, index) in tasks"
         :key="task.id"
         :name="task.name"
         :text="task.text"
         :caption="normalizeDate(task.updatedAt)"
+        :selecting-mode="tasksSelected"
+        @select="handleTaskSelected"
       >
         <template v-slot:menu>
           <v-menu>
             <menu-item
-              ><v-toggle icon="edit-pencil" icon-size="14px" :text="$t('Edit task')"
+              ><v-toggle
+                icon="checkmark"
+                icon-size="14px"
+                :text="$t('Select')"
+                @click="setSelected(index)"
             /></menu-item>
             <menu-item
-              ><v-toggle icon="trash" icon-size="14px" :text="$t('Move to trash')"
+              ><v-toggle
+                icon="edit-pencil"
+                icon-size="14px"
+                :text="$t('Edit task')"
+            /></menu-item>
+            <menu-item
+              ><v-toggle
+                icon="trash"
+                icon-size="14px"
+                :text="$t('Move to trash')"
             /></menu-item>
           </v-menu>
         </template>
@@ -41,6 +57,10 @@ import VToggle from "../atoms/VToggle";
 export default {
   name: "TaskList",
   components: { VToggle, MenuItem, VMenu, VCardClear, EmptyPlaceholder },
+  data: () => ({
+    tasksSelected: false,
+    noScroll: false
+  }),
   props: {
     tasks: {
       type: Array,
@@ -65,9 +85,6 @@ export default {
       this.scrollToTask(value.foundNodeIndex);
     }
   },
-  data: () => ({
-    noScroll: false
-  }),
   methods: {
     INSPECTOR_SET_TARGET_ELEMENT(nodeIndex, designIndex, foundNodeIndex) {
       this.$store.dispatch("INSPECTOR_SET_TARGET_ELEMENT", {
@@ -91,6 +108,21 @@ export default {
     },
     normalizeDate(date) {
       return normalizeDate(date);
+    },
+    handleTaskSelected() {
+      this.$nextTick(() => {
+        let hasSelected = false;
+        this.$children.some(child => {
+          if (child.$children[0].selected) {
+            return (hasSelected = true);
+          }
+        });
+        this.tasksSelected = hasSelected;
+      });
+    },
+    setSelected(index) {
+      this.$children[index].$children[0].selected = true;
+      this.tasksSelected = true;
     }
   }
 };

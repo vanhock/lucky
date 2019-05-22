@@ -163,8 +163,8 @@ export default {
         INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT
       );
       this.closeAllFieldsModal();
-      this.$refs.allFieldsForm.resetFormGroup();
-      this.$refs.quickCreateForm.resetFormGroup();
+      this.$refs.allFieldsForm.clearFormGroup();
+      this.$refs.quickCreateForm.clearFormGroup();
     },
     cancelCreating() {
       this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_INSPECTING);
@@ -174,8 +174,8 @@ export default {
       );
       this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, {});
       this.closeAllFieldsModal();
-      this.$refs.allFieldsForm.resetFormGroup();
-      this.$refs.quickCreateForm.resetFormGroup();
+      this.$refs.allFieldsForm.clearFormGroup();
+      this.$refs.quickCreateForm.clearFormGroup();
     },
     showAllFields() {
       this.$refs.operationalModal.showModal = true;
@@ -187,6 +187,10 @@ export default {
       this.currentForm = this.$refs.operationalModal.showModal
         ? this.$refs.quickCreateForm.getFormFields()
         : this.$refs.allFieldsForm.getFormFields();
+
+      if (!this.$refs.operationalModal.showModal) {
+        document.getElementById("pp-task-creator-input").focus();
+      }
     }
   }
 };

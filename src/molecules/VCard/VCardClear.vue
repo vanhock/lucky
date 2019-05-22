@@ -5,7 +5,9 @@
     :image="image"
     :caption="caption"
     :text="text"
+    :selecting-mode="selectingMode"
     @click="$emit('click')"
+    @select="$emit('select')"
   >
     <template v-slot
       ><slot></slot

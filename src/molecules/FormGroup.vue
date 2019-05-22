@@ -93,6 +93,15 @@ export default {
         child.resetValue();
       });
       this.changedItemsArray = [];
+      this.changedItems = {};
+    },
+    clearFormGroup() {
+      this.$children.forEach(child => {
+        child.clearValue();
+      });
+      this.changedItemsArray = [];
+      this.changedItems = {};
+      this.allItems = {};
     },
     showValidation() {
       this.$children.forEach(child => {
