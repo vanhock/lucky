@@ -47,8 +47,8 @@ module.exports = {
         },
         contentScripts: {
           entries: {
-            "content_scripts/inspectors-view": [
-              "src/extension/content_scripts/inspectors-view.js"
+            "content_scripts/inspectors-script": [
+              "src/extension/content_scripts/inspectors-script.js"
             ],
             "content_scripts/auth-script": [
               "src/extension/content_scripts/auth-script.js"

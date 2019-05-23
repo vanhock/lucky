@@ -26,11 +26,5 @@
       "128": "icons/128.png"
     }
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*/*"],
-      "js": ["content_scripts/inspectors-view.js"]
-    }
-  ],
   "web_accessible_resources": ["icons/*.png"]
 }

@@ -2,6 +2,20 @@ import config from "../config";
 import _ from "lodash";
 const ports = {};
 
+browser.browserAction.onClicked.addListener(
+  _.debounce(function(tab) {
+    if (!ports[tab.id]) {
+      return browser.tabs.executeScript(tab.id, {
+        file: "content_scripts/inspectors-script.js"
+      });
+    }
+    if (ports[tab.id].inspectorsActive) {
+      ports[tab.id].inspectorsActive = false;
+      ports[tab.id].postMessage({ reloadPage: true });
+    }
+  }, 300)
+);
+
 browser.tabs.onActivated.addListener(({ tabId }) => {
   /** Reset icon if tab changed **/
   browser.tabs
@@ -30,24 +44,6 @@ browser.tabs.onUpdated.addListener((tabId, { status }, { url }) => {
 browser.runtime.onConnect.addListener(connected);
 browser.runtime.onSuspend.addListener(disconnected);
 
-browser.browserAction.onClicked.addListener(
-  _.debounce(function(tab) {
-    if (!ports[tab.id]) {
-      return;
-    }
-    if (!ports[tab.id].inspectorsActive) {
-      ports[tab.id].postMessage({ initVue: true });
-      checkTokenBeforeStart(tab.id, token => {
-        ports[tab.id].postMessage({ initInspectors: token });
-        ports[tab.id].inspectorsActive = true;
-      });
-    } else {
-      ports[tab.id].inspectorsActive = false;
-      ports[tab.id].postMessage({ reloadPage: true });
-    }
-  }, 300)
-);
-
 function connected(p) {
   if (ports[p.sender.tab.id] && ports[p.sender.tab.id].name === "auth") {
     return;
@@ -60,6 +56,7 @@ function connected(p) {
       isCurrentTab(p.sender.tab.id, result => {
         if (result) {
           setIcon();
+          initInspectors(p.sender.tab.id);
         }
       });
       break;
@@ -94,6 +91,16 @@ function disconnected(p) {
       break;
   }
   delete ports[p.sender.tab.id];
+}
+
+function initInspectors(tabId) {
+  if (!ports[tabId].inspectorsActive) {
+    ports[tabId].postMessage({ initVue: true });
+    checkTokenBeforeStart(tabId, token => {
+      ports[tabId].postMessage({ initInspectors: token });
+      ports[tabId].inspectorsActive = true;
+    });
+  }
 }
 
 function handleMessages(data, { sender }) {
