@@ -4,7 +4,7 @@
       <menu-item
         v-for="(item, index) in items"
         :key="index"
-        :class="{ 'has-submenu': item.children }"
+        :class="{ 'has-submenu': item.children, bottom: item.bottom }"
       >
         <router-link
           class="router-link"

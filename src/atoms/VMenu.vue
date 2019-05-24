@@ -25,6 +25,8 @@ export default {
     }
   }
   &.vertical {
+    display: flex;
+    flex-direction: column;
     & > .menu-item {
       &:not(:last-child) {
         padding-bottom: 5px;
@@ -33,6 +35,10 @@ export default {
     .menu-item {
       & > * {
         padding-left: 15px;
+      }
+
+      &.bottom {
+        margin-top: auto;
       }
 
       .toggle {
@@ -50,11 +56,15 @@ export default {
           margin-left: 0;
         }
         .label {
+          position: static;
           background-color: transparent;
           margin-left: 0;
           text-align: left;
           margin-top: 5px;
           padding-left: 0;
+          font-size: 12px;
+          font-weight: 500;
+          color: $color-b3;
         }
       }
       &.has-submenu {
@@ -62,6 +72,7 @@ export default {
       }
     }
     .menu.submenu {
+      margin-bottom: 15px;
       .menu-item {
         position: relative;
         margin-left: -15px;

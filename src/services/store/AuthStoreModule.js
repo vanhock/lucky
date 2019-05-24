@@ -16,7 +16,8 @@ export default {
   getters: {
     isAuthenticated: state => state.userToken,
     status: state => state.status,
-    user: state => state.user
+    user: state => state.user,
+    userName: state => state.user && state.user.name
   },
   mutations: {
     [AUTH_REQUEST]: state => {
@@ -35,7 +36,8 @@ export default {
       state.userToken = null;
     },
     [AUTH_CHECK_AUTH]: (state, payload = null) => {
-      state.userToken = payload;
+      state.user = payload;
+      state.userToken = payload.token;
     }
   },
   actions: {
@@ -74,7 +76,7 @@ export default {
             postMessage({ resetToken: true });
             return reject(error);
           }
-          commit(AUTH_CHECK_AUTH, user.token);
+          commit(AUTH_CHECK_AUTH, user);
           return resolve(user);
         });
       });

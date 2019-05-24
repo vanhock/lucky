@@ -1,11 +1,11 @@
 <template>
   <div
-    :class="$style['page-selector']"
+    class="page-selector"
     v-if="hasCurrentProject"
     ref="selectorWrapper"
   >
     <div
-      :class="$style['page-selector-project-name']"
+      class="page-selector-project-name"
       v-if="hasCurrentProject"
       v-show="!editing"
       @click="$router.push(`/${currentProject.id}/pages`)"
@@ -71,7 +71,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module>
+<style lang="scss">
 .page-selector {
   display: flex;
   justify-content: center;

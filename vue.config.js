@@ -3,9 +3,6 @@ const SVGSpritemapPlugin = require("svg-spritemap-webpack-plugin");
 module.exports = {
   outputDir: "backend/public/",
   lintOnSave: false,
-  css: {
-    modules: true
-  },
   devServer: {
     proxy: "http://localhost:3000"
   },

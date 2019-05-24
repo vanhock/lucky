@@ -41,7 +41,7 @@ export default {
       max-width: 250px;
     }
   }
-  .actions {
+  .v-card-actions {
     svg {
       width: 15px;
       height: 15px;

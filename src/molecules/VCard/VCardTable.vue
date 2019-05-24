@@ -44,7 +44,7 @@ export default {
       color: $color-b3;
     }
   }
-  .actions {
+  .v-card-actions {
     right: 0;
     @include valign();
   }

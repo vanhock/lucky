@@ -10,7 +10,7 @@
         <div class="caption">{{ caption }}</div>
       </div>
     </div>
-    <div class="v-card-menu">
+    <div class="v-card-menu" v-if="showMenu">
       <panel-control v-if="!selectingMode" dropdown>
         <v-toggle icon="navigation-more" icon-size="25px" />
         <template v-slot:dropdown>
@@ -42,7 +42,8 @@ export default {
     image: String,
     caption: String,
     text: String,
-    selectingMode: Boolean
+    selectingMode: Boolean,
+    showMenu: Boolean
   },
   methods: {
     onclick(e) {
@@ -56,7 +57,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .v-card {
   position: relative;
   &-content {
@@ -118,6 +119,7 @@ export default {
     }
     .text {
       max-height: 90px;
+      min-height: 15px;
       overflow: hidden;
       font-size: 12px;
       font-weight: 500;
@@ -128,24 +130,6 @@ export default {
     position: absolute;
     right: 0;
     top: 0;
-  }
-  &-actions {
-    position: absolute;
-    right: 5px;
-    bottom: 0;
-    display: flex;
-    margin-top: auto;
-    margin-left: auto;
-
-    & > * {
-      cursor: pointer;
-    }
-  }
-}
-</style>
-<style lang="scss">
-.v-card {
-  .v-card-menu {
     .panel-control {
       .panel-control-content {
         & > .toggle {
@@ -192,6 +176,18 @@ export default {
           }
         }
       }
+    }
+  }
+  &-actions {
+    position: absolute;
+    right: 5px;
+    bottom: 0;
+    display: flex;
+    margin-top: auto;
+    margin-left: auto;
+
+    & > * {
+      cursor: pointer;
     }
   }
 }

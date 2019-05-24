@@ -1,8 +1,8 @@
 <template>
   <div class="sidebar" :class="appTheme">
-    <div class="logo">
+    <router-link tag="div" to="/" class="logo">
       <img src="/logo.png" style="width: 104px" alt="PerfectPixel" />
-    </div>
+    </router-link>
     <slot name="top"></slot>
     <dynamic-menu :items="menu" align="vertical" show-text />
     <slot name="bottom"></slot>
@@ -41,6 +41,10 @@ export default {
     align-items: center;
     justify-content: center;
     margin-left: 13px;
+    cursor: pointer;
+    &.router-link-exact-active {
+      cursor: default;
+    }
   }
   &-container {
     height: 100%;
@@ -48,6 +52,10 @@ export default {
     margin: 0 auto;
   }
   .dynamic-menu {
+    height: calc(100% - 100px);
+    .menu {
+      height: 100%;
+    }
     .menu-item .router-link {
       .toggle {
         color: inherit;

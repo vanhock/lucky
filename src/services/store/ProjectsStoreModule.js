@@ -22,7 +22,7 @@ export default {
   },
   getters: {
     projects: state => state.projects,
-    lastProjects: state => state.projects.filter((el, index) => index <= 5),
+    lastProjects: state => state.projects.filter((el, index) => index <= 2),
     hasProjects: state => state.projects && state.projects.length,
     currentProject: state => state.currentProject,
     hasCurrentProject: state =>

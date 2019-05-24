@@ -3,13 +3,13 @@ import VueNoty from "vuejs-noty";
 Vue.use(VueNoty, {
   timeout: 1500,
   dismissQueue: true,
-  maxVisible: 2,
+  killer: true,
   progressBar: false,
   layout: "topCenter",
   theme: "mint",
   animation: {
-    open: "slide-in-bck-top",
-    close: "slide-bck-top"
+    open: "scale-in-bottom",
+    close: "scale-out-top"
   }
 });
 

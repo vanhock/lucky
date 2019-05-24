@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style['center-toolbar']">
+  <div class="center-toolbar">
     <page-selector v-if="state === 'INSPECTOR_STATE_INSPECTING'" />
     <task-creator v-if="state === 'INSPECTOR_STATE_CREATING'" />
   </div>
@@ -19,7 +19,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module>
+<style lang="scss">
 .center-toolbar {
   display: flex;
   justify-content: center;

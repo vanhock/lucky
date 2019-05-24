@@ -30,13 +30,14 @@ export default {
     showPreloader: false
   }),
   computed: {
-    ...mapGetters(["currentProject", "projects", "user"])
+    ...mapGetters(["currentProject", "projects", "userName"])
   },
   methods: {
     init() {
-      this.fillMenu();
-      this.getUser();
-      this.getProjects();
+      this.getUser().then(() => {
+        this.getProjects();
+        this.fillMenu();
+      });
     },
     getProjects: async function() {
       await this.$store.dispatch(PROJECT_GET_ALL_PROJECTS);
@@ -53,18 +54,23 @@ export default {
           children: "lastProjects"
         },
         {
+          text: this.$t("trash"),
+          icon: "trash",
+          to: { name: "Trash" }
+        },
+        {
           text: this.$t("account"),
           icon: "user-solid-circle",
           to: { name: "Account" },
           label: this.$t("soon"),
-          disabled: true
+          disabled: true,
+          bottom: true
         },
-        { text: this.$t("trash"), icon: "trash", to: { name: "Trash" } },
         {
           text: this.$t("logOut"),
           icon: "stand-by",
           to: { name: "LogOut" },
-          label: this.user.name
+          label: this.userName
         }
       ];
     }
