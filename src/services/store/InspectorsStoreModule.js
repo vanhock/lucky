@@ -4,8 +4,10 @@ import {
   INSPECTOR_SET_FOUND_NODES,
   INSPECTOR_SET_STATE,
   INSPECTOR_SET_TARGET_ELEMENT,
+  INSPECTOR_SET_TASK_CREATOR_FORM,
   INSPECTOR_SET_TASK_CREATOR_STATE,
-  INSPECTOR_SET_VIEW_PARAMS
+  INSPECTOR_SET_VIEW_PARAMS,
+  INSPECTOR_TASK_CREATOR_TOGGLE_MODAL
 } from "./mutation-types";
 
 export const INSPECTOR_STATE_INSPECTING = "INSPECTOR_STATE_INSPECTING";
@@ -22,6 +24,7 @@ export default {
   state: {
     state: INSPECTOR_STATE_INSPECTING,
     taskCreatorState: INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
+    taskCreatorForm: {},
     viewParams: {
       websiteWidth: window.innerWidth + "px",
       websiteHeight: window.innerHeight - 24 + "px",
@@ -41,6 +44,7 @@ export default {
   getters: {
     state: state => state.state,
     taskCreatorState: state => state.taskCreatorState,
+    taskCreatorForm: state => state.taskCreatorForm,
     viewParams: state => state.viewParams,
     designBlocks: state => state.designBlocks,
     foundDesignBlocks: (state, getters) => {
@@ -81,6 +85,9 @@ export default {
     [INSPECTOR_SET_TASK_CREATOR_STATE](state, payload) {
       state.taskCreatorState = payload;
     },
+    [INSPECTOR_SET_TASK_CREATOR_FORM](state, payload) {
+      state.taskCreatorForm = payload;
+    },
     [INSPECTOR_SET_DESIGN](state, payload) {
       state.designBlocks = payload.designBlocks;
       state.designImage = payload.designImage;
@@ -106,6 +113,9 @@ export default {
     },
     [INSPECTOR_SET_TASK_CREATOR_STATE]: ({ commit }, payload) => {
       commit(INSPECTOR_SET_TASK_CREATOR_STATE, payload);
+    },
+    [INSPECTOR_SET_TASK_CREATOR_FORM]({ commit }, payload) {
+      commit(INSPECTOR_SET_TASK_CREATOR_FORM, payload);
     },
     [INSPECTOR_SET_DESIGN]: ({ commit }, payload) => {
       commit("INSPECTOR_SET_DESIGN", payload);

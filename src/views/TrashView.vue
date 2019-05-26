@@ -5,17 +5,24 @@
         $t("Empty trash")
       }}</v-button-primary>
       <trash-list
-        :trash="projectsTrash"
-        :title="$t('projects')"
-        @restore="restoreProject"
-        @delete="openModal('deleteProject', $event)"
+        :trash="tasksTrash"
+        :title="$t('Tasks')"
+        @restore="restore('task', $event)"
+        @delete="openModal('deleteTask', { target: 'task', ...$event })"
       />
       <trash-list
         :trash="pagesTrash"
         :title="$t('pages')"
-        @restore="restorePage"
-        @delete="openModal('deletePage', $event)"
+        @restore="restore('page', $event)"
+        @delete="openModal('deletePage', { target: 'page', ...$event })"
       />
+      <trash-list
+        :trash="projectsTrash"
+        :title="$t('projects')"
+        @restore="restore('project', $event)"
+        @delete="openModal('deleteProject', { target: 'project', ...$event })"
+      />
+
       <v-modal
         ref="operationalModal"
         class="operational-modal"
@@ -61,15 +68,12 @@
 </i18n>
 
 <script>
-import UserPanelMixin from "../mixins/ModalMixin";
+import ModalMixin from "../mixins/ModalMixin.js";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import {
-  TRASH_DELETE_PAGE,
-  TRASH_DELETE_PROJECT,
   TRASH_GET_PAGES_TRASH,
   TRASH_GET_PROJECTS_TRASH,
-  TRASH_RESTORE_PAGE,
-  TRASH_RESTORE_PROJECT
+  TRASH_GET_TASKS_TRASH
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import TrashList from "../organisms/TrashList";
@@ -78,11 +82,12 @@ import VModal from "../molecules/VModal";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 export default {
   name: "TrashView",
-  mixins: [UserPanelMixin],
+  mixins: [ModalMixin],
   components: { EmptyPlaceholder, TrashList, VButtonPrimary, VModal },
   created() {
-    this.getProjectsTrash();
-    this.getPagesTrash();
+    this.$store.dispatch(TRASH_GET_PROJECTS_TRASH);
+    this.$store.dispatch(TRASH_GET_PAGES_TRASH);
+    this.$store.dispatch(TRASH_GET_TASKS_TRASH);
     this.modals = {
       deleteAll: {
         title: this.$t("Empty all in trash"),
@@ -95,14 +100,20 @@ export default {
       deleteProject: {
         title: this.$t("Delete project"),
         description: this.$t("The Project will be deleted permanently!"),
-        action: "deleteProject",
+        action: "delete",
         buttonName: this.$t("Delete project")
       },
       deletePage: {
         title: this.$t("Delete page"),
         description: this.$t("The Page will be deleted permanently!"),
-        action: "deletePage",
+        action: "delete",
         buttonName: this.$t("Delete page")
+      },
+      deleteTask: {
+        title: this.$t("Delete task"),
+        description: this.$t("The Task will be deleted permanently!"),
+        action: "delete",
+        buttonName: this.$t("Delete task")
       }
     };
   },
@@ -111,55 +122,30 @@ export default {
     selectedModal: "deleteAll"
   }),
   computed: {
-    ...mapGetters(["projectsTrash", "pagesTrash"]),
+    ...mapGetters(["projectsTrash", "pagesTrash", "tasksTrash"]),
     trashLength() {
       return this.projectsTrash.length;
     }
   },
   methods: {
-    getProjectsTrash() {
-      this.$store.dispatch(TRASH_GET_PROJECTS_TRASH);
-    },
-    getPagesTrash() {
-      this.$store.dispatch(TRASH_GET_PAGES_TRASH);
-    },
-    restoreProject(project) {
+    restore(target, payload) {
       this.$store
-        .dispatch(TRASH_RESTORE_PROJECT, project)
+        .dispatch(`TRASH_RESTORE_${target.toUpperCase()}`, payload)
         .then(() => {
-          notification(this, "success", "Project restored");
+          notification(this, "success", `${target} restored`);
         })
         .catch(error => {
           notification(this, "error", error);
         });
     },
-    deleteProject() {
+    delete() {
+      const target = this.dataForOperations.target;
       this.$store
-        .dispatch(TRASH_DELETE_PROJECT, this.dataForOperations)
-        .then(() => {
-          notification(this, "success", "Project deleted permanently");
-          this.$refs.operationalModal.showModal = false;
+        .dispatch(`TRASH_DELETE_${target.toUpperCase()}`, {
+          id: this.dataForOperations.id
         })
-        .catch(error => {
-          notification(this, "error", error);
-          this.$refs.operationalModal.showModal = false;
-        });
-    },
-    restorePage(project) {
-      this.$store
-        .dispatch(TRASH_RESTORE_PAGE, project)
         .then(() => {
-          notification(this, "success", "Page restored");
-        })
-        .catch(error => {
-          notification(this, "error", error);
-        });
-    },
-    deletePage() {
-      this.$store
-        .dispatch(TRASH_DELETE_PAGE, this.dataForOperations)
-        .then(() => {
-          notification(this, "success", "Page deleted permanently");
+          notification(this, "success", `${target} deleted permanently`);
           this.$refs.operationalModal.showModal = false;
         })
         .catch(error => {

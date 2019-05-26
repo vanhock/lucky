@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="page-selector"
-    v-if="hasCurrentProject"
-    ref="selectorWrapper"
-  >
+  <div class="page-selector" v-if="hasCurrentProject" ref="selectorWrapper">
     <div
       class="page-selector-project-name"
       v-if="hasCurrentProject"
@@ -14,9 +10,9 @@
     </div>
     <!-- ToDo: Need to project selector dropdown here -->
     <template v-if="hasCurrentPage">
-      <span :class="$style['page-selector-divider']" v-show="!editing"></span>
+      <span class="page-selector-divider" v-show="!editing"></span>
       <div
-        :class="$style['page-selector-page-rename']"
+        class="page-selector-page-rename"
         ref="pageName"
         :contenteditable="editing"
         @click="openEdit"

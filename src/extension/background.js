@@ -4,14 +4,22 @@ const ports = {};
 
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
-    if (!ports[tab.id]) {
+    if (!ports[tab.id] || ports[tab.id].disconnected) {
       return browser.tabs.executeScript(tab.id, {
         file: "content_scripts/inspectors-script.js"
       });
     }
     if (ports[tab.id].inspectorsActive) {
       ports[tab.id].inspectorsActive = false;
-      ports[tab.id].postMessage({ reloadPage: true });
+      try {
+        ports[tab.id].postMessage({ reloadPage: true });
+        delete ports[tab.id];
+      } catch {
+        delete ports[tab.id];
+        return browser.tabs.executeScript(tab.id, {
+          file: "content_scripts/inspectors-script.js"
+        });
+      }
     }
   }, 300)
 );

@@ -37,7 +37,8 @@ module.exports = function(app) {
       Task.findAll({
         where: {
           pageId: req.query.pageId,
-          userId: user.id
+          userId: user.id,
+          trashId: null
         },
         order: [[sequelize.literal(sort), orderBy]]
       })

@@ -46,7 +46,7 @@ export default {
         return;
       }
       return (
-        this.inputValue !== this.value &&
+        this.inputValue !== this.value ||
         this.inputValue.toString() !== this.value.toString()
       );
     }

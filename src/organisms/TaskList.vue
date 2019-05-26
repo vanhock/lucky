@@ -10,6 +10,7 @@
         :caption="normalizeDate(task.updatedAt)"
         :selecting-mode="tasksSelected"
         @select="handleTaskSelected"
+        show-menu
       >
         <template v-slot:menu>
           <v-menu>
@@ -25,12 +26,14 @@
                 icon="edit-pencil"
                 icon-size="14px"
                 :text="$t('Edit task')"
+                @click="openEditModal(task)"
             /></menu-item>
             <menu-item
               ><v-toggle
                 icon="trash"
                 icon-size="14px"
                 :text="$t('Move to trash')"
+                @click="moveTaskToTrash(task)"
             /></menu-item>
           </v-menu>
         </template>
@@ -42,6 +45,27 @@
       :title="$t('No tasks yet')"
       transparent
     />
+    <v-modal ref="editModal" class="task-edit-modal" :title="$t('Edit task')">
+      <form-group ref="editForm" editable-mode>
+        <v-input-bordered
+          name="name"
+          ref="createInputName"
+          :value="editFormName"
+          :label="$t('Task name')"
+        />
+        <v-textarea-clear
+          name="text"
+          :value="editFormText"
+          :label="$t('Task description')"
+        />
+      </form-group>
+      <div class="task-creator-modal-buttons">
+        <v-button-inline @click="$refs.editModal.showModal = false">{{
+          $t("Back")
+        }}</v-button-inline>
+        <v-button-primary @click="editTask">{{ $t("Save") }}</v-button-primary>
+      </div>
+    </v-modal>
   </div>
 </template>
 
@@ -53,13 +77,44 @@ import VCardClear from "../molecules/VCard/VCardClear";
 import VMenu from "../atoms/VMenu";
 import MenuItem from "../atoms/MenuItem";
 import VToggle from "../atoms/VToggle";
-
+import {
+  INSPECTOR_SET_TASK_CREATOR_FORM,
+  TASK_EDIT_TASK,
+  TASK_MOVE_TO_TRASH
+} from "../services/store/mutation-types";
+import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
+import VButtonInline from "../molecules/VButton/VButtonInline";
+import FormGroup from "../molecules/FormGroup";
+import VInputBordered from "../molecules/VInput/VInputBordered";
+import VTextareaClear from "../molecules/VTextareaClear";
+import VModal from "../molecules/VModal";
 export default {
   name: "TaskList",
-  components: { VToggle, MenuItem, VMenu, VCardClear, EmptyPlaceholder },
+  components: {
+    VModal,
+    VTextareaClear,
+    VInputBordered,
+    FormGroup,
+    VButtonInline,
+    VButtonPrimary,
+    VToggle,
+    MenuItem,
+    VMenu,
+    VCardClear,
+    EmptyPlaceholder
+  },
+  created() {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === INSPECTOR_SET_TASK_CREATOR_FORM) {
+        this.currentForm = state.taskCreatorForm;
+        this.toggleModal(state.taskCreatorForm.target);
+      }
+    });
+  },
   data: () => ({
     tasksSelected: false,
-    noScroll: false
+    noScroll: false,
+    editForm: {}
   }),
   props: {
     tasks: {
@@ -69,12 +124,15 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["targetElement"]),
+    ...mapGetters(["targetElement", "taskCreatorForm", "taskCreatorModal"]),
     listElement() {
       return this.$refs.tasksList;
     },
-    targetNodeIndex() {
-      return this.targetElement && this.targetElement.nodeIndex;
+    editFormName() {
+      return this.editForm.name;
+    },
+    editFormText() {
+      return this.editForm.text;
     }
   },
   watch: {
@@ -113,7 +171,7 @@ export default {
       this.$nextTick(() => {
         let hasSelected = false;
         this.$children.some(child => {
-          if (child.$children[0].selected) {
+          if (child.$children.length && child.$children[0].selected) {
             return (hasSelected = true);
           }
         });
@@ -121,8 +179,25 @@ export default {
       });
     },
     setSelected(index) {
-      this.$children[index].$children[0].selected = true;
+      this.$children[index + 1].$children[0].selected = true;
       this.tasksSelected = true;
+    },
+    openEditModal(task) {
+      this.editForm = task;
+      this.$refs.editModal.showModal = true;
+    },
+    editTask() {
+      this.$store
+        .dispatch(TASK_EDIT_TASK, {
+          id: this.editForm.id,
+          ...this.$refs.editForm.changedItems
+        })
+        .then(() => {
+          this.$refs.editModal.showModal = false;
+        });
+    },
+    moveTaskToTrash(task) {
+      this.$store.dispatch(TASK_MOVE_TO_TRASH, task);
     }
   }
 };

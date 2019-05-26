@@ -88,11 +88,11 @@ import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import VModal from "../molecules/VModal";
 import FormGroup from "../molecules/FormGroup";
 import PagesList from "../organisms/PagesList";
-import UserPanelMixin from "../mixins/ModalMixin";
+import ModalMixin from "../mixins/ModalMixin.js";
 import VInputBordered from "../molecules/VInput/VInputBordered";
 export default {
   name: "PagesView",
-  mixins: [UserPanelMixin],
+  mixins: [ModalMixin],
   components: {
     VInputBordered,
     PagesList,
@@ -101,9 +101,6 @@ export default {
     EmptyPlaceholder,
     VButtonPrimary,
     ContentWithSidebar
-  },
-  props: {
-    projectId: String
   },
   created() {
     this.initPages(this.$route.params.projectId);
@@ -122,6 +119,9 @@ export default {
     modals: {},
     selectedModal: "create"
   }),
+  props: {
+    projectId: String
+  },
   computed: {
     ...mapGetters(["hasPages", "pages", "currentProject", "projects"]),
     selectedPageWebsite() {

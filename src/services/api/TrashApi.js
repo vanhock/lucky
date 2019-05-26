@@ -36,3 +36,21 @@ export function deletePage(payload, cb) {
     generalCallback(status, data, cb);
   });
 }
+
+export function getTasksTrash(cb) {
+  PixelApi.get("/get-tasks-trash", (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
+
+export function restoreTask(payload, cb) {
+  PixelApi.post("/restore-task", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
+
+export function deleteTask(payload, cb) {
+  PixelApi.post("/delete-task", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}

@@ -12,6 +12,7 @@ import {
   moveTaskToTrash
 } from "../api/TaskApi";
 import { serializeObject } from "../../utils";
+import Vue from "vue";
 export default {
   state: {
     tasks: [],
@@ -37,8 +38,12 @@ export default {
           state.tasks.hasOwnProperty(key) &&
           state.tasks[key].id === payload.id
         ) {
-          return (state.tasks[key] = payload);
+          Vue.set(state.tasks, key, payload);
+          break;
         }
+      }
+      if (state.currentTask && state.currentTask.id === payload.id) {
+        state.currentTask = payload;
       }
     },
     [TASK_SET_CURRENT_TASK](state, payload) {
@@ -95,7 +100,7 @@ export default {
           if (error) {
             return reject(error);
           }
-          commit(TASK_EDIT_TASK, payload);
+          commit(TASK_MOVE_TO_TRASH, payload);
           resolve(success);
         });
       });

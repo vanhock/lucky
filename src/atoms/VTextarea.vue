@@ -62,6 +62,7 @@ export default {
   },
   methods: {
     onChange: _.debounce(function() {
+      console.log("Emit textarea onchange ");
       this.$emit("onchange");
     }, 300),
     onFocus() {

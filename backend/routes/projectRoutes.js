@@ -123,9 +123,6 @@ module.exports = function(app) {
           if (!project) {
             return res.error("Project not found!");
           }
-          if (req.fields.name !== project.name) {
-            return res.error("Name check didn't pass!");
-          }
           if (project.userId === user.id || user.isAdmin) {
             project.destroy();
             Page.destroy({

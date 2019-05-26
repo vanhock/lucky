@@ -1,10 +1,13 @@
 import {
   TRASH_DELETE_PAGE,
   TRASH_DELETE_PROJECT,
+  TRASH_DELETE_TASK,
   TRASH_GET_PAGES_TRASH,
   TRASH_GET_PROJECTS_TRASH,
+  TRASH_GET_TASKS_TRASH,
   TRASH_RESTORE_PAGE,
-  TRASH_RESTORE_PROJECT
+  TRASH_RESTORE_PROJECT,
+  TRASH_RESTORE_TASK
 } from "./mutation-types";
 import {
   getProjectsTrash,
@@ -12,18 +15,23 @@ import {
   deleteProject,
   getPagesTrash,
   restorePage,
-  deletePage
+  deletePage,
+  deleteTask,
+  restoreTask,
+  getTasksTrash
 } from "../api/TrashApi";
 
 export default {
   state: {
     projectsTrash: [],
     pagesTrash: [],
+    tasksTrash: [],
     status: ""
   },
   getters: {
     projectsTrash: state => state.projectsTrash,
-    pagesTrash: state => state.pagesTrash
+    pagesTrash: state => state.pagesTrash,
+    tasksTrash: state => state.tasksTrash
   },
   mutations: {
     [TRASH_RESTORE_PROJECT](state, payload) {
@@ -43,6 +51,15 @@ export default {
     },
     [TRASH_GET_PAGES_TRASH](state, pages) {
       state.pagesTrash = pages;
+    },
+    [TRASH_RESTORE_TASK](state, payload) {
+      removeTrashElement(state, payload, "tasks");
+    },
+    [TRASH_DELETE_TASK](state, payload) {
+      removeTrashElement(state, payload, "tasks");
+    },
+    [TRASH_GET_TASKS_TRASH](state, tasks) {
+      state.tasksTrash = tasks;
     }
   },
   actions: {
@@ -70,16 +87,13 @@ export default {
     },
     [TRASH_DELETE_PROJECT]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        deleteProject(
-          { id: payload.id, name: payload.name },
-          (error, success) => {
-            if (error) {
-              return reject(error);
-            }
-            commit(TRASH_DELETE_PROJECT, payload);
-            resolve(success);
+        deleteProject({ id: payload.id }, (error, success) => {
+          if (error) {
+            return reject(error);
           }
-        );
+          commit(TRASH_DELETE_PROJECT, payload);
+          resolve(success);
+        });
       });
     },
     [TRASH_GET_PAGES_TRASH]: ({ commit }) => {
@@ -106,11 +120,44 @@ export default {
     },
     [TRASH_DELETE_PAGE]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        deletePage({ id: payload.id, name: payload.name }, (error, success) => {
+        deletePage({ id: payload.id }, (error, success) => {
           if (error) {
             return reject(error);
           }
           commit(TRASH_DELETE_PAGE, payload);
+          resolve(success);
+        });
+      });
+    },
+    [TRASH_GET_TASKS_TRASH]: ({ commit }) => {
+      return new Promise((resolve, reject) => {
+        getTasksTrash((error, projects) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(TRASH_GET_TASKS_TRASH, projects);
+          resolve(projects);
+        });
+      });
+    },
+    [TRASH_RESTORE_TASK]: ({ commit }, payload) => {
+      return new Promise((resolve, reject) => {
+        restoreTask({ id: payload.id }, (error, success) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(TRASH_RESTORE_TASK, payload);
+          resolve(success);
+        });
+      });
+    },
+    [TRASH_DELETE_TASK]: ({ commit }, payload) => {
+      return new Promise((resolve, reject) => {
+        deleteTask({ id: payload.id }, (error, success) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(TRASH_DELETE_TASK, payload);
           resolve(success);
         });
       });
@@ -119,9 +166,9 @@ export default {
 };
 
 function removeTrashElement(state, payload, trashType) {
-  const index = state[`${trashType}Trash`].indexOf(payload);
-  if (index === -1) {
-    return;
-  }
-  state[`${trashType}Trash`].splice(index, 1);
+  state[`${trashType}Trash`].some((item, index) => {
+    if (item.id === payload.id) {
+      return state[`${trashType}Trash`].splice(index, 1);
+    }
+  });
 }

@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style['task-creator']">
+  <div class="task-creator">
     <div
       class="task-creator-tools"
       v-if="taskCreatorState !== 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
@@ -23,7 +23,7 @@
       />
     </div>
     <div
-      :class="$style['task-creator-block']"
+      class="task-creator-block"
       v-if="taskCreatorState === 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
     >
       <v-toggle
@@ -32,11 +32,7 @@
         :text="$t('More')"
         @click="showAllFields"
       />
-      <form-group
-        ref="quickCreateForm"
-        :class="$style['task-form']"
-        editable-mode
-      >
+      <form-group ref="quickCreateForm" class="task-form" editable-mode>
         <v-input-clear
           id="pp-task-creator-input"
           ref="quickCreateInputName"
@@ -101,7 +97,6 @@ import VInputClear from "../VInput/VInputClear";
 import {
   INSPECTOR_CREATOR_STATE_SELECTING_AREA,
   INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
-  INSPECTOR_STATE_CREATING,
   INSPECTOR_STATE_INSPECTING
 } from "../../services/store/InspectorsStoreModule";
 import VModal from "../VModal";
@@ -174,8 +169,8 @@ export default {
       );
       this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, {});
       this.closeAllFieldsModal();
-      this.$refs.allFieldsForm.clearFormGroup();
-      this.$refs.quickCreateForm.clearFormGroup();
+      this.$refs.allFieldsForm && this.$refs.allFieldsForm.clearFormGroup();
+      this.$refs.quickCreateForm && this.$refs.quickCreateForm.clearFormGroup();
     },
     showAllFields() {
       this.$refs.operationalModal.showModal = true;
@@ -196,7 +191,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module>
+<style lang="scss">
 .task-creator {
   position: relative;
   display: flex;
@@ -204,23 +199,6 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
-}
-
-.task-creator-block {
-  display: flex;
-  width: 53%;
-  .task-form {
-    width: calc(100% - 120px);
-  }
-}
-
-.task-form-more {
-  position: absolute;
-  background-color: $color-bg2;
-}
-</style>
-<style lang="scss">
-.task-creator {
   &-input {
     .input input {
       border: 0 !important;
@@ -258,5 +236,18 @@ export default {
       align-items: center;
     }
   }
+}
+
+.task-creator-block {
+  display: flex;
+  width: 53%;
+  .task-form {
+    width: calc(100% - 120px);
+  }
+}
+
+.task-form-more {
+  position: absolute;
+  background-color: $color-bg2;
 }
 </style>

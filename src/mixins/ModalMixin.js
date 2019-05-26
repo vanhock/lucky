@@ -1,6 +1,3 @@
-<template> </template>
-
-<script>
 export default {
   name: "ModalMixin",
   data: () => ({
@@ -37,4 +34,3 @@ export default {
     }
   }
 };
-</script>

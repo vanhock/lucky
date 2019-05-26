@@ -6,6 +6,7 @@
     :caption="caption"
     :text="text"
     :selecting-mode="selectingMode"
+    :show-menu="showMenu"
     @click="$emit('click')"
     @select="$emit('select')"
   >

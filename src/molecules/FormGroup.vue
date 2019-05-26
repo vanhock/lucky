@@ -57,6 +57,7 @@ export default {
   },
   methods: {
     handleChildrenChanged() {
+      console.log("form children changed");
       const object = {};
       const self = this;
       this.changedItemsArray = this.$children

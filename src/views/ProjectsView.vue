@@ -76,13 +76,13 @@ import {
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
-import UserPanelMixin from "../mixins/ModalMixin";
+import ModalMixin from "../mixins/ModalMixin.js";
 export default {
   name: "ProjectsView",
   created() {
     this.initProjects();
   },
-  mixins: [UserPanelMixin],
+  mixins: [ModalMixin],
   components: {
     EmptyPlaceholder,
     VInputClear,
