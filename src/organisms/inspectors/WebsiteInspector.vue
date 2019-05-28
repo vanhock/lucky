@@ -28,6 +28,7 @@
           :y="node.y"
         ></v-node>
       </div>
+      <v-draw v-show="showFrameNodes" />
     </i-frame>
   </div>
 </template>
@@ -46,14 +47,16 @@ import {
   INSPECTOR_SET_TASK_CREATOR_STATE
 } from "../../services/store/mutation-types";
 import {
+  INSPECTOR_CREATOR_STATE_SELECTING_AREA,
   INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
   INSPECTOR_CREATOR_STATE_SETTING_TASK,
   INSPECTOR_STATE_CREATING,
   INSPECTOR_STATE_INSPECTING
 } from "../../services/store/InspectorsStoreModule";
+import VDraw from "../../molecules/Inspector/VDraw";
 export default {
   name: "WebsiteInspector",
-  components: { VNode, IFrame },
+  components: { VDraw, VNode, IFrame },
   created() {
     this.renderFrameStyles();
   },
@@ -70,11 +73,14 @@ export default {
       return (
         this.frameNodes &&
         this.frameNodes.length &&
-        this.state !== INSPECTOR_STATE_INSPECTING &&
+        this.state === INSPECTOR_STATE_CREATING &&
         (this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT ||
           (Object.keys(this.targetElement).length &&
             this.taskCreatorState === INSPECTOR_CREATOR_STATE_SETTING_TASK))
       );
+    },
+    showDrawTool() {
+      return this.state === INSPECTOR_STATE_CREATING;
     }
   },
   methods: {

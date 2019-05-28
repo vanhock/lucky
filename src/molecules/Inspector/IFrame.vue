@@ -18,7 +18,7 @@ export default {
     });
   },
   created() {
-    this.$store.subscribe((mutation, state) => {
+    this.$store.subscribe(mutation => {
       if (mutation.type === INSPECTOR_SET_STATE) {
         if (mutation.payload === INSPECTOR_STATE_CREATING) {
           this.onFrameUpdate();
