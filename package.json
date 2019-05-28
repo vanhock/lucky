@@ -29,7 +29,7 @@
     "coffeescript": "^2.3.2",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
-    "inputmask": "^4.0.6",
+    "inputmask": "^4.0.8",
     "lint-staged": "^8.1.0",
     "module": "^1.2.5",
     "node-sass": "^4.11.0",
