@@ -1,5 +1,7 @@
 <script>
 import Vue from "vue";
+import { INSPECTOR_SET_STATE } from "../../services/store/mutation-types";
+import { INSPECTOR_STATE_CREATING } from "../../services/store/InspectorsStoreModule";
 export default {
   name: "IFrame",
   render(h) {
@@ -15,6 +17,22 @@ export default {
       on: { load: this.initFrame }
     });
   },
+  created() {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === INSPECTOR_SET_STATE) {
+        if (mutation.payload === INSPECTOR_STATE_CREATING) {
+          this.onFrameUpdate();
+          this.renderSlot();
+          this.preventLinks();
+        } else {
+          this.restoreLinks();
+        }
+      }
+    });
+  },
+  data: () => ({
+    slotRendered: false
+  }),
   props: {
     src: {
       type: String,
@@ -28,17 +46,19 @@ export default {
     }
   },
   beforeUpdate() {
+    if (!this.frameApp || !this.frameApp.children) return;
     this.frameApp.children = Object.freeze(this.$slots.default);
   },
   methods: {
     initFrame() {
       console.log("I`m a frame");
-      this.preventAllLinks();
-      this.renderSlot();
       this.renderStyles();
-      this.onLoad();
+      this.onFrameUpdate();
     },
     renderSlot() {
+      if (this.slotRendered) {
+        return console.log("Frame slot already rendered!");
+      }
       const children = this.$slots.default;
       const body = this.$el.contentDocument.body;
       const el = document.createElement("DIV");
@@ -52,6 +72,7 @@ export default {
       });
       frameApp.$mount(el);
       this.frameApp = frameApp;
+      this.slotRendered = true;
     },
     renderStyles() {
       if (this.frameStyles !== "") {
@@ -66,23 +87,37 @@ export default {
         this.$el.contentDocument.head.appendChild(style);
       }
     },
-    preventAllLinks() {
+    preventLinks() {
       const anchors = this.$el.contentDocument.getElementsByTagName("a");
       for (let i = 0; i < anchors.length; i++) {
+        anchors[i].setAttribute(
+          "data-pp-href",
+          anchors[i].getAttribute("href")
+        );
         anchors[i].removeAttribute("href");
-        const old_element = anchors[i];
+        /*const old_element = anchors[i];
         const new_element = old_element.cloneNode(true);
         old_element.parentNode.replaceChild(new_element, old_element);
         new_element.onclick = () => {
           return false;
-        };
+        };*/
       }
     },
-    onLoad() {
+    restoreLinks() {
+      const anchors = this.$el.contentDocument.getElementsByTagName("a");
+      for (let i = 0; i < anchors.length; i++) {
+        anchors[i].setAttribute(
+          "href",
+          anchors[i].getAttribute("data-pp-href")
+        );
+        anchors[i].removeAttribute("data-pp-href");
+      }
+    },
+    onFrameUpdate() {
       const frameElements = this.$el.contentDocument.body.getElementsByTagName(
         "*"
       );
-      this.$emit("load", {
+      this.$emit("update", {
         frameNodes: [...frameElements],
         frameWindow: this.$el.contentWindow
       });

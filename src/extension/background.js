@@ -5,9 +5,7 @@ const ports = {};
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
     if (!ports[tab.id] || ports[tab.id].disconnected) {
-      return browser.tabs.executeScript(tab.id, {
-        file: "content_scripts/inspectors-script.js"
-      });
+      return injectContentScripts(tab.id);
     }
     if (ports[tab.id].inspectorsActive) {
       ports[tab.id].inspectorsActive = false;
@@ -16,9 +14,7 @@ browser.browserAction.onClicked.addListener(
         delete ports[tab.id];
       } catch {
         delete ports[tab.id];
-        return browser.tabs.executeScript(tab.id, {
-          file: "content_scripts/inspectors-script.js"
-        });
+        return injectContentScripts(tab.id);
       }
     }
   }, 300)
@@ -40,6 +36,7 @@ browser.tabs.onActivated.addListener(({ tabId }) => {
       console.log(`Error: ${error}`);
     });
 });
+
 browser.tabs.onUpdated.addListener((tabId, { status }, { url }) => {
   if (status === "loading") {
     setIcon("loading");
@@ -99,6 +96,15 @@ function disconnected(p) {
       break;
   }
   delete ports[p.sender.tab.id];
+}
+
+function injectContentScripts(tabId) {
+  browser.tabs.executeScript(tabId, {
+    file: "content_scripts/clear-script.js"
+  });
+  browser.tabs.executeScript(tabId, {
+    file: "content_scripts/inspectors-script.js"
+  });
 }
 
 function initInspectors(tabId) {

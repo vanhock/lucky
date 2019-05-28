@@ -5,7 +5,7 @@
       :src="websiteUrl"
       :width="frameWidth"
       :height="frameHeight"
-      @load="onLoad"
+      @update="reloadFrameSlot"
       :frame-styles="frameStyles"
     >
       <div
@@ -78,7 +78,7 @@ export default {
     }
   },
   methods: {
-    onLoad({ frameNodes, frameWindow }) {
+    reloadFrameSlot({ frameNodes, frameWindow }) {
       console.log("on frame load!");
       this.frameNodes = frameNodes.map((el, id) => {
         const elBounding = getElementBounding(el, frameWindow);
