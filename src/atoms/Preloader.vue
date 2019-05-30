@@ -3,38 +3,73 @@
     <slot></slot>
     <div
       class="preloader-container"
-      :class="{ show: showPreloader || show, dark: dark }"
+      :class="{ show: showPreloader, dark: dark }"
     >
       <div class="pp-fading-spinner">
-        <div
-          class="pp-circle"
-          :class="'pp-circle' + (i + 1)"
-          v-for="i in 12"
-          :key="i"
-        ></div>
+        <template v-if="type === 'circle'"
+          ><div
+            class="pp-circle"
+            :class="'pp-circle' + (i + 1)"
+            v-for="i in 12"
+            :key="i"
+          ></div
+        ></template>
+        <template v-if="type === 'cube'">
+          <div class="pp-cube1"></div>
+          <div class="pp-cube2"></div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { notification } from "../services/notification";
 export default {
   name: "Preloader",
-  data: () => ({
-    timer: 10000,
-    showPreloader: false
-  }),
-  mounted() {
+  created() {
     const self = this;
-    this.$router.beforeEach((from, to, next) => {
-      self.showPreloader = true;
-      next();
-    });
-    this.$router.afterEach((from, to, next) => {
-      setTimeout(() => {
-        self.showPreloader = false;
-      }, 500);
-    });
+    if (this.auto) {
+      if (!this.$router) {
+        return;
+      }
+      this.$router.beforeEach((from, to, next) => {
+        self.showPreloader = true;
+        next();
+      });
+      this.$router.afterEach(() => {
+        setTimeout(() => {
+          self.showPreloader = false;
+        }, 500);
+      });
+    }
+  },
+  data: () => ({
+    time: 15000,
+    timer: null,
+    showPreloader: false,
+    auto: Boolean
+  }),
+  watch: {
+    show(value) {
+      this.showPreloader = value;
+      if (value && !this.timer) {
+        this.timer = () => {
+          const self = this;
+          setTimeout(() => {
+            if (!self.showPreloader) {
+              return;
+            }
+            self.showPreloader = false;
+            notification(
+              this,
+              "error",
+              this.$t("Server not respond, please try again!")
+            );
+          }, this.time);
+        };
+      }
+    }
   },
   props: {
     show: {
@@ -44,17 +79,10 @@ export default {
     dark: {
       type: Boolean,
       default: false
-    }
-  },
-  computed: {
-    preloaderOutOfTime: () => {
-      if (!this || !this.show) {
-        return false;
-      }
-      const self = this;
-      setTimeout(() => {
-        self.preloaderOutOfTime = true;
-      }, this.timer);
+    },
+    type: {
+      type: String,
+      default: "circle"
     }
   }
 };
@@ -68,7 +96,7 @@ export default {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: $color-b5;
+    background-color: rgba(247, 247, 247, 0.4);
     opacity: 0;
     z-index: -5;
     transition: opacity 0.1s ease-in-out;
@@ -236,6 +264,64 @@ export default {
   }
   40% {
     opacity: 1;
+  }
+}
+
+.pp-cube1,
+.pp-cube2 {
+  background-color: #333;
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  -webkit-animation: sk-cubemove 1.8s infinite ease-in-out;
+  animation: sk-cubemove 1.8s infinite ease-in-out;
+}
+
+.pp-cube2 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+
+@-webkit-keyframes sk-cubemove {
+  25% {
+    -webkit-transform: translateX(42px) rotate(-90deg) scale(0.5);
+  }
+  50% {
+    -webkit-transform: translateX(42px) translateY(42px) rotate(-180deg);
+  }
+  75% {
+    -webkit-transform: translateX(0px) translateY(42px) rotate(-270deg)
+      scale(0.5);
+  }
+  100% {
+    -webkit-transform: rotate(-360deg);
+  }
+}
+
+@keyframes sk-cubemove {
+  25% {
+    transform: translateX(42px) rotate(-90deg) scale(0.5);
+    -webkit-transform: translateX(42px) rotate(-90deg) scale(0.5);
+  }
+  50% {
+    transform: translateX(42px) translateY(42px) rotate(-179deg);
+    -webkit-transform: translateX(42px) translateY(42px) rotate(-179deg);
+  }
+  50.1% {
+    transform: translateX(42px) translateY(42px) rotate(-180deg);
+    -webkit-transform: translateX(42px) translateY(42px) rotate(-180deg);
+  }
+  75% {
+    transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);
+    -webkit-transform: translateX(0px) translateY(42px) rotate(-270deg)
+      scale(0.5);
+  }
+  100% {
+    transform: rotate(-360deg);
+    -webkit-transform: rotate(-360deg);
   }
 }
 </style>

@@ -46,7 +46,7 @@
       <v-modal
         ref="operationalModal"
         class="task-creator-modal"
-        :title="$t('Create task')"
+        :title="$t('Share')"
         @open="updateCurrentForm"
         @close="updateCurrentForm"
       >
@@ -74,7 +74,7 @@
       </v-modal>
       <v-toggle
         class="task-creator-create-task"
-        :text="$t('Save task')"
+        :text="$t('Share')"
         @click="createTask"
         background
       />
@@ -221,7 +221,7 @@ export default {
     align-items: center;
   }
   &-create-task {
-    width: 120px;
+    width: 80px;
   }
   &-modal {
     .pp-modal-container {
@@ -243,6 +243,7 @@ export default {
   width: 53%;
   .task-form {
     width: calc(100% - 120px);
+    margin: 0;
   }
 }
 

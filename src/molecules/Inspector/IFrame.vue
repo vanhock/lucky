@@ -18,10 +18,11 @@ export default {
     });
   },
   created() {
+    this.$emit("stateChanged", "loading");
     this.$store.subscribe(mutation => {
       if (mutation.type === INSPECTOR_SET_STATE) {
         if (mutation.payload === INSPECTOR_STATE_CREATING) {
-          this.onFrameUpdate();
+          this.$emit("stateChanged", "loading");
           this.renderSlot();
           this.preventLinks();
         } else {
@@ -31,7 +32,8 @@ export default {
     });
   },
   data: () => ({
-    slotRendered: false
+    slotRendered: false,
+    stylesRendered: false
   }),
   props: {
     src: {
@@ -48,6 +50,7 @@ export default {
   beforeUpdate() {
     if (!this.frameApp || !this.frameApp.children) return;
     this.frameApp.children = Object.freeze(this.$slots.default);
+    this.$emit("stateChanged", this.$el.contentDocument.readyState);
   },
   methods: {
     initFrame() {
@@ -75,7 +78,7 @@ export default {
       this.slotRendered = true;
     },
     renderStyles() {
-      if (this.frameStyles !== "") {
+      if (!this.stylesRendered && this.frameStyles !== "") {
         const d = this.$el.contentDocument;
         const style = d.createElement("style");
         if (style.styleSheet) {
@@ -85,6 +88,7 @@ export default {
           style.appendChild(d.createTextNode(this.frameStyles));
         }
         this.$el.contentDocument.head.appendChild(style);
+        this.stylesRendered = true;
       }
     },
     preventLinks() {

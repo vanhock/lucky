@@ -6,8 +6,7 @@ import {
   INSPECTOR_SET_TARGET_ELEMENT,
   INSPECTOR_SET_TASK_CREATOR_FORM,
   INSPECTOR_SET_TASK_CREATOR_STATE,
-  INSPECTOR_SET_VIEW_PARAMS,
-  INSPECTOR_TASK_CREATOR_TOGGLE_MODAL
+  INSPECTOR_SET_VIEW_PARAMS
 } from "./mutation-types";
 
 export const INSPECTOR_STATE_INSPECTING = "INSPECTOR_STATE_INSPECTING";
@@ -25,6 +24,7 @@ export default {
     state: INSPECTOR_STATE_INSPECTING,
     taskCreatorState: INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
     taskCreatorForm: {},
+    currentDrawTool: "",
     viewParams: {
       websiteWidth: window.innerWidth + "px",
       websiteHeight: window.innerHeight - 24 + "px",

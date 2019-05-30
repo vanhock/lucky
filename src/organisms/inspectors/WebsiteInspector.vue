@@ -1,35 +1,38 @@
 <template>
   <div class="website-inspector">
-    <i-frame
-      ref="frame"
-      :src="websiteUrl"
-      :width="frameWidth"
-      :height="frameHeight"
-      @update="reloadFrameSlot"
-      :frame-styles="frameStyles"
-    >
-      <div
-        class="pp-frame-nodes"
-        v-show="showFrameNodes"
-        :class="{ selected: targetElement.id }"
+    <preloader :show="frameLoading" type="cube">
+      <i-frame
+        ref="frame"
+        :src="websiteUrl"
+        :width="frameWidth"
+        :height="frameHeight"
+        @update="onFrameUpdated"
+        @stateChanged="onFrameStateChanged"
+        :frame-styles="frameStyles"
       >
-        <v-node
-          class="pp-node"
-          v-for="node in frameNodes"
-          @click="selectNode(node)"
-          :active="targetElement.id === node.id"
-          :key="node.id"
-          :id="node.id"
-          :hidden="node.hidden"
-          :depth-level="node.depthLevel"
-          :width="node.width"
-          :height="node.height"
-          :x="node.x"
-          :y="node.y"
-        ></v-node>
-      </div>
-      <v-draw v-show="showFrameNodes" />
-    </i-frame>
+        <div
+          class="pp-frame-nodes"
+          v-show="showFrameNodes"
+          :class="{ selected: targetElement.id }"
+        >
+          <v-node
+            class="pp-node"
+            v-for="node in frameNodes"
+            @click="selectNode(node)"
+            :active="targetElement.id === node.id"
+            :key="node.id"
+            :id="node.id"
+            :hidden="node.hidden"
+            :depth-level="node.depthLevel"
+            :width="node.width"
+            :height="node.height"
+            :x="node.x"
+            :y="node.y"
+          ></v-node>
+        </div>
+        <v-draw v-show="showFrameNodes" />
+      </i-frame>
+    </preloader>
   </div>
 </template>
 
@@ -54,9 +57,10 @@ import {
   INSPECTOR_STATE_INSPECTING
 } from "../../services/store/InspectorsStoreModule";
 import VDraw from "../../molecules/Inspector/VDraw";
+import Preloader from "../../atoms/Preloader";
 export default {
   name: "WebsiteInspector",
-  components: { VDraw, VNode, IFrame },
+  components: { Preloader, VDraw, VNode, IFrame },
   created() {
     this.renderFrameStyles();
   },
@@ -65,7 +69,8 @@ export default {
     frameWidth: window.innerWidth + "px",
     frameHeight: window.innerHeight - 49 + "px",
     frameNodes: [],
-    frameStyles: ""
+    frameStyles: "",
+    frameLoading: false
   }),
   computed: {
     ...mapGetters(["state", "taskCreatorState", "targetElement"]),
@@ -84,7 +89,18 @@ export default {
     }
   },
   methods: {
-    reloadFrameSlot({ frameNodes, frameWindow }) {
+    onFrameUpdated({ frameNodes, frameWindow }) {
+      this.frameLoading = false;
+      this.reloadFrameSlot(frameNodes, frameWindow);
+    },
+    onFrameStateChanged(state) {
+      if (state === "loading") {
+        this.frameLoading = true;
+      } else if (state === "complete") {
+        this.frameLoading = false;
+      }
+    },
+    reloadFrameSlot(frameNodes, frameWindow) {
       console.log("on frame load!");
       this.frameNodes = frameNodes.map((el, id) => {
         const elBounding = getElementBounding(el, frameWindow);
@@ -140,4 +156,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.website-inspector {
+  position: relative;
+}
+</style>
