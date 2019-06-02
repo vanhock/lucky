@@ -1,38 +1,25 @@
 <template>
   <div class="task-creator">
-    <div
-      class="task-creator-tools"
-      v-if="taskCreatorState !== 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
-    >
-      <div class="task-creator-caption">
-        {{ currentToolCaption }}
-      </div>
-      <v-toggle
-        icon="target"
-        :icon-size="iconSize"
-        :active="
-          taskCreatorState === 'INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT'
-        "
-        @click="toggleTool('INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT')"
-      />
-      <v-toggle
-        icon="text-box"
-        :icon-size="iconSize"
-        :active="taskCreatorState === 'INSPECTOR_CREATOR_STATE_SELECTING_AREA'"
-        @click="toggleTool('INSPECTOR_CREATOR_STATE_SELECTING_AREA')"
-      />
-    </div>
-    <div
-      class="task-creator-block"
-      v-if="taskCreatorState === 'INSPECTOR_CREATOR_STATE_SETTING_TASK'"
-    >
+    <v-toggle
+      class="task-creator-close"
+      icon="cheveron-outline-left"
+      :text="$t('Back')"
+      @click="cancelCreating"
+    ></v-toggle>
+    <div class="task-creator-tools"></div>
+    <div class="task-creator-block">
       <v-toggle
         class="task-creator-all"
         icon="cheveron-down"
         :text="$t('More')"
         @click="showAllFields"
       />
-      <form-group ref="quickCreateForm" class="task-form" editable-mode>
+      <form-group
+        ref="quickCreateForm"
+        class="task-form"
+        @change="onChangeName"
+        editable-mode
+      >
         <v-input-clear
           id="pp-task-creator-input"
           ref="quickCreateInputName"
@@ -79,7 +66,6 @@
         background
       />
     </div>
-    <v-toggle :text="$t('Cancel')" @click="cancelCreating" />
   </div>
 </template>
 
@@ -88,22 +74,17 @@ import VToggle from "../../atoms/VToggle";
 import { mapGetters } from "vuex";
 import {
   INSPECTOR_SET_STATE,
-  INSPECTOR_SET_TARGET_ELEMENT,
-  INSPECTOR_SET_TASK_CREATOR_STATE,
+  INSPECTOR_SET_TOOL,
   TASK_CREATE_TASK
 } from "../../services/store/mutation-types";
 import FormGroup from "../FormGroup";
 import VInputClear from "../VInput/VInputClear";
-import {
-  INSPECTOR_CREATOR_STATE_SELECTING_AREA,
-  INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
-  INSPECTOR_STATE_INSPECTING
-} from "../../services/store/InspectorsStoreModule";
 import VModal from "../VModal";
 import VInputBordered from "../VInput/VInputBordered";
 import VButtonPrimary from "../VButton/VButtonPrimary";
 import VButtonInline from "../VButton/VButtonInline";
 import VTextareaClear from "../VTextareaClear";
+import { INSPECTOR_STATE_INSPECTING } from "../../services/store/InspectorsStoreModule";
 export default {
   name: "TaskCreator",
   components: {
@@ -122,28 +103,19 @@ export default {
   }),
   computed: {
     ...mapGetters(["taskCreatorState", "currentPage"]),
-    currentToolCaption() {
-      if (this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT) {
-        return this.$t("Select element on the page");
-      } else if (
-        this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_AREA
-      ) {
-        return this.$t("Highlight target area");
-      }
-    },
     currentFormFilled() {
-      return this.currentForm && Object.keys(this.currentForm);
+      return this.currentForm && Object.keys(this.currentForm).length;
     },
     currentFormName() {
-      return this.currentFormFilled && this.currentForm.name;
+      return this.currentFormFilled ? this.currentForm.name : "";
     },
     currentFormText() {
-      return this.currentFormFilled && this.currentForm.text;
+      return this.currentFormFilled ? this.currentForm.text : "";
     }
   },
   methods: {
     toggleTool(state) {
-      this.$store.dispatch(INSPECTOR_SET_TASK_CREATOR_STATE, state);
+      this.$store.dispatch(INSPECTOR_SET_TOOL, state);
     },
     createTask() {
       const fields = this.$refs.operationalModal.showModal
@@ -153,24 +125,17 @@ export default {
         id: this.currentPage.id,
         ...fields
       });
-      this.$store.dispatch(
-        INSPECTOR_SET_TASK_CREATOR_STATE,
-        INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT
-      );
-      this.closeAllFieldsModal();
-      this.$refs.allFieldsForm.clearFormGroup();
-      this.$refs.quickCreateForm.clearFormGroup();
+      this.clearTask();
     },
-    cancelCreating() {
-      this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_INSPECTING);
-      this.$store.dispatch(
-        INSPECTOR_SET_TASK_CREATOR_STATE,
-        INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT
-      );
-      this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, {});
+    clearTask() {
       this.closeAllFieldsModal();
+      this.currentForm = {};
       this.$refs.allFieldsForm && this.$refs.allFieldsForm.clearFormGroup();
       this.$refs.quickCreateForm && this.$refs.quickCreateForm.clearFormGroup();
+    },
+    cancelCreating() {
+      this.clearTask();
+      this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_INSPECTING);
     },
     showAllFields() {
       this.$refs.operationalModal.showModal = true;
@@ -180,12 +145,16 @@ export default {
     },
     updateCurrentForm() {
       this.currentForm = this.$refs.operationalModal.showModal
-        ? this.$refs.quickCreateForm.getFormFields()
-        : this.$refs.allFieldsForm.getFormFields();
+        ? this.$refs.quickCreateForm &&
+          this.$refs.quickCreateForm.getFormFields()
+        : this.$refs.allFieldsForm && this.$refs.allFieldsForm.getFormFields();
 
       if (!this.$refs.operationalModal.showModal) {
         document.getElementById("pp-task-creator-input").focus();
       }
+    },
+    onChangeName() {
+      this.currentForm = this.$refs.quickCreateForm.allItems;
     }
   }
 };
@@ -199,6 +168,8 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
+  &-close {
+  }
   &-input {
     .input input {
       border: 0 !important;
@@ -240,7 +211,8 @@ export default {
 
 .task-creator-block {
   display: flex;
-  width: 53%;
+  width: 40%;
+  margin: 0 auto;
   .task-form {
     width: calc(100% - 120px);
     margin: 0;

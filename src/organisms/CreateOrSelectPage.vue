@@ -168,7 +168,8 @@ export default {
 <style lang="scss">
 .pp-modal.popup-wide {
   .pp-modal-container {
-    max-width: 700px;
+    max-width: 844px;
+    width: 90%;
   }
 }
 

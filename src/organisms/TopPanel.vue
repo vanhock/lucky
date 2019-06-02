@@ -3,13 +3,17 @@
     <div class="top-panel-container">
       <v-toggle class="left" icon="menu" :icon-size="iconSize" />
       <design-params v-if="hasDesign" />
-      <v-toggle
-        class="left"
-        icon="refresh"
-        text="Reload view"
-        :show-text="false"
-        @click="$emit('reloadView')"
-      />
+      <panel-control v-show="inspectingState">
+        <v-toggle class="left" icon="upload" text="Compare with design" />
+        <!--<v-toggle
+          class="left"
+          icon="text-box"
+          text="Inspecting"
+          hide-text
+          :active="inspectorToolActive"
+          @click="toggleInspector"
+        />-->
+      </panel-control>
       <div
         style="flex-grow: 1;
     flex-shrink: 999;"
@@ -32,7 +36,7 @@
         :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
         :text="$t('Tasks')"
         :icon-size="iconSize"
-        :show-text="false"
+        hide-text
         :label="tasksCount"
         :active="showTasksList"
         @click="toggleTasksList"
@@ -50,11 +54,20 @@ import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/Toolbars/DesignToolbar";
 import CenterToolbar from "../molecules/Toolbars/CenterToolbar";
 import config from "../config";
-import { INSPECTOR_SET_STATE } from "../services/store/mutation-types";
-import { INSPECTOR_STATE_CREATING } from "../services/store/InspectorsStoreModule";
+import {
+  INSPECTOR_SET_STATE,
+  INSPECTOR_SET_TOOL
+} from "../services/store/mutation-types";
+import {
+  INSPECTOR_STATE_CREATING,
+  INSPECTOR_STATE_INSPECTING,
+  INSPECTOR_TOOL_DOM_INSPECTOR
+} from "../services/store/InspectorsStoreModule";
+import PanelControl from "../atoms/PanelControl";
 export default {
   name: "TopPanel",
   components: {
+    PanelControl,
     CenterToolbar,
     DesignParams,
     VToggle,
@@ -78,8 +91,15 @@ export default {
       "hasDesign",
       "state",
       "tasks",
-      "tasksCount"
-    ])
+      "tasksCount",
+      "tool"
+    ]),
+    inspectorToolActive() {
+      return this.tool === INSPECTOR_TOOL_DOM_INSPECTOR;
+    },
+    inspectingState() {
+      return this.state === INSPECTOR_STATE_INSPECTING;
+    }
   },
   methods: {
     toggleTasksList() {
@@ -87,6 +107,12 @@ export default {
     },
     setCreatingTaskState() {
       this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_CREATING);
+    },
+    toggleInspector() {
+      if (this.tool === "INSPECTOR_TOOL_DOM_INSPECTOR") {
+        return this.$store.dispatch(INSPECTOR_SET_TOOL, "");
+      }
+      this.$store.dispatch(INSPECTOR_SET_TOOL, "INSPECTOR_TOOL_DOM_INSPECTOR");
     }
   }
 };

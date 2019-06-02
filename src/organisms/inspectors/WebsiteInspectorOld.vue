@@ -24,7 +24,7 @@ import {
 import ViewMixin from "../../mixins/ViewMixin";
 import {
   INSPECTOR_SET_CURRENT_FRAME,
-  INSPECTOR_SET_VIEW_PARAMS
+  PAGE_SET_VIEW_PARAMS
 } from "../../services/store/mutation-types";
 export default {
   name: "WebsiteInspector",
@@ -108,9 +108,9 @@ export default {
               self.preventAllLinks(frameWindow);
               self.applyAdditionalFrameStyles();
               self.$emit("websiteInspectorReady");
-              /** If viewParams not set, emmit INSPECTOR_SET_VIEW_PARAMS **/
+              /** If viewParams not set, emmit PAGE_SET_VIEW_PARAMS **/
               if (!self.viewParams) {
-                self.$emit(INSPECTOR_SET_VIEW_PARAMS, {
+                self.$emit(PAGE_SET_VIEW_PARAMS, {
                   websiteInspectorWidth: frameWindow.innerWidth
                 });
               }

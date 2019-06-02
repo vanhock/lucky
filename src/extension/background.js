@@ -4,17 +4,17 @@ const ports = {};
 
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
-    if (!ports[tab.id] || ports[tab.id].disconnected) {
-      return injectContentScripts(tab.id);
-    }
     if (ports[tab.id].inspectorsActive) {
       ports[tab.id].inspectorsActive = false;
       try {
         ports[tab.id].postMessage({ reloadPage: true });
         delete ports[tab.id];
       } catch {
-        delete ports[tab.id];
-        return injectContentScripts(tab.id);
+        console.log(`Failed to connect with tab: ${tab.id}`);
+      }
+    } else {
+      if (ports[tab.id]) {
+        initInspectors(tab.id);
       }
     }
   }, 300)
@@ -61,7 +61,7 @@ function connected(p) {
       isCurrentTab(p.sender.tab.id, result => {
         if (result) {
           setIcon();
-          initInspectors(p.sender.tab.id);
+          ports[p.sender.tab.id].connected = true;
         }
       });
       break;
@@ -99,9 +99,9 @@ function disconnected(p) {
 }
 
 function injectContentScripts(tabId) {
-  browser.tabs.executeScript(tabId, {
+  /*browser.tabs.executeScript(tabId, {
     file: "content_scripts/clear-script.js"
-  });
+  });*/
   browser.tabs.executeScript(tabId, {
     file: "content_scripts/inspectors-script.js"
   });

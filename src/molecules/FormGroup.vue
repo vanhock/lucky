@@ -80,6 +80,7 @@ export default {
             ? item.$children[0].inputValue
             : item.$children[0].value;
       });
+      this.$emit("change");
     },
     getFormChangedFields() {
       this.handleChildrenChanged();
@@ -91,14 +92,14 @@ export default {
     },
     resetFormGroup() {
       this.$children.forEach(child => {
-        child.resetValue();
+        child.$children[0].resetValue();
       });
       this.changedItemsArray = [];
       this.changedItems = {};
     },
     clearFormGroup() {
       this.$children.forEach(child => {
-        child.clearValue();
+        child.$children[0].clearValue();
       });
       this.changedItemsArray = [];
       this.changedItems = {};

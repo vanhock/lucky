@@ -12,6 +12,7 @@
     :autocomplete="autocomplete"
     :disabled="disabled"
     :theme="theme"
+    @onchange="$emit('onchange')"
   />
 </template>
 

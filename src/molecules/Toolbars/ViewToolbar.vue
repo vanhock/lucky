@@ -6,13 +6,13 @@
         icon="link"
         text="Sync scroll"
         @click="toggleSyncScroll"
-        :show-text="false"
+        hide-text
       ></v-toggle>
       <panel-control :dropdown="true">
         <v-toggle
           icon="view-carousel"
           text="Change view"
-          :show-text="false"
+          hide-text
         ></v-toggle>
         <template v-slot:dropdown>
           <v-menu>
@@ -32,7 +32,7 @@
         </template>
       </panel-control>
       <panel-control :dropdown="true">
-        <v-toggle icon="tuning" text="Recognize settings" :show-text="false" />
+        <v-toggle icon="tuning" text="Recognize settings" hide-text />
         <template v-slot:dropdown>
           <v-menu>
             <menu-item>
@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     toggleSyncScroll() {
-      this.$store.dispatch("INSPECTOR_SET_VIEW_PARAMS", {
+      this.$store.dispatch("PAGE_SET_VIEW_PARAMS", {
         syncScroll: !this.syncScroll
       });
     }

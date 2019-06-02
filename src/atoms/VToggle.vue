@@ -2,7 +2,7 @@
   <div
     class="toggle"
     :class="[
-      { active: active, 'show-text': showText, background: background },
+      { active: active, 'show-text': !hideText, background: background },
       appTheme
     ]"
     @click="$emit('click')"
@@ -47,7 +47,7 @@ export default {
     icon: String,
     iconHover: String,
     text: String,
-    showText: { type: Boolean, default: true },
+    hideText: Boolean,
     label: {
       type: [String, Number]
     },

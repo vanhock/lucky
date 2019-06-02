@@ -20,7 +20,7 @@ import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
   AUTH_CHECK_AUTH,
-  INSPECTOR_SET_VIEW_PARAMS,
+  PAGE_EDIT_PAGE,
   PAGE_GET_PAGES,
   PAGE_SET_CURRENT_PAGE,
   PROJECT_SET_CURRENT_PROJECT
@@ -36,7 +36,7 @@ Vue.directive("clickoutside", {
     };
     document.addEventListener("click", el._handler);
   },
-  unbind(el, binding) {
+  unbind(el) {
     document.removeEventListener("click", el._handler);
   }
 });
@@ -108,6 +108,9 @@ export default {
               projectId: pages[0].projectId
             });
           }
+        })
+        .catch(() => {
+          this.$refs.pageModal.toggleModal(true);
         });
     },
     getFoundNodes() {
@@ -143,7 +146,7 @@ export default {
     },
     setViewParams() {
       const viewParams = this.defaultViewParams;
-      this.$store.dispatch(INSPECTOR_SET_VIEW_PARAMS, viewParams);
+      this.$store.dispatch(PAGE_EDIT_PAGE, viewParams);
     },
     scrollWebsite(value) {
       if (!this.currentFrameDocument) {

@@ -1,6 +1,6 @@
 <template>
   <div class="website-inspector">
-    <preloader :show="frameLoading" type="cube">
+    <preloader :show="websiteStatus === 'loading'" type="cube">
       <i-frame
         ref="frame"
         :src="websiteUrl"
@@ -10,27 +10,13 @@
         @stateChanged="onFrameStateChanged"
         :frame-styles="frameStyles"
       >
-        <div
-          class="pp-frame-nodes"
+        <frame-nodes
           v-show="showFrameNodes"
-          :class="{ selected: targetElement.id }"
-        >
-          <v-node
-            class="pp-node"
-            v-for="node in frameNodes"
-            @click="selectNode(node)"
-            :active="targetElement.id === node.id"
-            :key="node.id"
-            :id="node.id"
-            :hidden="node.hidden"
-            :depth-level="node.depthLevel"
-            :width="node.width"
-            :height="node.height"
-            :x="node.x"
-            :y="node.y"
-          ></v-node>
-        </div>
-        <v-draw v-show="showFrameNodes" />
+          :selected="targetElement"
+          :nodes="frameNodes"
+          @click="selectNode"
+        />
+        <v-draw v-show="showDrawTool" />
       </i-frame>
     </preloader>
   </div>
@@ -44,23 +30,17 @@ import {
   getElementBounding,
   hasParentElementWithSameSize
 } from "../../utils";
-import VNode from "../../molecules/Inspector/VNode";
 import {
-  INSPECTOR_SET_TARGET_ELEMENT,
-  INSPECTOR_SET_TASK_CREATOR_STATE
+  INSPECTOR_SET_STATE,
+  INSPECTOR_SET_STATUS,
+  INSPECTOR_SET_TARGET_ELEMENT
 } from "../../services/store/mutation-types";
-import {
-  INSPECTOR_CREATOR_STATE_SELECTING_AREA,
-  INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
-  INSPECTOR_CREATOR_STATE_SETTING_TASK,
-  INSPECTOR_STATE_CREATING,
-  INSPECTOR_STATE_INSPECTING
-} from "../../services/store/InspectorsStoreModule";
 import VDraw from "../../molecules/Inspector/VDraw";
 import Preloader from "../../atoms/Preloader";
+import FrameNodes from "../../molecules/Inspector/FrameNodes";
 export default {
   name: "WebsiteInspector",
-  components: { Preloader, VDraw, VNode, IFrame },
+  components: { FrameNodes, Preloader, VDraw, IFrame },
   created() {
     this.renderFrameStyles();
   },
@@ -73,35 +53,30 @@ export default {
     frameLoading: false
   }),
   computed: {
-    ...mapGetters(["state", "taskCreatorState", "targetElement"]),
+    ...mapGetters([
+      "state",
+      "taskCreatorState",
+      "targetElement",
+      "websiteStatus",
+      "showDesignInspector",
+      "compareMode",
+      "tool"
+    ]),
     showFrameNodes() {
       return (
-        this.frameNodes &&
-        this.frameNodes.length &&
-        this.state === INSPECTOR_STATE_CREATING &&
-        (this.taskCreatorState === INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT ||
-          (Object.keys(this.targetElement).length &&
-            this.taskCreatorState === INSPECTOR_CREATOR_STATE_SETTING_TASK))
+        this.state === "INSPECTOR_STATE_INSPECTING" &&
+        this.tool === "INSPECTOR_TOOL_DOM_INSPECTOR"
       );
     },
     showDrawTool() {
-      return this.state === INSPECTOR_STATE_CREATING;
+      return this.state === "INSPECTOR_STATE_CREATING";
     }
   },
   methods: {
-    onFrameUpdated({ frameNodes, frameWindow }) {
-      this.frameLoading = false;
-      this.reloadFrameSlot(frameNodes, frameWindow);
+    initView() {
+      this.renderFrameStyles();
     },
-    onFrameStateChanged(state) {
-      if (state === "loading") {
-        this.frameLoading = true;
-      } else if (state === "complete") {
-        this.frameLoading = false;
-      }
-    },
-    reloadFrameSlot(frameNodes, frameWindow) {
-      console.log("on frame load!");
+    setFrameNodes(frameNodes, frameWindow) {
       this.frameNodes = frameNodes.map((el, id) => {
         const elBounding = getElementBounding(el, frameWindow);
         return {
@@ -119,14 +94,23 @@ export default {
     },
     selectNode(node) {
       this.$store.dispatch(INSPECTOR_SET_TARGET_ELEMENT, node);
-      this.$store.dispatch(
-        INSPECTOR_SET_TASK_CREATOR_STATE,
-        INSPECTOR_CREATOR_STATE_SETTING_TASK
-      );
+      this.$store.dispatch(INSPECTOR_SET_STATE, "INSPECTOR_STATE_CREATING");
       this.$nextTick(() => {
         const input = document.getElementById("pp-task-creator-input");
         input.select();
         input.focus();
+      });
+    },
+    onFrameUpdated({ frameNodes, frameWindow }) {
+      this.setFrameNodes(frameNodes, frameWindow);
+      this.$nextTick(() => {
+        this.onFrameStateChanged("complete");
+      });
+    },
+    onFrameStateChanged(state) {
+      this.$store.dispatch(INSPECTOR_SET_STATUS, {
+        inspector: "website",
+        status: state
       });
     },
     renderFrameStyles() {

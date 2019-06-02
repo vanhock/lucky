@@ -6,7 +6,8 @@ import {
   PAGE_MOVE_TO_TRASH,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGE,
-  TASK_GET_ALL_TASKS
+  TASK_GET_ALL_TASKS,
+  PAGE_SET_VIEW_PARAMS
 } from "./mutation-types";
 import {
   createPage,
@@ -19,7 +20,17 @@ import { serializeObject } from "../../utils";
 
 export default {
   state: {
-    currentPage: {},
+    currentPage: {
+      websiteWidth: window.innerWidth + "px",
+      websiteHeight: window.innerHeight - 24 + "px",
+      websiteUrl: null,
+      showWebsiteInspector: true,
+      showDesignInspector: false,
+      websiteInspectorPercentage: 50,
+      showDesignViewMode: "found",
+      showWebsiteViewMode: "found",
+      syncScroll: false
+    },
     pages: []
   },
   getters: {
@@ -27,7 +38,10 @@ export default {
     pages: state => state.pages,
     hasPages: state => state.pages && state.pages.length,
     hasCurrentPage: state =>
-      state.currentPage && Object.keys(state.currentPage).length
+      state.currentPage && Object.keys(state.currentPage).length,
+    showDesignInspector: state => state.currentPage.showDesignInspector,
+    showWebsiteInspector: state => state.currentPage.showWebsiteInspector,
+    compareMode: state => state.currentPage.compareMode
   },
   mutations: {
     [PAGE_EDIT_PAGE](state, payload) {

@@ -78,7 +78,6 @@ import VMenu from "../atoms/VMenu";
 import MenuItem from "../atoms/MenuItem";
 import VToggle from "../atoms/VToggle";
 import {
-  INSPECTOR_SET_TASK_CREATOR_FORM,
   TASK_EDIT_TASK,
   TASK_MOVE_TO_TRASH
 } from "../services/store/mutation-types";
@@ -102,14 +101,6 @@ export default {
     VMenu,
     VCardClear,
     EmptyPlaceholder
-  },
-  created() {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === INSPECTOR_SET_TASK_CREATOR_FORM) {
-        this.currentForm = state.taskCreatorForm;
-        this.toggleModal(state.taskCreatorForm.target);
-      }
-    });
   },
   data: () => ({
     tasksSelected: false,

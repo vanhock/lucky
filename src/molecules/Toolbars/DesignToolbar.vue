@@ -6,10 +6,10 @@
           :active="showAllBlocks"
           :icon="(showFoundBlocks && 'target') || 'layers'"
           :text="(showFoundBlocks && 'Found layers') || 'All layers'"
-          :show-text="false"
+          hide-text
           @click="toggleLayersViewMode"
         />
-        <v-toggle icon="border-none" text="Guides" :show-text="false" />
+        <v-toggle icon="border-none" text="Guides" hide-text />
       </template>
 
       <v-toggle icon="repost" :text="$t('Add design')" />

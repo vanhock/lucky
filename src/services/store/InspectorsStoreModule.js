@@ -1,41 +1,30 @@
-import Vue from "vue";
 import {
   INSPECTOR_SET_DESIGN,
   INSPECTOR_SET_FOUND_NODES,
   INSPECTOR_SET_STATE,
+  INSPECTOR_SET_STATUS,
   INSPECTOR_SET_TARGET_ELEMENT,
-  INSPECTOR_SET_TASK_CREATOR_FORM,
-  INSPECTOR_SET_TASK_CREATOR_STATE,
-  INSPECTOR_SET_VIEW_PARAMS
+  INSPECTOR_SET_TOOL
 } from "./mutation-types";
 
 export const INSPECTOR_STATE_INSPECTING = "INSPECTOR_STATE_INSPECTING";
 export const INSPECTOR_STATE_CREATING = "INSPECTOR_STATE_CREATING";
 
-export const INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT =
-  "INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT";
-export const INSPECTOR_CREATOR_STATE_SELECTING_AREA =
-  "INSPECTOR_CREATOR_STATE_SELECTING_AREA";
-export const INSPECTOR_CREATOR_STATE_SETTING_TASK =
-  "INSPECTOR_CREATOR_STATE_SETTING_TASK";
+export const INSPECTOR_TOOL_DOM_INSPECTOR = "INSPECTOR_TOOL_DOM_INSPECTOR";
+export const INSPECTOR_TOOL_RECTANGLE = "INSPECTOR_TOOL_RECTANGLE";
+export const INSPECTOR_TOOL_OVAL = "INSPECTOR_TOOL_OVAL";
+export const INSPECTOR_TOOL_LINE = "INSPECTOR_TOOL_LINE";
+export const INSPECTOR_TOOL_PENCIL = "INSPECTOR_TOOL_PENCIL";
+export const INSPECTOR_TOOL_BLUR = "INSPECTOR_TOOL_BLUR";
+export const INSPECTOR_TOOL_TEXT = "INSPECTOR_TOOL_TEXT";
 
 export default {
   state: {
+    websiteStatus: "complete",
     state: INSPECTOR_STATE_INSPECTING,
-    taskCreatorState: INSPECTOR_CREATOR_STATE_SELECTING_ELEMENT,
+    tool: INSPECTOR_TOOL_DOM_INSPECTOR,
     taskCreatorForm: {},
     currentDrawTool: "",
-    viewParams: {
-      websiteWidth: window.innerWidth + "px",
-      websiteHeight: window.innerHeight - 24 + "px",
-      websiteUrl: null,
-      showWebsiteInspector: true,
-      showDesignInspector: false,
-      websiteInspectorPercentage: 50,
-      showDesignViewMode: "found",
-      showWebsiteViewMode: "found",
-      syncScroll: false
-    },
     foundNodes: {},
     designBlocks: {},
     designImage: "",
@@ -43,9 +32,10 @@ export default {
   },
   getters: {
     state: state => state.state,
+    tool: state => state.tool,
+    websiteStatus: state => state.websiteStatus,
     taskCreatorState: state => state.taskCreatorState,
     taskCreatorForm: state => state.taskCreatorForm,
-    viewParams: state => state.viewParams,
     designBlocks: state => state.designBlocks,
     foundDesignBlocks: (state, getters) => {
       const foundNodes = getters.foundNodes;
@@ -79,14 +69,14 @@ export default {
       state.designBlocks && Object.keys(state.designBlocks).length
   },
   mutations: {
+    [INSPECTOR_SET_STATUS](state, payload) {
+      state[`${payload.inspector}Status`] = payload.status;
+    },
     [INSPECTOR_SET_STATE](state, payload) {
       state.state = payload;
     },
-    [INSPECTOR_SET_TASK_CREATOR_STATE](state, payload) {
-      state.taskCreatorState = payload;
-    },
-    [INSPECTOR_SET_TASK_CREATOR_FORM](state, payload) {
-      state.taskCreatorForm = payload;
+    [INSPECTOR_SET_TOOL](state, payload) {
+      state.tool = payload;
     },
     [INSPECTOR_SET_DESIGN](state, payload) {
       state.designBlocks = payload.designBlocks;
@@ -95,33 +85,22 @@ export default {
     [INSPECTOR_SET_FOUND_NODES](state, payload) {
       state.foundNodes = payload;
     },
-    [INSPECTOR_SET_VIEW_PARAMS](state, payload) {
-      for (let key in payload) {
-        if (!payload.hasOwnProperty(key)) {
-          continue;
-        }
-        Vue.$set(state.viewParams, key, payload[key]);
-      }
-    },
     [INSPECTOR_SET_TARGET_ELEMENT](state, payload) {
       state.targetElement = payload;
     }
   },
   actions: {
+    [INSPECTOR_SET_STATUS]({ commit }, payload) {
+      commit(INSPECTOR_SET_STATUS, payload);
+    },
     [INSPECTOR_SET_STATE]: ({ commit }, payload) => {
       commit(INSPECTOR_SET_STATE, payload);
     },
-    [INSPECTOR_SET_TASK_CREATOR_STATE]: ({ commit }, payload) => {
-      commit(INSPECTOR_SET_TASK_CREATOR_STATE, payload);
-    },
-    [INSPECTOR_SET_TASK_CREATOR_FORM]({ commit }, payload) {
-      commit(INSPECTOR_SET_TASK_CREATOR_FORM, payload);
+    [INSPECTOR_SET_TOOL]: ({ commit }, payload) => {
+      commit(INSPECTOR_SET_TOOL, payload);
     },
     [INSPECTOR_SET_DESIGN]: ({ commit }, payload) => {
       commit("INSPECTOR_SET_DESIGN", payload);
-    },
-    [INSPECTOR_SET_VIEW_PARAMS]: ({ commit }, payload) => {
-      commit("INSPECTOR_SET_VIEW_PARAMS", payload);
     },
     [INSPECTOR_SET_FOUND_NODES]: ({ commit, state }, payload) => {
       return new Promise(resolve => {

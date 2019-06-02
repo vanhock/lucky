@@ -1,7 +1,10 @@
 <script>
 import Vue from "vue";
-import { INSPECTOR_SET_STATE } from "../../services/store/mutation-types";
-import { INSPECTOR_STATE_CREATING } from "../../services/store/InspectorsStoreModule";
+import { INSPECTOR_SET_TOOL } from "../../services/store/mutation-types";
+import {
+  INSPECTOR_STATE_INSPECTING,
+  INSPECTOR_TOOL_DOM_INSPECTOR
+} from "../../services/store/InspectorsStoreModule";
 export default {
   name: "IFrame",
   render(h) {
@@ -19,12 +22,15 @@ export default {
   },
   created() {
     this.$emit("stateChanged", "loading");
-    this.$store.subscribe(mutation => {
-      if (mutation.type === INSPECTOR_SET_STATE) {
-        if (mutation.payload === INSPECTOR_STATE_CREATING) {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === INSPECTOR_SET_TOOL) {
+        if (
+          mutation.payload === INSPECTOR_TOOL_DOM_INSPECTOR &&
+          state.inspectors.state === INSPECTOR_STATE_INSPECTING
+        ) {
           this.$emit("stateChanged", "loading");
-          this.renderSlot();
           this.preventLinks();
+          this.onFrameUpdate();
         } else {
           this.restoreLinks();
         }
@@ -56,7 +62,9 @@ export default {
     initFrame() {
       console.log("I`m a frame");
       this.renderStyles();
+      this.renderSlot();
       this.onFrameUpdate();
+      this.$emit("stateChanged", "complete");
     },
     renderSlot() {
       if (this.slotRendered) {
