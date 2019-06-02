@@ -100,7 +100,7 @@ export default {
 <style lang="scss" scoped>
 .view-params {
   height: inherit;
-  .toggle {
+  .v-toggle {
     width: auto;
   }
 }

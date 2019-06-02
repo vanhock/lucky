@@ -41,7 +41,7 @@ export default {
         margin-top: auto;
       }
 
-      .toggle {
+      .v-toggle {
         justify-content: flex-start;
         align-items: center;
         text-align: center;
@@ -99,7 +99,7 @@ export default {
         &:not(:last-child) {
           margin-bottom: 5px;
         }
-        .toggle {
+        .v-toggle {
           padding: 0;
           .text {
             font-weight: 500;

@@ -70,7 +70,7 @@ export default {
       padding: 2px 5px 0;
       text-align: center;
     }
-    .toggle {
+    .v-toggle {
       padding: 0 5px;
     }
   }

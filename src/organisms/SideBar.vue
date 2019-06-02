@@ -57,7 +57,7 @@ export default {
       height: 100%;
     }
     .menu-item .router-link {
-      .toggle {
+      .v-toggle {
         color: inherit;
         .icon {
           fill: inherit;
@@ -100,7 +100,7 @@ export default {
   }
 
   [disabled] {
-    .toggle {
+    .v-toggle {
       opacity: 0.4;
     }
   }

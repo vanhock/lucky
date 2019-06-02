@@ -132,7 +132,7 @@ export default {
     top: 0;
     .panel-control {
       .panel-control-content {
-        & > .toggle {
+        & > .v-toggle {
           position: absolute;
           display: flex;
           z-index: 12;
@@ -166,7 +166,7 @@ export default {
           .menu {
             &-item {
               padding: 0;
-              .toggle {
+              .v-toggle {
                 width: 140px;
                 justify-content: flex-start;
                 padding: 10px 10px 10px 20px;

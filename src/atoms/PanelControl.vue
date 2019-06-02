@@ -65,7 +65,7 @@ export default {
     height: 100%;
   }
   &.dropdown-open {
-    .toggle {
+    .v-toggle {
       opacity: 0.5;
     }
   }

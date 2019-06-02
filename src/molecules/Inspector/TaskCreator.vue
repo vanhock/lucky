@@ -6,7 +6,14 @@
       :text="$t('Back')"
       @click="cancelCreating"
     ></v-toggle>
-    <div class="task-creator-tools"></div>
+    <div class="task-creator-tools">
+      <v-toggle-selector>
+        <v-toggle icon="arrow-down-left" mode="feather" :params="toolParams" />
+        <v-toggle icon="square" mode="feather" :params="toolParams" />
+        <v-toggle icon="circle" mode="feather" :params="toolParams" />
+        <v-toggle icon="edit-3" mode="feather" :params="toolParams" />
+      </v-toggle-selector>
+    </div>
     <div class="task-creator-block">
       <v-toggle
         class="task-creator-all"
@@ -85,9 +92,11 @@ import VButtonPrimary from "../VButton/VButtonPrimary";
 import VButtonInline from "../VButton/VButtonInline";
 import VTextareaClear from "../VTextareaClear";
 import { INSPECTOR_STATE_INSPECTING } from "../../services/store/InspectorsStoreModule";
+import VToggleSelector from "../VToggleSelector";
 export default {
   name: "TaskCreator",
   components: {
+    VToggleSelector,
     VTextareaClear,
     VButtonInline,
     VButtonPrimary,
@@ -99,7 +108,10 @@ export default {
   },
   data: () => ({
     iconSize: "20px",
-    currentForm: {}
+    currentForm: {},
+    toolParams: {
+      stroke: "#fff"
+    }
   }),
   computed: {
     ...mapGetters(["taskCreatorState", "currentPage"]),
@@ -190,6 +202,8 @@ export default {
     position: relative;
     display: flex;
     align-items: center;
+    height: 100%;
+    width: 65px;
   }
   &-create-task {
     width: 80px;

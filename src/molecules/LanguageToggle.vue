@@ -49,7 +49,7 @@ export default {
   @include box-shadow(medium);
   z-index: 10;
   border-radius: 7px;
-  .toggle {
+  .v-toggle {
     font-weight: 600;
     text-align: center;
     padding: 10px 15px;

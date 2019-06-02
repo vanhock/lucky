@@ -1,6 +1,6 @@
 <template>
   <div
-    class="toggle"
+    class="v-toggle"
     :class="[
       { active: active, 'show-text': !hideText, background: background },
       appTheme
@@ -9,13 +9,26 @@
     @mouseenter="hover = true"
     @mouseleave="hover = false"
   >
-    <Zodicon
-      v-if="icon && !svg"
-      :icon="currentIcon"
-      class="icon"
-      :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
-    />
-    <v-icon class="icon" v-if="svg" :icon="icon" :size="iconSize" />
+    <template v-if="icon">
+      <Zodicon
+        v-if="mode === 'zondicon'"
+        class="icon"
+        :icon="currentIcon"
+        :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
+      />
+      <feather-icon
+        v-if="mode === 'feather'"
+        :type="icon"
+        :fill="params && params.fill"
+        :stroke="params && params.stroke"
+      />
+      <v-icon
+        v-if="mode === 'svg'"
+        class="icon"
+        :icon="icon"
+        :size="iconSize"
+      />
+    </template>
     <div class="text-block">
       <div class="text" v-if="text">
         <span>{{ text }}</span>
@@ -29,9 +42,10 @@
 import { mapState } from "vuex";
 import Zodicon from "vue-zondicons";
 import VIcon from "./VIcon/VIcon";
+import FeatherIcon from "vue-feather";
 export default {
   name: "VToggle",
-  components: { VIcon, Zodicon },
+  components: { FeatherIcon, VIcon, Zodicon },
   created() {},
   data: () => ({
     hover: false
@@ -55,13 +69,20 @@ export default {
     iconSize: { type: String, default: "16px" },
     textSize: { type: String, default: "10px" },
     background: Boolean,
-    svg: Boolean
+    mode: {
+      type: String,
+      default: "zondicon"
+    },
+    params: {
+      type: Object,
+      default: () => {}
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.toggle {
+.v-toggle {
   position: relative;
   padding: 0 20px;
   height: inherit;
