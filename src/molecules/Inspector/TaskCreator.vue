@@ -5,6 +5,7 @@
       icon="cheveron-outline-left"
       :text="$t('Back')"
       @click="cancelCreating"
+      v-hotkey.prevent="{ esc: cancelCreating }"
     ></v-toggle>
     <div class="task-creator-tools">
       <v-toggle-selector>
@@ -12,6 +13,34 @@
         <v-toggle icon="square" mode="feather" :params="toolParams" />
         <v-toggle icon="circle" mode="feather" :params="toolParams" />
         <v-toggle icon="edit-3" mode="feather" :params="toolParams" />
+      </v-toggle-selector>
+      <v-toggle icon="text-box" icon-size="20px" />
+      <v-toggle-selector>
+        <v-toggle
+          icon="circle"
+          mode="feather"
+          :params="{ stroke: '#fff', fill: '#FF0000' }"
+        />
+        <v-toggle
+          icon="circle"
+          mode="feather"
+          :params="{ stroke: '#fff', fill: '#fffb25' }"
+        />
+        <v-toggle
+          icon="circle"
+          mode="feather"
+          :params="{ stroke: '#fff', fill: '#3714ff' }"
+        />
+        <v-toggle
+          icon="circle"
+          mode="feather"
+          :params="{ stroke: '#fff', fill: '#2ed609' }"
+        />
+        <v-toggle
+          icon="circle"
+          mode="feather"
+          :params="{ stroke: '#fff', fill: '#000' }"
+        />
       </v-toggle-selector>
     </div>
     <div class="task-creator-block">
@@ -106,6 +135,16 @@ export default {
     FormGroup,
     VToggle
   },
+  created() {
+    this.$store.subscribe(mutation => {
+      if (
+        mutation.type === INSPECTOR_SET_STATE &&
+        mutation.payload === INSPECTOR_STATE_INSPECTING
+      ) {
+        this.clearTask();
+      }
+    });
+  },
   data: () => ({
     iconSize: "20px",
     currentForm: {},
@@ -146,7 +185,6 @@ export default {
       this.$refs.quickCreateForm && this.$refs.quickCreateForm.clearFormGroup();
     },
     cancelCreating() {
-      this.clearTask();
       this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_INSPECTING);
     },
     showAllFields() {
@@ -180,7 +218,9 @@ export default {
   align-items: center;
   width: 100%;
   height: 100%;
-  &-close {
+  &-close.v-toggle {
+    position: absolute;
+    left: 0;
   }
   &-input {
     .input input {
@@ -203,7 +243,14 @@ export default {
     display: flex;
     align-items: center;
     height: 100%;
-    width: 65px;
+    margin-right: 25px;
+    margin-left: -25px;
+    .v-toggle {
+      opacity: 0.8;
+      &.active {
+        opacity: 1;
+      }
+    }
   }
   &-create-task {
     width: 80px;
@@ -225,8 +272,7 @@ export default {
 
 .task-creator-block {
   display: flex;
-  width: 40%;
-  margin: 0 auto;
+  width: 45%;
   .task-form {
     width: calc(100% - 120px);
     margin: 0;

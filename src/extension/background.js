@@ -4,7 +4,7 @@ const ports = {};
 
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
-    if (ports[tab.id].inspectorsActive) {
+    if (ports[tab.id] && ports[tab.id].inspectorsActive) {
       ports[tab.id].inspectorsActive = false;
       try {
         ports[tab.id].postMessage({ reloadPage: true });
@@ -13,9 +13,7 @@ browser.browserAction.onClicked.addListener(
         console.log(`Failed to connect with tab: ${tab.id}`);
       }
     } else {
-      if (ports[tab.id]) {
-        initInspectors(tab.id);
-      }
+      injectContentScripts();
     }
   }, 300)
 );
@@ -62,6 +60,7 @@ function connected(p) {
         if (result) {
           setIcon();
           ports[p.sender.tab.id].connected = true;
+          initInspectors(p.sender.tab.id);
         }
       });
       break;
@@ -99,9 +98,9 @@ function disconnected(p) {
 }
 
 function injectContentScripts(tabId) {
-  /*browser.tabs.executeScript(tabId, {
+  browser.tabs.executeScript(tabId, {
     file: "content_scripts/clear-script.js"
-  });*/
+  });
   browser.tabs.executeScript(tabId, {
     file: "content_scripts/inspectors-script.js"
   });
@@ -109,7 +108,6 @@ function injectContentScripts(tabId) {
 
 function initInspectors(tabId) {
   if (!ports[tabId].inspectorsActive) {
-    ports[tabId].postMessage({ initVue: true });
     checkTokenBeforeStart(tabId, token => {
       ports[tabId].postMessage({ initInspectors: token });
       ports[tabId].inspectorsActive = true;
@@ -143,6 +141,10 @@ function handleMessages(data, { sender }) {
       return runAuthScript(sender.tab.id);
     case "closeExtension":
       return closeExtension(sender.tab.id);
+    case "takeScreenShot":
+      browser.tabs.captureVisibleTab().then(imagePath => {
+        ports[sender.tab.id].postMessage({ screenShot: imagePath });
+      });
   }
 }
 

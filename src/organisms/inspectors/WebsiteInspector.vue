@@ -16,8 +16,13 @@
           :nodes="frameNodes"
           @click="selectNode"
         />
-        <v-draw v-show="showDrawTool" />
       </i-frame>
+      <v-draw v-show="showDrawTool" />
+      <img
+        class="v-screen-shot"
+        v-show="showDrawTool"
+        :src="currentTask.screenShot"
+      />
     </preloader>
   </div>
 </template>
@@ -60,7 +65,8 @@ export default {
       "websiteStatus",
       "showDesignInspector",
       "compareMode",
-      "tool"
+      "tool",
+      "currentTask"
     ]),
     showFrameNodes() {
       return (
@@ -143,5 +149,13 @@ export default {
 <style lang="scss" scoped>
 .website-inspector {
   position: relative;
+  .v-screen-shot {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+  }
 }
 </style>

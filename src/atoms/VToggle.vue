@@ -84,7 +84,7 @@ export default {
 <style lang="scss" scoped>
 .v-toggle {
   position: relative;
-  padding: 0 20px;
+  padding: 0 15px;
   height: inherit;
   display: flex;
   justify-content: center;
@@ -107,10 +107,10 @@ export default {
   .text-block {
   }
   .icon {
-    margin-right: 7px;
     fill: $color-b5;
   }
   .text {
+    margin-left: 7px;
     font-weight: 600;
   }
   .label {

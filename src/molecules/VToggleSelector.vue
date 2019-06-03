@@ -2,7 +2,7 @@
   <div
     class="v-toggle-selector"
     :class="{ open: open }"
-    :style="{ width: size }"
+    :style="{ width: size, height: size }"
     @mouseenter="openSelector"
     @mouseleave="closeSelector"
   >
@@ -23,11 +23,11 @@ export default {
   },
   data: () => ({
     open: false,
-    timeToOpen: 300,
+    timeToOpen: 200,
     timer: null
   }),
   props: {
-    size: { type: String, default: "64px" }
+    size: { type: String, default: "45px" }
   },
   methods: {
     sortSlot() {
@@ -51,27 +51,35 @@ export default {
 
 <style lang="scss" scoped>
 .v-toggle-selector {
-  border-radius: 30px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10;
   &-container {
+    position: absolute;
+    top: 0;
     display: flex;
     flex-direction: column;
+    margin-top: 0;
+    border-radius: 30px;
+    z-index: 10;
+    padding: 10px 0 4px;
   }
   .v-toggle {
-    padding: 13px;
+    padding: 8px 10px;
+    border-radius: 50%;
+    &:not(:first-child) {
+      opacity: 1;
+    }
+    &:first-child {
+      padding-top: 3px;
+      &.active {
+        opacity: 1;
+      }
+    }
   }
   &.open {
-    background-color: $color-bg2;
-    @include box-shadow(medium);
-    .v-toggle {
-      &:first-child {
-        border-radius: 30px 30px 0 0;
-      }
-      &:last-child {
-        border-radius: 0 0 30px 30px;
+    .v-toggle-selector-container {
+      background-color: $color-bg2;
+      box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+      .v-toggle {
+        opacity: 1;
       }
     }
   }

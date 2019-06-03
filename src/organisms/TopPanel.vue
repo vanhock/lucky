@@ -28,6 +28,7 @@
         :text="$t('New task')"
         :icon-size="iconSize"
         @click="setCreatingTaskState"
+        v-hotkey.prevent="{ 'ctrl+space': setCreatingTaskState }"
         background
       ></v-toggle>
       <v-toggle
@@ -92,7 +93,8 @@ export default {
       "state",
       "tasks",
       "tasksCount",
-      "tool"
+      "tool",
+      "port"
     ]),
     inspectorToolActive() {
       return this.tool === INSPECTOR_TOOL_DOM_INSPECTOR;
@@ -106,7 +108,12 @@ export default {
       this.showTasksList = !this.showTasksList;
     },
     setCreatingTaskState() {
-      this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_CREATING);
+      const self = this;
+      console.log("try to create screenshot");
+      document.getElementById("app-panel").style.display = "none";
+      setTimeout(() => {
+        self.port.postMessage({ takeScreenShot: true });
+      }, 100);
     },
     toggleInspector() {
       if (this.tool === "INSPECTOR_TOOL_DOM_INSPECTOR") {

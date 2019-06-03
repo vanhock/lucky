@@ -1,6 +1,10 @@
 <template>
   <div class="pp-inspectors-app">
-    <top-panel @getFoundNodes="getFoundNodes" @reloadView="getFoundNodes" />
+    <top-panel
+      id="app-panel"
+      @getFoundNodes="getFoundNodes"
+      @reloadView="getFoundNodes"
+    />
     <design-inspector ref="designInspector" @designScrollTop="scrollWebsite" />
     <website-inspector
       ref="websiteInspector"
@@ -20,13 +24,18 @@ import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
   AUTH_CHECK_AUTH,
+  INSPECTOR_SET_STATE,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGES,
   PAGE_SET_CURRENT_PAGE,
-  PROJECT_SET_CURRENT_PROJECT
+  PROJECT_SET_CURRENT_PROJECT,
+  TASK_SET_CURRENT_TASK
 } from "../services/store/mutation-types";
 import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
+import VueHotkey from "v-hotkey";
 import Vue from "vue";
+import { INSPECTOR_STATE_CREATING } from "../services/store/InspectorsStoreModule";
+Vue.use(VueHotkey);
 Vue.directive("clickoutside", {
   bind(el, binding) {
     el._handler = evt => {
@@ -59,6 +68,16 @@ export default {
           sessionStorage.setItem("pp-u-t-s", response.initInspectors);
           this.initView(response.initInspectors);
           break;
+        case "screenShot":
+          console.log("ScreenShot received!");
+          document.getElementById("app-panel").style.display = "block";
+          this.$store.dispatch(TASK_SET_CURRENT_TASK, {
+            id: -1,
+            screenShot: response.screenShot,
+            unsaved: true
+          });
+          this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_CREATING);
+          break;
         case "reloadPage":
           break;
       }
@@ -77,7 +96,7 @@ export default {
   }),
   computed: {
     ...mapState(["currentProject"]),
-    ...mapGetters(["port", "foundNodes", "pages", "hasPages"])
+    ...mapGetters(["port", "foundNodes", "pages", "hasPages", "state"])
   },
   methods: {
     initView(token = null) {

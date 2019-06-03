@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
      * }
      **/
     coordinatesOnWebsite: DataTypes.JSON,
-    coordinatesOnDesign: DataTypes.JSON
+    coordinatesOnDesign: DataTypes.JSON,
+    status: DataTypes.ENUM("draft", "opened", "closed"),
+    priority: DataTypes.STRING,
+    screenShot: DataTypes.STRING,
+    drawings: DataTypes.JSON
   });
 };
