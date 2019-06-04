@@ -1,6 +1,6 @@
 <template>
   <v-stage :config="configKonva" class="v-draw">
-    <v-layer><v-circle :config="configCircle"></v-circle></v-layer>
+    <v-layer><!--<v-circle :config="configCircle"></v-circle>--></v-layer>
   </v-stage>
 </template>
 

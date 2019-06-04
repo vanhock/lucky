@@ -9,10 +9,30 @@
     ></v-toggle>
     <div class="task-creator-tools">
       <v-toggle-selector>
-        <v-toggle icon="arrow-down-left" mode="feather" :params="toolParams" />
-        <v-toggle icon="square" mode="feather" :params="toolParams" />
-        <v-toggle icon="circle" mode="feather" :params="toolParams" />
-        <v-toggle icon="edit-3" mode="feather" :params="toolParams" />
+        <v-toggle
+          icon="arrow-down-left"
+          mode="feather"
+          :params="toolParams"
+          icon-size="24px"
+        />
+        <v-toggle
+          icon="square"
+          mode="feather"
+          :params="toolParams"
+          icon-size="24px"
+        />
+        <v-toggle
+          icon="circle"
+          mode="feather"
+          :params="toolParams"
+          icon-size="24px"
+        />
+        <v-toggle
+          icon="edit-3"
+          mode="feather"
+          :params="toolParams"
+          icon-size="24px"
+        />
       </v-toggle-selector>
       <v-toggle icon="text-box" icon-size="20px" />
       <v-toggle-selector>
@@ -20,26 +40,31 @@
           icon="circle"
           mode="feather"
           :params="{ stroke: '#fff', fill: '#FF0000' }"
+          icon-size="24px"
         />
         <v-toggle
           icon="circle"
           mode="feather"
           :params="{ stroke: '#fff', fill: '#fffb25' }"
+          icon-size="24px"
         />
         <v-toggle
           icon="circle"
           mode="feather"
           :params="{ stroke: '#fff', fill: '#3714ff' }"
+          icon-size="24px"
         />
         <v-toggle
           icon="circle"
           mode="feather"
           :params="{ stroke: '#fff', fill: '#2ed609' }"
+          icon-size="24px"
         />
         <v-toggle
           icon="circle"
           mode="feather"
           :params="{ stroke: '#fff', fill: '#000' }"
+          icon-size="24px"
         />
       </v-toggle-selector>
     </div>
@@ -95,6 +120,24 @@
           }}</v-button-primary>
         </div>
       </v-modal>
+    </div>
+    <div class="task-creator-destination">
+      <v-toggle class="chevron" icon="cheveron-down" disabled />
+      <div class="destination-block">
+        <div class="destination-block-name">
+          Share to
+          <v-toggle
+            icon="slack"
+            :text="$t('Slack')"
+            mode="feather"
+            :params="{ stroke: '#d0d0d0', color: '#d0d0d0' }"
+            icon-size="14px"
+            text-size="9px"
+            disabled
+          />
+        </div>
+        <div class="destination-block-target">Highweb / #malina</div>
+      </div>
       <v-toggle
         class="task-creator-create-task"
         :text="$t('Share')"
@@ -252,8 +295,10 @@ export default {
       }
     }
   }
-  &-create-task {
+  &-create-task.v-toggle {
     width: 80px;
+    height: 34px;
+    border-radius: 4px;
   }
   &-modal {
     .pp-modal-container {
@@ -268,19 +313,69 @@ export default {
       align-items: center;
     }
   }
-}
-
-.task-creator-block {
-  display: flex;
-  width: 45%;
-  .task-form {
-    width: calc(100% - 120px);
-    margin: 0;
+  .task-creator-block {
+    display: flex;
+    width: 30%;
+    .task-form {
+      width: calc(100% - 120px);
+      margin: 0;
+    }
   }
-}
 
-.task-form-more {
-  position: absolute;
-  background-color: $color-bg2;
+  .task-form-more {
+    position: absolute;
+    background-color: $color-bg2;
+  }
+
+  &-destination {
+    display: flex;
+    & > .v-toggle.chevron {
+      padding: 0 5px;
+      opacity: 0.6;
+    }
+  }
+
+  .destination-block {
+    max-width: 200px;
+    padding-right: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;
+    & > * {
+      height: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    &-name {
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      font-size: 9px;
+      font-weight: 500;
+      color: $color-b4;
+      .v-toggle {
+        padding-left: 10px;
+        .icon + .text-block .text {
+          margin-left: 2px;
+        }
+      }
+    }
+    &-target {
+      width: 100%;
+      overflow: hidden;
+      font-size: 10px;
+      margin-top: 5px;
+      color: #fff;
+    }
+    &:hover {
+      cursor: pointer;
+      .destination-block-target {
+        text-decoration: underline;
+      }
+    }
+  }
 }
 </style>

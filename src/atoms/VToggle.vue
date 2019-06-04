@@ -18,9 +18,11 @@
       />
       <feather-icon
         v-if="mode === 'feather'"
+        class="icon"
         :type="icon"
         :fill="params && params.fill"
         :stroke="params && params.stroke"
+        :size="iconSize"
       />
       <v-icon
         v-if="mode === 'svg'"
@@ -30,7 +32,11 @@
       />
     </template>
     <div class="text-block">
-      <div class="text" v-if="text">
+      <div
+        class="text"
+        v-if="text"
+        :style="{ fontSize: textSize, color: params && params.color }"
+      >
         <span>{{ text }}</span>
       </div>
       <div class="label" v-if="label">{{ label }}</div>
@@ -67,7 +73,7 @@ export default {
     },
     theme: { type: String, default: "white" },
     iconSize: { type: String, default: "16px" },
-    textSize: { type: String, default: "10px" },
+    textSize: { type: String, default: "12px" },
     background: Boolean,
     mode: {
       type: String,
@@ -108,9 +114,11 @@ export default {
   }
   .icon {
     fill: $color-b5;
+    & + .text-block .text {
+      margin-left: 7px;
+    }
   }
   .text {
-    margin-left: 7px;
     font-weight: 600;
   }
   .label {

@@ -69,6 +69,8 @@ export default {
 
 <style lang="scss">
 .page-selector {
+  position: absolute;
+  @include galign();
   display: flex;
   justify-content: center;
   align-items: center;
