@@ -417,9 +417,8 @@ export const hasParentElementWithSameSize = function(el, currentWindow) {
     currentWindow
   );
   if (
-    (elementBounding.width ===
-      currentWindow.document.body.scrollWidth &&
-      elementBounding.height === currentWindow.innerHeight) ||
+    elementBounding.width === currentWindow.document.body.scrollWidth ||
+    elementBounding.height === currentWindow.innerHeight ||
     (elementBounding.width === parentElementBounding.width &&
       elementBounding.height === parentElementBounding.height)
   ) {

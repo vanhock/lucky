@@ -32,9 +32,9 @@
         <form-group ref="operationalForm">
           <v-input-clear
             id="projectName"
-            name="name"
+            name="url"
             :value="selectedName"
-            :label="$t('projectTitle')"
+            :label="$t('Website URL')"
             required
           />
         </form-group>
@@ -149,7 +149,7 @@ export default {
       this.$store
         .dispatch(
           PROJECT_CREATE_PROJECT,
-          this.$refs.operationalForm.changedItems
+          {...this.$refs.operationalForm.changedItems}
         )
         .then(project => {
           this.$refs.operationalModal.showModal = false;

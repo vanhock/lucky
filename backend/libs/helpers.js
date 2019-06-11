@@ -1,4 +1,21 @@
 const fs = require("fs");
+const extractHostname = function(url) {
+  let hostname;
+  //find & remove protocol (http, ftp, etc.) and get hostname
+
+  if (url.indexOf("//") > -1) {
+    hostname = url.split("/")[2];
+  } else {
+    hostname = url.split("/")[0];
+  }
+
+  //find & remove port number
+  hostname = hostname.split(":")[0];
+  //find & remove "?"
+  hostname = hostname.split("?")[0];
+
+  return hostname;
+};
 
 const getUserByToken = function(req, res, cb) {
   const { User } = require("../sequelize");
@@ -160,7 +177,37 @@ const moveFile = function(sourceName, targetName, cb) {
   }
 };
 
+const getUrlData = url => {
+  return new Promise((resolve, reject) => {
+    const https = require("https");
+    let client = require("http");
+
+    if (url.toString().indexOf("https") === 0) {
+      client = https;
+    }
+
+    client
+      .get(url, resp => {
+        let data = "";
+
+        // A chunk of data has been recieved.
+        resp.on("data", chunk => {
+          data += chunk;
+        });
+
+        // The whole response has been received. Print out the result.
+        resp.on("end", () => {
+          resolve(data);
+        });
+      })
+      .on("error", err => {
+        reject(err);
+      });
+  });
+};
+
 module.exports = {
+  extractHostname,
   getUserByToken,
   filterObject,
   normalizePSD,
@@ -168,5 +215,6 @@ module.exports = {
   getParentAndChild,
   checkAllowChangesToPage,
   removeFile,
-  moveFile
+  moveFile,
+  getUrlData
 };

@@ -1,15 +1,54 @@
-const { Project, Page, Design, Comment, Trash } = require("../sequelize");
-const { getUserByToken, filterObject } = require("../libs/helpers");
+const { Project, Page, Design } = require("../sequelize");
+const {
+  getUserByToken,
+  filterObject,
+  extractHostname,
+  getUrlData
+} = require("../libs/helpers");
 const sequelize = require("sequelize");
+const isReachable = require("is-reachable");
+const webshot = require("webshot");
+const config = require("../config/config");
+
 module.exports = function(app) {
   app.post("/create-project", (req, res) => {
     getUserByToken(req, res, user => {
-      Project.create({
-        name: req.fields.name || "Untitled",
-        userId: user.id
-      }).then(response => {
-        return res.status(200).send(JSON.stringify(response.dataValues));
-      });
+      const hostName = extractHostname(req.fields.url);
+      const imgUrl = config.upload.projectsImageFullPath + hostName + ".png";
+      const resultImg = config.upload.projectsImagePath + hostName + ".png";
+      isReachable(req.fields.url)
+        .then(() => {
+          getUrlData(req.fields.url).then(r => {
+            webshot(req.fields.url, imgUrl, err => {
+              if (!err) {
+                Project.create({
+                  name:
+                    r.match(/<title[^>]*>([^<]+)<\/title>/)[1] || "Untitled",
+                  url: req.fields.url,
+                  userId: user.id,
+                  image: resultImg
+                }).then(response => {
+                  Page.create({
+                    name: req.fields.name || "Untitled",
+                    userId: user.id,
+                    projectId: response.dataValues.id,
+                    websiteUrl: req.fields.url
+                  }).then(() => {
+                    return res.status(200).send(
+                      JSON.stringify({
+                        ...response.dataValues,
+                        image: resultImg
+                      })
+                    );
+                  });
+                });
+              }
+            });
+          });
+        })
+        .catch(() => {
+          return res.error("Website not respond");
+        });
     });
   });
 

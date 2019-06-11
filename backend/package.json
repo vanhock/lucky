@@ -21,6 +21,7 @@
     "formidable": "^1.2.1",
     "http-proxy": "^1.17.0",
     "image-downloader": "^3.4.2",
+    "is-reachable": "^3.1.0",
     "is-url": "^1.2.4",
     "jspack": "^0.0.4",
     "mongodb": "^3.1.13",
@@ -36,7 +37,8 @@
     "rsvp": "^4.8.4",
     "sequelize": "^5.3.5",
     "sketch-constructor": "^1.0.1",
-    "tinify": "^1.6.0-beta.2"
+    "tinify": "^1.6.0-beta.2",
+    "webshot": "^0.18.0"
   },
   "dependencies": {}
 }

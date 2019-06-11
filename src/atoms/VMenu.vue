@@ -53,7 +53,7 @@ export default {
         }
         .text {
           font-size: 14px;
-          margin-left: 0;
+          margin-left: 0 !important;
         }
         .label {
           position: static;

@@ -5,6 +5,8 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    name: DataTypes.STRING
+    name: DataTypes.STRING,
+    url: DataTypes.STRING,
+    image: DataTypes.STRING
   });
 };
