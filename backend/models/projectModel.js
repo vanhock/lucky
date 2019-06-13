@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: DataTypes.STRING,
     url: DataTypes.STRING,
-    image: DataTypes.STRING
+    image: DataTypes.STRING,
+    folderName: DataTypes.STRING
   });
 };

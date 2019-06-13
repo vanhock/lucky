@@ -1,57 +1,98 @@
-const { Project, Page, Design } = require("../sequelize");
+const { Project, Page } = require("../sequelize");
 const {
   getUserByToken,
   filterObject,
   extractHostname,
-  getUrlData
+  getUrlData,
+  removeFile
 } = require("../libs/helpers");
+const { deleteDesigns } = require("../controllers/designController");
 const sequelize = require("sequelize");
 const isReachable = require("is-reachable");
 const webshot = require("webshot");
 const config = require("../config/config");
+let crypto;
+try {
+  crypto = require("crypto");
+} catch (err) {
+  console.log("crypto support is disabled!");
+}
 
 module.exports = function(app) {
   app.post("/create-project", (req, res) => {
     getUserByToken(req, res, user => {
       const hostName = extractHostname(req.fields.url);
-      const imgUrl = config.upload.projectsImageFullPath + hostName + ".png";
-      const resultImg = config.upload.projectsImagePath + hostName + ".png";
+      const folderName = crypto.randomBytes(4).toString("hex");
       isReachable(req.fields.url)
         .then(() => {
-          getUrlData(req.fields.url).then(r => {
-            webshot(req.fields.url, imgUrl, err => {
-              if (!err) {
-                Project.create({
-                  name:
-                    r.match(/<title[^>]*>([^<]+)<\/title>/)[1] || "Untitled",
-                  url: req.fields.url,
+          getUrlData(req.fields.url)
+            .then(r => {
+              Project.create({
+                name: r.match(/<title[^>]*>([^<]+)<\/title>/)[1] || "Untitled",
+                url: req.fields.url,
+                userId: user.id,
+                folderName: folderName
+              }).then(response => {
+                Page.create({
+                  name: req.fields.name || "Untitled",
                   userId: user.id,
-                  image: resultImg
-                }).then(response => {
-                  Page.create({
-                    name: req.fields.name || "Untitled",
-                    userId: user.id,
-                    projectId: response.dataValues.id,
-                    websiteUrl: req.fields.url
-                  }).then(() => {
-                    return res.status(200).send(
-                      JSON.stringify({
-                        ...response.dataValues,
-                        image: resultImg
-                      })
-                    );
-                  });
+                  projectId: response.dataValues.id,
+                  websiteUrl: req.fields.url
+                }).then(() => {
+                  return res
+                    .status(200)
+                    .send(JSON.stringify(response.dataValues));
                 });
-              }
+              });
+            })
+            .catch(error => {
+              return res.error("Website not respond " + error);
             });
-          });
         })
-        .catch(() => {
-          return res.error("Website not respond");
+        .catch(error => {
+          return res.error("Website not respond " + error);
         });
     });
   });
 
+  app.post("/get-project-screenshot", (req, res) => {
+    if (!req.fields.id) {
+      return res.error("Project id did not provide!");
+    }
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          userId: user.id,
+          id: req.fields.id
+        }
+      })
+        .then(project => {
+          const imgUrl = `${config.upload.projectsFolderFullPath}${
+            project.folderName
+          }/shot.png`;
+          const resultImg = `${config.upload.projectsFolderPath}${
+            project.folderName
+          }/shot.png`;
+          webshot(project.url, imgUrl, err => {
+            if (!err) {
+              project
+                .update({ image: resultImg })
+                .then(resultProject => {
+                  return res
+                    .status(200)
+                    .send(JSON.stringify(resultProject.dataValues));
+                })
+                .catch(() => {
+                  res.error("Error with edit project");
+                });
+            }
+          });
+        })
+        .catch(() => {
+          res.error("Project not found");
+        });
+    });
+  });
   app.post("/edit-project", (req, res) => {
     if (!req.fields.id) {
       return res.error("Id did not provide!");
@@ -71,9 +112,14 @@ module.exports = function(app) {
             return res.error("Project not found!");
           }
           if (project.userId === user.id || user.isAdmin) {
-            project.update(fieldsToEdit).then(project => {
-              return res.status(200).send(JSON.stringify(project.dataValues));
-            });
+            project
+              .update(fieldsToEdit)
+              .then(project => {
+                return res.status(200).send(JSON.stringify(project.dataValues));
+              })
+              .catch(() => {
+                res.error("Error with edit project");
+              });
           } else {
             return res.error({
               title: "You don't have rights for edit this project!",
@@ -169,11 +215,11 @@ module.exports = function(app) {
                 projectId: project.id
               }
             });
-            Design.destroy({
-              where: {
-                projectId: project.id
-              }
-            });
+            req.fields.projectId = project.id;
+            deleteDesigns(req, res);
+            removeFile(
+              config.upload.projectsFolderFullPath + project.folderName
+            );
             return res.status(200).send("Project deleted!");
           } else {
             res.error({

@@ -9,8 +9,8 @@ module.exports = {
     tempPath: path.join(__dirname, "../public/images/temp/"),
     designImagesFullPath: path.join(__dirname, "../public/images/designs/"),
     designImagesPath: "/images/designs/",
-    projectsImageFullPath: path.join(__dirname, "../public/images/projects/"),
-    projectsImagePath: "/images/projects/",
+    projectsFolderFullPath: path.join(__dirname, "../public/projects/"),
+    projectsFolderPath: "/projects/",
     avatarFullPath: path.join(__dirname, "../public/images/avatars/"),
     avatarPath: "/images/avatars/"
   }

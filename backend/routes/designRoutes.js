@@ -6,7 +6,6 @@ const {
 } = require("../controllers/designController");
 
 module.exports = function(app) {
-  /** ToDo: Need rewrite to pass only needed request params and add a callback for the response **/
   app.get("/get-project-designs", (req, res) => {
     return getProjectDesigns(req, res);
   });

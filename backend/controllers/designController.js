@@ -63,12 +63,12 @@ const getProjectDesigns = (req, res) => {
   });
 };
 
-const deleteDesigns = (res, req) => {
-  if (!req.fields.ids || !req.fields.projectId) {
+const deleteDesigns = (req, res) => {
+  if (!req.fields.projectId) {
     return res.error("Required params did not provide!");
   }
 
-  const ids = req.fields.ids.split(",");
+  const ids = (req.fields.ids && req.fields.ids.split(",")) || null;
 
   getUserByToken(req, res, user => {
     Project.findOne({
@@ -80,11 +80,13 @@ const deleteDesigns = (res, req) => {
         return res.error("Project not found!");
       }
       if (project.userId === user.id) {
+        const designSearchParams = (ids && {
+          id: ids,
+          projectId: req.fields.projectId
+        }) || { projectId: req.fields.projectId };
+
         Design.findAll({
-          where: {
-            id: ids,
-            projectId: req.fields.projectId
-          }
+          where: designSearchParams
         })
           .then(designs => {
             if (!designs.length) {

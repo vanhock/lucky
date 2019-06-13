@@ -179,30 +179,21 @@ const moveFile = function(sourceName, targetName, cb) {
 
 const getUrlData = url => {
   return new Promise((resolve, reject) => {
-    const https = require("https");
-    let client = require("http");
+    const request = require("request");
 
-    if (url.toString().indexOf("https") === 0) {
-      client = https;
-    }
-
-    client
-      .get(url, resp => {
-        let data = "";
-
-        // A chunk of data has been recieved.
-        resp.on("data", chunk => {
-          data += chunk;
-        });
-
-        // The whole response has been received. Print out the result.
-        resp.on("end", () => {
-          resolve(data);
-        });
-      })
-      .on("error", err => {
-        reject(err);
-      });
+    request(url, (err, response) => {
+      if (err) {
+        return reject(err);
+      }
+      if (
+        response.statusCode === 200 &&
+        response.headers &&
+        response.headers["x-frame-options"] &&
+        response.headers["x-frame-options"] !== "deny"
+      ) {
+        resolve(response.body);
+      }
+    });
   });
 };
 
