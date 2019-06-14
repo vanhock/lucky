@@ -1,7 +1,7 @@
 <template>
   <div class="empty-placeholder" :class="{ transparent: transparent }">
     <div class="image" v-if="icon">
-      <v-icon :icon="icon" width="50px" size="100px" />
+      <v-icon :icon="icon" :params="{ iconSize: '100px' }" />
     </div>
     <div class="title">{{ title }}</div>
     <div class="text" v-if="text">{{ text }}</div>
@@ -32,7 +32,7 @@ export default {
 .empty-placeholder {
   display: flex;
   width: 100%;
-  min-height: 500px;
+  min-height: 450px;
   margin: 0 auto;
   justify-content: center;
   align-items: center;
@@ -48,11 +48,10 @@ export default {
   .image {
     background-size: cover;
     pointer-events: none;
-    margin-bottom: 40px;
   }
   .title {
     font-size: 18px;
-    margin-bottom: 20px;
+    margin: 25px 0 30px;
   }
   .text {
     margin-bottom: 20px;

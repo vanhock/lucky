@@ -21,7 +21,7 @@ export function getAllProjects(payload, cb) {
 }
 
 export function getProject(payload, cb) {
-  PixelApi.get(`/get-project?id=${payload}`, (status, data) => {
+  PixelApi.get(`/get-project?${payload}`, (status, data) => {
     generalCallback(status, data, cb);
   });
 }

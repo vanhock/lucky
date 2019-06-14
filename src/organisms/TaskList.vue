@@ -17,21 +17,21 @@
             <menu-item
               ><v-toggle
                 icon="checkmark"
-                icon-size="14px"
+                params="{iconSize:'14px'}"
                 :text="$t('Select')"
                 @click="setSelected(index)"
             /></menu-item>
             <menu-item
               ><v-toggle
                 icon="edit-pencil"
-                icon-size="14px"
+                :params="{iconSize: '14px'}"
                 :text="$t('Edit task')"
                 @click="openEditModal(task)"
             /></menu-item>
             <menu-item
               ><v-toggle
                 icon="trash"
-                icon-size="14px"
+                :params="{iconSize: '14px'}"
                 :text="$t('Move to trash')"
                 @click="moveTaskToTrash(task)"
             /></menu-item>

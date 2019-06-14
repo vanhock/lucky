@@ -7,17 +7,19 @@
     />
     <design-inspector ref="designInspector" @designScrollTop="scrollWebsite" />
     <website-inspector
+      v-if="hasCurrentProject"
       ref="websiteInspector"
+      :website-url="currentProjectUrl"
       @getFoundNodes="getFoundNodes"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
     />
-    <create-or-select-page ref="pageModal" />
+    <create-or-select-page ref="projectModal" />
   </div>
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
+import { mapGetters } from "vuex";
 import { simplifyDom, addToLocal } from "../utils";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
@@ -26,8 +28,10 @@ import {
   AUTH_CHECK_AUTH,
   INSPECTOR_SET_STATE,
   PAGE_EDIT_PAGE,
+  PAGE_GET_PAGE,
   PAGE_GET_PAGES,
   PAGE_SET_CURRENT_PAGE,
+  PROJECT_GET_PROJECTS,
   PROJECT_SET_CURRENT_PROJECT,
   TASK_SET_CURRENT_TASK
 } from "../services/store/mutation-types";
@@ -60,13 +64,18 @@ export default {
   },
   created() {
     this.applyInspectorsStyles();
+
+    if (this.permalink) {
+      return this.getPages();
+    }
+
     this.port.postMessage({ inspectorsLoaded: true });
     this.port.onMessage.addListener(response => {
       switch (Object.keys(response)[0]) {
-        case "initInspectors":
+        case "initVue":
           console.log("init inspector handler");
-          sessionStorage.setItem("pp-u-t-s", response.initInspectors);
-          this.initView(response.initInspectors);
+          sessionStorage.setItem("pp-u-t-s", response.initVue);
+          this.initView(response.initVue);
           break;
         case "screenShot":
           console.log("ScreenShot received!");
@@ -83,6 +92,9 @@ export default {
       }
     });
   },
+  props: {
+    permalink: String
+  },
   data: () => ({
     gettingFoundNodeData: true,
     frameNodes: null,
@@ -95,8 +107,16 @@ export default {
     }
   }),
   computed: {
-    ...mapState(["currentProject"]),
-    ...mapGetters(["port", "foundNodes", "pages", "hasPages", "state"])
+    ...mapGetters([
+      "hasCurrentProject",
+      "currentProject",
+      "currentProjectUrl",
+      "port",
+      "foundNodes",
+      "pages",
+      "hasPages",
+      "state"
+    ])
   },
   methods: {
     initView(token = null) {
@@ -114,23 +134,33 @@ export default {
         });
     },
     getPages() {
-      this.$store
-        .dispatch(PAGE_GET_PAGES, { websiteUrl: location.href })
-        .then(pages => {
-          if (pages.length > 1) {
-            this.$refs.pageModal.toggleModal(true);
-          } else if (pages.length === 0) {
-            this.$refs.pageModal.toggleModal(true);
-          } else {
-            this.$store.dispatch(PAGE_SET_CURRENT_PAGE, pages[0]);
-            this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
-              projectId: pages[0].projectId
+      if (this.permalink) {
+        this.$store
+          .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: this.permalink })
+          .then(project => {
+            this.$store.dispatch(PAGE_GET_PAGES, {
+              projectId: project.id
             });
-          }
-        })
-        .catch(() => {
-          this.$refs.pageModal.toggleModal(true);
-        });
+          });
+      } else {
+        this.$store
+          .dispatch(PROJECT_GET_PROJECTS, { url: location.host })
+          .then(projects => {
+            if (projects.length > 1) {
+              this.$refs.projectModal.toggleModal(true);
+            } else if (projects.length === 0) {
+              this.$refs.projectModal.toggleModal(true);
+            } else {
+              this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, projects[0]);
+              this.$store.dispatch(PAGE_GET_PAGES, {
+                projectId: projects[0].id
+              });
+            }
+          })
+          .catch(() => {
+            this.$refs.projectModal.toggleModal(true);
+          });
+      }
     },
     getFoundNodes() {
       this.clearFrame();

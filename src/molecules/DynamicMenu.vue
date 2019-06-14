@@ -17,7 +17,7 @@
             :text="item.text"
             :show-text="showText"
             :label="item.label"
-            icon-size="23px"
+            :params="{ iconSize: '23px' }"
             text-size="14px"
           />
         </router-link>

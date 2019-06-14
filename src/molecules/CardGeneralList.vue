@@ -55,6 +55,7 @@ export default {
     display: flex;
   }
   .title {
+    color: $color-b3;
   }
   &-container {
     display: grid;

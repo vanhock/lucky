@@ -9,28 +9,13 @@
     @mouseenter="hover = true"
     @mouseleave="hover = false"
   >
-    <template v-if="icon">
-      <Zodicon
-        v-if="mode === 'zondicon'"
-        class="icon"
-        :icon="currentIcon"
-        :style="{ width: iconSize, height: iconSize, fontSize: textSize }"
-      />
-      <feather-icon
-        v-if="mode === 'feather'"
-        class="icon"
-        :type="icon"
-        :fill="params && params.fill"
-        :stroke="params && params.stroke"
-        :size="iconSize"
-      />
-      <v-icon
-        v-if="mode === 'svg'"
-        class="icon"
-        :icon="icon"
-        :size="iconSize"
-      />
-    </template>
+    <v-icon
+      v-if="icon"
+      class="icon"
+      :mode="mode"
+      :icon="currentIcon"
+      :params="params"
+    />
     <div class="text-block">
       <div
         class="text"
@@ -46,13 +31,10 @@
 
 <script>
 import { mapState } from "vuex";
-import Zodicon from "vue-zondicons";
 import VIcon from "./VIcon/VIcon";
-import FeatherIcon from "vue-feather";
 export default {
   name: "VToggle",
-  components: { FeatherIcon, VIcon, Zodicon },
-  created() {},
+  components: { VIcon },
   data: () => ({
     hover: false
   }),

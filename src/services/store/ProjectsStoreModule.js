@@ -3,7 +3,7 @@ import {
   PROJECT_SET_CURRENT_PROJECT,
   PROJECT_EDIT_PROJECT,
   PROJECT_CREATE_PROJECT,
-  PROJECT_GET_ALL_PROJECTS,
+  PROJECT_GET_PROJECTS,
   PROJECT_MOVE_TO_TRASH
 } from "./mutation-types";
 import {
@@ -25,6 +25,8 @@ export default {
     lastProjects: state => state.projects.filter((el, index) => index <= 2),
     hasProjects: state => state.projects && state.projects.length,
     currentProject: state => state.currentProject,
+    currentProjectUrl: state =>
+      Object.keys(state.currentProject).length && state.currentProject.url,
     hasCurrentProject: state =>
       state.currentProject && Object.keys(state.currentProject).length
   },
@@ -47,7 +49,7 @@ export default {
       state.currentProject = payload;
     },
     [PROJECT_CREATE_PROJECT](state, payload) {
-      state.projects.push(payload);
+      state.projects.unshift(payload);
     },
     [PROJECT_MOVE_TO_TRASH](state, payload) {
       const projectIndex = state.projects.indexOf(payload);
@@ -55,18 +57,18 @@ export default {
         state.projects.splice(projectIndex, 1);
       }
     },
-    [PROJECT_GET_ALL_PROJECTS](state, payload) {
+    [PROJECT_GET_PROJECTS](state, payload) {
       state.projects = payload;
     }
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
       console.log("Try to set current project");
-      if (!payload.projectId) {
+      if (!payload) {
         commit(PROJECT_SET_CURRENT_PROJECT, {});
       }
       return new Promise((resolve, reject) => {
-        getProject(payload.projectId, (error, project) => {
+        getProject(serializeObject(payload), (error, project) => {
           if (error) {
             return reject(error);
           }
@@ -108,13 +110,13 @@ export default {
         });
       });
     },
-    [PROJECT_GET_ALL_PROJECTS]: ({ commit }, payload) => {
+    [PROJECT_GET_PROJECTS]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
         getAllProjects(serializeObject(payload), (error, projects) => {
           if (error) {
             return reject(error);
           }
-          commit(PROJECT_GET_ALL_PROJECTS, projects);
+          commit(PROJECT_GET_PROJECTS, projects);
           resolve(projects);
         });
       });

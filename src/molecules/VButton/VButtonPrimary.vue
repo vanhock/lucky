@@ -4,6 +4,7 @@
     @click="$emit('click')"
     :loading="loading"
     :theme="appTheme"
+    no-shadow
     ><slot></slot
   ></v-button>
 </template>

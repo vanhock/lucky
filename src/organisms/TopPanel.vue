@@ -1,7 +1,7 @@
 <template>
   <div class="top-panel">
     <div class="top-panel-container">
-      <v-toggle class="left" icon="menu" :icon-size="iconSize" />
+      <v-toggle class="left" icon="menu" :params="{ iconSize: iconSize }" />
       <design-params v-if="hasDesign" />
       <panel-control v-show="inspectingState">
         <v-toggle class="left" icon="upload" text="Compare with design" />
@@ -26,7 +26,7 @@
         class="right"
         icon="add-outline"
         :text="$t('New task')"
-        :icon-size="iconSize"
+        :params="{ iconSize: iconSize }"
         @click="setCreatingTaskState"
         v-hotkey.prevent="{ 'ctrl+space': setCreatingTaskState }"
         background
@@ -36,7 +36,7 @@
         icon="inbox-full"
         :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
         :text="$t('Tasks')"
-        :icon-size="iconSize"
+        :params="{ iconSize: iconSize }"
         hide-text
         :label="tasksCount"
         :active="showTasksList"

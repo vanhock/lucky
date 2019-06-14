@@ -109,7 +109,7 @@ function injectContentScripts(tabId) {
 function initInspectors(tabId) {
   if (!ports[tabId].inspectorsActive) {
     checkTokenBeforeStart(tabId, token => {
-      ports[tabId].postMessage({ initInspectors: token });
+      ports[tabId].postMessage({ initVue: token });
       ports[tabId].inspectorsActive = true;
     });
   }

@@ -10,7 +10,7 @@ Vue.use(Router);
 i18n.locale = localStorage.getItem("locale") || "en";
 
 const ifNotAuthenticated = (to, from, next) => {
-  if (!store.getters.isAuthenticated || to.query.redirect === "disabled") {
+  if (!localStorage.getItem("pp-u-t-s") || to.query.redirect === "disabled") {
     localStorage.removeItem("pp-u-t-s");
     next();
     return;
@@ -19,7 +19,7 @@ const ifNotAuthenticated = (to, from, next) => {
 };
 
 const ifAuthenticated = (to, from, next) => {
-  if (store.getters.isAuthenticated) {
+  if (localStorage.getItem("pp-u-t-s")) {
     next();
     return;
   }
@@ -42,20 +42,7 @@ export default new Router({
             title: i18n.t("projects")
           },
           component: () =>
-            import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView"),
-          children: [
-            {
-              path: ":projectId/pages",
-              name: "Pages",
-              props: true,
-              component: () =>
-                import(/* webpackChunkName: "PagesView" */ "./views/PagesView"),
-              meta: {
-                title: i18n.t("pages"),
-                getter: "currentProject"
-              }
-            }
-          ]
+            import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
         },
         {
           path: "/trash",
@@ -67,6 +54,16 @@ export default new Router({
           }
         }
       ]
+    },
+    {
+      path: "/app/:permalink/:pageUrl?",
+      name: "Inspectors",
+      props: true,
+      component: () =>
+        import(/* webpackChunkName: "InspectorsView" */ "./views/InspectorsView"),
+      meta: {
+        title: i18n.t("inspectors")
+      }
     },
     {
       path: "/account",

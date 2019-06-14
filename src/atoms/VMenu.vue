@@ -47,8 +47,6 @@ export default {
         text-align: center;
         padding: 14px 0;
         .icon {
-          width: 24px;
-          height: 25px;
           margin-right: 12px;
         }
         .text {

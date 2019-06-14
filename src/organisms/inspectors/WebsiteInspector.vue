@@ -49,8 +49,14 @@ export default {
   created() {
     this.renderFrameStyles();
   },
+  props: {
+    websiteUrl: {
+      type: String,
+      default: "",
+      required: true
+    }
+  },
   data: () => ({
-    websiteUrl: location.href,
     frameWidth: window.innerWidth + "px",
     frameHeight: window.innerHeight - 49 + "px",
     frameNodes: [],

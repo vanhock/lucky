@@ -3,7 +3,7 @@
     class="v-button"
     @click="$emit('click')"
     @touchmove="$emit('click')"
-    :class="[{ loading: loading }, appTheme]"
+    :class="[{ loading: loading, 'no-shadow': noShadow }, appTheme]"
   >
     <slot></slot>
   </button>
@@ -18,7 +18,8 @@ export default {
     theme: {
       type: String,
       default: "white"
-    }
+    },
+    noShadow: Boolean
   },
   computed: {
     ...mapState(["appTheme"])
@@ -28,14 +29,20 @@ export default {
 
 <style lang="scss">
 .v-button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 38px;
   font-weight: 600;
   border-radius: 26px;
   font-size: 14px;
   cursor: pointer;
   color: #fff;
-  @include box-shadow(deep);
+  line-height: initial;
+  &:not(.no-shadow) {
+    @include box-shadow(deep);
+  }
+
   &[disabled] {
     opacity: 0.7;
     pointer-events: none;

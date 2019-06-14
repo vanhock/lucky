@@ -1,8 +1,8 @@
 <template>
   <div class="v-card" :class="{ selected: selected }">
     <div class="v-card-content">
-      <div class="v-card-image-container" v-if="image">
-        <img class="image" :src="image" :alt="name" />
+      <div class="v-card-image-container">
+        <img class="image" :src="image" v-if="image" :alt="name" />
       </div>
       <div class="v-card-text-container" @click="onclick">
         <div class="name">{{ name }}</div>
@@ -12,7 +12,7 @@
     </div>
     <div class="v-card-menu" v-if="showMenu">
       <panel-control v-if="!selectingMode" dropdown>
-        <v-toggle icon="navigation-more" icon-size="25px" />
+        <v-toggle icon="navigation-more" :params="{ iconSize: '25px' }" />
         <template v-slot:dropdown>
           <slot name="menu"></slot>
         </template>
@@ -87,20 +87,30 @@ export default {
     display: flex;
     height: 250px;
     img {
-      width: auto;
+      width: 100%;
     }
   }
   &-text-container {
     display: flex;
     flex-direction: column;
-    padding: 20px 20px 0;
-    height: 190px;
+    padding: 20px 0 0;
+    height: 110px;
+    width: 100%;
     box-sizing: border-box;
     margin-top: auto;
+    position: absolute;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 1);
     & > * {
       &:not(:last-child) {
         margin-bottom: 10px;
       }
+    }
+    .name,
+    .text,
+    .caption {
+      padding-left: 20px;
+      padding-right: 20px;
     }
     .name {
       font-weight: bold;
@@ -111,11 +121,15 @@ export default {
       white-space: nowrap;
     }
     .caption {
-      margin: auto 0 17px;
+      margin: auto 0 0;
       padding-right: 40px;
       font-weight: 600;
       color: $color-b4;
       font-size: 9px;
+      background-color: #fff;
+      height: 50px;
+      display: flex;
+      align-items: center;
     }
     .text {
       max-height: 90px;

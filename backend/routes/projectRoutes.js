@@ -22,26 +22,38 @@ module.exports = function(app) {
   app.post("/create-project", (req, res) => {
     getUserByToken(req, res, user => {
       const hostName = extractHostname(req.fields.url);
-      const folderName = crypto.randomBytes(4).toString("hex");
-      isReachable(req.fields.url)
+      const permalink = crypto.randomBytes(4).toString("hex");
+      const targetUrl = (req.fields.url = !req.fields.url.includes("http")
+        ? `https://${req.fields.url}`
+        : req.fields.url);
+      isReachable(targetUrl)
         .then(() => {
-          getUrlData(req.fields.url)
+          getUrlData(targetUrl)
             .then(r => {
               Project.create({
                 name: r.match(/<title[^>]*>([^<]+)<\/title>/)[1] || "Untitled",
-                url: req.fields.url,
+                url: targetUrl,
                 userId: user.id,
-                folderName: folderName
-              }).then(response => {
+                permalink: permalink
+              }).then(project => {
                 Page.create({
                   name: req.fields.name || "Untitled",
                   userId: user.id,
-                  projectId: response.dataValues.id,
+                  projectId: project.dataValues.id,
                   websiteUrl: req.fields.url
                 }).then(() => {
-                  return res
-                    .status(200)
-                    .send(JSON.stringify(response.dataValues));
+                  res.status(200).send(JSON.stringify(project.dataValues));
+                  const imgUrl = `${config.upload.projectsFolderFullPath}${
+                    project.permalink
+                  }/shot.png`;
+                  const resultImg = `${config.upload.projectsFolderPath}${
+                    project.permalink
+                  }/shot.png`;
+                  webshot(project.url, imgUrl, err => {
+                    if (!err) {
+                      project.update({ image: resultImg });
+                    }
+                  });
                 });
               });
             })
@@ -55,44 +67,6 @@ module.exports = function(app) {
     });
   });
 
-  app.post("/get-project-screenshot", (req, res) => {
-    if (!req.fields.id) {
-      return res.error("Project id did not provide!");
-    }
-    getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          userId: user.id,
-          id: req.fields.id
-        }
-      })
-        .then(project => {
-          const imgUrl = `${config.upload.projectsFolderFullPath}${
-            project.folderName
-          }/shot.png`;
-          const resultImg = `${config.upload.projectsFolderPath}${
-            project.folderName
-          }/shot.png`;
-          webshot(project.url, imgUrl, err => {
-            if (!err) {
-              project
-                .update({ image: resultImg })
-                .then(resultProject => {
-                  return res
-                    .status(200)
-                    .send(JSON.stringify(resultProject.dataValues));
-                })
-                .catch(() => {
-                  res.error("Error with edit project");
-                });
-            }
-          });
-        })
-        .catch(() => {
-          res.error("Project not found");
-        });
-    });
-  });
   app.post("/edit-project", (req, res) => {
     if (!req.fields.id) {
       return res.error("Id did not provide!");
@@ -134,16 +108,21 @@ module.exports = function(app) {
   });
 
   app.get("/get-project", (req, res) => {
-    if (!req.query.id) {
-      return res.error("Project id did not provide!");
+    if (!req.query.id && !req.query.permalink) {
+      return res.error("Required params did not provide!");
     }
+    const params = {
+      trashId: null
+    };
+    req.query.id
+      ? (params.id = req.query.id)
+      : req.query.permalink
+      ? (params.permalink = req.query.permalink)
+      : "";
     getUserByToken(req, res, user => {
+      params.userId = user.id;
       Project.findOne({
-        where: {
-          userId: user.id,
-          id: req.query.id,
-          trashId: null
-        }
+        where: params
       })
         .then(project => {
           return res.status(200).send(JSON.stringify(project));
@@ -166,6 +145,9 @@ module.exports = function(app) {
         attributes: [
           "name",
           "id",
+          "image",
+          "permalink",
+          "url",
           "updatedAt",
           "createdAt",
           [
@@ -218,7 +200,7 @@ module.exports = function(app) {
             req.fields.projectId = project.id;
             deleteDesigns(req, res);
             removeFile(
-              config.upload.projectsFolderFullPath + project.folderName
+              config.upload.projectsFolderFullPath + project.permalink
             );
             return res.status(200).send("Project deleted!");
           } else {

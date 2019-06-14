@@ -13,25 +13,21 @@
           icon="arrow-down-left"
           mode="feather"
           :params="toolParams"
-          icon-size="24px"
         />
         <v-toggle
           icon="square"
           mode="feather"
           :params="toolParams"
-          icon-size="24px"
         />
         <v-toggle
           icon="circle"
           mode="feather"
           :params="toolParams"
-          icon-size="24px"
         />
         <v-toggle
           icon="edit-3"
           mode="feather"
           :params="toolParams"
-          icon-size="24px"
         />
       </v-toggle-selector>
       <v-toggle icon="text-box" icon-size="20px" />
@@ -39,32 +35,28 @@
         <v-toggle
           icon="circle"
           mode="feather"
-          :params="{ stroke: '#fff', fill: '#FF0000' }"
+          :params="{ stroke: '#fff', fill: '#FF0000', iconSize: '24px' }"
           icon-size="24px"
         />
         <v-toggle
           icon="circle"
           mode="feather"
-          :params="{ stroke: '#fff', fill: '#fffb25' }"
-          icon-size="24px"
+          :params="{ stroke: '#fff', fill: '#fffb25', iconSize: '24px' }"
         />
         <v-toggle
           icon="circle"
           mode="feather"
-          :params="{ stroke: '#fff', fill: '#3714ff' }"
-          icon-size="24px"
+          :params="{ stroke: '#fff', fill: '#3714ff', iconSize: '24px' }"
         />
         <v-toggle
           icon="circle"
           mode="feather"
-          :params="{ stroke: '#fff', fill: '#2ed609' }"
-          icon-size="24px"
+          :params="{ stroke: '#fff', fill: '#2ed609', iconSize: '24px' }"
         />
         <v-toggle
           icon="circle"
           mode="feather"
-          :params="{ stroke: '#fff', fill: '#000' }"
-          icon-size="24px"
+          :params="{ stroke: '#fff', fill: '#000', iconSize: '24px' }"
         />
       </v-toggle-selector>
     </div>
@@ -131,7 +123,6 @@
             :text="$t('Slack')"
             mode="feather"
             :params="{ stroke: '#d0d0d0', color: '#d0d0d0' }"
-            icon-size="14px"
             text-size="9px"
             disabled
           />
@@ -192,7 +183,8 @@ export default {
     iconSize: "20px",
     currentForm: {},
     toolParams: {
-      stroke: "#fff"
+      stroke: "#fff",
+      iconSize: "24px"
     }
   }),
   computed: {

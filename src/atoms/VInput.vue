@@ -5,7 +5,7 @@
     </div>
     <div class="input">
       <div class="validation-message" v-if="!valid && focused">
-        {{ $t("required") }}
+        {{ validationMessage || $t("required") }}
       </div>
       <input
         :type="type"
@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     onChange: _.debounce(function() {
-      this.$emit("onchange");
+      this.$emit("onchange", { value: this.inputValue, valid: this.valid });
     }, 300),
     onFocus() {
       this.focus = true;

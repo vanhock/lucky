@@ -5,9 +5,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
+    permalink: DataTypes.STRING,
     name: DataTypes.STRING,
     url: DataTypes.STRING,
-    image: DataTypes.STRING,
-    folderName: DataTypes.STRING
+    image: DataTypes.STRING
   });
 };

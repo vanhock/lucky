@@ -17,7 +17,7 @@ import { mapGetters } from "vuex";
 import Breadcrumbs from "../molecules/Breadcrumbs";
 import {
   AUTH_CHECK_AUTH,
-  PROJECT_GET_ALL_PROJECTS
+  PROJECT_GET_PROJECTS
 } from "../services/store/mutation-types";
 export default {
   name: "UserPanelView",
@@ -40,7 +40,7 @@ export default {
       });
     },
     getProjects: async function() {
-      await this.$store.dispatch(PROJECT_GET_ALL_PROJECTS);
+      await this.$store.dispatch(PROJECT_GET_PROJECTS);
     },
     getUser: async function() {
       await this.$store.dispatch(AUTH_CHECK_AUTH);

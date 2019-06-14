@@ -188,8 +188,8 @@ const getUrlData = url => {
       if (
         response.statusCode === 200 &&
         response.headers &&
-        response.headers["x-frame-options"] &&
-        response.headers["x-frame-options"] !== "deny"
+        (!response.headers["x-frame-options"] ||
+          response.headers["x-frame-options"] !== "deny")
       ) {
         resolve(response.body);
       }

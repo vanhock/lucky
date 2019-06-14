@@ -2,22 +2,50 @@
   <div class="v-icon">
     <div
       class="v-icon-image"
+      v-if="mode === 'image'"
       :class="`icon-${icon}`"
-      :style="{ width: size, height: size }"
-    >
-    </div>
+      :style="{ width: params.iconSize, height: params.iconSize }"
+    ></div>
+    <Zodicon
+      v-if="mode === 'zondicon'"
+      class="icon"
+      :icon="icon"
+      :style="{
+        width: params.iconSize,
+        height: params.iconSize,
+        fontSize: params.textSize
+      }"
+    />
+    <feather-icon
+      v-if="mode === 'feather'"
+      class="icon"
+      :type="icon"
+      :fill="params && params.fill"
+      :stroke="params && params.stroke"
+      :size="(params && params.iconSize) || '24px'"
+    />
   </div>
 </template>
 
 <script>
+import Zodicon from "vue-zondicons";
+import FeatherIcon from "vue-feather";
 export default {
   name: "VIcon",
+  components: { FeatherIcon, Zodicon },
   props: {
     icon: {
       type: String,
       required: true
     },
-    size: String
+    mode: {
+      type: String,
+      default: "image"
+    },
+    params: {
+      type: Object,
+      default: () => {}
+    }
   }
 };
 </script>

@@ -9,7 +9,7 @@
       class="pp-modal-overlay"
       @click="!unableClosing ? (showModal = false) : ''"
     ></div>
-    <div class="pp-modal-container">
+    <div class="pp-modal-container" :class="{ wide: wide }">
       <div
         class="pp-modal-close"
         @click="unableClosing ? $emit('reload') : (showModal = false)"
@@ -38,7 +38,8 @@ export default {
   props: {
     title: String,
     description: String,
-    unableClosing: Boolean
+    unableClosing: Boolean,
+    wide: Boolean
   },
   watch: {
     showModal(value) {
@@ -75,7 +76,7 @@ export default {
     position: fixed;
     background-color: #fff;
     padding: 30px;
-    min-width: 350px;
+    min-width: 400px;
     max-width: 500px;
     max-height: 150vh;
     left: 50%;
@@ -86,6 +87,9 @@ export default {
     box-sizing: border-box;
     z-index: 9999;
     text-align: left;
+    &.wide {
+      min-width: 600px;
+    }
   }
 
   &-header {

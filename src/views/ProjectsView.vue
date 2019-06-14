@@ -1,48 +1,44 @@
 <template>
   <div class="projects-view">
-    <router-view v-if="$route.name === 'Pages'"></router-view>
-    <template v-else>
-      <template v-if="hasProjects && loaded">
-        <v-button-primary @click="openModal('create')">{{
-          $t("newProject")
-        }}</v-button-primary>
-        <project-list
-          :title="$t('activeProjects')"
-          :projects="projects"
-          :sort="sort"
-          @delete="deleteProject($event)"
-          @edit="openModal('edit', $event)"
-          @filtersChange="getAllProjects($event)"
-        />
-      </template>
-      <empty-placeholder
-        v-if="!hasProjects && loaded"
-        :title="$t('Have no projects yet')"
-        icon="project"
-      >
-        <v-button-primary @click="openModal('create')">{{
-          $t("newProject")
-        }}</v-button-primary>
-      </empty-placeholder>
-      <v-modal
-        ref="operationalModal"
-        class="operational-modal"
-        :title="currentModalTitle"
-      >
-        <form-group ref="operationalForm">
-          <v-input-clear
-            id="projectName"
-            name="url"
-            :value="selectedName"
-            :label="$t('Website URL')"
-            required
-          />
-        </form-group>
-        <v-button-primary @click="currentAction">{{
-          currentModalButtonName
-        }}</v-button-primary>
-      </v-modal>
+    <div class="projects-view-add">
+      <website-selector ref="websiteSelector" @create="createProject" />
+    </div>
+    <template v-if="hasProjects && loaded">
+      <project-list
+        :title="$t('activeProjects')"
+        :projects="projects"
+        :sort="sort"
+        @delete="deleteProject($event)"
+        @edit="openModal('edit', $event)"
+        @filtersChange="getAllProjects($event)"
+      />
     </template>
+    <empty-placeholder
+      v-if="!hasProjects && loaded"
+      :title="$t('Have no projects yet')"
+      icon="project"
+      transparent
+    >
+    </empty-placeholder>
+    <v-modal
+      ref="operationalModal"
+      class="operational-modal"
+      :title="currentModalTitle"
+      wide
+    >
+      <form-group ref="operationalForm">
+        <v-input-clear
+          id="projectName"
+          name="name"
+          :value="selectedName"
+          :label="$t('Project name')"
+          required
+        />
+      </form-group>
+      <v-button-primary @click="currentAction">{{
+        currentModalButtonName
+      }}</v-button-primary>
+    </v-modal>
   </div>
 </template>
 <i18n>
@@ -71,12 +67,13 @@ import { mapGetters } from "vuex";
 import {
   PROJECT_CREATE_PROJECT,
   PROJECT_EDIT_PROJECT,
-  PROJECT_GET_ALL_PROJECTS,
+  PROJECT_GET_PROJECTS,
   PROJECT_MOVE_TO_TRASH
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import ModalMixin from "../mixins/ModalMixin.js";
+import WebsiteSelector from "../organisms/WebsiteSelector";
 export default {
   name: "ProjectsView",
   created() {
@@ -84,6 +81,7 @@ export default {
   },
   mixins: [ModalMixin],
   components: {
+    WebsiteSelector,
     EmptyPlaceholder,
     VInputClear,
     FormGroup,
@@ -129,7 +127,7 @@ export default {
     },
     getAllProjects(params) {
       this.$store
-        .dispatch(PROJECT_GET_ALL_PROJECTS, params || "")
+        .dispatch(PROJECT_GET_PROJECTS, params || "")
         .then(() => {
           this.loaded = true;
         })
@@ -139,7 +137,9 @@ export default {
         });
     },
     createProject() {
-      if (!this.$refs.operationalForm.valid) {
+      const self = this;
+      const url = this.$refs.websiteSelector.$children[0];
+      if (!url.isValid) {
         return notification(
           this,
           "error",
@@ -147,17 +147,20 @@ export default {
         );
       }
       this.$store
-        .dispatch(
-          PROJECT_CREATE_PROJECT,
-          {...this.$refs.operationalForm.changedItems}
-        )
+        .dispatch(PROJECT_CREATE_PROJECT, {
+          url: url.currentValue
+        })
         .then(project => {
           this.$refs.operationalModal.showModal = false;
-          return notification(
+          notification(
             this,
             "success",
             `Project "${project.name}" successfully created!`
           );
+          this.$refs.websiteSelector.$children[0].clearValue();
+          setTimeout(() => {
+            self.getAllProjects();
+          }, 5000);
         })
         .catch(error => notification(this, "error", error));
     },
@@ -203,4 +206,10 @@ export default {
 };
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.projects-view-add {
+  display: grid;
+  grid-template-columns: 1auto 1auto;
+  grid-template-areas: ". .";
+}
+</style>

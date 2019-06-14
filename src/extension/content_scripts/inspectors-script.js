@@ -1,6 +1,6 @@
 import Vue from "vue";
 import store from "../../services/store/store";
-import App from "../Inspectors";
+import App from "../../views/InspectorsView";
 import i18n from "../../i18n";
 import { EXTENSION_SET_PORT } from "../../services/store/mutation-types";
 
@@ -13,7 +13,6 @@ if (!port.scriptsLoaded) {
   port.postMessage({
     message: `Content script connected for ${location.href}`
   });
-  initVue();
   port.scriptsLoaded = true;
 }
 
@@ -21,6 +20,7 @@ if (!port.scriptsLoaded) {
 port.onMessage.addListener(response => {
   switch (Object.keys(response)[0]) {
     case "initVue":
+      initVue();
       break;
     case "reloadPage":
       location.reload();

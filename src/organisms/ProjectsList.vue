@@ -9,11 +9,12 @@
         v-for="project in projects"
         :key="project.id"
         :name="project.name"
+        :image="project.image"
         :caption="normalizeDate(project.updatedAt)"
         :text="`Pages: ${project.pagesCount || 0}`"
         @delete="$emit('delete', project)"
         @edit="$emit('edit', project)"
-        @click="$router.push(`${project.id}/pages`)"
+        @click="$router.push(`/app/${project.permalink}`)"
       />
     </card-general-list>
   </div>
