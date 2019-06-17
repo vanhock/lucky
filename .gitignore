@@ -3,6 +3,7 @@ node_modules
 /dist
 /backend/log
 /backend/public
+/backend/app
 
 /src/assets/styles/_sprites.scss
 

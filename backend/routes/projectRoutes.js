@@ -67,8 +67,9 @@ module.exports = function(app) {
         });
     });
   });
-
+  const shell = require("shelljs");
   const request = require("request");
+  const download = require("@jinphen/download2");
   const schedule = require("node-schedule");
   const fs = require("fs");
   app.post("/download-project-resources", (req, res) => {
@@ -76,19 +77,33 @@ module.exports = function(app) {
       return res.error("Required fields: projectId, links, did not provide!");
     }
     JSON.parse(req.fields.links).forEach(link => {
-      request(link, (error, response) => {
-        if (error) {
-          return;
-        }
-        /** Todo: need to process paths starts with "//domain.*" */
-        const domain = getUrlDomain(link);
-        const path = link.replace(
+      const checkNoProtocol = link.match(
+        /^\/\/[^/]*?\.?([^/.]+)\.[^/.]+(?::\d+)?\//g
+      );
+      if (checkNoProtocol) {
+        link = link.replace("//", "https://");
+      }
+      const domain = getUrlDomain(link);
+      const fileName = link.match(/[^/]+$/g)[0];
+      const folders = `${config.upload.projectsFolderFullPath}${
+        req.fields.folder
+      }/static/${link}`
+        .replace(domain, "")
+        .replace(fileName, "")
+        .replace(/\\/g, "/");
+      const targetPath = link
+        .replace(
           domain,
-          `${config.upload.projectsFolderFullPath}/${req.fields.folder}/static/`
-        );
-        if (!fs.existsSync(path)) {
-          response.download(path);
-        }
+          `${config.upload.projectsFolderFullPath}${req.fields.folder}/static/`
+        )
+        .replace(/\\/g, "/");
+
+      if (fs.existsSync(targetPath)) {
+        return;
+      }
+      shell.mkdir("-p", folders);
+      download(link, folders).then(({ data, filename }) => {
+        fs.writeFileSync(`${folders}/${filename}`, data);
       });
     });
     res.status(200).send({ message: "ok!" });

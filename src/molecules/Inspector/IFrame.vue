@@ -159,7 +159,7 @@ export default {
       );
       const proxyPath = `${config.projectsFolderUrl}/${
         this.currentProject.permalink
-      }`;
+      }/static/`;
       scripts.forEach(s => {
         const src = s.getAttribute("src");
         if (src && src !== "") {
