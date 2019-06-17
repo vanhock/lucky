@@ -4,7 +4,8 @@ const {
   filterObject,
   extractHostname,
   getUrlData,
-  removeFile
+  removeFile,
+  getUrlDomain
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
 const sequelize = require("sequelize");
@@ -65,6 +66,32 @@ module.exports = function(app) {
           return res.error("Website not respond " + error);
         });
     });
+  });
+
+  const request = require("request");
+  const schedule = require("node-schedule");
+  const fs = require("fs");
+  app.post("/download-project-resources", (req, res) => {
+    if (!req.fields.folder || !req.fields.links) {
+      return res.error("Required fields: projectId, links, did not provide!");
+    }
+    JSON.parse(req.fields.links).forEach(link => {
+      request(link, (error, response) => {
+        if (error) {
+          return;
+        }
+        /** Todo: need to process paths starts with "//domain.*" */
+        const domain = getUrlDomain(link);
+        const path = link.replace(
+          domain,
+          `${config.upload.projectsFolderFullPath}/${req.fields.folder}/static/`
+        );
+        if (!fs.existsSync(path)) {
+          response.download(path);
+        }
+      });
+    });
+    res.status(200).send({ message: "ok!" });
   });
 
   app.post("/edit-project", (req, res) => {

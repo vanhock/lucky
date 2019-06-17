@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar" :class="appTheme">
     <router-link tag="div" to="/" class="logo">
-      <img src="/logo.png" style="width: 104px" alt="PerfectPixel" />
+      <img src="logo.png" style="width: 104px" alt="PerfectPixel" />
     </router-link>
     <slot name="top"></slot>
     <dynamic-menu :items="menu" align="vertical" show-text />

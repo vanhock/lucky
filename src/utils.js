@@ -515,6 +515,11 @@ export const extractHostname = function(url) {
   return hostname;
 };
 
+export const getUrlDomain = function(url) {
+  const urlDomain = url.match(/([^\/]+:)?\/\/[^\/]*?\.?([^\/.]+)\.[^\/.]+(?::\d+)?\//g);
+  return urlDomain && urlDomain[0] || "";
+};
+
 export const detectMouseButton = function(evt) {
   evt = evt || window.event;
   return evt.isTrusted;

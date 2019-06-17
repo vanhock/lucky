@@ -9,7 +9,7 @@
     <website-inspector
       v-if="hasCurrentProject"
       ref="websiteInspector"
-      :website-url="currentProjectUrl"
+      :website-url="currentProjectUrl || location.href"
       @getFoundNodes="getFoundNodes"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
@@ -28,9 +28,7 @@ import {
   AUTH_CHECK_AUTH,
   INSPECTOR_SET_STATE,
   PAGE_EDIT_PAGE,
-  PAGE_GET_PAGE,
   PAGE_GET_PAGES,
-  PAGE_SET_CURRENT_PAGE,
   PROJECT_GET_PROJECTS,
   PROJECT_SET_CURRENT_PROJECT,
   TASK_SET_CURRENT_TASK

@@ -8,6 +8,16 @@ export function createProject(payload, cb) {
   });
 }
 
+export function downloadProjectResources(payload, cb) {
+  PixelApi.post(
+    "/download-project-resources",
+    { data: payload },
+    (status, data) => {
+      generalCallback(status, data, cb);
+    }
+  );
+}
+
 export function editProject(payload, cb) {
   PixelApi.post("/edit-project", { data: payload }, (status, data) => {
     generalCallback(status, data, cb);

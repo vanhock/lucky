@@ -1,17 +1,21 @@
 <script>
 import Vue from "vue";
+import { downloadProjectResources } from "../../services/api/ProjectApi";
 import { INSPECTOR_SET_TOOL } from "../../services/store/mutation-types";
 import {
   INSPECTOR_STATE_INSPECTING,
   INSPECTOR_TOOL_DOM_INSPECTOR
 } from "../../services/store/InspectorsStoreModule";
+import { extractHostname, getUrlDomain } from "../../utils";
+import { mapGetters } from "vuex";
+import config from "../../config";
 export default {
   name: "IFrame",
   render(h) {
     return h("iframe", {
       attrs: {
         "data-perfect-pixel": true,
-        src: this.src,
+        src: this.currentUrl,
         width: this.width,
         height: this.height,
         sandbox: "allow-same-origin allow-scripts"
@@ -22,6 +26,7 @@ export default {
   },
   created() {
     this.$emit("stateChanged", "loading");
+    this.setMode();
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === INSPECTOR_SET_TOOL) {
         if (
@@ -37,9 +42,15 @@ export default {
       }
     });
   },
+  beforeUpdate() {
+    if (!this.frameApp || !this.frameApp.children) return;
+    this.frameApp.children = Object.freeze(this.$slots.default);
+    this.$emit("stateChanged", this.$el.contentDocument.readyState);
+  },
   data: () => ({
     slotRendered: false,
-    stylesRendered: false
+    stylesRendered: false,
+    proxyMode: false
   }),
   props: {
     src: {
@@ -53,17 +64,19 @@ export default {
       default: ""
     }
   },
-  beforeUpdate() {
-    if (!this.frameApp || !this.frameApp.children) return;
-    this.frameApp.children = Object.freeze(this.$slots.default);
-    this.$emit("stateChanged", this.$el.contentDocument.readyState);
+  computed: {
+    currentUrl() {
+      return this.proxyMode ? `${config.proxyUrl}/${this.src}` : this.src;
+    },
+    ...mapGetters(["currentProject"])
   },
   methods: {
     initFrame() {
       console.log("I`m a frame");
-      this.renderStyles();
+      this.applyProxyForLinks();
+      /*this.renderStyles();
       this.renderSlot();
-      this.onFrameUpdate();
+      this.onFrameUpdate();*/
       this.$emit("stateChanged", "complete");
     },
     renderSlot() {
@@ -133,6 +146,49 @@ export default {
         frameNodes: [...frameElements],
         frameWindow: this.$el.contentWindow
       });
+    },
+    setMode() {
+      this.proxyMode =
+        extractHostname(this.src) !== extractHostname(location.href);
+    },
+    applyProxyForLinks() {
+      const hrefArray = [];
+      const scripts = this.$el.contentDocument.querySelectorAll("script");
+      const links = this.$el.contentDocument.querySelectorAll(
+        "link[rel='stylesheet']"
+      );
+      const proxyPath = `${config.projectsFolderUrl}/${
+        this.currentProject.permalink
+      }`;
+      scripts.forEach(s => {
+        const src = s.getAttribute("src");
+        if (src && src !== "") {
+          s.setAttribute("src", src.replace(getUrlDomain(src), proxyPath));
+          hrefArray.push(src);
+        }
+      });
+      links.forEach(l => {
+        const href = l.getAttribute("href");
+        if (href && href !== "") {
+          l.setAttribute("href", href.replace(getUrlDomain(href), proxyPath));
+          hrefArray.push(href);
+        }
+      });
+      if (!hrefArray.length) {
+        return;
+      }
+      downloadProjectResources(
+        {
+          folder: this.currentProject.permalink,
+          links: JSON.stringify(hrefArray)
+        },
+        error => {
+          if (error) {
+            return console.log(`Error with download: ${error}`);
+          }
+          console.log("Resources downloaded successfully");
+        }
+      );
     }
   }
 };

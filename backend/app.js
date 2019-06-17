@@ -13,8 +13,9 @@ app.use(function(req, res, next) {
 });
 app.use(bodyParser.urlencoded({ extended: true }));
 require("./routes")(app);
-const root = `${__dirname}/public`;
-app.use(express.static(root));
+const root = `${__dirname}/app`;
+app.use(express.static("app"));
+app.use(express.static("public"));
 app.use(fallback("index.html", { root }));
 app.listen(port, () => {
   console.log("We are live on " + port);

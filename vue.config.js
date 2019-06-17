@@ -1,7 +1,7 @@
 const path = require("path");
 const SVGSpritemapPlugin = require("svg-spritemap-webpack-plugin");
 module.exports = {
-  outputDir: "backend/public/",
+  outputDir: "backend/app/",
   lintOnSave: false,
   devServer: {
     proxy: "http://localhost:3000"

@@ -6,7 +6,7 @@
       v-show="!editing"
       @click="$router.push(`/${currentProject.id}/pages`)"
     >
-      {{ currentProject.name }}
+      {{ currentProject.url }}
     </div>
     <!-- ToDo: Need to project selector dropdown here -->
     <template v-if="hasCurrentPage">
@@ -76,6 +76,10 @@ export default {
   align-items: center;
   & > * {
     margin: 0 5px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   &-divider {
     width: 10px;
@@ -92,15 +96,10 @@ export default {
   &-page-rename {
     height: auto;
     max-height: 20px;
-
-    max-width: 250px;
     color: $color-b6;
     font-size: 14px;
     margin-top: 2px;
     cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     border-radius: 2px;
     padding: 4px 0;
     &[contenteditable="true"] {

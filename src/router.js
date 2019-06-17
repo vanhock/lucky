@@ -3,7 +3,6 @@ import i18n from "./i18n";
 import Router from "vue-router";
 import AuthView from "./views/AuthView";
 
-import store from "./services/store/store";
 import UserPanelView from "./views/UserPanelView";
 Vue.use(Router);
 

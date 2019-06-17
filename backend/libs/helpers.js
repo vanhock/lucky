@@ -177,6 +177,13 @@ const moveFile = function(sourceName, targetName, cb) {
   }
 };
 
+const getUrlDomain = url => {
+  const urlDomain = url.match(
+    /([^\/]+:)?\/\/[^\/]*?\.?([^\/.]+)\.[^\/.]+(?::\d+)?\//g
+  );
+  return (urlDomain && urlDomain[0]) || "";
+};
+
 const getUrlData = url => {
   return new Promise((resolve, reject) => {
     const request = require("request");
@@ -207,5 +214,6 @@ module.exports = {
   checkAllowChangesToPage,
   removeFile,
   moveFile,
-  getUrlData
+  getUrlData,
+  getUrlDomain
 };
