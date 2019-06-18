@@ -4,7 +4,7 @@ const {
   filterObject,
   extractHostname,
   getUrlData,
-  removeFile,
+  removeFolder,
   getUrlDomain
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
@@ -50,7 +50,7 @@ module.exports = function(app) {
                   const resultImg = `${config.upload.projectsFolderPath}${
                     project.permalink
                   }/shot.png`;
-                  webshot(project.url, imgUrl, err => {
+                  return webshot(project.url, imgUrl, err => {
                     if (!err) {
                       project.update({ image: resultImg });
                     }
@@ -67,23 +67,44 @@ module.exports = function(app) {
         });
     });
   });
-  const shell = require("shelljs");
+  const scrape = require("website-scraper");
+  const SaveToExistingDirectoryPlugin = require("website-scraper-existing-directory");
+  const PuppeteerPlugin = require("website-scraper-puppeteer");
   const request = require("request");
-  const download = require("@jinphen/download2");
   const schedule = require("node-schedule");
   const fs = require("fs");
   app.post("/download-project-resources", (req, res) => {
-    if (!req.fields.folder || !req.fields.links) {
-      return res.error("Required fields: projectId, links, did not provide!");
+    if (!req.fields.folder || !req.fields.url) {
+      return res.error("Required fields (folder, url) did not provide!");
     }
-    JSON.parse(req.fields.links).forEach(link => {
+    const domain = getUrlDomain(req.fields.url);
+    const pathToSave = `${config.upload.projectsFolderFullPath}${
+      req.fields.folder
+    }/static/`.replace(/\\/g, "/");
+    /*if (fs.existsSync(pathToSave)) {
+      return res.status(200).send({ message: "resources already exist!" });
+    }*/
+    scrape({
+      urls: [req.fields.url],
+      /*recursive: true,
+      maxDepth: 50,
+      maxRecursiveDepth: 50,*/
+      //prettifyUrls: true,
+      //filenameGenerator: "bySiteStructure",
+      directory: pathToSave,
+      plugins: [new SaveToExistingDirectoryPlugin()],
+      ignoreErrors: true
+    }).then(result => {
+      res.status(200).send({ message: "Files downloaded!" });
+    });
+    /*JSON.parse(req.fields.links).forEach(link => {
       const checkNoProtocol = link.match(
         /^\/\/[^/]*?\.?([^/.]+)\.[^/.]+(?::\d+)?\//g
       );
       if (checkNoProtocol) {
         link = link.replace("//", "https://");
       }
-      const domain = getUrlDomain(link);
+
       const fileName = link.match(/[^/]+$/g)[0];
       const folders = `${config.upload.projectsFolderFullPath}${
         req.fields.folder
@@ -105,8 +126,7 @@ module.exports = function(app) {
       download(link, folders).then(({ data, filename }) => {
         fs.writeFileSync(`${folders}/${filename}`, data);
       });
-    });
-    res.status(200).send({ message: "ok!" });
+    });*/
   });
 
   app.post("/edit-project", (req, res) => {
@@ -241,12 +261,13 @@ module.exports = function(app) {
             });
             req.fields.projectId = project.id;
             deleteDesigns(req, res);
-            removeFile(
-              config.upload.projectsFolderFullPath + project.permalink
+            removeFolder(
+              config.upload.projectsFolderFullPath + project.permalink,
+              () => {}
             );
             return res.status(200).send("Project deleted!");
           } else {
-            res.error({
+            return res.error({
               title: "You don't have rights for delete this project!",
               code: 403
             });

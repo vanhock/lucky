@@ -16,7 +16,7 @@ require("./routes")(app);
 const root = `${__dirname}/app`;
 app.use(express.static("app"));
 app.use(express.static("public"));
-app.use(fallback("index.html", { root }));
+//app.use(fallback("index.html", { root }));
 app.listen(port, () => {
   console.log("We are live on " + port);
 });

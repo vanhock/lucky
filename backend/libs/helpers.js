@@ -157,13 +157,20 @@ const getPairsForNode = function(node, childrenKey) {
 };
 
 const removeFile = function(filePath, cb) {
-  /** Remove temp design file **/
   if (fs.existsSync(filePath)) {
     fs.unlink(filePath, message => {
       message && cb(message);
     });
   } else {
     cb("File does not exist");
+  }
+};
+const shell = require("shelljs");
+const removeFolder = function(folderPath, cb) {
+  if (fs.existsSync(folderPath)) {
+    shell.rm("-rf", folderPath);
+  } else {
+    cb("This path does not exist");
   }
 };
 
@@ -213,6 +220,7 @@ module.exports = {
   getParentAndChild,
   checkAllowChangesToPage,
   removeFile,
+  removeFolder,
   moveFile,
   getUrlData,
   getUrlDomain

@@ -29,6 +29,7 @@ import {
   INSPECTOR_SET_STATE,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGES,
+  PAGE_SET_CURRENT_PAGE,
   PROJECT_GET_PROJECTS,
   PROJECT_SET_CURRENT_PROJECT,
   TASK_SET_CURRENT_TASK
@@ -136,9 +137,13 @@ export default {
         this.$store
           .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: this.permalink })
           .then(project => {
-            this.$store.dispatch(PAGE_GET_PAGES, {
-              projectId: project.id
-            });
+            this.$store
+              .dispatch(PAGE_GET_PAGES, {
+                projectId: project.id
+              })
+              .then(pages => {
+                this.$store.dispatch(PAGE_SET_CURRENT_PAGE, pages[0]);
+              });
           });
       } else {
         this.$store

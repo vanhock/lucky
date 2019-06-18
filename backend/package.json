@@ -9,7 +9,6 @@
   "author": "Ivan Sinyavin",
   "license": "ISC",
   "devDependencies": {
-    "@jinphen/download2": "^7.1.2",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",
     "coffeescript-module": "^0.2.1",
@@ -42,7 +41,10 @@
     "shelljs": "^0.8.3",
     "sketch-constructor": "^1.0.1",
     "tinify": "^1.6.0-beta.2",
-    "webshot": "^0.18.0"
+    "webshot": "^0.18.0",
+    "website-scraper": "^4.0.1",
+    "website-scraper-existing-directory": "^0.1.0",
+    "website-scraper-puppeteer": "^0.1.1"
   },
   "dependencies": {}
 }

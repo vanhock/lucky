@@ -18,6 +18,7 @@ export default {
         src: this.currentUrl,
         width: this.width,
         height: this.height,
+        charset: "utf-8",
         sandbox: "allow-same-origin allow-scripts"
       },
       ref: "perfectFrame",
@@ -66,14 +67,16 @@ export default {
   },
   computed: {
     currentUrl() {
-      return this.proxyMode ? `${config.proxyUrl}/${this.src}` : this.src;
+      return this.proxyMode
+        ? `${config.proxyUrl}/${this.currentProject.permalink}/static/`
+        : this.src;
     },
-    ...mapGetters(["currentProject"])
+    ...mapGetters(["currentProject", "currentPage"])
   },
   methods: {
     initFrame() {
       console.log("I`m a frame");
-      this.applyProxyForLinks();
+      //this.applyProxyForLinks();
       /*this.renderStyles();
       this.renderSlot();
       this.onFrameUpdate();*/
@@ -152,35 +155,34 @@ export default {
         extractHostname(this.src) !== extractHostname(location.href);
     },
     applyProxyForLinks() {
-      const hrefArray = [];
-      const scripts = this.$el.contentDocument.querySelectorAll("script");
       const links = this.$el.contentDocument.querySelectorAll(
-        "link[rel='stylesheet']"
+        "script, link[rel='stylesheet']"
       );
       const proxyPath = `${config.projectsFolderUrl}/${
         this.currentProject.permalink
       }/static/`;
-      scripts.forEach(s => {
-        const src = s.getAttribute("src");
-        if (src && src !== "") {
-          s.setAttribute("src", src.replace(getUrlDomain(src), proxyPath));
-          hrefArray.push(src);
-        }
-      });
       links.forEach(l => {
-        const href = l.getAttribute("href");
-        if (href && href !== "") {
-          l.setAttribute("href", href.replace(getUrlDomain(href), proxyPath));
-          hrefArray.push(href);
+        const attrs = {
+          href: l.getAttribute("href"),
+          src: l.getAttribute("src")
+        };
+        for (let key in attrs) {
+          if (attrs.hasOwnProperty(key) && attrs[key]) {
+            const domain = extractHostname(this.currentProject.url);
+            l.setAttribute(
+              key,
+              proxyPath +
+                attrs[key]
+                  .replace(/^\/(?!\/)/i, `${domain}/`)
+                  .replace(/(?:(?!\/\/).)*\/\//i, "")
+            );
+          }
         }
       });
-      if (!hrefArray.length) {
-        return;
-      }
       downloadProjectResources(
         {
           folder: this.currentProject.permalink,
-          links: JSON.stringify(hrefArray)
+          url: this.currentPage.websiteUrl
         },
         error => {
           if (error) {
