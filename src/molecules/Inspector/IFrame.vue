@@ -13,8 +13,8 @@ export default {
   name: "IFrame",
   render(h) {
     return h("iframe", {
-      src: this.src,
       attrs: {
+        src: this.src,
         "data-perfect-pixel": true,
         width: this.width,
         height: "100%",
@@ -22,7 +22,7 @@ export default {
         sandbox: "allow-same-origin allow-scripts allow-forms"
       },
       ref: "perfectFrame",
-      on: { load: this.onFrameLoad() }
+      on: { load: this.onFrameLoad }
     });
   },
   created() {
@@ -72,15 +72,22 @@ export default {
       return this.proxyMode ? `${config.proxyUrl}/${this.src}` : this.src;
     },
     ...mapGetters(["currentProject", "currentPage"]),
+    frameDocument() {
+      return this.$el && this.$el.contentDocument;
+    },
     frameWindow() {
       return this.$el.contentWindow;
     }
   },
   methods: {
     onFrameLoad() {
-      /*this.renderStyles();
+      if (!this.frameDocument) {
+        return;
+      }
+      this.$emit("stateChanged", "complete");
+      this.renderStyles();
       this.renderSlot();
-      this.preventLinks();*/
+      this.preventLinks();
     },
     renderSlot() {
       if (this.slotRendered) {
