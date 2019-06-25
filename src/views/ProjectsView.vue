@@ -65,18 +65,17 @@ import FormGroup from "../molecules/FormGroup";
 import VInputClear from "../molecules/VInput/VInputClear";
 import { mapGetters } from "vuex";
 import {
-  PAGE_CREATE_PAGE,
   PROJECT_CREATE_PROJECT,
   PROJECT_EDIT_PROJECT,
   PROJECT_GET_PROJECTS,
-  PROJECT_MOVE_TO_TRASH
+  PROJECT_MOVE_TO_TRASH,
+  PROJECT_SET_SCREENSHOT
 } from "../services/store/mutation-types";
 import { downloadProjectResources } from "../services/api/ProjectApi";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import ModalMixin from "../mixins/ModalMixin.js";
 import WebsiteSelector from "../organisms/WebsiteSelector";
-import { getUrlDomain } from "../utils";
 
 export default {
   name: "ProjectsView",
@@ -141,7 +140,6 @@ export default {
         });
     },
     createProject() {
-      const self = this;
       const url = this.$refs.websiteSelector.$children[0];
       if (!url.isValid) {
         return notification(
@@ -161,17 +159,13 @@ export default {
             "success",
             `Project "${project.name}" successfully created!`
           );
-          downloadProjectResources(
-            {
+          this.$refs.websiteSelector.$children[0].clearValue();
+          this.$store
+            .dispatch(PROJECT_SET_SCREENSHOT, {
               folder: project.permalink,
               url: project.url
-            },
-            () => {}
-          );
-          setTimeout(() => {
-            self.getAllProjects();
-          }, 7000);
-          this.$refs.websiteSelector.$children[0].clearValue();
+            })
+            .then(() => {});
         })
         .catch(error => notification(this, "error", error));
     },
@@ -211,6 +205,12 @@ export default {
           );
         })
         .then(error => notification(this, "error", error));
+    },
+    updateProject(project) {
+      downloadProjectResources(
+        { folder: project.permalink, url: project.url },
+        () => {}
+      );
     }
   }
 };

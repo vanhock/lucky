@@ -83,7 +83,7 @@ export default {
   height: 100%;
   display: flex;
   box-sizing: border-box;
-  background-color: $color-b5;
+  background-color: $color-bg4;
   overflow-x: hidden;
   &-content {
     width: 100%;

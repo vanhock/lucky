@@ -1,9 +1,12 @@
 <template>
   <div class="trash-view">
     <template v-if="trashLength">
-      <v-button-primary @click="openModal('create')">{{
-        $t("Empty trash")
-      }}</v-button-primary>
+      <v-button-primary
+        @click="
+          openModal('deleteAll', { target: 'project', id: projectsTrashIds })
+        "
+        >{{ $t("Empty projects trash") }}</v-button-primary
+      >
       <trash-list
         :trash="tasksTrash"
         :title="$t('Tasks')"
@@ -43,7 +46,7 @@
 <i18n>
   {
     "en": {
-      "Empty trash": "Empty trash",
+      "Empty projects trash": "Empty projects trash",
       "Restore": "Restore",
       "Delete forever": "Delete forever",
       "Empty all in trash": "Empty all in trash",
@@ -54,7 +57,7 @@
       "The Page will be deleted permanently!": "The Page will be deleted permanently!"
     },
     "ru": {
-      "Empty trash": "Очистить корзину",
+      "Empty projects trash": "Очистить проекты в корзине",
       "Restore": "Восстановить",
       "Delete forever": "Удалить навсегда",
       "Empty all in trash": "Удалить все содержимое корзины",
@@ -94,7 +97,7 @@ export default {
         description: this.$t(
           "All documents in trash will be deleted permanently!"
         ),
-        action: "deleteAll",
+        action: "delete",
         buttonName: this.$t("Empty trash")
       },
       deleteProject: {
@@ -125,6 +128,9 @@ export default {
     ...mapGetters(["projectsTrash", "pagesTrash", "tasksTrash"]),
     trashLength() {
       return this.projectsTrash.length;
+    },
+    projectsTrashIds() {
+      return this.projectsTrash && this.projectsTrash.map(p => p.id);
     }
   },
   methods: {

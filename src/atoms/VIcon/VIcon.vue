@@ -4,16 +4,19 @@
       class="v-icon-image"
       v-if="mode === 'image'"
       :class="`icon-${icon}`"
-      :style="{ width: params.iconSize, height: params.iconSize }"
+      :style="{
+        width: params && params.iconSize,
+        height: params && params.iconSize
+      }"
     ></div>
     <Zodicon
       v-if="mode === 'zondicon'"
       class="icon"
       :icon="icon"
       :style="{
-        width: params.iconSize,
-        height: params.iconSize,
-        fontSize: params.textSize
+        width: params && params.iconSize,
+        height: params && params.iconSize,
+        fontSize: params && params.textSize
       }"
     />
     <feather-icon

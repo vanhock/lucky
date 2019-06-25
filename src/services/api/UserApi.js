@@ -19,18 +19,16 @@ export function Authorization(payload, cb) {
   });
 }
 
+export function SetAuthToken(payload) {
+  PixelApi.setToken(payload, () => {});
+}
+
 export function AuthByToken(payload, cb) {
   if (payload) {
-    PixelApi.setToken(payload, () => {
-      send();
-    });
-  } else {
-    send();
+    SetAuthToken(payload);
   }
-  function send() {
-    PixelApi.get("/auth-by-token", (status, data) => {
-      console.log("auth response" + data);
-      generalCallback(status, data, cb);
-    });
-  }
+  PixelApi.get("/auth-by-token", (status, data) => {
+    console.log("auth response" + data);
+    generalCallback(status, data, cb);
+  });
 }

@@ -20,7 +20,7 @@
       <v-draw v-show="showDrawTool" />
       <img
         class="v-screen-shot"
-        v-show="showDrawTool"
+        v-show="false"
         :src="currentTask.screenShot"
       />
     </preloader>
@@ -155,6 +155,10 @@ export default {
 <style lang="scss" scoped>
 .website-inspector {
   position: relative;
+  height: calc(100% - 50px);
+  .preloader {
+    height: 100%;
+  }
   .v-screen-shot {
     display: block;
     position: absolute;

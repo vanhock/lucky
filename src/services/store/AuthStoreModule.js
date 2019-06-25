@@ -6,7 +6,7 @@ import {
   AUTH_CHECK_AUTH
 } from "./mutation-types";
 import PixelApi from "../api/api";
-import { AuthByToken, Authorization } from "../api/UserApi";
+import { AuthByToken, Authorization, SetAuthToken } from "../api/UserApi";
 export default {
   state: {
     user: {},
@@ -51,6 +51,7 @@ export default {
             return reject(error);
           }
           PixelApi.setToken(user.token, () => {
+            SetAuthToken(user.token);
             localStorage.setItem("pp-u-t-s", user.token);
             window.postMessage({ authorized: true }, "*");
             commit(AUTH_SUCCESS, user);
@@ -62,6 +63,7 @@ export default {
     [AUTH_LOGOUT]: ({ commit }) => {
       return new Promise(resolve => {
         commit(AUTH_LOGOUT);
+        SetAuthToken("");
         localStorage.removeItem("pp-u-t-s"); // clear your user's token from localstorage
         resolve();
       });
@@ -72,6 +74,7 @@ export default {
         AuthByToken(payload, (error, user) => {
           if (error || !user) {
             commit(AUTH_CHECK_AUTH);
+            SetAuthToken("");
             localStorage.removeItem("pp-u-t-s");
             postMessage({ resetToken: true });
             return reject(error);

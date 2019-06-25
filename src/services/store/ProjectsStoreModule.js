@@ -4,10 +4,11 @@ import {
   PROJECT_EDIT_PROJECT,
   PROJECT_CREATE_PROJECT,
   PROJECT_GET_PROJECTS,
-  PROJECT_MOVE_TO_TRASH
+  PROJECT_MOVE_TO_TRASH,
+  PROJECT_SET_SCREENSHOT
 } from "./mutation-types";
 import {
-  createProject,
+  createProject, downloadProjectResources,
   editProject,
   getAllProjects,
   getProject,
@@ -96,6 +97,16 @@ export default {
           }
           commit(PROJECT_EDIT_PROJECT, project);
           resolve(project);
+        });
+      });
+    },
+    [PROJECT_SET_SCREENSHOT]: ({ commit }, payload) => {
+      return new Promise((resolve, reject) => {
+        downloadProjectResources(payload, (error, image) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(PROJECT_EDIT_PROJECT, image);
         });
       });
     },

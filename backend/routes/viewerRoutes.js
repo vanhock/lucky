@@ -22,18 +22,7 @@ module.exports = function(app) {
     });
   });
   */
-  const corsAnywhere = require("cors-anywhere");
-  let proxy = corsAnywhere.createServer({
-    originWhitelist: [], // Allow all origins
-    requireHeaders: [], // Do not require any headers.
-    removeHeaders: [] // Do not remove any headers.
-  });
-
-  app.get("/proxy/:proxyUrl*", (req, res) => {
-    req.url = req.url.replace("/proxy/", "/");
-    proxy.emit("request", req, res);
-  });
-
+  
   const getFoundNodes = require("../libs/getFoundNodes");
   app.post("/get-found-nodes", (req, res) => {
     if (!req.fields) {

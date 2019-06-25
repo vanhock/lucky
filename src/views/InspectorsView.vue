@@ -20,16 +20,17 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { simplifyDom, addToLocal } from "../utils";
+import { simplifyDom, addToLocal, getParameterByName } from "../utils";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
   AUTH_CHECK_AUTH,
-  INSPECTOR_SET_STATE,
   PAGE_EDIT_PAGE,
+  PAGE_GET_PAGE,
   PAGE_GET_PAGES,
   PAGE_SET_CURRENT_PAGE,
+  PROJECT_CREATE_PROJECT,
   PROJECT_GET_PROJECTS,
   PROJECT_SET_CURRENT_PROJECT,
   TASK_SET_CURRENT_TASK
@@ -37,7 +38,6 @@ import {
 import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
 import VueHotkey from "v-hotkey";
 import Vue from "vue";
-import { INSPECTOR_STATE_CREATING } from "../services/store/InspectorsStoreModule";
 Vue.use(VueHotkey);
 Vue.directive("clickoutside", {
   bind(el, binding) {
@@ -62,19 +62,14 @@ export default {
     TopPanel
   },
   created() {
+    console.log("I'm inspectors view");
     this.applyInspectorsStyles();
-
-    if (this.permalink) {
-      return this.getPages();
-    }
-
     this.port.postMessage({ inspectorsLoaded: true });
     this.port.onMessage.addListener(response => {
       switch (Object.keys(response)[0]) {
-        case "initVue":
-          console.log("init inspector handler");
-          sessionStorage.setItem("pp-u-t-s", response.initVue);
-          this.initView(response.initVue);
+        case "initInspectors":
+          sessionStorage.setItem("pp-u-t-s", response.initInspectors);
+          this.initView(response.initInspectors);
           break;
         case "screenShot":
           console.log("ScreenShot received!");
@@ -84,7 +79,6 @@ export default {
             screenShot: response.screenShot,
             unsaved: true
           });
-          this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_CREATING);
           break;
         case "reloadPage":
           break;
@@ -92,7 +86,9 @@ export default {
     });
   },
   props: {
-    permalink: String
+    permalink: String,
+    pageId: String,
+    taskId: String
   },
   data: () => ({
     gettingFoundNodeData: true,
@@ -118,52 +114,73 @@ export default {
     ])
   },
   methods: {
-    initView(token = null) {
-      console.log("Check auth request");
+    initView(token) {
       this.$store
         .dispatch(AUTH_CHECK_AUTH, token)
         .then(() => {
           console.log("Check auth success");
-          return this.getPages();
+          const permalink =
+            getParameterByName("pxl", location.href) || this.permalink;
+          const pageId = getParameterByName("pxl-page", location.href);
+
+          if (permalink) {
+            this.$store
+              .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: permalink })
+              .then(project => {
+                this.$store
+                  .dispatch(PAGE_GET_PAGES, {
+                    projectId: project.id
+                  })
+                  .then(pages => {
+                    if (pageId) {
+                      this.$store.dispatch(PAGE_GET_PAGE, {
+                        id: pageId
+                      });
+                    } else {
+                      this.$store.dispatch(PAGE_SET_CURRENT_PAGE, pages[0]);
+                    }
+                  });
+              });
+          } else {
+            this.$store
+              .dispatch(PROJECT_GET_PROJECTS, { url: location.href })
+              .then(projects => {
+                if (projects.length > 1) {
+                  this.$refs.projectModal.toggleModal(true);
+                } else if (projects.length === 0) {
+                  this.$store
+                    .dispatch(PROJECT_CREATE_PROJECT, {
+                      url: location.href
+                    })
+                    .then(project => {
+                      this.$store.dispatch(
+                        PROJECT_SET_CURRENT_PROJECT,
+                        project
+                      );
+                      this.$store.dispatch(PAGE_GET_PAGE, {
+                        websiteUrl: project.url
+                      });
+                    });
+                } else {
+                  this.$store.dispatch(
+                    PROJECT_SET_CURRENT_PROJECT,
+                    projects[0]
+                  );
+                  this.$store.dispatch(PAGE_GET_PAGE, {
+                    websiteUrl: location.href
+                  });
+                }
+              })
+              .catch(() => {
+                this.$refs.projectModal.toggleModal(true);
+              });
+          }
         })
         .catch(message => {
           console.log("Check auth fail: " + message);
           sessionStorage.removeItem("pp-u-t-s");
           return this.port.postMessage({ resetToken: true });
         });
-    },
-    getPages() {
-      if (this.permalink) {
-        this.$store
-          .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: this.permalink })
-          .then(project => {
-            this.$store
-              .dispatch(PAGE_GET_PAGES, {
-                projectId: project.id
-              })
-              .then(pages => {
-                this.$store.dispatch(PAGE_SET_CURRENT_PAGE, pages[0]);
-              });
-          });
-      } else {
-        this.$store
-          .dispatch(PROJECT_GET_PROJECTS, { url: location.host })
-          .then(projects => {
-            if (projects.length > 1) {
-              this.$refs.projectModal.toggleModal(true);
-            } else if (projects.length === 0) {
-              this.$refs.projectModal.toggleModal(true);
-            } else {
-              this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, projects[0]);
-              this.$store.dispatch(PAGE_GET_PAGES, {
-                projectId: projects[0].id
-              });
-            }
-          })
-          .catch(() => {
-            this.$refs.projectModal.toggleModal(true);
-          });
-      }
     },
     getFoundNodes() {
       this.clearFrame();

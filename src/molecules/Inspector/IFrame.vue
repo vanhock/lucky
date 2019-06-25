@@ -6,23 +6,23 @@ import {
   INSPECTOR_STATE_INSPECTING,
   INSPECTOR_TOOL_DOM_INSPECTOR
 } from "../../services/store/InspectorsStoreModule";
-import { extractHostname, getUrlDomain } from "../../utils";
+import { extractHostname } from "../../utils";
 import { mapGetters } from "vuex";
 import config from "../../config";
 export default {
   name: "IFrame",
   render(h) {
     return h("iframe", {
+      src: this.src,
       attrs: {
         "data-perfect-pixel": true,
-        src: this.currentUrl,
         width: this.width,
-        height: this.height,
+        height: "100%",
         charset: "utf-8",
-        sandbox: "allow-same-origin allow-scripts"
+        sandbox: "allow-same-origin allow-scripts allow-forms"
       },
       ref: "perfectFrame",
-      on: { load: this.initFrame }
+      on: { load: this.onFrameLoad() }
     });
   },
   created() {
@@ -49,9 +49,11 @@ export default {
     this.$emit("stateChanged", this.$el.contentDocument.readyState);
   },
   data: () => ({
+    urlLoaded: false,
     slotRendered: false,
     stylesRendered: false,
-    proxyMode: false
+    proxyMode: false,
+    ajaxSession: null
   }),
   props: {
     src: {
@@ -67,20 +69,18 @@ export default {
   },
   computed: {
     currentUrl() {
-      return this.proxyMode
-        ? `${config.proxyUrl}/${this.currentProject.permalink}/static/`
-        : this.src;
+      return this.proxyMode ? `${config.proxyUrl}/${this.src}` : this.src;
     },
-    ...mapGetters(["currentProject", "currentPage"])
+    ...mapGetters(["currentProject", "currentPage"]),
+    frameWindow() {
+      return this.$el.contentWindow;
+    }
   },
   methods: {
-    initFrame() {
-      console.log("I`m a frame");
-      //this.applyProxyForLinks();
+    onFrameLoad() {
       /*this.renderStyles();
       this.renderSlot();
-      this.onFrameUpdate();*/
-      this.$emit("stateChanged", "complete");
+      this.preventLinks();*/
     },
     renderSlot() {
       if (this.slotRendered) {
@@ -123,12 +123,12 @@ export default {
           anchors[i].getAttribute("href")
         );
         anchors[i].removeAttribute("href");
-        /*const old_element = anchors[i];
+        const old_element = anchors[i];
         const new_element = old_element.cloneNode(true);
         old_element.parentNode.replaceChild(new_element, old_element);
         new_element.onclick = () => {
           return false;
-        };*/
+        };
       }
     },
     restoreLinks() {

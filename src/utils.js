@@ -516,8 +516,10 @@ export const extractHostname = function(url) {
 };
 
 export const getUrlDomain = function(url) {
-  const urlDomain = url.match(/([^\/]+:)?\/\/[^\/]*?\.?([^\/.]+)\.[^\/.]+(?::\d+)?\//g);
-  return urlDomain && urlDomain[0] || "";
+  const urlDomain = url.match(
+    /([^\/]+:)?\/\/[^\/]*?\.?([^\/.]+)\.[^\/.]+(?::\d+)?\//g
+  );
+  return (urlDomain && urlDomain[0]) || "";
 };
 
 export const detectMouseButton = function(evt) {
@@ -655,4 +657,8 @@ export const selectElementContents = function(el) {
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
+};
+
+export const insertAfter = function(elem, refElem) {
+  return refElem.parentNode.insertBefore(elem, refElem.nextSibling);
 };

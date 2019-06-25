@@ -108,12 +108,7 @@ export default {
       this.showTasksList = !this.showTasksList;
     },
     setCreatingTaskState() {
-      const self = this;
-      console.log("try to create screenshot");
-      document.getElementById("app-panel").style.display = "none";
-      setTimeout(() => {
-        self.port.postMessage({ takeScreenShot: true });
-      }, 100);
+      this.$store.dispatch(INSPECTOR_SET_STATE, INSPECTOR_STATE_CREATING);
     },
     toggleInspector() {
       if (this.tool === "INSPECTOR_TOOL_DOM_INSPECTOR") {

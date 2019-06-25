@@ -22,7 +22,6 @@ try {
 module.exports = function(app) {
   app.post("/create-project", (req, res) => {
     getUserByToken(req, res, user => {
-      const hostName = extractHostname(req.fields.url);
       const permalink = crypto.randomBytes(4).toString("hex");
       const targetUrl = (req.fields.url = !req.fields.url.includes("http")
         ? `https://${req.fields.url}`
@@ -31,30 +30,28 @@ module.exports = function(app) {
         .then(() => {
           getUrlData(targetUrl)
             .then(r => {
+              const title =
+                r
+                  .match(/<title[^>]*>([^<]+)<\/title>/)[1]
+                  .replace(
+                    /([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g,
+                    ""
+                  ) || "Untitled";
               Project.create({
-                name: r.match(/<title[^>]*>([^<]+)<\/title>/)[1] || "Untitled",
+                name: title,
                 url: targetUrl,
                 userId: user.id,
                 permalink: permalink
               }).then(project => {
                 Page.create({
-                  name: req.fields.name || "Untitled",
+                  name: title,
                   userId: user.id,
                   projectId: project.dataValues.id,
                   websiteUrl: req.fields.url
                 }).then(() => {
-                  res.status(200).send(JSON.stringify(project.dataValues));
-                  const imgUrl = `${config.upload.projectsFolderFullPath}${
-                    project.permalink
-                  }/shot.png`;
-                  const resultImg = `${config.upload.projectsFolderPath}${
-                    project.permalink
-                  }/shot.png`;
-                  return webshot(project.url, imgUrl, err => {
-                    if (!err) {
-                      project.update({ image: resultImg });
-                    }
-                  });
+                  return res
+                    .status(200)
+                    .send(JSON.stringify(project.dataValues));
                 });
               });
             })
@@ -67,66 +64,45 @@ module.exports = function(app) {
         });
     });
   });
-  const scrape = require("website-scraper");
-  const SaveToExistingDirectoryPlugin = require("website-scraper-existing-directory");
-  const PuppeteerPlugin = require("website-scraper-puppeteer");
-  const request = require("request");
-  const schedule = require("node-schedule");
-  const fs = require("fs");
+
   app.post("/download-project-resources", (req, res) => {
     if (!req.fields.folder || !req.fields.url) {
       return res.error("Required fields (folder, url) did not provide!");
     }
-    const domain = getUrlDomain(req.fields.url);
-    const pathToSave = `${config.upload.projectsFolderFullPath}${
-      req.fields.folder
-    }/static/`.replace(/\\/g, "/");
-    /*if (fs.existsSync(pathToSave)) {
-      return res.status(200).send({ message: "resources already exist!" });
-    }*/
-    scrape({
-      urls: [req.fields.url],
-      /*recursive: true,
-      maxDepth: 50,
-      maxRecursiveDepth: 50,*/
-      //prettifyUrls: true,
-      //filenameGenerator: "bySiteStructure",
-      directory: pathToSave,
-      plugins: [new SaveToExistingDirectoryPlugin()],
-      ignoreErrors: true
-    }).then(result => {
-      res.status(200).send({ message: "Files downloaded!" });
-    });
-    /*JSON.parse(req.fields.links).forEach(link => {
-      const checkNoProtocol = link.match(
-        /^\/\/[^/]*?\.?([^/.]+)\.[^/.]+(?::\d+)?\//g
-      );
-      if (checkNoProtocol) {
-        link = link.replace("//", "https://");
-      }
-
-      const fileName = link.match(/[^/]+$/g)[0];
-      const folders = `${config.upload.projectsFolderFullPath}${
-        req.fields.folder
-      }/static/${link}`
-        .replace(domain, "")
-        .replace(fileName, "")
-        .replace(/\\/g, "/");
-      const targetPath = link
-        .replace(
-          domain,
-          `${config.upload.projectsFolderFullPath}${req.fields.folder}/static/`
-        )
-        .replace(/\\/g, "/");
-
-      if (fs.existsSync(targetPath)) {
-        return;
-      }
-      shell.mkdir("-p", folders);
-      download(link, folders).then(({ data, filename }) => {
-        fs.writeFileSync(`${folders}/${filename}`, data);
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: {
+          permalink: req.fields.folder
+        }
+      }).then(project => {
+        const imgUrl = `${config.upload.projectsFolderFullPath}${
+          project.permalink
+        }/shot.png`;
+        const resultImg = `${config.upload.projectsFolderPath}${
+          project.permalink
+        }/shot.png`;
+        const puppeteer = require("puppeteer");
+        (async () => {
+          const browser = await puppeteer.launch();
+          const page = await browser.newPage();
+          await page.goto(req.fields.url);
+          const screenshot = await page.screenshot({ path: imgUrl });
+          if (screenshot) {
+            project
+              .update({ image: resultImg })
+              .then(() => {
+                return res
+                  .status(200)
+                  .send(JSON.stringify({ image: resultImg }));
+              })
+              .catch(error => {
+                res.error(`Error with creating screenshot: ${error}`);
+              });
+          }
+          await browser.close();
+        })();
       });
-    });*/
+    });
   });
 
   app.post("/edit-project", (req, res) => {
@@ -199,11 +175,10 @@ module.exports = function(app) {
     const sort = req.query.sort || "updatedAt";
     const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
     const setQuery = user => {
+      const params = { userId: user.id, trashId: null };
+      req.query.url ? (params.url = req.query.url) : "";
       const query = {
-        where: {
-          userId: user.id,
-          trashId: null
-        },
+        where: params,
         attributes: [
           "name",
           "id",
@@ -243,35 +218,37 @@ module.exports = function(app) {
       return res.error("Id did not provide!");
     }
     getUserByToken(req, res, user => {
-      Project.findOne({
+      Project.findAll({
         where: {
           id: req.fields.id
         }
       })
-        .then(project => {
-          if (!project) {
+        .then(projects => {
+          if (!projects.length) {
             return res.error("Project not found!");
           }
-          if (project.userId === user.id || user.isAdmin) {
-            project.destroy();
-            Page.destroy({
-              where: {
-                projectId: project.id
-              }
-            });
-            req.fields.projectId = project.id;
-            deleteDesigns(req, res);
-            removeFolder(
-              config.upload.projectsFolderFullPath + project.permalink,
-              () => {}
-            );
-            return res.status(200).send("Project deleted!");
-          } else {
-            return res.error({
-              title: "You don't have rights for delete this project!",
-              code: 403
-            });
-          }
+          projects.forEach(project => {
+            if (project.userId === user.id || user.isAdmin) {
+              project.destroy();
+              Page.destroy({
+                where: {
+                  projectId: project.id
+                }
+              });
+              req.fields.projectId = project.id;
+              deleteDesigns(req, res);
+              removeFolder(
+                config.upload.projectsFolderFullPath + project.permalink,
+                () => {}
+              );
+              return res.status(200).send("Project deleted!");
+            } else {
+              return res.error({
+                title: "You don't have rights for delete this project!",
+                code: 403
+              });
+            }
+          });
         })
         .catch(() => {
           return res.error("Projects not found for this user!");

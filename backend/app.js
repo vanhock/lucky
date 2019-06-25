@@ -1,8 +1,9 @@
+const config = require("./config/config");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const fallback = require("express-history-api-fallback");
-const port = 3000;
+const morgan = require("morgan");
+
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -11,12 +12,11 @@ app.use(function(req, res, next) {
   );
   next();
 });
+app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: true }));
+
 require("./routes")(app);
-const root = `${__dirname}/app`;
-app.use(express.static("app"));
-app.use(express.static("public"));
-//app.use(fallback("index.html", { root }));
-app.listen(port, () => {
-  console.log("We are live on " + port);
+
+app.listen(config.server.port, () => {
+  console.log("We are live on " + config.server.port);
 });
