@@ -5,14 +5,6 @@
       <design-params v-if="hasDesign" />
       <panel-control v-show="inspectingState">
         <v-toggle class="left" icon="upload" text="Compare with design" />
-        <!--<v-toggle
-          class="left"
-          icon="text-box"
-          text="Inspecting"
-          hide-text
-          :active="inspectorToolActive"
-          @click="toggleInspector"
-        />-->
       </panel-control>
       <div
         style="flex-grow: 1;

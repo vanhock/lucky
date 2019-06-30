@@ -2,7 +2,7 @@ import Vue from "vue";
 import store from "../../services/store/store";
 import App from "../../views/InspectorsView";
 import i18n from "../../i18n";
-import {AUTH_CHECK_AUTH, EXTENSION_SET_PORT} from "../../services/store/mutation-types";
+import { EXTENSION_SET_PORT } from "../../services/store/mutation-types";
 
 const port = browser.runtime.connect({ name: "content-script" });
 if (!port.scriptsLoaded) {

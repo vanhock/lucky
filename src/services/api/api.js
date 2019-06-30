@@ -21,7 +21,7 @@ class PixelApi {
     switch (error.response.status) {
       case 401:
         if (location.href.includes(config.apiUrl)) {
-          document.location = "/log-out";
+          //document.location = "/log-out";
         } else if (store.getters.port) {
           store.getters.port.postMessage({ resetToken: true });
         }

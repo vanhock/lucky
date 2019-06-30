@@ -9,26 +9,10 @@
     ></v-toggle>
     <div class="task-creator-tools">
       <v-toggle-selector>
-        <v-toggle
-          icon="arrow-down-left"
-          mode="feather"
-          :params="toolParams"
-        />
-        <v-toggle
-          icon="square"
-          mode="feather"
-          :params="toolParams"
-        />
-        <v-toggle
-          icon="circle"
-          mode="feather"
-          :params="toolParams"
-        />
-        <v-toggle
-          icon="edit-3"
-          mode="feather"
-          :params="toolParams"
-        />
+        <v-toggle icon="arrow-down-left" mode="feather" :params="toolParams" />
+        <v-toggle icon="square" mode="feather" :params="toolParams" />
+        <v-toggle icon="circle" mode="feather" :params="toolParams" />
+        <v-toggle icon="edit-3" mode="feather" :params="toolParams" />
       </v-toggle-selector>
       <v-toggle icon="text-box" icon-size="20px" />
       <v-toggle-selector>
@@ -122,7 +106,7 @@
             icon="slack"
             :text="$t('Slack')"
             mode="feather"
-            :params="{ stroke: '#d0d0d0', color: '#d0d0d0' }"
+            :params="{ stroke: '#d0d0d0', color: '#d0d0d0', iconSize: '14px' }"
             text-size="9px"
             disabled
           />

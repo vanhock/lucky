@@ -2,6 +2,18 @@ import config from "../config";
 import _ from "lodash";
 const ports = {};
 
+browser.runtime.onMessageExternal.addListener(
+  (message, sender, sendResponse) => {
+    if (message === "version") {
+      sendResponse({
+        type: "success",
+        version: "0.1.0"
+      });
+      return true;
+    }
+  }
+);
+
 browser.browserAction.onClicked.addListener(
   _.debounce(function(tab) {
     if (ports[tab.id] && ports[tab.id].inspectorsActive) {
@@ -13,7 +25,7 @@ browser.browserAction.onClicked.addListener(
         console.log(`Failed to connect with tab: ${tab.id}`);
       }
     } else {
-      injectContentScripts();
+      setUpInspectorsScript();
     }
   }, 300)
 );
@@ -97,10 +109,8 @@ function disconnected(p) {
   delete ports[p.sender.tab.id];
 }
 
-function injectContentScripts(tabId) {
-  browser.tabs.executeScript(tabId, {
-    file: "content_scripts/clear-script.js"
-  });
+function setUpInspectorsScript(tabId) {
+  ports[tabId].sendMessage({ clear: true });
   browser.tabs.executeScript(tabId, {
     file: "content_scripts/inspectors-script.js"
   });
@@ -162,13 +172,6 @@ function checkTokenBeforeStart(tabId, cb) {
 }
 
 function runAuthScript(tabId = null) {
-  /*if (
-    tabId &&
-    ports[tabId].hasOwnProperty("authTabId") &&
-    ports[tabId].authTabId
-  ) {
-    return ports[ports[tabId].authTabId].postMessage({ getToken: true });
-  }*/
   if (!ports[tabId].authorization) {
     ports[tabId].authorization = true;
     browser.tabs

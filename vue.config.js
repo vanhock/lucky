@@ -46,8 +46,8 @@ module.exports = {
             "content_scripts/inspectors-script": [
               "src/extension/content_scripts/inspectors-script.js"
             ],
-            "content_scripts/clear-script": [
-              "src/extension/content_scripts/clear-script.js"
+            "content_scripts/main-script": [
+              "src/extension/content_scripts/main-script.js"
             ],
             "content_scripts/auth-script": [
               "src/extension/content_scripts/auth-script.js"

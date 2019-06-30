@@ -63,7 +63,7 @@ export default {
 .v-icon {
   display: flex;
   &-image {
-    background-size: cover;
+    background-size: contain;
   }
 }
 </style>

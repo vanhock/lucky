@@ -52,6 +52,9 @@ export default {
   .title {
     font-size: 18px;
     margin: 25px 0 30px;
+    max-width: 80%;
+    max-height: 70px;
+    overflow: hidden;
   }
   .text {
     margin-bottom: 20px;

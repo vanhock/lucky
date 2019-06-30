@@ -16,6 +16,12 @@
     "scripts": ["background.js"],
     "persistent": false
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["/content_scripts/main-script.js"]
+    }
+  ],
   "browser_action": {
     "default_title": "__MSG_extName__",
     "default_icon": {

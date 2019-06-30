@@ -1,9 +1,9 @@
 import Vue from "vue";
-import i18n from "./i18n";
+import i18n from "../i18n";
 import Router from "vue-router";
-import AuthView from "./views/AuthView";
+import AuthView from "../views/AuthView";
 
-import UserPanelView from "./views/UserPanelView";
+import UserPanelView from "../views/UserPanelView";
 Vue.use(Router);
 
 i18n.locale = localStorage.getItem("locale") || "en";
@@ -41,13 +41,13 @@ export default new Router({
             title: i18n.t("projects")
           },
           component: () =>
-            import(/* webpackChunkName: "ProjectsView" */ "./views/ProjectsView")
+            import(/* webpackChunkName: "ProjectsView" */ "../views/ProjectsView")
         },
         {
           path: "/trash",
           name: "Trash",
           component: () =>
-            import(/* webpackChunkName: "TrashView" */ "./views/TrashView"),
+            import(/* webpackChunkName: "TrashView" */ "../views/TrashView"),
           meta: {
             title: i18n.t("trash")
           }
@@ -55,13 +55,13 @@ export default new Router({
       ]
     },
     {
-      path: "/app/:permalink/:pageUrl?",
-      name: "Inspectors",
+      path: "/i/:type/:permalink/:page?",
+      name: "Conductor",
       props: true,
       component: () =>
-        import(/* webpackChunkName: "InspectorsView" */ "./views/InspectorsView"),
+        import(/* webpackChunkName: "ConductorView" */ "../views/ConductorView"),
       meta: {
-        title: i18n.t("inspectors")
+        title: i18n.t("Conductor")
       }
     },
     {
@@ -78,13 +78,13 @@ export default new Router({
           path: "",
           name: "SignIn",
           component: () =>
-            import(/* webpackChunkName: "SignIn" */ "./organisms/authorization/SignIn")
+            import(/* webpackChunkName: "SignIn" */ "../organisms/authorization/SignIn")
         },
         {
           path: "/sign-up",
           name: "SignUp",
           component: () =>
-            import(/* webpackChunkName: "SignUp" */ "./organisms/authorization/SignUp")
+            import(/* webpackChunkName: "SignUp" */ "../organisms/authorization/SignUp")
         }
       ]
     },
@@ -92,7 +92,7 @@ export default new Router({
       path: "/log-out",
       name: "LogOut",
       component: () =>
-        import(/* webpackChunkName: "LogOut" */ "./views/LogOutView")
+        import(/* webpackChunkName: "LogOut" */ "../views/LogOutView")
     }
   ]
 });
