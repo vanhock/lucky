@@ -42,11 +42,12 @@ export default {
     /** from InputMixin **/
     componentType: "general",
     focus: false,
-    focused: false
+    focused: false,
+    checkChange: false
   }),
   mounted() {
     if (this.value && this.value.length) {
-      this.focus = true;
+      this.setFocus();
     }
   },
   computed: {
@@ -70,6 +71,9 @@ export default {
     onBlur() {
       this.inputValue === "" ? (this.focus = false) : "";
       this.focused = true;
+    },
+    setFocus() {
+      this.$refs[`input-${name}`].focus();
     }
   }
 };

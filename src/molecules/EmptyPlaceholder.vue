@@ -1,7 +1,10 @@
 <template>
-  <div class="empty-placeholder" :class="{ transparent: transparent }">
+  <div
+    class="empty-placeholder"
+    :class="[{ transparent: transparent }, alignment]"
+  >
     <div class="image" v-if="icon">
-      <v-icon :icon="icon" :params="{ iconSize: '100px' }" />
+      <v-icon :icon="icon" :params="{ iconSize: iconSize }" />
     </div>
     <div class="title">{{ title }}</div>
     <div class="text" v-if="text">{{ text }}</div>
@@ -23,6 +26,14 @@ export default {
     },
     text: String,
     icon: String,
+    iconSize: {
+      type: String,
+      default: "100px"
+    },
+    alignment: {
+      type: String,
+      default: "center"
+    },
     transparent: Boolean
   }
 };
@@ -34,7 +45,6 @@ export default {
   width: 100%;
   min-height: 450px;
   margin: 0 auto;
-  justify-content: center;
   align-items: center;
   flex-direction: column;
   text-align: center;
@@ -49,15 +59,31 @@ export default {
     background-size: cover;
     pointer-events: none;
   }
+
   .title {
     font-size: 18px;
     margin: 25px 0 30px;
-    max-width: 80%;
+    max-width: 70%;
     max-height: 70px;
     overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
+
   .text {
     margin-bottom: 20px;
+  }
+
+  &.center {
+    justify-content: center;
+  }
+
+  &.top {
+    justify-content: flex-start;
+  }
+
+  &.bottom {
+    justify-content: flex-end;
   }
 }
 </style>

@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <language-toggle />
     <router-view />
   </div>
 </template>
@@ -11,12 +10,10 @@ import moment from "moment";
 import VueMoment from "vue-moment";
 Vue.use(VueMoment);
 import "vuejs-noty/dist/vuejs-noty.css";
-import LanguageToggle from "./molecules/LanguageToggle";
 export default {
   created() {
     moment.locale(this.$i18n.locale);
-  },
-  components: { LanguageToggle }
+  }
 };
 </script>
 

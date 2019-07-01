@@ -1,18 +1,45 @@
 <template>
   <div class="conductor-view">
-    <empty-placeholder :title="$t(`We are going to: ${pageUrl}`)" icon="logo">
-      <div class="conductor-steps" v-if="!authorized || !hasExtension">
-        <div class="step-auth">
-          {{
-            (authorized && "You are authorized") ||
-              "You need to login to this project"
-          }}
+    <empty-placeholder
+      icon="logo"
+      :title="titleText"
+      icon-size="120px"
+      alignment="top"
+    >
+      <div class="conductor-steps">
+        <div class="step-auth" :class="{ loading: !authorized }">
+          <v-icon
+            :icon="stepStyle(authorized).icon"
+            :mode="icon.mode"
+            :params="{ ...icon.params, stroke: stepStyle(authorized).color }"
+          />
+          <div class="cont">
+            <div class="cont-title">
+              {{
+                (authorized && "You are authorized") ||
+                  "You need to login to this project"
+              }}
+            </div>
+            <sign-in />
+          </div>
         </div>
-        <div class="step-auth">
-          {{
-            (hasExtension && "Extension installed") ||
-              "Install our extension by link"
-          }}
+        <div class="step-extension" :class="{ loading: !hasExtension }">
+          <v-icon
+            :icon="stepStyle(hasExtension).icon"
+            :mode="icon.mode"
+            :params="{ ...icon.params, stroke: stepStyle(hasExtension).color }"
+          />
+          <div class="cont">
+            <div class="cont-title">
+              {{
+                (hasExtension && "Extension installed") ||
+                  "Install our extension by link"
+              }}
+            </div>
+            <v-button-primary v-if="!hasExtension">{{
+              $t("Download")
+            }}</v-button-primary>
+          </div>
         </div>
       </div>
     </empty-placeholder>
@@ -27,15 +54,18 @@ import {
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
 import config from "../config";
+import VIcon from "../atoms/VIcon/VIcon";
+import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
+import SignIn from "../organisms/authorization/SignIn";
 
 export default {
   name: "ConductorView",
-  components: { EmptyPlaceholder },
+  components: { SignIn, VButtonPrimary, VIcon, EmptyPlaceholder },
   created() {
-    this.checkAccessToProject();
+    //this.checkAccessToProject();
   },
   mounted() {
-    this.checkExtensionInstalled();
+    //this.checkExtensionInstalled();
   },
   data: () => ({
     currentProject: null,
@@ -43,12 +73,23 @@ export default {
     logoParams: {
       iconSize: "20px"
     },
-    authorized: true,
-    hasExtension: true
+    authorized: false,
+    hasExtension: false,
+    icon: {
+      mode: "feather",
+      params: { iconSize: "22px" }
+    }
   }),
   computed: {
-    pageUrl() {
-      return this.currentPage && this.currentPage.websiteUrl;
+    pageName() {
+      return this.currentPage && this.currentPage.name;
+    },
+    titleText() {
+      return !this.authorized && !this.hasExtension
+        ? this.$t("Two steps for open page")
+        : !this.authorized || !this.hasExtension
+        ? this.$t("One step for open page")
+        : this.$t("Open page");
     }
   },
   props: {
@@ -78,27 +119,97 @@ export default {
               .then(pages => {
                 this.currentPage = pages[0];
               })
-              .catch(error => {
-                this.authorized = false;
-              });
+              .catch(error => {});
           }
         })
-        .catch(error => {});
+        .catch(error => {
+          this.authorized = false;
+        });
     },
     checkExtensionInstalled() {
-      this.hasExtension =
-        document.querySelector(`[extension-id=${config.extensionId}]`) || false;
+      setTimeout(() => {
+        this.hasExtension =
+          document.querySelector(`[extension-id=${config.extensionId}]`) ||
+          false;
+      }, 100);
+    },
+    stepStyle(state) {
+      return (
+        (state && { icon: "check-circle", color: "#2ed609" }) || {
+          icon: "arrow-right",
+          color: "#a035fb"
+        }
+      );
     }
   }
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .conductor-view {
   max-width: 900px;
   margin: auto;
   height: 100%;
   display: flex;
   align-items: center;
+
+  .empty-placeholder {
+    padding-bottom: 100px;
+    .title {
+      margin-top: 0;
+      font-size: 25px;
+      margin-bottom: 48px;
+      color: $color-b3;
+    }
+  }
+}
+.conductor-steps {
+  & > div {
+    display: flex;
+    align-items: flex-start;
+    font-size: 20px;
+
+    &:not(:last-child) {
+      margin-bottom: 40px;
+    }
+    .v-icon {
+      margin-top: 1px;
+      margin-right: 20px;
+    }
+    .cont {
+      &-title {
+        font-weight: 500;
+      }
+      .v-button {
+        margin-top: 20px;
+      }
+    }
+    &.loading {
+    }
+    .sign-in {
+      margin-top: 20px;
+      .v-input {
+        &:not(:last-child) {
+          margin-bottom: 10px;
+        }
+      }
+    }
+  }
+}
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bounce {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1.3);
+  }
 }
 </style>

@@ -1,6 +1,10 @@
 <template>
   <div class="sign-in" @keypress.enter="authorization">
-    <form-group ref="form" :loading="loading">
+    <form-group
+      ref="form"
+      :loading="loading"
+      @change="changeValid = Math.random()"
+    >
       <v-input-bordered
         name="email"
         :label="$t('email')"
@@ -19,6 +23,7 @@
       class="submit"
       @click="authorization"
       :loading="loading"
+      :disabled="!formValid"
       >{{ $t("signIn") }}</v-button-primary
     >
   </div>
@@ -36,8 +41,14 @@ export default {
   name: "SignIn",
   components: { VButtonPrimary, FormGroup, VInputBordered },
   data: () => ({
-    loading: false
+    loading: false,
+    changeValid: 0
   }),
+  computed: {
+    formValid() {
+      return this.changeValid && this.$refs.form.valid;
+    }
+  },
   props: {
     redirectTo: String
   },
@@ -56,7 +67,7 @@ export default {
         .then(user => {
           UserLoginSuccess(this, user.name);
           setTimeout(() => {
-            self.$router.push("/");
+            //self.$router.push("/");
           }, 2000);
         })
         .catch(error => {
