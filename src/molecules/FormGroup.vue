@@ -15,6 +15,7 @@
 export default {
   name: "FormGroup",
   mounted() {
+    this.handleChildrenChanged();
     this.$children.forEach((children, index) => {
       if (index === 0) {
         const targetEl = children.$el.querySelector("input:not([disabled])");

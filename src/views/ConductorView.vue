@@ -3,6 +3,7 @@
     <empty-placeholder
       icon="logo"
       :title="titleText"
+      :text="$t('You will redirect to target page after complete these steps')"
       icon-size="120px"
       alignment="top"
     >
@@ -17,7 +18,8 @@
             <div class="cont-title">
               {{
                 (authorized && "You are authorized") ||
-                  "You need to login to this project"
+                  ((showSteps && "1. ") || "") +
+                    $t("Login to this project")
               }}
             </div>
             <sign-in />
@@ -33,7 +35,8 @@
             <div class="cont-title">
               {{
                 (hasExtension && "Extension installed") ||
-                  "Install our extension by link"
+                  ((showSteps && "2. ") || "") +
+                    $t("Install our extension by link")
               }}
             </div>
             <v-button-primary v-if="!hasExtension">{{
@@ -65,7 +68,10 @@ export default {
     //this.checkAccessToProject();
   },
   mounted() {
-    //this.checkExtensionInstalled();
+    this.checkExtensionInstalled();
+  },
+  updated() {
+    this.checkExtensionInstalled();
   },
   data: () => ({
     currentProject: null,
@@ -90,6 +96,9 @@ export default {
         : !this.authorized || !this.hasExtension
         ? this.$t("One step for open page")
         : this.$t("Open page");
+    },
+    showSteps() {
+      return !this.authorized && !this.hasExtension;
     }
   },
   props: {
@@ -154,10 +163,14 @@ export default {
   align-items: center;
 
   .empty-placeholder {
-    padding-bottom: 100px;
+    padding-bottom: 60px;
     .title {
       margin-top: 0;
+      margin-bottom: 20px;
       font-size: 25px;
+      color: $color-b2;
+    }
+    .text {
       margin-bottom: 48px;
       color: $color-b3;
     }
@@ -167,6 +180,7 @@ export default {
   & > div {
     display: flex;
     align-items: flex-start;
+    width: 360px;
     font-size: 20px;
 
     &:not(:last-child) {
@@ -177,6 +191,8 @@ export default {
       margin-right: 20px;
     }
     .cont {
+      justify-content: flex-start;
+      text-align: left;
       &-title {
         font-weight: 500;
       }
@@ -187,6 +203,7 @@ export default {
     &.loading {
     }
     .sign-in {
+      width: 265px;
       margin-top: 20px;
       .v-input {
         &:not(:last-child) {

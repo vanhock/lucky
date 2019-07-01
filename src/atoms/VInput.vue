@@ -46,14 +46,30 @@ export default {
     checkChange: false
   }),
   mounted() {
-    if (this.value && this.value.length) {
-      this.setFocus();
-    }
+    this.$nextTick(() => {
+      if (this.value && this.value.length) {
+        this.setFocus();
+      }
+    });
+  },
+  updated() {
+    this.$nextTick(() => {
+      if (this.value && this.value.length) {
+        this.setFocus();
+      }
+    });
   },
   computed: {
     ...mapState(["appTheme"]),
     currentTheme() {
       return (this.theme && this.theme) || this.appTheme;
+    }
+  },
+  watch: {
+    value(newVal) {
+      if (newVal.length) {
+        this.setFocus();
+      }
     }
   },
   props: {
@@ -73,6 +89,7 @@ export default {
       this.focused = true;
     },
     setFocus() {
+      this.focus = true;
       this.$refs[`input-${name}`].focus();
     }
   }
