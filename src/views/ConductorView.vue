@@ -52,6 +52,7 @@
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import {
   AUTH_AS_CLIENT,
+  AUTH_SUCCESS,
   PROJECT_CHECK_ACCESS,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
@@ -112,12 +113,19 @@ export default {
     },
     authToProject(fields) {
       this.$store
-        .dispatch(PROJECT_CHECK_ACCESS, { permalink: this.permalink })
-        .then(project => {
-          this.currentProject = project;
-          this.$store.dispatch(AUTH_AS_CLIENT, fields).then(() => {
-            this.authorized = true;
-          });
+        .dispatch(AUTH_AS_CLIENT, fields)
+        .then(user => {
+          this.$store
+            .dispatch(PROJECT_CHECK_ACCESS, {
+              permalink: this.permalink,
+              email: fields.email,
+              userId: user.id
+            })
+            .then(project => {
+              this.$store.commit(AUTH_SUCCESS, user);
+              this.currentProject = project;
+              this.authorized = true;
+            });
         })
         .catch(error => {
           this.accessError = error;

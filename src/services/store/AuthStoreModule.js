@@ -3,7 +3,8 @@ import {
   AUTH_SUCCESS,
   AUTH_ERROR,
   AUTH_LOGOUT,
-  AUTH_CHECK_AUTH, AUTH_AS_CLIENT
+  AUTH_CHECK_AUTH,
+  AUTH_AS_CLIENT
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
@@ -32,6 +33,7 @@ export default {
       state.status = "success";
       state.user = user;
       state.userToken = user.token;
+      localStorage.setItem("pp-u-t-s", user.token);
     },
     [AUTH_ERROR]: state => {
       state.status = "error";
@@ -39,6 +41,7 @@ export default {
     [AUTH_LOGOUT]: state => {
       state.user = {};
       state.userToken = null;
+      localStorage.removeItem("pp-u-t-s");
     },
     [AUTH_CHECK_AUTH]: (state, payload = null) => {
       state.user = payload;
@@ -57,7 +60,6 @@ export default {
           }
           PixelApi.setToken(user.token, () => {
             SetAuthToken(user.token);
-            localStorage.setItem("pp-u-t-s", user.token);
             window.postMessage({ authorized: true }, "*");
             commit(AUTH_SUCCESS, user);
             resolve(user);
@@ -69,7 +71,6 @@ export default {
       return new Promise(resolve => {
         commit(AUTH_LOGOUT);
         SetAuthToken("");
-        localStorage.removeItem("pp-u-t-s"); // clear your user's token from localstorage
         resolve();
       });
     },
@@ -89,15 +90,12 @@ export default {
         });
       });
     },
-    [AUTH_AS_CLIENT]({ commit }, payload) {
+    [AUTH_AS_CLIENT](payload) {
       return new Promise((resolve, reject) => {
         AuthAsClient(payload, (error, user) => {
           if (error) {
             return reject(error);
           }
-          SetAuthToken(user.token);
-          localStorage.setItem("pp-u-t-s", user.token);
-          commit(AUTH_SUCCESS, user);
           resolve(user);
         });
       });

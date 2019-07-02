@@ -280,16 +280,21 @@ module.exports = function(app) {
       }
     })
       .then(project => {
-        if (project.status === "public") {
-          /** Project is Public, any user can authorize to it **/
-          return res.status(200).send(JSON.stringify(project.dataValues));
-        }
         if (project.status === "closed") {
           return res.error({ title: "Project closed!", code: 500 });
         }
+
+        if (
+          project.status === "public" ||
+          (!req.query.userId && req.query.userId === project.userId)
+        ) {
+          return res.status(200).send(JSON.stringify(project.dataValues));
+        }
+
         if (!req.query.email) {
           return res.error("Email didn't provide!");
         }
+
         Email.findOne({
           where: {
             email: req.query.email,
