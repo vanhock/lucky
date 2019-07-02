@@ -5,14 +5,17 @@ import {
   PROJECT_CREATE_PROJECT,
   PROJECT_GET_PROJECTS,
   PROJECT_MOVE_TO_TRASH,
-  PROJECT_SET_SCREENSHOT
+  PROJECT_SET_SCREENSHOT,
+  PROJECT_CHECK_ACCESS
 } from "./mutation-types";
 import {
-  createProject, downloadProjectResources,
+  createProject,
+  downloadProjectResources,
   editProject,
   getAllProjects,
   getProject,
-  moveProjectToTrash
+  moveProjectToTrash,
+  checkAccessToProject
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -63,7 +66,7 @@ export default {
     }
   },
   actions: {
-    [PROJECT_SET_CURRENT_PROJECT]: ({ commit }, payload) => {
+    [PROJECT_SET_CURRENT_PROJECT]({ commit }, payload) {
       console.log("Try to set current project");
       if (!payload) {
         commit(PROJECT_SET_CURRENT_PROJECT, {});
@@ -78,7 +81,7 @@ export default {
         });
       });
     },
-    [PROJECT_CREATE_PROJECT]: ({ commit }, payload) => {
+    [PROJECT_CREATE_PROJECT]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         createProject(payload, (error, project) => {
           if (error) {
@@ -89,7 +92,7 @@ export default {
         });
       });
     },
-    [PROJECT_EDIT_PROJECT]: ({ commit }, payload) => {
+    [PROJECT_EDIT_PROJECT]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         editProject(payload, (error, project) => {
           if (error) {
@@ -100,7 +103,7 @@ export default {
         });
       });
     },
-    [PROJECT_SET_SCREENSHOT]: ({ commit }, payload) => {
+    [PROJECT_SET_SCREENSHOT]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         downloadProjectResources(payload, (error, image) => {
           if (error) {
@@ -110,7 +113,7 @@ export default {
         });
       });
     },
-    [PROJECT_MOVE_TO_TRASH]: ({ commit }, payload) => {
+    [PROJECT_MOVE_TO_TRASH]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         moveProjectToTrash({ id: payload.id }, (error, success) => {
           if (error) {
@@ -121,7 +124,7 @@ export default {
         });
       });
     },
-    [PROJECT_GET_PROJECTS]: ({ commit }, payload) => {
+    [PROJECT_GET_PROJECTS]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         getAllProjects(serializeObject(payload), (error, projects) => {
           if (error) {
@@ -129,6 +132,16 @@ export default {
           }
           commit(PROJECT_GET_PROJECTS, projects);
           resolve(projects);
+        });
+      });
+    },
+    [PROJECT_CHECK_ACCESS](payload) {
+      return new Promise((resolve, reject) => {
+        checkAccessToProject(serializeObject(payload), (error, project) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(project);
         });
       });
     }

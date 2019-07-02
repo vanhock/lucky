@@ -1,4 +1,4 @@
-const { Project, Page } = require("../sequelize");
+const { Project, Page, Email, User } = require("../sequelize");
 const {
   getUserByToken,
   filterObject,
@@ -157,18 +157,32 @@ module.exports = function(app) {
       : req.query.permalink
       ? (params.permalink = req.query.permalink)
       : "";
-    getUserByToken(req, res, user => {
-      params.userId = user.id;
-      Project.findOne({
-        where: params
+    Project.findOne({
+      where: params
+    })
+      .then(project => {
+        if (project.status === "closed") {
+          return res.error({ title: "Project closed!", code: 500 });
+        }
+        if (req.headers.authorization) {
+          User.options.classMethods.authByToken(
+            req.headers.authorization,
+            (message, user) => {
+              if (user) {
+                if (user.id === project.userId) {
+                  return res.status(200).send(JSON.stringify(project));
+                }
+              }
+            }
+          );
+        }
+        return res
+          .status(200)
+          .send(JSON.stringify(filterObject(project, ["permalink, status"])));
       })
-        .then(project => {
-          return res.status(200).send(JSON.stringify(project));
-        })
-        .catch(message => {
-          return res.error("Error with getting project: " + message);
-        });
-    });
+      .catch(() => {
+        res.error("Project not found!");
+      });
   });
 
   app.get("/get-all-projects", (req, res) => {
@@ -211,6 +225,87 @@ module.exports = function(app) {
           return res.error("Error with getting projects: " + message);
         });
     });
+  });
+
+  app.post("/invite-to-project", (req, res) => {
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        id: req.fields.id,
+        userId: user.id
+      })
+        .then(project => {
+          Email.findOne({
+            where: {
+              email: req.fields.email
+            }
+          })
+            .then(email => {
+              return project.addEmail(email).then(() => {
+                res.status(200).send(
+                  JSON.stringify({
+                    ...project.dataValues,
+                    ...email.dataValues
+                  })
+                );
+              });
+            })
+            .catch(() => {
+              return Email.create({
+                email: req.fields.email
+              }).then(email => {
+                return project.addEmail(email).then(() => {
+                  res.status(200).send(
+                    JSON.stringify({
+                      ...project.dataValues,
+                      ...email.dataValues
+                    })
+                  );
+                });
+              });
+            });
+        })
+        .catch(error => {
+          res.error(error);
+        });
+    });
+  });
+
+  app.get("/check-access-to-project", (req, res) => {
+    if (!req.query.permalink) {
+      return res.error("Permalink did not provide!");
+    }
+    Project.findOne({
+      where: {
+        permalink: req.query.permalink
+      }
+    })
+      .then(project => {
+        if (project.status === "public") {
+          /** Project is Public, any user can authorize to it **/
+          return res.status(200).send(JSON.stringify(project.dataValues));
+        }
+        if (project.status === "closed") {
+          return res.error({ title: "Project closed!", code: 500 });
+        }
+        if (!req.query.email) {
+          return res.error("Email didn't provide!");
+        }
+        Email.findOne({
+          where: {
+            email: req.query.email,
+            projectPermalink: req.query.permalink
+          }
+        })
+          .then(() => {
+            return res.status(200).send(JSON.stringify(project.dataValues));
+          })
+          .catch(() => {
+            res.error({ title: "Email is't assign to project", code: 401 });
+          });
+      })
+      .catch(() => {
+        return res.error("Project not found!");
+      });
   });
 
   app.post("/delete-project", (req, res) => {

@@ -33,7 +33,7 @@ module.exports = function(app) {
         }
         return res.status(200).send(
           JSON.stringify({
-            message: success
+            message: "User created"
           })
         );
       }
@@ -46,22 +46,66 @@ module.exports = function(app) {
     });
   });
 
+  app.post("/auth-as-client", (req, res) => {
+    if (!req.fields.email || !req.fields.password) {
+      return res.error("Required fields did not provide!");
+    }
+    User.findOne({
+      where: {
+        email: req.fields.email
+      }
+    })
+      .then(() => {
+        User.options.classMethods.authorization(
+          req.fields.email,
+          req.fields.password,
+          (error, response) => {
+            if (!error) {
+              return res
+                .status(200)
+                .send(JSON.stringify(filterObject(response, allowedParams)));
+            } else {
+              return res.error(error);
+            }
+          }
+        );
+      })
+      .catch(() => {
+        User.options.classMethods.createNewUser(
+          {
+            email: req.fields.email,
+            password: req.fields.password,
+            role: "client"
+          },
+          (error, user) => {
+            if (error) {
+              return res.error(error);
+            }
+            return res
+              .status(200)
+              .send(JSON.stringify(filterObject(user, allowedParams)));
+          }
+        );
+      });
+  });
+
   app.post("/authorization", (req, res) => {
     if (!Object.keys(req.fields).length) {
       return;
     }
-    const fields = req.fields;
-    if (!fields.email || !fields.password) {
-      return;
+    if (!req.fields.email || !req.fields.password) {
+      return res.error("Required fields did not provide!");
     }
     User.options.classMethods.authorization(
-      fields.email,
-      fields.password,
-      (response, object) => {
-        if (!response) {
-          return res.status(200).send(JSON.stringify(object));
+      req.fields.email,
+      req.fields.password,
+      (error, response) => {
+        if (!error) {
+          return res
+            .status(200)
+            .send(JSON.stringify(filterObject(response, allowedParams)));
         } else {
-          return res.error(response);
+          return res.error(error);
         }
       }
     );

@@ -59,9 +59,9 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.ENUM("new", "confirmed", "active", "disabled"),
         defaultValue: "active"
       },
-      isAdmin: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
+      role: {
+        type: DataTypes.ENUM("owner", "admin", "collaborator", "client"),
+        defaultValue: "collaborator"
       },
       salt: {
         type: DataTypes.STRING
@@ -118,16 +118,16 @@ module.exports = function(sequelize, DataTypes) {
               if (users.length) {
                 return done("User with same email already exist!");
               }
-              return User.create(
-                {
-                  name: user.name,
-                  company: user.company,
-                  email: user.email,
-                  password: user.password,
-                  tempPassword: this.generatePassword()
-                },
-                done(null, "User created!")
-              );
+              return User.create({
+                name: user.name,
+                company: user.company,
+                email: user.email,
+                role: user.role,
+                password: user.password,
+                tempPassword: this.generatePassword()
+              }).then(user => {
+                done(null, user);
+              });
             })
             .catch(message => {
               console.log(message);
@@ -176,12 +176,9 @@ module.exports = function(sequelize, DataTypes) {
                 token: newToken
               });
             } else {
-              const newToken = User.options.instanceMethods.createToken();
               done(null, {
-                name: foundUser.name,
-                email: foundUser.email,
-                isAdmin: foundUser.isAdmin,
-                token: newToken
+                ...foundUser,
+                token: User.options.instanceMethods.createToken()
               });
             }
           }, done);
@@ -201,19 +198,7 @@ module.exports = function(sequelize, DataTypes) {
             }
             return done(null, foundUser);
           }, done);
-        },
-        findByToken: function(token, done) {
-          User.findOne({ where: { token: token } })
-            .then(user => {
-              done(null, user);
-            })
-            .catch(error => {
-              done(error);
-            });
         }
-        /*associate: function(models) {
-          User.hasMany(models.Client);
-        }*/
       },
       hooks: {
         beforeDestroy: function(user) {

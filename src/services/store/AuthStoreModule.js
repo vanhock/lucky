@@ -3,10 +3,15 @@ import {
   AUTH_SUCCESS,
   AUTH_ERROR,
   AUTH_LOGOUT,
-  AUTH_CHECK_AUTH
+  AUTH_CHECK_AUTH, AUTH_AS_CLIENT
 } from "./mutation-types";
 import PixelApi from "../api/api";
-import { AuthByToken, Authorization, SetAuthToken } from "../api/UserApi";
+import {
+  AuthAsClient,
+  AuthByToken,
+  Authorization,
+  SetAuthToken
+} from "../api/UserApi";
 export default {
   state: {
     user: {},
@@ -80,7 +85,20 @@ export default {
             return reject(error);
           }
           commit(AUTH_CHECK_AUTH, user);
-          return resolve(user);
+          resolve(user);
+        });
+      });
+    },
+    [AUTH_AS_CLIENT]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        AuthAsClient(payload, (error, user) => {
+          if (error) {
+            return reject(error);
+          }
+          SetAuthToken(user.token);
+          localStorage.setItem("pp-u-t-s", user.token);
+          commit(AUTH_SUCCESS, user);
+          resolve(user);
         });
       });
     }

@@ -1,6 +1,7 @@
 import axios from "axios";
 import config from "../../config";
 import store from "../store/store";
+import { AUTH_LOGOUT } from "../store/mutation-types";
 class PixelApi {
   constructor() {
     let api = axios.create({
@@ -21,7 +22,12 @@ class PixelApi {
     switch (error.response.status) {
       case 401:
         if (location.href.includes(config.apiUrl)) {
-          //document.location = "/log-out";
+          if (location.href.includes(`${config.apiUrl}/i`)) {
+            return;
+          }
+          store.dispatch(AUTH_LOGOUT).then(() => {
+            document.location = "/sign-in";
+          });
         } else if (store.getters.port) {
           store.getters.port.postMessage({ resetToken: true });
         }

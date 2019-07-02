@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     permalink: DataTypes.STRING,
     name: DataTypes.STRING,
+    status: DataTypes.ENUM("public", "private", "closed"),
     url: DataTypes.STRING,
     image: DataTypes.STRING
   });

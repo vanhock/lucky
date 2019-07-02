@@ -2,6 +2,7 @@ const config = require("./config/db");
 const Sequelize = require("sequelize");
 const UserModel = require("./models/userModel");
 const ProjectModel = require("./models/projectModel");
+const emailModel = require("./models/emailModel");
 const PageModel = require("./models/pageModel");
 const CommentModel = require("./models/commentModel");
 const DesignModel = require("./models/designModel");
@@ -26,26 +27,26 @@ const sequelize = new Sequelize(
 
 const User = UserModel(sequelize, Sequelize);
 const Project = ProjectModel(sequelize, Sequelize);
+const Email = emailModel(sequelize, Sequelize);
 const Page = PageModel(sequelize, Sequelize);
 const Comment = CommentModel(sequelize, Sequelize);
 const Design = DesignModel(sequelize, Sequelize);
 const Task = TaskModel(sequelize, Sequelize);
 const Trash = TrashModel(sequelize, Sequelize);
 
-User.belongsToMany(Project, { through: "project_collaborators" });
-Project.belongsToMany(User, {
-  as: "Collaborators",
-  through: "project_collaborators"
-});
-
-User.hasMany(Project);
 User.hasMany(Comment);
 User.hasMany(Task);
+User.hasMany(Project);
 User.belongsTo(Trash);
 
 Project.hasMany(Page);
 Project.hasMany(Design);
 Project.belongsTo(Trash);
+Project.belongsToMany(Email, {
+  through: "project_emails",
+  foreignKey: "projectPermalink",
+  otherKey: "email"
+});
 
 Page.hasMany(Comment);
 Page.belongsTo(Design);
@@ -72,6 +73,7 @@ sequelize.sync({ force: false }).then(() => {
 module.exports = {
   User,
   Project,
+  Email,
   Page,
   Design,
   Comment,

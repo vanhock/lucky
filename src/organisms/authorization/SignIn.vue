@@ -1,10 +1,6 @@
 <template>
   <div class="sign-in" @keypress.enter="authorization">
-    <form-group
-      ref="form"
-      :loading="loading"
-      @change="changeValid = Math.random()"
-    >
+    <form-group ref="form" :loading="loading">
       <v-input-bordered
         name="email"
         :label="$t('email')"
@@ -23,7 +19,6 @@
       class="submit"
       @click="authorization"
       :loading="loading"
-      :disabled="!formValid"
       >{{ $t("signIn") }}</v-button-primary
     >
   </div>
@@ -41,16 +36,11 @@ export default {
   name: "SignIn",
   components: { VButtonPrimary, FormGroup, VInputBordered },
   data: () => ({
-    loading: false,
-    changeValid: 0
+    loading: false
   }),
-  computed: {
-    formValid() {
-      return this.changeValid && this.$refs.form.valid;
-    }
-  },
   props: {
-    redirectTo: String
+    redirectTo: String,
+    custom: Boolean
   },
   methods: {
     authorization: _.debounce(function() {
@@ -62,12 +52,15 @@ export default {
         return UserLoginError(this, "Form not valid!");
       }
       this.loading = true;
+      if (this.custom) {
+        return this.$emit("callback", fields);
+      }
       this.$store
         .dispatch(AUTH_REQUEST, fields)
         .then(user => {
           UserLoginSuccess(this, user.name);
           setTimeout(() => {
-            //self.$router.push("/");
+            self.$router.push("/");
           }, 2000);
         })
         .catch(error => {

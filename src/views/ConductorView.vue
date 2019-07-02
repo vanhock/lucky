@@ -18,11 +18,10 @@
             <div class="cont-title">
               {{
                 (authorized && "You are authorized") ||
-                  ((showSteps && "1. ") || "") +
-                    $t("Login to this project")
+                  ((showSteps && "1. ") || "") + $t("Login to this project")
               }}
             </div>
-            <sign-in />
+            <sign-in @callback="authToProject" custom />
           </div>
         </div>
         <div class="step-extension" :class="{ loading: !hasExtension }">
@@ -52,8 +51,8 @@
 <script>
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import {
-  PAGE_GET_PAGE,
-  PAGE_GET_PAGES,
+  AUTH_AS_CLIENT,
+  PROJECT_CHECK_ACCESS,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
 import config from "../config";
@@ -65,36 +64,30 @@ export default {
   name: "ConductorView",
   components: { SignIn, VButtonPrimary, VIcon, EmptyPlaceholder },
   created() {
-    //this.checkAccessToProject();
+    this.getProjectAndCheckAuth();
   },
   mounted() {
     this.checkExtensionInstalled();
   },
-  updated() {
-    this.checkExtensionInstalled();
-  },
   data: () => ({
     currentProject: null,
-    currentPage: null,
     logoParams: {
       iconSize: "20px"
     },
     authorized: false,
     hasExtension: false,
+    accessError: null,
     icon: {
       mode: "feather",
       params: { iconSize: "22px" }
     }
   }),
   computed: {
-    pageName() {
-      return this.currentPage && this.currentPage.name;
-    },
     titleText() {
       return !this.authorized && !this.hasExtension
-        ? this.$t("Two steps for open page")
+        ? this.$t("Two steps to open page")
         : !this.authorized || !this.hasExtension
-        ? this.$t("One step for open page")
+        ? this.$t("One step to open page")
         : this.$t("Open page");
     },
     showSteps() {
@@ -107,32 +100,27 @@ export default {
     page: String
   },
   methods: {
-    async checkAccessToProject() {
+    getProjectAndCheckAuth() {
       this.$store
         .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: this.permalink })
         .then(project => {
           this.currentProject = project;
-          if (this.pageId) {
-            this.$store
-              .dispatch(PAGE_GET_PAGE, {
-                projectId: project.id,
-                id: this.page
-              })
-              .then(page => {
-                this.currentPage = page;
-              })
-              .catch(error => {});
-          } else {
-            this.$store
-              .dispatch(PAGE_GET_PAGES, { projectId: project.id })
-              .then(pages => {
-                this.currentPage = pages[0];
-              })
-              .catch(error => {});
+          if (project.id && project.name) {
+            this.authorized = true;
           }
+        });
+    },
+    authToProject(fields) {
+      this.$store
+        .dispatch(PROJECT_CHECK_ACCESS, { permalink: this.permalink })
+        .then(project => {
+          this.currentProject = project;
+          this.$store.dispatch(AUTH_AS_CLIENT, fields).then(() => {
+            this.authorized = true;
+          });
         })
         .catch(error => {
-          this.authorized = false;
+          this.accessError = error;
         });
     },
     checkExtensionInstalled() {

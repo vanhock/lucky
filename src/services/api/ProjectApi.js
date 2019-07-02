@@ -41,3 +41,9 @@ export function moveProjectToTrash(payload, cb) {
     generalCallback(status, data, cb);
   });
 }
+
+export function checkAccessToProject(payload, cb) {
+  PixelApi.get(`/check-access-to-project?${payload}`, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}

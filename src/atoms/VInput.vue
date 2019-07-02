@@ -1,5 +1,5 @@
 <template>
-  <div class="v-input" :class="[currentTheme, { focus: focus }]">
+  <div class="v-input" :class="[currentTheme, { focus: value || focus }]">
     <div class="label">
       <label :for="`input-${name}`">{{ label }}</label>
     </div>
@@ -45,31 +45,10 @@ export default {
     focused: false,
     checkChange: false
   }),
-  mounted() {
-    this.$nextTick(() => {
-      if (this.value && this.value.length) {
-        this.setFocus();
-      }
-    });
-  },
-  updated() {
-    this.$nextTick(() => {
-      if (this.value && this.value.length) {
-        this.setFocus();
-      }
-    });
-  },
   computed: {
     ...mapState(["appTheme"]),
     currentTheme() {
       return (this.theme && this.theme) || this.appTheme;
-    }
-  },
-  watch: {
-    value(newVal) {
-      if (newVal.length) {
-        this.setFocus();
-      }
     }
   },
   props: {
@@ -90,7 +69,7 @@ export default {
     },
     setFocus() {
       this.focus = true;
-      this.$refs[`input-${name}`].focus();
+      this.$el.getElementsByTagName("input")[0].focus();
     }
   }
 };
