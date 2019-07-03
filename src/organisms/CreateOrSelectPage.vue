@@ -27,9 +27,9 @@
     <template v-if="showPageCreation">
       <form-group ref="operationalForm">
         <v-input-bordered
-          name="websiteUrl"
+          name="url"
           :label="$t('Website URL')"
-          :value="currentWebsiteUrl"
+          :value="currenturl"
           disabled
         />
         <v-input-bordered
@@ -90,13 +90,13 @@ export default {
   },
   data: () => ({
     toggleCreate: false,
-    currentWebsiteUrl: location.href,
+    currenturl: location.href,
     currentWebsiteTitle: document.title
   }),
   computed: {
     ...mapGetters(["pages", "hasPages", "port"]),
     currentHostname() {
-      return this.currentWebsiteUrl && extractHostname(this.currentWebsiteUrl);
+      return this.currenturl && extractHostname(this.currenturl);
     },
     pageModalTitle() {
       return (

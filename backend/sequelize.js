@@ -2,7 +2,6 @@ const config = require("./config/db");
 const Sequelize = require("sequelize");
 const UserModel = require("./models/userModel");
 const ProjectModel = require("./models/projectModel");
-const emailModel = require("./models/emailModel");
 const PageModel = require("./models/pageModel");
 const CommentModel = require("./models/commentModel");
 const DesignModel = require("./models/designModel");
@@ -27,7 +26,6 @@ const sequelize = new Sequelize(
 
 const User = UserModel(sequelize, Sequelize);
 const Project = ProjectModel(sequelize, Sequelize);
-const Email = emailModel(sequelize, Sequelize);
 const Page = PageModel(sequelize, Sequelize);
 const Comment = CommentModel(sequelize, Sequelize);
 const Design = DesignModel(sequelize, Sequelize);
@@ -36,14 +34,24 @@ const Trash = TrashModel(sequelize, Sequelize);
 
 User.hasMany(Comment);
 User.hasMany(Task);
-User.hasMany(Project);
 User.belongsTo(Trash);
 
 Project.hasMany(Page);
 Project.hasMany(Design);
 Project.belongsTo(Trash);
-Project.belongsToMany(Email, {
-  through: "project_emails",
+
+const UserProject = sequelize.define("user_project", {
+  role: Sequelize.ENUM("owner", "admin", "collaborator", "client")
+});
+
+User.belongsToMany(Project, {
+  through: UserProject,
+  foreignKey: "projectPermalink",
+  otherKey: "email"
+});
+
+Project.belongsToMany(User, {
+  through: "UserProject",
   foreignKey: "projectPermalink",
   otherKey: "email"
 });
@@ -66,14 +74,13 @@ Trash.belongsToMany(Page, { through: "pages_trash" });
 Trash.belongsToMany(Task, { through: "tasks_trash" });
 Trash.belongsToMany(Comment, { through: "comments_trash" });
 
-sequelize.sync({ force: false }).then(() => {
+sequelize.sync({ force: true }).then(() => {
   console.log(`Database & tables created!`);
 });
 
 module.exports = {
   User,
   Project,
-  Email,
   Page,
   Design,
   Comment,

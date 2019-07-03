@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: DataTypes.STRING,
     foundNodes: DataTypes.JSON,
-    websiteUrl: DataTypes.STRING,
+    url: DataTypes.STRING,
     websiteWidth: DataTypes.STRING,
     websiteHeight: DataTypes.STRING,
     showWebsiteInspector: {

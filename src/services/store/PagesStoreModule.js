@@ -23,7 +23,7 @@ export default {
     currentPage: {
       websiteWidth: window.innerWidth + "px",
       websiteHeight: window.innerHeight - 24 + "px",
-      websiteUrl: null,
+      url: null,
       showWebsiteInspector: true,
       showDesignInspector: false,
       websiteInspectorPercentage: 50,

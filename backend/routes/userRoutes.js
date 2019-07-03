@@ -7,7 +7,16 @@ const {
   moveFile
 } = require("../libs/helpers");
 
-const allowedParams = ["id", "name", "avatarPath", "email", "company"];
+const allowedParams = [
+  "id",
+  "name",
+  "avatarPath",
+  "email",
+  "company",
+  "token",
+  "createdAt",
+  "updatedAt"
+];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
     const fields = req.fields;

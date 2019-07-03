@@ -49,8 +49,8 @@ export default {
   computed: {
     ...mapGetters([
       "designBlocks",
-      "websiteUrl",
-      "websiteUrlProxy",
+      "url",
+      "urlProxy",
       "viewerReady",
       "frameParams",
       "foundNodes",
@@ -135,7 +135,7 @@ export default {
       frame.src = "about:blank";
       frame.contentWindow.document.open();
       frame.contentWindow.document.write(
-        html.replace(/<head>/i, `<head><base href="${this.websiteUrl}">`)
+        html.replace(/<head>/i, `<head><base href="${this.url}">`)
       );
 
       frame.contentWindow.document.close();

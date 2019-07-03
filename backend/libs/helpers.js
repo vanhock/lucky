@@ -37,38 +37,66 @@ const getUserByToken = function(req, res, cb) {
   );
 };
 
-function checkAllowChangesToPage(req, res, cb) {
-  const { Page, Project } = require("../sequelize");
-  getUserByToken(req, res, user => {
-    Page.findOne({
-      where: {
-        id: req.fields.id
-      }
-    })
-      .then(page => {
-        Project.findOne({
-          where: {
-            id: page.projectId
-          }
-        })
-          .then(project => {
-            if (project.userId === user.id || user.isAdmin) {
-              return cb(page, project, user);
-            } else {
-              return res.error.send({
-                title: "You don't have rights to edit this page!",
-                status: 403
-              });
-            }
+function updateProjectUser(req, res, project, user, params = {}) {
+  user
+    .getProject(project)
+    .then(() => {
+      return user.setProject(project, { through: params }).then(projectUser => {
+        res.status(200).send(
+          JSON.stringify({
+            ...project.dataValues,
+            ...projectUser.dataValues
           })
-          .catch(() => {
-            return res.error("Project of this page not found!");
-          });
+        );
+      });
+    })
+    .catch(() => {
+      return project
+        .addProject(project, { through: params })
+        .then(projectUser => {
+          res.status(200).send(
+            JSON.stringify({
+              ...project.dataValues,
+              ...projectUser.dataValues
+            })
+          );
+        });
+    });
+}
+
+function checkProjectAccess(projectOrProjectId, user, cb) {
+  if (!projectOrProjectId || !user) {
+    return;
+  }
+  const { Project } = require("../sequelize");
+
+  if (typeof projectOrProjectId === "string") {
+    Project.findOne({
+      where: projectOrProjectId
+    })
+      .then(project => {
+        return f(project);
       })
       .catch(() => {
-        return res.error("Page not found!");
+        return cb("Project not found!");
       });
-  });
+  }
+  f(projectOrProjectId);
+
+  function f(project) {
+    user
+      .getProject(project)
+      .then(projectUser => {
+        return cb(null, projectUser.role);
+      })
+      .catch(() => {
+        cb(
+          `Access to project ${project.permalink} denied for user: ${
+            user.email
+          }!`
+        );
+      });
+  }
 }
 
 const filterObject = function(object, includes, except) {
@@ -214,6 +242,8 @@ const getUrlData = url => {
 module.exports = {
   extractHostname,
   getUserByToken,
+  updateProjectUser,
+  checkProjectAccess,
   filterObject,
   normalizePSD,
   normalizeFigma,

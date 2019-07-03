@@ -158,7 +158,7 @@ export default {
                         project
                       );
                       this.$store.dispatch(PAGE_GET_PAGE, {
-                        websiteUrl: project.url
+                        url: project.url
                       });
                     });
                 } else {
@@ -167,7 +167,7 @@ export default {
                     projects[0]
                   );
                   this.$store.dispatch(PAGE_GET_PAGE, {
-                    websiteUrl: location.href
+                    url: location.href
                   });
                 }
               })

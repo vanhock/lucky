@@ -1,83 +1,70 @@
 const { Page, Project } = require("../sequelize");
 const {
   getUserByToken,
-  checkAllowChangesToPage,
+  checkProjectAccess,
   filterObject
 } = require("../libs/helpers");
 
 module.exports = function(app) {
   app.post("/create-page", (req, res) => {
-    if (!req.fields.websiteUrl) {
-      return res.error("Website url did not provide!");
+    if (!req.fields.url || !req.fields.projectId) {
+      return res.error("Required fields did not provide!");
     }
-    const websiteUrl = req.fields.websiteUrl;
     getUserByToken(req, res, user => {
-      let projectId = req.fields.projectId;
-
-      if (projectId) {
-        Project.findOne({
-          where: {
-            id: projectId,
-            userId: user.id
-          }
-        })
-          .then(() => {
-            return createPage();
-          })
-          .catch(() => {
-            return res.error("You don't have rights for change this project!");
-          });
-      } else {
-        /** Get the last project if a project id didn't provide **/
-
-        /** If projects not found create new Untitled project **/
-        Project.create({
-          name: req.fields.projectName || "Untitled",
+      Project.findOne({
+        where: {
+          id: req.fields.projectId,
           userId: user.id
-        }).then(project => {
-          projectId = project.id;
-          createPage();
-        });
-      }
-      function createPage() {
-        Page.create({
-          name: req.fields.name || "Untitled",
-          userId: user.id,
-          projectId: projectId,
-          websiteUrl: websiteUrl
-        })
-          .then(page => {
-            return res.status(200).send(JSON.stringify(page.dataValues));
-          })
-          .catch(message => {
-            return res.error("Error with creating page!" + message);
+        }
+      })
+        .then(project => {
+          checkProjectAccess(project, user, (error, role) => {
+            if (error) {
+              return res.error(error);
+            }
+            if (role === "owner" || role === "admin") {
+              return Page.create({
+                name: req.fields.name || "Untitled",
+                projectId: req.fields.projectId,
+                url: req.fields.url
+              })
+                .then(page => {
+                  return res.status(200).send(JSON.stringify(page.dataValues));
+                })
+                .catch(message => {
+                  return res.error("Error with creating page!" + message);
+                });
+            }
           });
-      }
+        })
+        .catch(() => {
+          return res.error("Project not found!");
+        });
     });
   });
 
   app.get("/get-page", (req, res) => {
-    if (!req.query.websiteUrl && !req.query.id) {
+    if (!req.query.url && !req.query.id) {
       return res.error("Required field did not provide!");
     }
     getUserByToken(req, res, user => {
       const params = { trashId: null };
-      if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
+      if (req.query.url) params.url = req.query.url;
       if (req.query.id) params.id = req.query.id;
-      if (!user.isAdmin) params.userId = user.id;
 
       Page.findOne({
         where: params
       })
         .then(page => {
-          if (page.userId === user.id || user.isAdmin) {
+          checkProjectAccess(page.projectId, user, error => {
+            if (error) {
+              return res.error({
+                title: "You don't have rights to view this page!",
+                code: 403
+              });
+            }
             return res.status(200).send(JSON.stringify(page));
-          } else {
-            res.error({
-              title: "You don't have rights to view this page!",
-              code: 403
-            });
-          }
+          });
         })
         .catch(() => {
           return res.error({ title: "Page not found!", code: 404 });
@@ -86,24 +73,29 @@ module.exports = function(app) {
   });
 
   app.get("/get-pages", (req, res) => {
-    if (!req.query.websiteUrl && !req.query.projectId) {
+    if (!req.query.projectId) {
       return res.error("Required did not provide!");
     }
     getUserByToken(req, res, user => {
-      const params = { trashId: null };
-      if (req.query.websiteUrl) params.websiteUrl = req.query.websiteUrl;
-      if (req.query.projectId) params.projectId = req.query.projectId;
-      if (!user.isAdmin) params.userId = user.id;
-
-      Page.findAll({
-        where: params
-      })
-        .then(pages => {
-          return res.status(200).send(JSON.stringify(pages));
+      const params = { trashId: null, projectId: req.query.projectId };
+      if (req.query.url) params.url = req.query.url;
+      checkProjectAccess(req.query.projectId, user, error => {
+        if (error) {
+          return res.error({
+            title: "You don't have rights to get this pages!",
+            code: 403
+          });
+        }
+        return Page.findAll({
+          where: params
         })
-        .catch(() => {
-          return res.error("Have no pages found!");
-        });
+          .then(pages => {
+            return res.status(200).send(JSON.stringify(pages));
+          })
+          .catch(() => {
+            return res.error("Have no pages found!");
+          });
+      });
     });
   });
 
@@ -111,9 +103,19 @@ module.exports = function(app) {
     if (!req.fields.id) {
       return res.error("Page id did not provide!");
     }
-    checkAllowChangesToPage(req, res, page => {
-      page.destroy();
-      return res.status(200).send("Page deleted!");
+    getUserByToken(req, res, user => {
+      Page.findAll({
+        where: req.fields.id
+      }).then(pages => {
+        pages.forEach(page => {
+          checkProjectAccess(page.projectId, user, (error, role) => {
+            if (role === "owner" || role === "admin") {
+              page.destroy();
+            }
+          });
+        });
+        return res.status(200).send("Page(s) deleted!");
+      });
     });
   });
 
@@ -121,33 +123,27 @@ module.exports = function(app) {
     if (!req.fields.id || !req.fields.projectId) {
       return res.error("Required fields did not provide!");
     }
-    checkAllowChangesToPage(req, res, (page, project, user) => {
-      Project.findOne({
+    getUserByToken(req, res, user => {
+      Page.findOne({
         where: {
-          id: req.fields.projectId
+          id: req.fields.id
         }
-      })
-        .then(targetProject => {
-          if (!targetProject) {
-            return res.error("Project of this page not found!");
+      }).then(page => {
+        checkProjectAccess(page.projectId, user, (error, role) => {
+          if (error) {
+            return res.error(error);
           }
-          if (user.id !== targetProject.userId) {
-            res.error({
-              title: "You don't allow to move the page to this project",
-              code: 403
-            });
+          if (role === "owner" || role === "admin") {
+            page
+              .update({
+                projectId: req.fields.projectId
+              })
+              .then(result => {
+                return res.status(200).send(JSON.stringify(result));
+              });
           }
-          page
-            .update({
-              projectId: targetProject.id
-            })
-            .then(result => {
-              return res.status(200).send(JSON.stringify(result));
-            });
-        })
-        .catch(() => {
-          return res.error("Target project did not found!");
         });
+      });
     });
   });
 

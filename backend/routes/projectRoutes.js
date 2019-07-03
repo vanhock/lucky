@@ -1,11 +1,11 @@
-const { Project, Page, Email, User } = require("../sequelize");
+const { Project, Page, User } = require("../sequelize");
 const {
   getUserByToken,
   filterObject,
-  extractHostname,
+  updateProjectUser,
+  checkProjectAccess,
   getUrlData,
-  removeFolder,
-  getUrlDomain
+  removeFolder
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
 const sequelize = require("sequelize");
@@ -40,14 +40,13 @@ module.exports = function(app) {
               Project.create({
                 name: title,
                 url: targetUrl,
-                userId: user.id,
                 permalink: permalink
               }).then(project => {
+                updateProjectUser(req, res, project, user, { role: "owner" });
                 Page.create({
                   name: title,
-                  userId: user.id,
                   projectId: project.dataValues.id,
-                  websiteUrl: req.fields.url
+                  url: req.fields.url
                 }).then(() => {
                   return res
                     .status(200)
@@ -123,21 +122,23 @@ module.exports = function(app) {
           if (!project) {
             return res.error("Project not found!");
           }
-          if (project.userId === user.id || user.isAdmin) {
-            project
-              .update(fieldsToEdit)
-              .then(project => {
-                return res.status(200).send(JSON.stringify(project.dataValues));
-              })
-              .catch(() => {
-                res.error("Error with edit project");
-              });
-          } else {
-            return res.error({
-              title: "You don't have rights for edit this project!",
-              code: 403
-            });
-          }
+          checkProjectAccess(project, user, (error, role) => {
+            if (error) {
+              res.error(error);
+            }
+            if (role === "owner" || role === "admin") {
+              project
+                .update(fieldsToEdit)
+                .then(project => {
+                  return res
+                    .status(200)
+                    .send(JSON.stringify(project.dataValues));
+                })
+                .catch(() => {
+                  res.error("Error with edit project");
+                });
+            }
+          });
         })
         .catch(message => {
           return res.error("Error with getting project: " + message);
@@ -169,9 +170,11 @@ module.exports = function(app) {
             req.headers.authorization,
             (message, user) => {
               if (user) {
-                if (user.id === project.userId) {
-                  return res.status(200).send(JSON.stringify(project));
-                }
+                checkProjectAccess(project, user, (error, role) => {
+                  if (role) {
+                    return res.status(200).send(JSON.stringify(project));
+                  }
+                });
               }
             }
           );
@@ -188,9 +191,8 @@ module.exports = function(app) {
   app.get("/get-all-projects", (req, res) => {
     const sort = req.query.sort || "updatedAt";
     const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
-    const setQuery = user => {
-      const params = { userId: user.id, trashId: null };
-      req.query.url ? (params.url = req.query.url) : "";
+    const setQuery = (p = {}) => {
+      const params = { trashId: null, ...p };
       const query = {
         where: params,
         attributes: [
@@ -217,52 +219,47 @@ module.exports = function(app) {
     };
 
     getUserByToken(req, res, user => {
-      Project.findAll(setQuery(user))
-        .then(projects => {
-          return res.status(200).send(JSON.stringify(projects));
+      user
+        .getProjects()
+        .then(userProjects => {
+          if (!userProjects.length) {
+            return res.status(200).send(JSON.stringify([]));
+          }
+          Project.findAll(
+            setQuery({ permalink: userProjects.map(up => up.projectPermalink) })
+          )
+            .then(projects => {
+              return res.status(200).send(JSON.stringify(projects));
+            })
+            .catch(message => {
+              return res.error("Error with getting projects: " + message);
+            });
         })
-        .catch(message => {
-          return res.error("Error with getting projects: " + message);
+        .catch(() => {
+          return res.status(200).send(JSON.stringify([]));
         });
     });
   });
 
   app.post("/invite-to-project", (req, res) => {
+    if (!req.fields.id || !req.fields.role) {
+      return res.error("Required fields didn't provide!");
+    }
     getUserByToken(req, res, user => {
       Project.findOne({
-        id: req.fields.id,
-        userId: user.id
+        id: req.fields.id
       })
         .then(project => {
-          Email.findOne({
-            where: {
-              email: req.fields.email
+          checkProjectAccess(project, user, (error, role) => {
+            if (error) {
+              return res.error(error);
             }
-          })
-            .then(email => {
-              return project.addEmail(email).then(() => {
-                res.status(200).send(
-                  JSON.stringify({
-                    ...project.dataValues,
-                    ...email.dataValues
-                  })
-                );
+            if (role === "owner" || role === "admin") {
+              updateProjectUser(req, res, project, user, {
+                role: req.fields.role
               });
-            })
-            .catch(() => {
-              return Email.create({
-                email: req.fields.email
-              }).then(email => {
-                return project.addEmail(email).then(() => {
-                  res.status(200).send(
-                    JSON.stringify({
-                      ...project.dataValues,
-                      ...email.dataValues
-                    })
-                  );
-                });
-              });
-            });
+            }
+          });
         })
         .catch(error => {
           res.error(error);
@@ -270,53 +267,11 @@ module.exports = function(app) {
     });
   });
 
-  app.get("/check-access-to-project", (req, res) => {
-    if (!req.query.permalink) {
-      return res.error("Permalink did not provide!");
-    }
-    Project.findOne({
-      where: {
-        permalink: req.query.permalink
-      }
-    })
-      .then(project => {
-        if (project.status === "closed") {
-          return res.error({ title: "Project closed!", code: 500 });
-        }
-
-        if (
-          project.status === "public" ||
-          (!req.query.userId && req.query.userId === project.userId)
-        ) {
-          return res.status(200).send(JSON.stringify(project.dataValues));
-        }
-
-        if (!req.query.email) {
-          return res.error("Email didn't provide!");
-        }
-
-        Email.findOne({
-          where: {
-            email: req.query.email,
-            projectPermalink: req.query.permalink
-          }
-        })
-          .then(() => {
-            return res.status(200).send(JSON.stringify(project.dataValues));
-          })
-          .catch(() => {
-            res.error({ title: "Email is't assign to project", code: 401 });
-          });
-      })
-      .catch(() => {
-        return res.error("Project not found!");
-      });
-  });
-
   app.post("/delete-project", (req, res) => {
     if (!req.fields.id) {
       return res.error("Id did not provide!");
     }
+    /** ToDo: Add access check for project delete **/
     getUserByToken(req, res, user => {
       Project.findAll({
         where: {

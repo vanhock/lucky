@@ -36,7 +36,7 @@
         />
         <v-input-bordered
           id="pageWebsite"
-          name="websiteUrl"
+          name="url"
           :value="selectedPageWebsite"
           :label="$t('Website URL')"
           required
@@ -125,7 +125,7 @@ export default {
   computed: {
     ...mapGetters(["hasPages", "pages", "currentProject", "projects"]),
     selectedPageWebsite() {
-      return this.dataForOperations && this.dataForOperations.websiteUrl;
+      return this.dataForOperations && this.dataForOperations.url;
     }
   },
   methods: {

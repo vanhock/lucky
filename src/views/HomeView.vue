@@ -44,7 +44,7 @@ export default {
     this.$store.dispatch("resetHomepageState");
   },
   computed: {
-    ...mapGetters(["designBlocks", "websiteUrl", "viewerReady"])
+    ...mapGetters(["designBlocks", "url", "viewerReady"])
   }
 };
 </script>

@@ -189,7 +189,7 @@ export default {
       downloadProjectResources(
         {
           folder: this.currentProject.permalink,
-          url: this.currentPage.websiteUrl
+          url: this.currentPage.url
         },
         error => {
           if (error) {

@@ -60,8 +60,8 @@ module.exports = function(sequelize, DataTypes) {
         defaultValue: "active"
       },
       role: {
-        type: DataTypes.ENUM("owner", "admin", "collaborator", "client"),
-        defaultValue: "collaborator"
+        type: DataTypes.ENUM("owner", "admin", "user"),
+        defaultValue: "user"
       },
       salt: {
         type: DataTypes.STRING
@@ -177,7 +177,7 @@ module.exports = function(sequelize, DataTypes) {
               });
             } else {
               done(null, {
-                ...foundUser,
+                ...foundUser.dataValues,
                 token: User.options.instanceMethods.createToken()
               });
             }

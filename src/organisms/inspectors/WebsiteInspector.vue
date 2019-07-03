@@ -3,7 +3,7 @@
     <preloader :show="websiteStatus === 'loading'" type="cube">
       <i-frame
         ref="frame"
-        :src="websiteUrl"
+        :src="url"
         :width="frameWidth"
         :height="frameHeight"
         @update="onFrameUpdated"
@@ -50,7 +50,7 @@ export default {
     this.renderFrameStyles();
   },
   props: {
-    websiteUrl: {
+    url: {
       type: String,
       default: "",
       required: true
