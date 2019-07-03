@@ -1,9 +1,7 @@
-const { checkAllowChangesToPage } = require("../libs/helpers");
-
 const sequelize = require("sequelize");
 
 const { Project, Page, Trash, Task } = require("../sequelize");
-const { getUserByToken } = require("../libs/helpers");
+const { getUserByToken, checkProjectAccess } = require("../libs/helpers");
 
 module.exports = function(app) {
   app.get("/get-projects-trash", (req, res) => {
@@ -123,13 +121,26 @@ module.exports = function(app) {
     });
   });
   app.post("/move-page-to-trash", (req, res) => {
-    if (!req.fields.id || !req.fields.projectId) {
+    if (!req.fields.id) {
       return res.error("Required fields did not provide!");
     }
-    checkAllowChangesToPage(req, res, page => {
-      Trash.create().then(trash => {
-        page.update({ trashId: trash.id });
-        res.status(200).send(JSON.stringify(page.dataValues));
+    getUserByToken(req, res, user => {
+      Page.findOne({
+        where: {
+          id: req.fields.id
+        }
+      }).then(page => {
+        checkProjectAccess(page.projectId, user, (error, role) => {
+          if (error) {
+            return res.error(error);
+          }
+          if (role === "owner" || role === "admin") {
+            Trash.create().then(trash => {
+              page.update({ trashId: trash.id });
+              res.status(200).send(JSON.stringify(page.dataValues));
+            });
+          }
+        });
       });
     });
   });

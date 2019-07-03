@@ -35,12 +35,8 @@ export default {
   methods: {
     init() {
       this.getUser().then(() => {
-        this.getProjects();
         this.fillMenu();
       });
-    },
-    getProjects: async function() {
-      await this.$store.dispatch(PROJECT_GET_PROJECTS);
     },
     getUser: async function() {
       await this.$store.dispatch(AUTH_CHECK_AUTH);

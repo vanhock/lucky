@@ -128,22 +128,26 @@ module.exports = function(app) {
         where: {
           id: req.fields.id
         }
-      }).then(page => {
-        checkProjectAccess(page.projectId, user, (error, role) => {
-          if (error) {
-            return res.error(error);
-          }
-          if (role === "owner" || role === "admin") {
-            page
-              .update({
-                projectId: req.fields.projectId
-              })
-              .then(result => {
-                return res.status(200).send(JSON.stringify(result));
-              });
-          }
+      })
+        .then(page => {
+          checkProjectAccess(page.projectId, user, (error, role) => {
+            if (error) {
+              return res.error(error);
+            }
+            if (role === "owner" || role === "admin") {
+              page
+                .update({
+                  projectId: req.fields.projectId
+                })
+                .then(result => {
+                  return res.status(200).send(JSON.stringify(result));
+                });
+            }
+          });
+        })
+        .catch(() => {
+          return res.error({ title: "Page not found!", code: 404 });
         });
-      });
     });
   });
 

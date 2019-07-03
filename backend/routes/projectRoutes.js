@@ -42,16 +42,24 @@ module.exports = function(app) {
                 url: targetUrl,
                 permalink: permalink
               }).then(project => {
-                updateProjectUser(req, res, project, user, { role: "owner" });
-                Page.create({
-                  name: title,
-                  projectId: project.dataValues.id,
-                  url: req.fields.url
-                }).then(() => {
-                  return res
-                    .status(200)
-                    .send(JSON.stringify(project.dataValues));
-                });
+                updateProjectUser(
+                  req,
+                  res,
+                  project,
+                  user,
+                  { role: "owner" },
+                  () => {
+                    Page.create({
+                      name: title,
+                      projectId: project.dataValues.id,
+                      url: req.fields.url
+                    }).then(() => {
+                      return res
+                        .status(200)
+                        .send(JSON.stringify(project.dataValues));
+                    });
+                  }
+                );
               });
             })
             .catch(error => {
@@ -226,7 +234,7 @@ module.exports = function(app) {
             return res.status(200).send(JSON.stringify([]));
           }
           Project.findAll(
-            setQuery({ permalink: userProjects.map(up => up.projectPermalink) })
+            setQuery({ permalink: userProjects.map(up => up.dataValues.permalink) })
           )
             .then(projects => {
               return res.status(200).send(JSON.stringify(projects));
@@ -255,9 +263,18 @@ module.exports = function(app) {
               return res.error(error);
             }
             if (role === "owner" || role === "admin") {
-              updateProjectUser(req, res, project, user, {
-                role: req.fields.role
-              });
+              updateProjectUser(
+                req,
+                res,
+                project,
+                user,
+                {
+                  role: req.fields.role
+                },
+                () => {
+                  res.status(200);
+                }
+              );
             }
           });
         })

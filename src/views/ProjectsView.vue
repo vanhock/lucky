@@ -160,12 +160,12 @@ export default {
             `Project "${project.name}" successfully created!`
           );
           this.$refs.websiteSelector.$children[0].clearValue();
-          this.$store
+          /*this.$store
             .dispatch(PROJECT_SET_SCREENSHOT, {
               folder: project.permalink,
               url: project.url
             })
-            .then(() => {});
+            .then(() => {});*/
         })
         .catch(error => notification(this, "error", error));
     },

@@ -45,15 +45,11 @@ const UserProject = sequelize.define("user_project", {
 });
 
 User.belongsToMany(Project, {
-  through: UserProject,
-  foreignKey: "projectPermalink",
-  otherKey: "email"
+  through: UserProject
 });
 
 Project.belongsToMany(User, {
-  through: "UserProject",
-  foreignKey: "projectPermalink",
-  otherKey: "email"
+  through: UserProject
 });
 
 Page.hasMany(Comment);
@@ -74,7 +70,7 @@ Trash.belongsToMany(Page, { through: "pages_trash" });
 Trash.belongsToMany(Task, { through: "tasks_trash" });
 Trash.belongsToMany(Comment, { through: "comments_trash" });
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: false }).then(() => {
   console.log(`Database & tables created!`);
 });
 

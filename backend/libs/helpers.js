@@ -37,30 +37,28 @@ const getUserByToken = function(req, res, cb) {
   );
 };
 
-function updateProjectUser(req, res, project, user, params = {}) {
+function updateProjectUser(req, res, project, user, params = {}, cb) {
   user
-    .getProject(project)
+    .getProjects({
+      where: {
+        projectId: project.id
+      }
+    })
     .then(() => {
       return user.setProject(project, { through: params }).then(projectUser => {
-        res.status(200).send(
-          JSON.stringify({
-            ...project.dataValues,
-            ...projectUser.dataValues
-          })
-        );
+        cb({
+          ...project.dataValues,
+          ...projectUser.dataValues
+        });
       });
     })
     .catch(() => {
-      return project
-        .addProject(project, { through: params })
-        .then(projectUser => {
-          res.status(200).send(
-            JSON.stringify({
-              ...project.dataValues,
-              ...projectUser.dataValues
-            })
-          );
+      return user.addProject(project, { through: params }).then(projectUser => {
+        cb({
+          ...project.dataValues,
+          ...projectUser.dataValues
         });
+      });
     });
 }
 
@@ -248,7 +246,6 @@ module.exports = {
   normalizePSD,
   normalizeFigma,
   getParentAndChild,
-  checkAllowChangesToPage,
   removeFile,
   removeFolder,
   moveFile,
