@@ -148,20 +148,40 @@ module.exports = function(app) {
   });
 
   app.post("/set-page-params", (req, res) => {
+    if (!req.fields.id) {
+      return res.error("Page id did not provide!");
+    }
     const params = filterObject(req.fields, null, [
       "createdAt",
       "updatedAt",
       "projectId",
       "id"
     ]);
-    checkAllowChangesToPage(req, res, page => {
-      page
-        .update(params)
-        .then(result => {
-          return res.status(200).send(JSON.stringify(result));
+    getUserByToken(req, res, user => {
+      Page.findOne({
+        where: {
+          id: req.fields.id
+        }
+      })
+        .then(page => {
+          checkProjectAccess(page.projectId, user, (error, role) => {
+            if (error) {
+              return res.error(error);
+            }
+            if (role === "owner" || role === "admin") {
+              page
+                .update(params)
+                .then(result => {
+                  return res.status(200).send(JSON.stringify(result));
+                })
+                .catch(() => {
+                  return res.error("Error with update page params!");
+                });
+            }
+          });
         })
         .catch(() => {
-          return res.error("Error with update page params!");
+          res.error("Page not found");
         });
     });
   });
