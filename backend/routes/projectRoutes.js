@@ -1,4 +1,4 @@
-const { Project, Page, User } = require("../sequelize");
+const { Project, Page } = require("../sequelize");
 const {
   getUserByToken,
   filterObject,
@@ -121,36 +121,24 @@ module.exports = function(app) {
         return res.error("Name can't have an empty value!");
       }
       const fieldsToEdit = filterObject(req.fields, ["name"]);
-      Project.findOne({
-        where: {
-          id: req.fields.id
-        }
-      })
-        .then(project => {
-          if (!project) {
-            return res.error("Project not found!");
+      checkProjectAccess(
+        { id: req.fields.id },
+        user,
+        undefined,
+        (error, project) => {
+          if (error) {
+            return res.error(error);
           }
-          checkProjectAccess(project, user, (error, role) => {
-            if (error) {
-              res.error(error);
-            }
-            if (role === "owner" || role === "admin") {
-              project
-                .update(fieldsToEdit)
-                .then(project => {
-                  return res
-                    .status(200)
-                    .send(JSON.stringify(project.dataValues));
-                })
-                .catch(() => {
-                  res.error("Error with edit project");
-                });
-            }
-          });
-        })
-        .catch(message => {
-          return res.error("Error with getting project: " + message);
-        });
+          return project
+            .update(fieldsToEdit)
+            .then(project => {
+              return res.status(200).send(JSON.stringify(project.dataValues));
+            })
+            .catch(() => {
+              res.error("Error with edit project");
+            });
+        }
+      );
     });
   });
 
@@ -166,41 +154,24 @@ module.exports = function(app) {
       : req.query.permalink
       ? (params.permalink = req.query.permalink)
       : "";
-    Project.findOne({
-      where: params
-    })
-      .then(project => {
-        if (project.status === "closed") {
+    getUserByToken(req, res, user => {
+      checkProjectAccess(params, user, [], (error, project) => {
+        if (error) {
+          return res.error(error);
+        }
+        if (project.dataValues.status === "closed") {
           return res.error({ title: "Project closed!", code: 500 });
         }
-        if (req.headers.authorization) {
-          User.options.classMethods.authByToken(
-            req.headers.authorization,
-            (message, user) => {
-              if (user) {
-                checkProjectAccess(project, user, (error, role) => {
-                  if (role) {
-                    return res.status(200).send(JSON.stringify(project));
-                  }
-                });
-              }
-            }
-          );
-        }
-        return res
-          .status(200)
-          .send(JSON.stringify(filterObject(project, ["permalink, status"])));
-      })
-      .catch(() => {
-        res.error("Project not found!");
+        return res.status(200).send(JSON.stringify(project.dataValues));
       });
+    });
   });
 
   app.get("/get-all-projects", (req, res) => {
     const sort = req.query.sort || "updatedAt";
     const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
-    const setQuery = (p = {}) => {
-      const params = { trashId: null, ...p };
+    const setQuery = () => {
+      const params = { trashId: null };
       const query = {
         where: params,
         attributes: [
@@ -228,23 +199,15 @@ module.exports = function(app) {
 
     getUserByToken(req, res, user => {
       user
-        .getProjects()
-        .then(userProjects => {
-          if (!userProjects.length) {
+        .getProjects(setQuery())
+        .then(projects => {
+          if (!projects.length) {
             return res.status(200).send(JSON.stringify([]));
           }
-          Project.findAll(
-            setQuery({ permalink: userProjects.map(up => up.dataValues.permalink) })
-          )
-            .then(projects => {
-              return res.status(200).send(JSON.stringify(projects));
-            })
-            .catch(message => {
-              return res.error("Error with getting projects: " + message);
-            });
+          return res.status(200).send(JSON.stringify(projects));
         })
-        .catch(() => {
-          return res.status(200).send(JSON.stringify([]));
+        .catch(message => {
+          return res.error("Error with getting projects: " + message);
         });
     });
   });
@@ -254,33 +217,30 @@ module.exports = function(app) {
       return res.error("Required fields didn't provide!");
     }
     getUserByToken(req, res, user => {
-      Project.findOne({
-        id: req.fields.id
-      })
-        .then(project => {
-          checkProjectAccess(project, user, (error, role) => {
-            if (error) {
-              return res.error(error);
+      checkProjectAccess(
+        { id: req.fields.id },
+        user,
+        undefined,
+        (error, project) => {
+          if (error) {
+            return res.error(error);
+          }
+          updateProjectUser(
+            req,
+            res,
+            project,
+            user,
+            {
+              role: req.fields.role
+            },
+            () => {
+              res.status(200);
             }
-            if (role === "owner" || role === "admin") {
-              updateProjectUser(
-                req,
-                res,
-                project,
-                user,
-                {
-                  role: req.fields.role
-                },
-                () => {
-                  res.status(200);
-                }
-              );
-            }
-          });
-        })
-        .catch(error => {
-          res.error(error);
-        });
+          );
+        }
+      ).catch(error => {
+        res.error(error);
+      });
     });
   });
 
@@ -288,43 +248,35 @@ module.exports = function(app) {
     if (!req.fields.id) {
       return res.error("Id did not provide!");
     }
-    /** ToDo: Add access check for project delete **/
     getUserByToken(req, res, user => {
-      Project.findAll({
-        where: {
-          id: req.fields.id
+      user.getProjects({ id: req.fields.id }).then(projects => {
+        if (!projects.length) {
+          return res.status(200).send(JSON.stringify([]));
         }
-      })
-        .then(projects => {
-          if (!projects.length) {
-            return res.error("Project not found!");
+
+        projects.forEach(project => {
+          if (config.rights.edit.includes(project.user_project.dataValues.role)) {
+            project.destroy();
+            Page.destroy({
+              where: {
+                projectId: project.id
+              }
+            });
+            req.fields.projectId = project.id;
+            deleteDesigns(req, res);
+            removeFolder(
+              config.upload.projectsFolderFullPath + project.permalink,
+              () => {}
+            );
+            return res.status(200).send("Project deleted!");
+          } else {
+            return res.error({
+              title: "You don't have rights for delete this project!",
+              code: 403
+            });
           }
-          projects.forEach(project => {
-            if (project.userId === user.id || user.isAdmin) {
-              project.destroy();
-              Page.destroy({
-                where: {
-                  projectId: project.id
-                }
-              });
-              req.fields.projectId = project.id;
-              deleteDesigns(req, res);
-              removeFolder(
-                config.upload.projectsFolderFullPath + project.permalink,
-                () => {}
-              );
-              return res.status(200).send("Project deleted!");
-            } else {
-              return res.error({
-                title: "You don't have rights for delete this project!",
-                code: 403
-              });
-            }
-          });
-        })
-        .catch(() => {
-          return res.error("Projects not found for this user!");
         });
+      });
     });
   });
 };

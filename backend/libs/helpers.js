@@ -1,4 +1,6 @@
 const fs = require("fs");
+
+const config = require("../config/config");
 const extractHostname = function(url) {
   let hostname;
   //find & remove protocol (http, ftp, etc.) and get hostname
@@ -41,10 +43,13 @@ function updateProjectUser(req, res, project, user, params = {}, cb) {
   user
     .getProjects({
       where: {
-        projectId: project.id
+        id: project.id
       }
     })
-    .then(() => {
+    .then(projects => {
+      if (!projects.length) {
+        return add();
+      }
       return user.setProject(project, { through: params }).then(projectUser => {
         cb({
           ...project.dataValues,
@@ -53,48 +58,49 @@ function updateProjectUser(req, res, project, user, params = {}, cb) {
       });
     })
     .catch(() => {
-      return user.addProject(project, { through: params }).then(projectUser => {
-        cb({
-          ...project.dataValues,
-          ...projectUser.dataValues
-        });
+      return add();
+    });
+
+  function add() {
+    return user.addProject(project, { through: params }).then(projectUser => {
+      cb({
+        ...project.dataValues,
+        ...projectUser.dataValues
       });
     });
+  }
 }
 
-function checkProjectAccess(projectOrProjectId, user, cb) {
-  if (!projectOrProjectId || !user) {
+function checkProjectAccess(
+  projectParams = {},
+  user,
+  role = config.rights.edit,
+  cb
+) {
+  if (!user) {
     return;
   }
-  const { Project } = require("../sequelize");
 
-  if (typeof projectOrProjectId === "string") {
-    Project.findOne({
-      where: projectOrProjectId
+  const errorMessage = `Access to project denied for user: ${user.email}!`;
+
+  user
+    .getProjects({ where: projectParams })
+    .then(projects => {
+      if (!projects.length) {
+        return cb(errorMessage);
+      }
+      if (
+        role === [] /* Accept all roles */ ||
+        role.includes(projects[0].user_project.dataValues.role)
+      ) {
+        return cb(null, projects[0]);
+      } else {
+        return cb(errorMessage);
+      }
     })
-      .then(project => {
-        return f(project);
-      })
-      .catch(() => {
-        return cb("Project not found!");
-      });
-  }
-  f(projectOrProjectId);
-
-  function f(project) {
-    user
-      .getProject(project)
-      .then(projectUser => {
-        return cb(null, projectUser.role);
-      })
-      .catch(() => {
-        cb(
-          `Access to project ${project.permalink} denied for user: ${
-            user.email
-          }!`
-        );
-      });
-  }
+    .catch(() => {
+      return cb(errorMessage);
+    });
 }
 
 const filterObject = function(object, includes, except) {

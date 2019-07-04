@@ -2,10 +2,8 @@ import {
   TRASH_DELETE_PAGE,
   TRASH_DELETE_PROJECT,
   TRASH_DELETE_TASK,
-  TRASH_GET_PAGES_TRASH,
   TRASH_GET_PROJECTS_TRASH,
   TRASH_GET_TASKS_TRASH,
-  TRASH_RESTORE_PAGE,
   TRASH_RESTORE_PROJECT,
   TRASH_RESTORE_TASK
 } from "./mutation-types";
@@ -13,8 +11,6 @@ import {
   getProjectsTrash,
   restoreProject,
   deleteProject,
-  getPagesTrash,
-  restorePage,
   deletePage,
   deleteTask,
   restoreTask,
@@ -43,14 +39,8 @@ export default {
     [TRASH_GET_PROJECTS_TRASH](state, projects) {
       state.projectsTrash = projects;
     },
-    [TRASH_RESTORE_PAGE](state, payload) {
-      removeTrashElement(state, payload, "pages");
-    },
     [TRASH_DELETE_PAGE](state, payload) {
       removeTrashElement(state, payload, "pages");
-    },
-    [TRASH_GET_PAGES_TRASH](state, pages) {
-      state.pagesTrash = pages;
     },
     [TRASH_RESTORE_TASK](state, payload) {
       removeTrashElement(state, payload, "tasks");
@@ -92,28 +82,6 @@ export default {
             return reject(error);
           }
           commit(TRASH_DELETE_PROJECT, payload);
-          resolve(success);
-        });
-      });
-    },
-    [TRASH_GET_PAGES_TRASH]: ({ commit }) => {
-      return new Promise((resolve, reject) => {
-        getPagesTrash((error, projects) => {
-          if (error) {
-            return reject(error);
-          }
-          commit(TRASH_GET_PAGES_TRASH, projects);
-          resolve(projects);
-        });
-      });
-    },
-    [TRASH_RESTORE_PAGE]: ({ commit }, payload) => {
-      return new Promise((resolve, reject) => {
-        restorePage({ id: payload.id }, (error, success) => {
-          if (error) {
-            return reject(error);
-          }
-          commit(TRASH_RESTORE_PAGE, payload);
           resolve(success);
         });
       });

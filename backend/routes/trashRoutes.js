@@ -1,26 +1,34 @@
 const sequelize = require("sequelize");
-
-const { Project, Page, Trash, Task } = require("../sequelize");
+const config = require("../config/config");
+const { Trash, Task } = require("../sequelize");
 const { getUserByToken, checkProjectAccess } = require("../libs/helpers");
 
 module.exports = function(app) {
   app.get("/get-projects-trash", (req, res) => {
-    getUserByToken(req, res, user => {
-      Project.findAll({
-        where: {
-          userId: user.id,
-          trashId: {
-            [sequelize.Op.not]: null
+    getUserByToken(req, res, user =>
+      user
+        .getProjects({
+          where: {
+            trashId: {
+              [sequelize.Op.not]: null
+            }
           }
-        }
-      })
+        })
         .then(projects => {
-          return res.status(200).send(JSON.stringify(projects));
+          return res
+            .status(200)
+            .send(
+              JSON.stringify(
+                projects.filter(p =>
+                  config.rights.edit.includes(p.user_project.dataValues.role)
+                )
+              )
+            );
         })
         .catch(message => {
           return res.error("Error with getting trashed projects: " + message);
-        });
-    });
+        })
+    );
   });
 
   app.post("/move-project-to-trash", (req, res) => {
@@ -28,29 +36,23 @@ module.exports = function(app) {
       return res.error("Id did not provide!");
     }
     getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
+      checkProjectAccess(
+        {
           id: req.fields.id,
           trashId: null
+        },
+        user,
+        undefined,
+        (error, project) => {
+          if (error) {
+            return res.error(error);
+          }
+          Trash.create().then(trash => {
+            project.update({ trashId: trash.id });
+            res.status(200).send(JSON.stringify(project));
+          });
         }
-      })
-        .then(project => {
-          if (!project) {
-            return res.error("Project not found");
-          }
-          if (project.userId === user.id || user.isAdmin) {
-            Trash.create().then(trash => {
-              project.update({ trashId: trash.id });
-              res.status(200).send(JSON.stringify(project));
-            });
-          } else {
-            return res.error({
-              title: "You don't have rights for delete this project!",
-              code: 403
-            });
-          }
-        })
-        .catch(error => res.error(error));
+      );
     });
   });
 
@@ -59,148 +61,53 @@ module.exports = function(app) {
       return res.error("Id did not provide!");
     }
     getUserByToken(req, res, user => {
-      const fieldsToEdit = { trashId: null };
-      Project.findOne({
-        where: {
+      checkProjectAccess(
+        {
           id: req.fields.id
-        }
-      })
-        .then(project => {
-          if (!project) {
-            return res.error("Project not found!");
-          }
-          if (project.userId === user.id || user.isAdmin) {
-            removeItemFromTrash(project.trashId, status => {
-              if (status === "fail") {
-                return res.error(null, 500);
-              }
-              project.update(fieldsToEdit).then(project => {
-                return res.status(200).send(JSON.stringify(project.dataValues));
-              });
-            });
-          } else {
-            return res.error({
-              title: "You don't have rights for edit this project!",
-              code: 403
-            });
-          }
-        })
-        .catch(message => {
-          return res.error("Error with getting project: " + message);
-        });
-    });
-  });
-
-  app.get("/get-pages-trash", (req, res) => {
-    getUserByToken(req, res, user => {
-      Project.findAll({
-        where: {
-          userId: user.id,
-          trashId: null
         },
-        include: {
-          model: Page,
-          as: "pages",
-          where: {
-            trashId: {
-              [sequelize.Op.not]: null
-            }
-          }
-        }
-      })
-        .then(projects => {
-          const pagesTrash = [];
-          projects.forEach(project =>
-            project.pages.forEach(page => pagesTrash.push(page.dataValues))
-          );
-          return res.status(200).send(JSON.stringify(pagesTrash));
-        })
-        .catch(() => {
-          return res.error("Have no pages found for this project!");
-        });
-    });
-  });
-  app.post("/move-page-to-trash", (req, res) => {
-    if (!req.fields.id) {
-      return res.error("Required fields did not provide!");
-    }
-    getUserByToken(req, res, user => {
-      Page.findOne({
-        where: {
-          id: req.fields.id
-        }
-      }).then(page => {
-        checkProjectAccess(page.projectId, user, (error, role) => {
-          if (error) {
-            return res.error(error);
-          }
-          if (role === "owner" || role === "admin") {
-            Trash.create().then(trash => {
-              page.update({ trashId: trash.id });
-              res.status(200).send(JSON.stringify(page.dataValues));
-            });
-          }
-        });
-      });
-    });
-  });
-
-  app.post("/restore-page", (req, res) => {
-    if (!req.fields.id) {
-      return res.error("Page id did not provide!");
-    }
-    getUserByToken(req, res, user => {
-      Project.findAll({
-        where: {
-          userId: user.id,
-          trashId: null
-        },
-        include: {
-          model: Page,
-          where: {
-            id: req.fields.id
-          }
-        }
-      })
-        .then(projects => {
-          const page = projects[0].pages[0];
-          removeItemFromTrash(page.dataValues.trashId, status => {
+        user,
+        undefined,
+        (error, project) => {
+          removeItemFromTrash(project.trashId, status => {
             if (status === "fail") {
               return res.error(null, 500);
             }
-            page.update({ trashId: null }).then(page => {
-              return res.status(200).send(JSON.stringify(page.dataValues));
+            project.update({ trashId: null }).then(project => {
+              return res.status(200).send(JSON.stringify(project.dataValues));
             });
           });
-        })
-        .catch(() => {
-          return res.error("Page not found!");
-        });
+        }
+      );
     });
   });
 
   app.get("/get-tasks-trash", (req, res) => {
     getUserByToken(req, res, user => {
-      Page.findAll({
-        where: {
-          userId: user.id,
-          trashId: null
-        },
-        include: {
-          model: Task,
-          as: "tasks",
+      user
+        .getProjects({
           where: {
-            trashId: {
-              [sequelize.Op.not]: null
+            trashId: null
+          },
+          include: {
+            model: Task,
+            as: "tasks",
+            where: {
+              trashId: {
+                [sequelize.Op.not]: null
+              }
             }
           }
-        }
-      })
-        .then(pages => {
+        })
+        .then(projects => {
           const tasksTrash = [];
-          pages.forEach(page =>
-            page.tasks.forEach(task => tasksTrash.push(task.dataValues))
-          );
+          projects.forEach(project => {
+            if (
+              !config.rights.edit.includes(project.user_project.dataValues.role)
+            ) {
+              return;
+            }
+            project.tasks.forEach(task => tasksTrash.push(task.dataValues));
+          });
           return res.status(200).send(JSON.stringify(tasksTrash));
         })
         .catch(() => {
@@ -215,20 +122,35 @@ module.exports = function(app) {
     getUserByToken(req, res, user => {
       Task.findOne({
         where: {
-          id: req.fields.id,
-          userId: user.id
+          id: req.fields.id
         }
       })
         .then(task => {
-          Trash.create().then(trash => {
-            task.update({ trashId: trash.id });
-            res.status(200).send(JSON.stringify(task.dataValues));
-          });
+          if (task.userId === user.id) {
+            return moveToTrash(task);
+          }
+          checkProjectAccess(
+            { id: task.projectId },
+            user,
+            config.rights.collaborator,
+            error => {
+              if (!error) {
+                return res.error(error);
+              }
+              moveToTrash(task);
+            }
+          );
         })
         .catch(() => {
           res.error("Task not found");
         });
     });
+    function moveToTrash(task) {
+      Trash.create().then(trash => {
+        task.update({ trashId: trash.id });
+        res.status(200).send(JSON.stringify(task.dataValues));
+      });
+    }
   });
 
   app.post("/restore-task", (req, res) => {
@@ -236,33 +158,42 @@ module.exports = function(app) {
       return res.error("Task id did not provide!");
     }
     getUserByToken(req, res, user => {
-      Page.findAll({
+      Task.findOne({
         where: {
-          userId: user.id,
-          trashId: null
-        },
-        include: {
-          model: Task,
-          where: {
-            id: req.fields.id
-          }
+          id: req.fields.id,
+          trashId: { [sequelize.Op.not]: null }
         }
       })
-        .then(pages => {
-          const task = pages[0].tasks[0];
-          removeItemFromTrash(task.dataValues.trashId, status => {
-            if (status === "fail") {
-              return res.error(null, 500);
+        .then(task => {
+          if (task.userId === user.id) {
+            return restoreTask(task);
+          }
+          checkProjectAccess(
+            { id: task.projectId },
+            user,
+            config.rights.collaborator,
+            error => {
+              if (!error) {
+                return res.error(error);
+              }
+              restoreTask(task);
             }
-            task.update({ trashId: null }).then(task => {
-              return res.status(200).send(JSON.stringify(task.dataValues));
-            });
-          });
+          );
         })
         .catch(() => {
-          return res.error("Task not found!");
+          res.error("Task not found");
         });
     });
+    function restoreTask(task) {
+      removeItemFromTrash(task.dataValues.trashId, status => {
+        if (status === "fail") {
+          return res.error(null, 500);
+        }
+        task.update({ trashId: null }).then(task => {
+          return res.status(200).send(JSON.stringify(task.dataValues));
+        });
+      });
+    }
   });
 };
 

@@ -38,6 +38,7 @@ User.belongsTo(Trash);
 
 Project.hasMany(Page);
 Project.hasMany(Design);
+Project.hasMany(Task);
 Project.belongsTo(Trash);
 
 const UserProject = sequelize.define("user_project", {
@@ -60,13 +61,13 @@ Page.hasMany(Task);
 Page.belongsTo(Trash);
 
 Task.hasMany(Comment);
+Task.belongsTo(Project);
 Task.belongsTo(Trash);
 
 Comment.belongsTo(Trash);
 
 Trash.belongsToMany(User, { through: "users_trash" });
 Trash.belongsToMany(Project, { through: "projects_trash" });
-Trash.belongsToMany(Page, { through: "pages_trash" });
 Trash.belongsToMany(Task, { through: "tasks_trash" });
 Trash.belongsToMany(Comment, { through: "comments_trash" });
 

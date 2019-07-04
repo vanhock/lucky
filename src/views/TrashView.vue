@@ -14,12 +14,6 @@
         @delete="openModal('deleteTask', { target: 'task', ...$event })"
       />
       <trash-list
-        :trash="pagesTrash"
-        :title="$t('pages')"
-        @restore="restore('page', $event)"
-        @delete="openModal('deletePage', { target: 'page', ...$event })"
-      />
-      <trash-list
         :trash="projectsTrash"
         :title="$t('projects')"
         @restore="restore('project', $event)"
@@ -74,7 +68,6 @@
 import ModalMixin from "../mixins/ModalMixin.js";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import {
-  TRASH_GET_PAGES_TRASH,
   TRASH_GET_PROJECTS_TRASH,
   TRASH_GET_TASKS_TRASH
 } from "../services/store/mutation-types";
@@ -89,7 +82,6 @@ export default {
   components: { EmptyPlaceholder, TrashList, VButtonPrimary, VModal },
   created() {
     this.$store.dispatch(TRASH_GET_PROJECTS_TRASH);
-    this.$store.dispatch(TRASH_GET_PAGES_TRASH);
     this.$store.dispatch(TRASH_GET_TASKS_TRASH);
     this.modals = {
       deleteAll: {
@@ -105,12 +97,6 @@ export default {
         description: this.$t("The Project will be deleted permanently!"),
         action: "delete",
         buttonName: this.$t("Delete project")
-      },
-      deletePage: {
-        title: this.$t("Delete page"),
-        description: this.$t("The Page will be deleted permanently!"),
-        action: "delete",
-        buttonName: this.$t("Delete page")
       },
       deleteTask: {
         title: this.$t("Delete task"),

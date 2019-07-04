@@ -1,6 +1,7 @@
 const config = require("../config/config");
 const {
   getUserByToken,
+  checkAccessToProject,
   filterObject,
   normalizeFigma,
   moveFile,
@@ -13,53 +14,43 @@ const getProjectDesigns = (req, res) => {
   if (!req.fields.projectId) {
     return res.error("Project id did not provide!");
   }
-
   getUserByToken(req, res, user => {
-    Project.findOne({
-      where: {
-        id: req.fields.projectId
-      }
-    })
-      .then(project => {
-        if (!project) {
-          return res.error("Project not found!");
+    checkAccessToProject(
+      { id: req.fields.projectId },
+      user,
+      config.rights.view,
+      error => {
+        if (error) {
+          return res.error(error);
         }
-        if (project.userId === user.id) {
-          Design.findAll({
-            where: {
-              projectId: req.fields.projectId
-            }
-          })
-            .then(designs => {
-              if (!designs.length) {
-                return res
-                  .status(400)
-                  .send("Have no designs found for this project!");
-              }
-              return res
-                .status(200)
-                .send(
-                  JSON.stringify(
-                    designs.map(design =>
-                      filterObject(design.dataValues, null, ["blocks"])
-                    )
-                  )
-                );
-            })
-            .catch(() => {
+        Design.findAll({
+          where: {
+            projectId: req.fields.projectId
+          }
+        })
+          .then(designs => {
+            if (!designs.length) {
               return res
                 .status(400)
                 .send("Have no designs found for this project!");
-            });
-        } else {
-          return res
-            .status(403)
-            .send("You don't have rights for edit this project!");
-        }
-      })
-      .catch(() => {
-        return res.error("Project not found by id!");
-      });
+            }
+            return res
+              .status(200)
+              .send(
+                JSON.stringify(
+                  designs.map(design =>
+                    filterObject(design.dataValues, null, ["blocks"])
+                  )
+                )
+              );
+          })
+          .catch(() => {
+            return res
+              .status(400)
+              .send("Have no designs found for this project!");
+          });
+      }
+    );
   });
 };
 
@@ -71,15 +62,14 @@ const deleteDesigns = (req, res) => {
   const ids = (req.fields.ids && req.fields.ids.split(",")) || null;
 
   getUserByToken(req, res, user => {
-    Project.findOne({
-      where: {
-        id: req.fields.projectId
-      }
-    }).then(project => {
-      if (!project) {
-        return res.error("Project not found!");
-      }
-      if (project.userId === user.id) {
+    checkAccessToProject(
+      { id: req.fields.projectId },
+      user,
+      undefined,
+      error => {
+        if (error) {
+          return res.error(error);
+        }
         const designSearchParams = (ids && {
           id: ids,
           projectId: req.fields.projectId
@@ -115,12 +105,8 @@ const deleteDesigns = (req, res) => {
               .status(400)
               .send(`Designs with ids: ${req.fields.ids} not found!`);
           });
-      } else {
-        return res
-          .status(403)
-          .send("You don't have rights for edit designs of this project!");
       }
-    });
+    );
   });
 };
 
@@ -144,80 +130,79 @@ const getFigmaDesigns = (req, res) => {
     .replace("/file/", "");
 
   getUserByToken(req, res, user => {
-    Project.findOne({
-      where: {
-        id: req.fields.projectId
-      }
-    })
-      .then(project => {
-        if (project.userId === user.id) {
-          figma.get(`/files/${id}`).then(response => {
-            if (!response.data) {
-              return;
-            }
-            const designIds = [];
-            const processedDesigns = [];
-            const artboards = response.data.document.children[0].children.filter(
-              item => item.type === "FRAME"
-            );
-            artboards.forEach(artboard => {
-              designIds.push(artboard.id);
-              processedDesigns.push({
-                name: artboard.name,
-                projectId: project.id,
-                blocks: normalizeFigma(artboard),
-                image: "",
-                width: artboard.absoluteBoundingBox.width,
-                height: artboard.absoluteBoundingBox.height
-              });
-            });
-            const imagesUrl = `/images/${id}?ids=${designIds.join(",")}`;
-            figma
-              .get(imagesUrl)
-              .then(response => {
-                if (!response.data) {
-                  return;
-                }
-                const images = response.data.images;
-                let imageIndex = 0;
-                for (let i in images) {
-                  if (!images.hasOwnProperty(i)) {
-                    continue;
-                  }
-                  download
-                    .image({
-                      url: images[i],
-                      dest: config.upload.designImagesFullPath
-                    })
-                    .then(({ filename }) => {
-                      const splittedName = filename.split("\\");
-                      const imageName =
-                        splittedName[splittedName.length - 1] + ".png";
-
-                      // Move file with another name
-                      moveFile(filename, filename + ".png");
-                      processedDesigns[imageIndex].imagePath =
-                        config.upload.designImagesPath + imageName;
-                      processedDesigns[imageIndex].imagePath =
-                        config.upload.designImagesFullPath + imageName;
-
-                      if (imageIndex === Object.keys(images).length - 1) {
-                        /** If all design images saved => **/
-                        saveDesignsToDataBase(res, processedDesigns);
-                      }
-                      imageIndex++;
-                    });
-                }
-              })
-              .catch(message => {
-                return res.error(message);
-              });
-          });
+    checkAccessToProject(
+      { id: req.fields.projectId },
+      user,
+      undefined,
+      error => {
+        if (error) {
+          return res.error(error);
         }
-      })
-      .catch(() => {
-        return res.error("User not found or wrong api key");
-      });
+
+        figma.get(`/files/${id}`).then(response => {
+          if (!response.data) {
+            return;
+          }
+          const designIds = [];
+          const processedDesigns = [];
+          const artboards = response.data.document.children[0].children.filter(
+            item => item.type === "FRAME"
+          );
+          artboards.forEach(artboard => {
+            designIds.push(artboard.id);
+            processedDesigns.push({
+              name: artboard.name,
+              projectId: req.fields.projectId,
+              blocks: normalizeFigma(artboard),
+              image: "",
+              width: artboard.absoluteBoundingBox.width,
+              height: artboard.absoluteBoundingBox.height
+            });
+          });
+          const imagesUrl = `/images/${id}?ids=${designIds.join(",")}`;
+          figma
+            .get(imagesUrl)
+            .then(response => {
+              if (!response.data) {
+                return;
+              }
+              const images = response.data.images;
+              let imageIndex = 0;
+              for (let i in images) {
+                if (!images.hasOwnProperty(i)) {
+                  continue;
+                }
+                download
+                  .image({
+                    url: images[i],
+                    dest: config.upload.designImagesFullPath
+                  })
+                  .then(({ filename }) => {
+                    const splittedName = filename.split("\\");
+                    const imageName =
+                      splittedName[splittedName.length - 1] + ".png";
+
+                    // Move file with another name
+                    moveFile(filename, filename + ".png");
+                    processedDesigns[imageIndex].imagePath =
+                      config.upload.designImagesPath + imageName;
+                    processedDesigns[imageIndex].imagePath =
+                      config.upload.designImagesFullPath + imageName;
+
+                    if (imageIndex === Object.keys(images).length - 1) {
+                      /** If all design images saved => **/
+                      saveDesignsToDataBase(res, processedDesigns);
+                    }
+                    imageIndex++;
+                  });
+              }
+            })
+            .catch(message => {
+              return res.error(message);
+            });
+        });
+      }
+    );
   });
 };
 
@@ -249,54 +234,46 @@ const uploadDesign = (req, res) => {
   }
   const tempPath = designFile.path;
   getUserByToken(req, res, user => {
-    Project.findOne({
-      where: {
-        id: req.fields.projectId
-      }
-    })
-      .then(project => {
-        if (project.userId === user.id) {
-          upload(designFile, (message, designs) => {
-            if (message) {
-              return res.error(message);
-            }
-            const responseDesigns = [];
-            designs.forEach((design, index) => {
-              Design.create({
-                projectId: req.fields.projectId,
-                blocks: design.blocks,
-                image: design.imagePath,
-                name: designFile.name,
-                width: design.document.width,
-                height: design.document.height
-              })
-                .then(d => {
-                  responseDesigns.push(d);
-                  if (index === designs.length - 1) {
-                    removeFile(tempPath);
-                    return res
-                      .status(200)
-                      .send(JSON.stringify(responseDesigns));
-                  }
-                })
-                .catch(message => {
-                  return res
-                    .status(400)
-                    .send("Error with save design! Log: " + message);
-                });
-            });
-          });
-        } else {
+    checkAccessToProject(
+      { id: req.fields.projectId },
+      user,
+      undefined,
+      error => {
+        if (error) {
           removeFile(tempPath);
-          return res
-            .status(403)
-            .send("You don't have rights to upload files to this project!");
+          return res.error(error);
         }
-      })
-      .catch(() => {
-        removeFile(tempPath);
-        return res.error("Project not found!");
-      });
+
+        upload(designFile, (message, designs) => {
+          if (message) {
+            return res.error(message);
+          }
+          const responseDesigns = [];
+          designs.forEach((design, index) => {
+            Design.create({
+              projectId: req.fields.projectId,
+              blocks: design.blocks,
+              image: design.imagePath,
+              name: designFile.name,
+              width: design.document.width,
+              height: design.document.height
+            })
+              .then(d => {
+                responseDesigns.push(d);
+                if (index === designs.length - 1) {
+                  removeFile(tempPath);
+                  return res.status(200).send(JSON.stringify(responseDesigns));
+                }
+              })
+              .catch(message => {
+                return res
+                  .status(400)
+                  .send("Error with save design! Log: " + message);
+              });
+          });
+        });
+      }
+    );
   });
 };
 
@@ -339,6 +316,8 @@ function upload(design, done) {
         .catch(error => {
           done(error);
         });
+      break;
+    case "another":
       break;
   }
 }

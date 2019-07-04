@@ -3,7 +3,6 @@ import {
   PAGE_SET_CURRENT_PAGE,
   PAGE_CREATE_PAGE,
   PAGE_GET_PAGES,
-  PAGE_MOVE_TO_TRASH,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGE,
   TASK_GET_ALL_TASKS,
@@ -14,7 +13,6 @@ import {
   editPage,
   getPages,
   getPage,
-  movePageToTrash
 } from "../api/PageApi";
 import { serializeObject } from "../../utils";
 
@@ -62,13 +60,6 @@ export default {
     [PAGE_CREATE_PAGE](state, payload) {
       state.pages.push(payload);
     },
-    [PAGE_MOVE_TO_TRASH](state, payload) {
-      const pageIndex = state.pages.indexOf(payload);
-      if (pageIndex !== -1) {
-        state.pages.splice(pageIndex, 1);
-      }
-      state.currentPage.id === payload.id ? (state.currentPage = {}) : "";
-    },
     [PAGE_GET_PAGES](state, payload) {
       state.pages = payload;
     },
@@ -102,20 +93,6 @@ export default {
           commit(PAGE_EDIT_PAGE, page);
           resolve(page);
         });
-      });
-    },
-    [PAGE_MOVE_TO_TRASH]: ({ commit }, payload) => {
-      return new Promise((resolve, reject) => {
-        movePageToTrash(
-          { id: payload.id, projectId: payload.projectId },
-          (error, success) => {
-            if (error) {
-              return reject(error);
-            }
-            commit(PAGE_MOVE_TO_TRASH, payload);
-            resolve(success);
-          }
-        );
       });
     },
     [PAGE_GET_PAGES]: ({ commit }, payload) => {

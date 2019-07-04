@@ -17,5 +17,10 @@ module.exports = {
     projectsFolderPath: "/projects/",
     avatarFullPath: path.join(__dirname, "../public/images/avatars/"),
     avatarPath: "/images/avatars/"
+  },
+  rights: {
+    edit: ["owner", "admin"],
+    view: ["owner", "admin", "collaborator", "client"],
+    collaborator: ["owner", "admin", "collaborator"]
   }
 };
