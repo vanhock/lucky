@@ -55,22 +55,18 @@ export default {
         .dispatch(AUTH_REQUEST, fields)
         .then(user => {
           this.$emit("success", user);
-          if (this.custom) {
-            return () => {
-              UserLoginSuccess(this, user.name);
-              setTimeout(() => {
-                self.$router.push("/");
-              }, 2000);
-            };
+          if (!this.custom) {
+            UserLoginSuccess(this, user.name);
+            setTimeout(() => {
+              self.$router.push("/");
+            }, 2000);
           }
         })
         .catch(error => {
           this.loading = false;
-          if (this.custom) {
-            return () => {
-              this.$emit("error", error);
-              UserLoginError(this, error);
-            };
+          if (!this.custom) {
+            this.$emit("error", error);
+            UserLoginError(this, error);
           }
         });
     }, 300)

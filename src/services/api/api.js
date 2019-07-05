@@ -15,6 +15,9 @@ class PixelApi {
   }
 
   static handleSuccess(response) {
+    if (!response) {
+      return;
+    }
     return { status: response.status, data: response.data };
   }
 
@@ -22,12 +25,11 @@ class PixelApi {
     switch (error.response.status) {
       case 401:
         if (location.href.includes(config.apiUrl)) {
-          if (location.href.includes(`${config.apiUrl}/i`)) {
-            return;
+          if (!location.href.includes(`${config.apiUrl}/i`)) {
+            store.dispatch(AUTH_LOGOUT).then(() => {
+              document.location = "/sign-in";
+            });
           }
-          store.dispatch(AUTH_LOGOUT).then(() => {
-            document.location = "/sign-in";
-          });
         } else if (store.getters.port) {
           store.getters.port.postMessage({ resetToken: true });
         }
@@ -54,7 +56,7 @@ class PixelApi {
         url: config.apiUrl + path,
         responseType: "json"
       })
-      .then(response => callback(response.status, response.data));
+      .then(response => response && callback(response.status, response.data));
   }
 
   patch(path, payload, callback) {
@@ -65,7 +67,7 @@ class PixelApi {
         responseType: "json",
         data: payload.data
       })
-      .then(response => callback(response.status, response));
+      .then(response => response && callback(response.status, response));
   }
 
   post(path, payload, callback) {
@@ -76,7 +78,7 @@ class PixelApi {
         responseType: "json",
         data: payload.data
       })
-      .then(response => callback(response.status, response.data));
+      .then(response => response && callback(response.status, response.data));
   }
 }
 

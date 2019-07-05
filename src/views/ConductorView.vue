@@ -25,6 +25,7 @@
                   ((showSteps && "1. ") || "") + $t("Login to this project")
               }}
             </div>
+            <div class="sign-in-error" v-if="currentAccessError">{{currentAccessError}}</div>
             <sign-in @success="checkProjectAccess" custom />
           </div>
         </div>
@@ -171,7 +172,7 @@ export default {
       const self = this;
       setTimeout(() => {
         self.loading = false;
-      }, 500);
+      }, 400);
     }
   }
 };
@@ -251,6 +252,11 @@ export default {
         }
       }
     }
+  }
+  .sign-in-error {
+    margin-top: 12px;
+    color: $color-w4;
+    font-size: 12px;
   }
 }
 @keyframes rotate {

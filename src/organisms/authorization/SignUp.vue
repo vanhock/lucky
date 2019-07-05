@@ -4,13 +4,12 @@
       <v-input-bordered
         name="name"
         :label="$t('name')"
-        autocomplete="username"
         required
       />
       <v-input-bordered
         name="email"
         :label="$t('email')"
-        autocomplete="email"
+        autocomplete="username"
         required
       />
       <v-input-bordered

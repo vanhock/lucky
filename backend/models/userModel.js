@@ -164,23 +164,11 @@ module.exports = function(sequelize, DataTypes) {
                 "This user isn't confirmed by admin or account has been locked"
               );
             }
-
-            const newToken = User.options.instanceMethods.createToken();
-            foundUser.update({ token: newToken });
-            if (
-              foundUser.status === "confirmed" &&
-              foundUser.tempPassword === password
-            ) {
-              done(null, {
-                confirmed: true,
-                token: newToken
-              });
-            } else {
-              done(null, {
-                ...foundUser.dataValues,
-                token: User.options.instanceMethods.createToken()
-              });
-            }
+            const token = User.options.classMethods.generateToken();
+            foundUser.update({ token: token });
+            return done(null, {
+              ...foundUser.dataValues
+            });
           }, done);
         },
         authByToken: function(token, done) {

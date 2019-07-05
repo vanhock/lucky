@@ -72,43 +72,47 @@ module.exports = function(app) {
     });
   });
 
-  app.post("/download-project-resources", (req, res) => {
-    if (!req.fields.folder || !req.fields.url) {
+  app.post("/project-set-screenshot", (req, res) => {
+    if (!req.fields.permalink || !req.fields.url) {
       return res.error("Required fields (folder, url) did not provide!");
     }
     getUserByToken(req, res, user => {
-      Project.findOne({
-        where: {
-          permalink: req.fields.folder
-        }
-      }).then(project => {
-        const imgUrl = `${config.upload.projectsFolderFullPath}${
-          project.permalink
-        }/shot.png`;
-        const resultImg = `${config.upload.projectsFolderPath}${
-          project.permalink
-        }/shot.png`;
-        const puppeteer = require("puppeteer");
-        (async () => {
-          const browser = await puppeteer.launch();
-          const page = await browser.newPage();
-          await page.goto(req.fields.url);
-          const screenshot = await page.screenshot({ path: imgUrl });
-          if (screenshot) {
-            project
-              .update({ image: resultImg })
-              .then(() => {
-                return res
-                  .status(200)
-                  .send(JSON.stringify({ image: resultImg }));
-              })
-              .catch(error => {
-                res.error(`Error with creating screenshot: ${error}`);
-              });
+      checkProjectAccess(
+        { permalink: req.fields.permalink },
+        user,
+        config.rights.edit,
+        (error, project) => {
+          if (error) {
+            return res.error(error);
           }
-          await browser.close();
-        })();
-      });
+          const imgUrl = `${config.upload.projectsFolderFullPath}${
+            project.permalink
+          }/shot.png`;
+          const resultImg = `${config.upload.projectsFolderPath}${
+            project.permalink
+          }/shot.png`;
+          const puppeteer = require("puppeteer");
+          (async () => {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.goto(req.fields.url);
+            const screenshot = await page.screenshot({ path: imgUrl });
+            if (screenshot) {
+              project
+                .update({ image: resultImg })
+                .then(() => {
+                  return res
+                    .status(200)
+                    .send(JSON.stringify({ image: resultImg }));
+                })
+                .catch(error => {
+                  res.error(`Error with creating screenshot: ${error}`);
+                });
+            }
+            await browser.close();
+          })();
+        }
+      );
     });
   });
 

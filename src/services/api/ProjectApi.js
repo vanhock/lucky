@@ -8,9 +8,9 @@ export function createProject(payload, cb) {
   });
 }
 
-export function downloadProjectResources(payload, cb) {
+export function projectSetScreenshot(payload, cb) {
   PixelApi.post(
-    "/download-project-resources",
+    "/project-set-screenshot",
     { data: payload },
     (status, data) => {
       generalCallback(status, data, cb);

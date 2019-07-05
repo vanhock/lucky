@@ -15,7 +15,7 @@ import {
   getAllProjects,
   getProject,
   moveProjectToTrash,
-  checkAccessToProject
+  checkAccessToProject, projectSetScreenshot
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -105,7 +105,7 @@ export default {
     },
     [PROJECT_SET_SCREENSHOT]({ commit }, payload) {
       return new Promise((resolve, reject) => {
-        downloadProjectResources(payload, (error, image) => {
+        projectSetScreenshot(payload, (error, image) => {
           if (error) {
             return reject(error);
           }
