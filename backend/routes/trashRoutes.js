@@ -42,7 +42,7 @@ module.exports = function(app) {
           trashId: null
         },
         user,
-        undefined,
+        config.rights.edit,
         (error, project) => {
           if (error) {
             return res.error(error);
@@ -66,7 +66,7 @@ module.exports = function(app) {
           id: req.fields.id
         },
         user,
-        undefined,
+        config.rights.edit,
         (error, project) => {
           removeItemFromTrash(project.trashId, status => {
             if (status === "fail") {

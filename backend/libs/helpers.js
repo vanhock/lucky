@@ -74,7 +74,7 @@ function updateProjectUser(req, res, project, user, params = {}, cb) {
 function checkProjectAccess(
   projectParams = {},
   user,
-  role = config.rights.edit,
+  role = config.rights.view,
   cb
 ) {
   if (!user) {
@@ -89,10 +89,7 @@ function checkProjectAccess(
       if (!projects.length) {
         return cb(errorMessage);
       }
-      if (
-        role === [] /* Accept all roles */ ||
-        role.includes(projects[0].user_project.dataValues.role)
-      ) {
+      if (role.includes(projects[0].user_project.dataValues.role)) {
         return cb(null, projects[0]);
       } else {
         return cb(errorMessage);

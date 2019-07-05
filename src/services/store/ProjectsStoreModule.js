@@ -135,7 +135,7 @@ export default {
         });
       });
     },
-    [PROJECT_CHECK_ACCESS](payload) {
+    [PROJECT_CHECK_ACCESS](undefined, payload) {
       return new Promise((resolve, reject) => {
         checkAccessToProject(serializeObject(payload), (error, project) => {
           if (error) {

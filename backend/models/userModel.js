@@ -108,10 +108,10 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
       classMethods: {
-        createNewUser: function(user, done) {
+        createNewUser: function(req, done) {
           User.findAll({
             where: {
-              email: user.email
+              email: req.email
             }
           })
             .then(users => {
@@ -119,11 +119,11 @@ module.exports = function(sequelize, DataTypes) {
                 return done("User with same email already exist!");
               }
               return User.create({
-                name: user.name,
-                company: user.company,
-                email: user.email,
-                role: user.role,
-                password: user.password,
+                name: req.name,
+                company: req.company,
+                email: req.email,
+                role: req.role,
+                password: req.password,
                 tempPassword: this.generatePassword()
               }).then(user => {
                 done(null, user);

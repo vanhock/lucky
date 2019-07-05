@@ -2,13 +2,16 @@
   <div class="conductor-view">
     <empty-placeholder
       icon="logo"
-      :title="titleText"
-      :text="$t('You will redirect to target page after complete these steps')"
+      :title="(!notFound && titleText) || ''"
+      :text="(!notFound && descriptionText) || ''"
       icon-size="120px"
       alignment="top"
     >
-      <div class="conductor-steps">
-        <div class="step-auth" :class="{ loading: !authorized }">
+      <div
+        class="conductor-steps"
+        v-show="!notFound && (!authorized || !hasExtension)"
+      >
+        <div class="step-auth">
           <v-icon
             :icon="stepStyle(authorized).icon"
             :mode="icon.mode"
@@ -21,10 +24,10 @@
                   ((showSteps && "1. ") || "") + $t("Login to this project")
               }}
             </div>
-            <sign-in @callback="authToProject" custom />
+            <sign-in @success="checkProjectAccess" custom />
           </div>
         </div>
-        <div class="step-extension" :class="{ loading: !hasExtension }">
+        <div class="step-extension">
           <v-icon
             :icon="stepStyle(hasExtension).icon"
             :mode="icon.mode"
@@ -44,6 +47,12 @@
           </div>
         </div>
       </div>
+      <div class="not-found" v-show="notFound">
+        <div class="not-found-image">
+          <v-icon icon="project" :params="{ iconSize: '100px' }" />
+        </div>
+        <div class="not-found-message">{{ currentAccessError }}</div>
+      </div>
     </empty-placeholder>
   </div>
 </template>
@@ -51,8 +60,6 @@
 <script>
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import {
-  AUTH_AS_CLIENT,
-  AUTH_SUCCESS,
   PROJECT_CHECK_ACCESS,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
@@ -60,30 +67,37 @@ import config from "../config";
 import VIcon from "../atoms/VIcon/VIcon";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import SignIn from "../organisms/authorization/SignIn";
-
+import { mapGetters } from "vuex";
 export default {
   name: "ConductorView",
   components: { SignIn, VButtonPrimary, VIcon, EmptyPlaceholder },
   created() {
-    this.getProjectAndCheckAuth();
+    this.getProject();
   },
   mounted() {
-    this.checkExtensionInstalled();
+    this.$nextTick(() => {
+      this.checkExtensionInstalled();
+    });
+
+    setInterval(() => {
+      this.checkExtensionInstalled();
+    }, 500);
   },
   data: () => ({
-    currentProject: null,
     logoParams: {
       iconSize: "20px"
     },
     authorized: false,
     hasExtension: false,
     accessError: null,
+    notFound: false,
     icon: {
       mode: "feather",
       params: { iconSize: "22px" }
     }
   }),
   computed: {
+    ...mapGetters(["currentProject"]),
     titleText() {
       return !this.authorized && !this.hasExtension
         ? this.$t("Two steps to open page")
@@ -91,8 +105,16 @@ export default {
         ? this.$t("One step to open page")
         : this.$t("Open page");
     },
+    descriptionText() {
+      return !this.authorized || !this.hasExtension
+        ? this.$t("You will redirect to target page after complete these steps")
+        : this.$t("Redirecting...");
+    },
     showSteps() {
       return !this.authorized && !this.hasExtension;
+    },
+    currentAccessError() {
+      return this.accessError && this.$t(this.accessError);
     }
   },
   props: {
@@ -101,42 +123,31 @@ export default {
     page: String
   },
   methods: {
-    getProjectAndCheckAuth() {
+    getProject() {
       this.$store
         .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: this.permalink })
-        .then(project => {
-          this.currentProject = project;
-          if (project.id && project.name) {
-            this.authorized = true;
-          }
-        });
-    },
-    authToProject(fields) {
-      this.$store
-        .dispatch(AUTH_AS_CLIENT, fields)
-        .then(user => {
-          this.$store
-            .dispatch(PROJECT_CHECK_ACCESS, {
-              permalink: this.permalink,
-              email: fields.email,
-              userId: user.id
-            })
-            .then(project => {
-              this.$store.commit(AUTH_SUCCESS, user);
-              this.currentProject = project;
-              this.authorized = true;
-            });
+        .then(() => {
+          return this.checkProjectAccess();
         })
         .catch(error => {
           this.accessError = error;
+          this.notFound = true;
+        });
+    },
+    checkProjectAccess() {
+      return this.$store
+        .dispatch(PROJECT_CHECK_ACCESS, { permalink: this.permalink })
+        .then(() => {
+          return (this.authorized = true);
+        })
+        .catch(error => {
+          this.accessError = error;
+          return (this.authorized = false);
         });
     },
     checkExtensionInstalled() {
-      setTimeout(() => {
-        this.hasExtension =
-          document.querySelector(`[extension-id=${config.extensionId}]`) ||
-          false;
-      }, 100);
+      this.hasExtension =
+        document.querySelector(`[extension-id=${config.extensionId}]`) || false;
     },
     stepStyle(state) {
       return (
@@ -169,6 +180,23 @@ export default {
     .text {
       margin-bottom: 48px;
       color: $color-b3;
+    }
+  }
+  .not-found {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    &-image {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0.5;
+      margin-bottom: 25px;
+    }
+    &-message {
+      font-weight: 500;
+      font-size: 22px;
     }
   }
 }

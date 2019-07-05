@@ -3,8 +3,7 @@ import {
   AUTH_SUCCESS,
   AUTH_ERROR,
   AUTH_LOGOUT,
-  AUTH_CHECK_AUTH,
-  AUTH_AS_CLIENT
+  AUTH_CHECK_AUTH
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
@@ -33,7 +32,6 @@ export default {
       state.status = "success";
       state.user = user;
       state.userToken = user.token;
-      localStorage.setItem("pp-u-t-s", user.token);
     },
     [AUTH_ERROR]: state => {
       state.status = "error";
@@ -58,6 +56,7 @@ export default {
             localStorage.removeItem("pp-u-t-s");
             return reject(error);
           }
+          localStorage.setItem("pp-u-t-s", user.token);
           PixelApi.setToken(user.token, () => {
             SetAuthToken(user.token);
             window.postMessage({ authorized: true }, "*");
@@ -86,16 +85,6 @@ export default {
             return reject(error);
           }
           commit(AUTH_CHECK_AUTH, user);
-          resolve(user);
-        });
-      });
-    },
-    [AUTH_AS_CLIENT](payload) {
-      return new Promise((resolve, reject) => {
-        AuthAsClient(payload, (error, user) => {
-          if (error) {
-            return reject(error);
-          }
           resolve(user);
         });
       });

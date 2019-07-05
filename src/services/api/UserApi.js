@@ -19,15 +19,6 @@ export function Authorization(payload, cb) {
   });
 }
 
-export function AuthAsClient(payload, cb) {
-  PixelApi.post("/auth-as-client", { data: payload }, (status, data) => {
-    if (status !== 200) {
-      return cb(data);
-    }
-    cb(null, data);
-  });
-}
-
 export function SetAuthToken(payload) {
   PixelApi.setToken(payload, () => {});
 }

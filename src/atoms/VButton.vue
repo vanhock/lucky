@@ -1,5 +1,6 @@
 <template>
   <button
+    type="button"
     class="v-button"
     @click="$emit('click')"
     @touchmove="$emit('click')"

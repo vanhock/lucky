@@ -39,7 +39,6 @@ export default {
     loading: false
   }),
   props: {
-    redirectTo: String,
     custom: Boolean
   },
   methods: {
@@ -52,20 +51,27 @@ export default {
         return UserLoginError(this, "Form not valid!");
       }
       this.loading = true;
-      if (this.custom) {
-        return this.$emit("callback", fields);
-      }
       this.$store
         .dispatch(AUTH_REQUEST, fields)
         .then(user => {
-          UserLoginSuccess(this, user.name);
-          setTimeout(() => {
-            self.$router.push("/");
-          }, 2000);
+          this.$emit("success", user);
+          if (this.custom) {
+            return () => {
+              UserLoginSuccess(this, user.name);
+              setTimeout(() => {
+                self.$router.push("/");
+              }, 2000);
+            };
+          }
         })
         .catch(error => {
           this.loading = false;
-          UserLoginError(this, error);
+          if (this.custom) {
+            return () => {
+              this.$emit("error", error);
+              UserLoginError(this, error);
+            };
+          }
         });
     }, 300)
   }

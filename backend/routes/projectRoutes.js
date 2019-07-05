@@ -1,4 +1,4 @@
-const { Project, Page } = require("../sequelize");
+const { Project, Page, User } = require("../sequelize");
 const {
   getUserByToken,
   filterObject,
@@ -124,7 +124,7 @@ module.exports = function(app) {
       checkProjectAccess(
         { id: req.fields.id },
         user,
-        undefined,
+        config.rights.edit,
         (error, project) => {
           if (error) {
             return res.error(error);
@@ -154,17 +154,19 @@ module.exports = function(app) {
       : req.query.permalink
       ? (params.permalink = req.query.permalink)
       : "";
-    getUserByToken(req, res, user => {
-      checkProjectAccess(params, user, [], (error, project) => {
-        if (error) {
-          return res.error(error);
-        }
-        if (project.dataValues.status === "closed") {
-          return res.error({ title: "Project closed!", code: 500 });
+
+    Project.findOne({
+      where: params
+    })
+      .then(project => {
+        if (!project) {
+          return res.error("Project not found");
         }
         return res.status(200).send(JSON.stringify(project.dataValues));
+      })
+      .catch(() => {
+        return res.error("Project not found");
       });
-    });
   });
 
   app.get("/get-all-projects", (req, res) => {
@@ -212,31 +214,67 @@ module.exports = function(app) {
     });
   });
 
+  app.get("/check-access-to-project", (req, res) => {
+    if (!req.fields.id && !req.query.permalink) {
+      return res.error("Required fields didn't provide!");
+    }
+    const params = {
+      trashId: null
+    };
+    req.query.id
+      ? (params.id = req.query.id)
+      : req.query.permalink
+      ? (params.permalink = req.query.permalink)
+      : "";
+    getUserByToken(req, res, user => {
+      checkProjectAccess(params, user, undefined, (error, project) => {
+        if (error) {
+          return res.error(error);
+        }
+        if (project.dataValues.status === "closed") {
+          return res.error({ title: "Project are closed!", code: 403 });
+        }
+        return res.status(200).send(JSON.stringify(project.dataValues));
+      });
+    });
+  });
+
   app.post("/invite-to-project", (req, res) => {
-    if (!req.fields.id || !req.fields.role) {
+    if (!req.fields.id || !req.fields.role || !req.fields.email) {
       return res.error("Required fields didn't provide!");
     }
     getUserByToken(req, res, user => {
       checkProjectAccess(
         { id: req.fields.id },
         user,
-        undefined,
+        config.rights.edit,
         (error, project) => {
           if (error) {
             return res.error(error);
           }
-          updateProjectUser(
-            req,
-            res,
-            project,
-            user,
-            {
-              role: req.fields.role
-            },
-            () => {
-              res.status(200);
-            }
-          );
+          const emails = JSON.parse(req.fields.email);
+          const invitedUsers = [];
+          emails.forEach(email => {
+            User.options.classMethods.createNewUser(
+              { email: email },
+              (error, user) => {
+                if (error) {
+                  return res.error(error);
+                }
+                updateProjectUser(
+                  req,
+                  res,
+                  project,
+                  user,
+                  { role: req.fields.role },
+                  () => {
+                    invitedUsers.push(user);
+                  }
+                );
+              }
+            );
+          });
+          res.status(200).send(JSON.stringify(invitedUsers));
         }
       ).catch(error => {
         res.error(error);
@@ -255,7 +293,9 @@ module.exports = function(app) {
         }
 
         projects.forEach(project => {
-          if (config.rights.edit.includes(project.user_project.dataValues.role)) {
+          if (
+            config.rights.edit.includes(project.user_project.dataValues.role)
+          ) {
             project.destroy();
             Page.destroy({
               where: {

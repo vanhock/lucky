@@ -19,83 +19,27 @@ const allowedParams = [
 ];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
-    const fields = req.fields;
-    if (
-      !Object.keys(fields).length ||
-      !fields.name ||
-      !fields.email ||
-      !fields.password
-    ) {
+    if (!req.fields.email || !req.fields.password) {
       return res.error("Required fields did not provide!");
     }
 
-    User.options.classMethods.createNewUser(
-      {
-        name: fields.name,
-        email: fields.email,
-        password: fields.password,
-        company: fields.company
-      },
-      (fail, success) => {
-        if (fail) {
-          return res.error(fail);
-        }
-        return res.status(200).send(
-          JSON.stringify({
-            message: "User created"
-          })
-        );
+    User.options.classMethods.createNewUser(req.fields, (error, user) => {
+      if (error) {
+        return res.error(error);
       }
-    );
+      return res.status(200).send(
+        JSON.stringify({
+          message: "User created",
+          user: filterObject(user, allowedParams)
+        })
+      );
+    });
   });
 
   app.get("/auth-by-token", (req, res) => {
     getUserByToken(req, res, user => {
       res.status(200).send(filterObject(user.dataValues, allowedParams));
     });
-  });
-
-  app.post("/auth-as-client", (req, res) => {
-    if (!req.fields.email || !req.fields.password) {
-      return res.error("Required fields did not provide!");
-    }
-    User.findOne({
-      where: {
-        email: req.fields.email
-      }
-    })
-      .then(() => {
-        User.options.classMethods.authorization(
-          req.fields.email,
-          req.fields.password,
-          (error, response) => {
-            if (!error) {
-              return res
-                .status(200)
-                .send(JSON.stringify(filterObject(response, allowedParams)));
-            } else {
-              return res.error(error);
-            }
-          }
-        );
-      })
-      .catch(() => {
-        User.options.classMethods.createNewUser(
-          {
-            email: req.fields.email,
-            password: req.fields.password,
-            role: "client"
-          },
-          (error, user) => {
-            if (error) {
-              return res.error(error);
-            }
-            return res
-              .status(200)
-              .send(JSON.stringify(filterObject(user, allowedParams)));
-          }
-        );
-      });
   });
 
   app.post("/authorization", (req, res) => {
