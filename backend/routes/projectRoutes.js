@@ -12,6 +12,7 @@ const sequelize = require("sequelize");
 const isReachable = require("is-reachable");
 const webshot = require("webshot");
 const config = require("../config/config");
+const fs = require("fs");
 let crypto;
 try {
   crypto = require("crypto");
@@ -85,25 +86,31 @@ module.exports = function(app) {
           if (error) {
             return res.error(error);
           }
-          const imgUrl = `${config.upload.projectsFolderFullPath}${
+          const imgFolder = `${config.upload.projectsFolderFullPath}${
             project.permalink
-          }/shot.png`;
+          }`;
+          const imgUrl = `${imgFolder}/shot.png`;
           const resultImg = `${config.upload.projectsFolderPath}${
             project.permalink
           }/shot.png`;
           const puppeteer = require("puppeteer");
           (async () => {
-            const browser = await puppeteer.launch();
+            const puppeteerConfig = {
+              headless: true,
+              defaultViewport: { width: 1280, height: 768 }
+            };
+            const browser = await puppeteer.launch(puppeteerConfig);
             const page = await browser.newPage();
             await page.goto(req.fields.url);
+            if (!fs.existsSync(imgFolder)) {
+              fs.mkdirSync(imgFolder);
+            }
             const screenshot = await page.screenshot({ path: imgUrl });
             if (screenshot) {
               project
                 .update({ image: resultImg })
-                .then(() => {
-                  return res
-                    .status(200)
-                    .send(JSON.stringify({ image: resultImg }));
+                .then(resultProject => {
+                  return res.status(200).send(JSON.stringify(resultProject));
                 })
                 .catch(error => {
                   res.error(`Error with creating screenshot: ${error}`);

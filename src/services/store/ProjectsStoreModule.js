@@ -15,7 +15,8 @@ import {
   getAllProjects,
   getProject,
   moveProjectToTrash,
-  checkAccessToProject, projectSetScreenshot
+  checkAccessToProject,
+  projectSetScreenshot
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -41,12 +42,18 @@ export default {
           state.projects.hasOwnProperty(key) &&
           state.projects[key].id === payload.id
         ) {
-          Vue.set(state.projects, key, payload);
+          for (let k in payload) {
+            if (!payload.hasOwnProperty(k) || k === "id") {
+              continue;
+            }
+            if (state.projects[key].hasOwnProperty(k)) {
+              state.projects[key][k] = payload[k];
+            } else {
+              Vue.set(state.projects[key], k, payload[k]);
+            }
+          }
           break;
         }
-      }
-      if (state.currentProject && state.currentProject.id === payload.id) {
-        state.currentProject = payload;
       }
     },
     [PROJECT_SET_CURRENT_PROJECT](state, payload) {
@@ -105,11 +112,14 @@ export default {
     },
     [PROJECT_SET_SCREENSHOT]({ commit }, payload) {
       return new Promise((resolve, reject) => {
-        projectSetScreenshot(payload, (error, image) => {
+        projectSetScreenshot(payload, (error, project) => {
           if (error) {
             return reject(error);
           }
-          commit(PROJECT_EDIT_PROJECT, image);
+          commit(PROJECT_EDIT_PROJECT, {
+            id: project.id,
+            image: project.image
+          });
         });
       });
     },
