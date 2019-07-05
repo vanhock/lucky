@@ -1,6 +1,7 @@
 <template>
   <div class="conductor-view">
     <empty-placeholder
+      v-show="!loading"
       icon="logo"
       :title="(!notFound && titleText) || ''"
       :text="(!notFound && descriptionText) || ''"
@@ -87,6 +88,7 @@ export default {
     logoParams: {
       iconSize: "20px"
     },
+    loading: true,
     authorized: false,
     hasExtension: false,
     accessError: null,
@@ -130,19 +132,26 @@ export default {
           return this.checkProjectAccess();
         })
         .catch(error => {
-          this.accessError = error;
-          this.notFound = true;
+          this.loaded(() => {
+            this.accessError = error;
+            this.notFound = true;
+          });
         });
     },
     checkProjectAccess() {
+      this.loading = true;
       return this.$store
         .dispatch(PROJECT_CHECK_ACCESS, { permalink: this.permalink })
         .then(() => {
-          return (this.authorized = true);
+          this.loaded(() => {
+            return (this.authorized = true);
+          });
         })
         .catch(error => {
-          this.accessError = error;
-          return (this.authorized = false);
+          this.loaded(() => {
+            this.accessError = error;
+            return (this.authorized = false);
+          });
         });
     },
     checkExtensionInstalled() {
@@ -156,6 +165,13 @@ export default {
           color: "#a035fb"
         }
       );
+    },
+    loaded(cb) {
+      cb();
+      const self = this;
+      setTimeout(() => {
+        self.loading = false;
+      }, 500);
     }
   }
 };

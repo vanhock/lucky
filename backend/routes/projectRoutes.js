@@ -165,7 +165,7 @@ module.exports = function(app) {
         return res.status(200).send(JSON.stringify(project.dataValues));
       })
       .catch(() => {
-        return res.error("Project not found");
+        return res.error({ title: "Project not found", code: 404 });
       });
   });
 
