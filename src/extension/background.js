@@ -171,6 +171,9 @@ function handleMessages(data, { sender }) {
     case "getReady":
       ports[sender.tab.id].ready = true;
       break;
+    case "checkExtension":
+      ports[sender.tab.id].postMessage({ extensionInstalled: true });
+      break;
     case "token":
       // eslint-disable-next-line no-case-declarations
       const inspectorTabId = ports[sender.tab.id].inspectorTabId;

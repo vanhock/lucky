@@ -134,6 +134,14 @@ export default {
   components: { SignIn, VButtonPrimary, VIcon },
   created() {
     this.getProject();
+    const self = this;
+    window.addEventListener("message", event => {
+      if (event.source !== window) return;
+      if (event.data.hasOwnProperty("extensionInstalled")) {
+        self.hasExtension = event.data.extensionInstalled;
+        self.hasExtension ? self.redirect() : "";
+      }
+    });
   },
   mounted() {
     this.$nextTick(() => {
@@ -142,7 +150,7 @@ export default {
 
     setInterval(() => {
       this.checkExtensionInstalled();
-    }, 500);
+    }, 2000);
   },
   data: () => ({
     logoParams: {
@@ -223,9 +231,11 @@ export default {
         });
     },
     checkExtensionInstalled() {
-      this.hasExtension =
-        document.querySelector(`[extension-id=${config.extensionId}]`) || false;
-      this.redirect();
+      try {
+        window.postMessage({ checkExtension: true }, location.href);
+      } catch (e) {
+        this.hasExtension = false;
+      }
     },
     onAuth() {
       this.checkProjectAccess();

@@ -12,18 +12,26 @@ port.onMessage.addListener(response => {
       clear();
       document.addEventListener("DOMContentLoaded", clear);
       break;
-    case "anotherAction":
+    case "extensionInstalled":
+      window.postMessage({ extensionInstalled: true }, location.href);
       break;
   }
 });
 
-window.addEventListener("message", function(event) {
+window.addEventListener("message", event => {
   // We only accept messages from ourselves
   if (event.source !== window) return;
   if (event.data.setExtensionReady) {
     console.log("Extension ready call!");
     port.postMessage({ getReady: true });
     location.href = event.data.setExtensionReady;
+  }
+  if (event.data.checkExtension) {
+    try {
+      port.postMessage({ checkExtension: true });
+    } catch (e) {
+      window.postMessage({ extensionInstalled: false }, location.href);
+    }
   }
 });
 
