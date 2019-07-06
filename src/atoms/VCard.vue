@@ -2,7 +2,12 @@
   <div class="v-card" :class="{ selected: selected }">
     <div class="v-card-content">
       <div class="v-card-image-container">
-        <img class="image" :src="image" v-if="image" :alt="name" />
+        <div
+          class="image"
+          v-if="image"
+          :style="{ backgroundImage: `url(${image})` }"
+          :alt="name"
+        ></div>
       </div>
       <div class="v-card-text-container" @click="onclick">
         <div class="name">{{ name }}</div>
@@ -86,8 +91,11 @@ export default {
     position: relative;
     display: flex;
     height: 250px;
-    img {
+    div.image {
       width: 100%;
+      background-position: top;
+      background-size: cover;
+      background-repeat: no-repeat;
     }
   }
   &-text-container {

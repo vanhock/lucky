@@ -10,7 +10,6 @@ const {
 const { deleteDesigns } = require("../controllers/designController");
 const sequelize = require("sequelize");
 const isReachable = require("is-reachable");
-const webshot = require("webshot");
 const config = require("../config/config");
 const fs = require("fs");
 let crypto;
@@ -105,7 +104,10 @@ module.exports = function(app) {
             if (!fs.existsSync(imgFolder)) {
               fs.mkdirSync(imgFolder);
             }
-            const screenshot = await page.screenshot({ path: imgUrl });
+            const screenshot = await page.screenshot({
+              path: imgUrl,
+              fullPage: true
+            });
             if (screenshot) {
               project
                 .update({ image: resultImg })
