@@ -1,6 +1,5 @@
 console.log("AuthScript loaded");
 const port = browser.runtime.connect({ name: "auth" });
-
 port.onMessage.addListener(response => {
   if (Object.keys(response)[0] === "getToken") {
     getToken();
@@ -19,5 +18,7 @@ function getToken() {
   const token = localStorage.getItem("pp-u-t-s");
   if (token) {
     port.postMessage({ token: token });
+  } else {
+    console.log("Token not found in local storage!");
   }
 }

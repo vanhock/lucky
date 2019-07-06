@@ -7,50 +7,20 @@
     @reload="closeExtension"
     unable-closing
   >
-    <template v-if="hasPages && !showPageCreation">
+    <template v-if="sameProjects">
       <card-general-list class="pp-pages-list">
         <v-card-clear
-          v-for="page in pages"
-          :key="page.id"
-          :name="page.name"
-          :caption="normalizeDate(page.updatedAt)"
-          @click="selectPage(page)"
+          v-for="project in sameProjects"
+          :key="project.id"
+          :name="project.name"
+          :caption="normalizeDate(project.updatedAt)"
+          @click="selectProject(project)"
         />
       </card-general-list>
       <div class="pp-pages-selector-action">
         <span>{{ $t("Or you can ") }}</span>
         <v-button-inline @click="toggleCreate = true">{{
           $t("create new page")
-        }}</v-button-inline>
-      </div>
-    </template>
-    <template v-if="showPageCreation">
-      <form-group ref="operationalForm">
-        <v-input-bordered
-          name="url"
-          :label="$t('Website URL')"
-          :value="currenturl"
-          disabled
-        />
-        <v-input-bordered
-          ref="pageName"
-          name="name"
-          :label="$t('Page name')"
-          :value="currentWebsiteTitle"
-        />
-        <v-input-bordered
-          name="projectName"
-          :label="$t('Project name')"
-          :value="currentHostname"
-        />
-      </form-group>
-      <v-button-primary @click="createPage">{{
-        $t("create")
-      }}</v-button-primary>
-      <div class="pp-pages-selector-action" v-if="hasPages">
-        <span>{{ $t("Or you can ") }}</span>
-        <v-button-inline @click="toggleCreate = false">{{
-          $t("select from Found pages")
         }}</v-button-inline>
       </div>
     </template>
@@ -69,6 +39,7 @@ import FormGroup from "../molecules/FormGroup";
 import { notification } from "../services/notification";
 import {
   PAGE_CREATE_PAGE,
+  PAGE_GET_PAGES,
   PAGE_SET_CURRENT_PAGE,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
@@ -90,13 +61,21 @@ export default {
   },
   data: () => ({
     toggleCreate: false,
-    currenturl: location.href,
+    currentUrl: location.href,
     currentWebsiteTitle: document.title
   }),
   computed: {
-    ...mapGetters(["pages", "hasPages", "port"]),
+    ...mapGetters(["projects", "hasProjects", "port"]),
     currentHostname() {
-      return this.currenturl && extractHostname(this.currenturl);
+      return this.currentUrl && extractHostname(this.currentUrl);
+    },
+    sameProjects() {
+      return (
+        this.projects &&
+        this.projects.filter(project =>
+          project.url.includes(this.currentHostname)
+        )
+      );
     },
     pageModalTitle() {
       return (
@@ -135,11 +114,9 @@ export default {
         })
         .catch(error => notification(this, "error", error));
     },
-    selectPage(page) {
-      this.$store.dispatch(PAGE_SET_CURRENT_PAGE, page);
-      this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
-        projectId: page.projectId
-      });
+    selectProject(project) {
+      this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, project);
+      this.$store.dispatch(PAGE_GET_PAGES, { projectId: project.id });
       this.$refs.operationalModal.showModal = false;
     },
     toggleModal(open = false) {

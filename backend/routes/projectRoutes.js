@@ -186,7 +186,10 @@ module.exports = function(app) {
     const sort = req.query.sort || "updatedAt";
     const orderBy = req.query.sort === "name" ? "ASC" : "DESC";
     const setQuery = () => {
-      const params = { trashId: null };
+      const params = {
+        trashId: null,
+        ...filterObject(req.query, ["url", "name"])
+      };
       const query = {
         where: params,
         attributes: [

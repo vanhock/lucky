@@ -25,7 +25,7 @@ browser.browserAction.onClicked.addListener(
         console.log(`Failed to connect with tab: ${tab.id}`);
       }
     } else {
-      setUpInspectorsScript();
+      setUpInspectorsScript(tab.id);
     }
   }, 300)
 );
@@ -66,12 +66,18 @@ function connected(p) {
   p.onMessage.addListener(handleMessages);
   ports[p.sender.tab.id] = p;
   switch (p.name) {
-    case "content-script":
-      p.initInspectors = false;
+    case "main-script":
       isCurrentTab(p.sender.tab.id, result => {
         if (result) {
           setIcon();
           ports[p.sender.tab.id].connected = true;
+        }
+      });
+      break;
+    case "content-script":
+      p.initInspectors = false;
+      isCurrentTab(p.sender.tab.id, result => {
+        if (result) {
           initInspectors(p.sender.tab.id);
         }
       });
@@ -82,6 +88,7 @@ function connected(p) {
           ports.hasOwnProperty(key) &&
           ports[key].authTabId === p.sender.tab.id
         ) {
+          ports[p.sender.tab.id].postMessage({ getToken: true });
           return (ports[p.sender.tab.id].inspectorTabId = parseInt(key));
         }
       }
@@ -110,7 +117,7 @@ function disconnected(p) {
 }
 
 function setUpInspectorsScript(tabId) {
-  ports[tabId].sendMessage({ clear: true });
+  ports[tabId].postMessage({ clear: true });
   browser.tabs.executeScript(tabId, {
     file: "content_scripts/inspectors-script.js"
   });

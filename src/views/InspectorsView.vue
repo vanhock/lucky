@@ -9,7 +9,7 @@
     <website-inspector
       v-if="hasCurrentProject"
       ref="websiteInspector"
-      :website-url="currentProjectUrl || location.href"
+      :url="currentProjectUrl || location.href"
       @getFoundNodes="getFoundNodes"
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
@@ -26,6 +26,7 @@ import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
   AUTH_CHECK_AUTH,
+  PAGE_CREATE_PAGE,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGE,
   PAGE_GET_PAGES,
@@ -35,7 +36,7 @@ import {
   PROJECT_SET_CURRENT_PROJECT,
   TASK_SET_CURRENT_TASK
 } from "../services/store/mutation-types";
-import CreateOrSelectPage from "../organisms/CreateOrSelectPage";
+import CreateOrSelectPage from "../organisms/SelectProjectModal";
 import VueHotkey from "v-hotkey";
 import Vue from "vue";
 Vue.use(VueHotkey);
@@ -127,28 +128,24 @@ export default {
             this.$store
               .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: permalink })
               .then(project => {
-                this.$store
-                  .dispatch(PAGE_GET_PAGES, {
-                    projectId: project.id
-                  })
-                  .then(pages => {
-                    if (pageId) {
-                      this.$store.dispatch(PAGE_GET_PAGE, {
-                        id: pageId
-                      });
-                    } else {
-                      this.$store.dispatch(PAGE_SET_CURRENT_PAGE, pages[0]);
-                    }
-                  });
+                this.$store.dispatch(PAGE_GET_PAGES, {
+                  projectId: project.id
+                });
               });
           } else {
             this.$store
               .dispatch(PROJECT_GET_PROJECTS, { url: location.href })
               .then(projects => {
-                if (projects.length > 1) {
-                  this.$refs.projectModal.toggleModal(true);
+                if (projects.length === 1) {
+                  this.$store.dispatch(
+                    PROJECT_SET_CURRENT_PROJECT,
+                    projects[0]
+                  );
+                  return this.$store.dispatch(PAGE_GET_PAGES, {
+                    projectId: projects[0].id
+                  });
                 } else if (projects.length === 0) {
-                  this.$store
+                  return this.$store
                     .dispatch(PROJECT_CREATE_PROJECT, {
                       url: location.href
                     })
@@ -157,18 +154,13 @@ export default {
                         PROJECT_SET_CURRENT_PROJECT,
                         project
                       );
-                      this.$store.dispatch(PAGE_GET_PAGE, {
+                      this.$store.dispatch(PAGE_CREATE_PAGE, {
+                        projectId: project.id,
                         url: project.url
                       });
                     });
                 } else {
-                  this.$store.dispatch(
-                    PROJECT_SET_CURRENT_PROJECT,
-                    projects[0]
-                  );
-                  this.$store.dispatch(PAGE_GET_PAGE, {
-                    url: location.href
-                  });
+                  this.$refs.projectModal.toggleModal(true);
                 }
               })
               .catch(() => {

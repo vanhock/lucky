@@ -71,7 +71,6 @@ import {
   PROJECT_MOVE_TO_TRASH,
   PROJECT_SET_SCREENSHOT
 } from "../services/store/mutation-types";
-import { downloadProjectResources } from "../services/api/ProjectApi";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import ModalMixin from "../mixins/ModalMixin.js";

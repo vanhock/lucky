@@ -1,6 +1,5 @@
 import PixelApi from "./api";
 import { generalCallback } from "./helpers";
-import { serializeObject } from "../../utils";
 
 export function createProject(payload, cb) {
   PixelApi.post("/create-project", { data: payload }, (status, data) => {

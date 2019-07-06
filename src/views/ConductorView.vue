@@ -1,7 +1,7 @@
 <template>
   <div class="conductor-view">
-    <div v-show="!loading">
-      <div class="conductor-view-container" v-if="!notFound">
+    <div>
+      <div class="conductor-view-container" v-if="!notFound" v-show="!loading">
         <div class="conductor-view-project">
           <div
             class="project-image"

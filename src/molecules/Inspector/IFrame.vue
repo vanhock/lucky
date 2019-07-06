@@ -1,6 +1,5 @@
 <script>
 import Vue from "vue";
-import { downloadProjectResources } from "../../services/api/ProjectApi";
 import { INSPECTOR_SET_TOOL } from "../../services/store/mutation-types";
 import {
   INSPECTOR_STATE_INSPECTING,
@@ -186,18 +185,6 @@ export default {
           }
         }
       });
-      downloadProjectResources(
-        {
-          folder: this.currentProject.permalink,
-          url: this.currentPage.url
-        },
-        error => {
-          if (error) {
-            return console.log(`Error with download: ${error}`);
-          }
-          console.log("Resources downloaded successfully");
-        }
-      );
     }
   }
 };
