@@ -34,7 +34,7 @@ export default {
 .project-item {
   .v-card-text-container {
     .name {
-      max-height: 50px;
+      height: 30px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;

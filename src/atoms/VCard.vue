@@ -96,6 +96,7 @@ export default {
       background-position: top;
       background-size: cover;
       background-repeat: no-repeat;
+      border-radius: 5px 5px 0 0;
     }
   }
   &-text-container {

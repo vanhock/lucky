@@ -96,7 +96,7 @@ module.exports = function(app) {
           (async () => {
             const puppeteerConfig = {
               headless: true,
-              defaultViewport: { width: 1280, height: 768 }
+              defaultViewport: { width: 1280, height: 2000 }
             };
             const browser = await puppeteer.launch(puppeteerConfig);
             const page = await browser.newPage();
@@ -106,7 +106,7 @@ module.exports = function(app) {
             }
             const screenshot = await page.screenshot({
               path: imgUrl,
-              fullPage: true
+              fullPage: false
             });
             if (screenshot) {
               project

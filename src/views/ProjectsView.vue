@@ -68,8 +68,7 @@ import {
   PROJECT_CREATE_PROJECT,
   PROJECT_EDIT_PROJECT,
   PROJECT_GET_PROJECTS,
-  PROJECT_MOVE_TO_TRASH,
-  PROJECT_SET_SCREENSHOT
+  PROJECT_MOVE_TO_TRASH
 } from "../services/store/mutation-types";
 import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
@@ -139,6 +138,7 @@ export default {
         });
     },
     createProject() {
+      const self = this;
       const url = this.$refs.websiteSelector.$children[0];
       if (!url.isValid) {
         return notification(
@@ -152,19 +152,13 @@ export default {
           url: url.currentValue
         })
         .then(project => {
-          this.$refs.operationalModal.showModal = false;
+          self.$refs.operationalModal.showModal = false;
           notification(
             this,
             "success",
             `Project "${project.name}" successfully created!`
           );
-          this.$refs.websiteSelector.$children[0].clearValue();
-          this.$store
-            .dispatch(PROJECT_SET_SCREENSHOT, {
-              permalink: project.permalink,
-              url: project.url
-            })
-            .then(() => {});
+          self.$refs.websiteSelector.$children[0].$children[0].clearValue();
         })
         .catch(error => notification(this, "error", error));
     },

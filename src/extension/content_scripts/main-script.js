@@ -1,4 +1,5 @@
 import config from "../../config";
+console.log("This is a main script");
 /** This need for extension exist check **/
 const extensionId = document.createElement("div");
 extensionId.setAttribute("extension-id", config.extensionId);
@@ -13,6 +14,16 @@ port.onMessage.addListener(response => {
       break;
     case "anotherAction":
       break;
+  }
+});
+
+window.addEventListener("message", function(event) {
+  // We only accept messages from ourselves
+  if (event.source !== window) return;
+  if (event.data.setExtensionReady) {
+    console.log("Extension ready call!");
+    port.postMessage({ getReady: true });
+    location.href = event.data.setExtensionReady;
   }
 });
 

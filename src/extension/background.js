@@ -63,14 +63,22 @@ function connected(p) {
   if (ports[p.sender.tab.id] && ports[p.sender.tab.id].name === "auth") {
     return;
   }
+  const lastActivePort = { ...ports[p.sender.tab.id] };
   p.onMessage.addListener(handleMessages);
   ports[p.sender.tab.id] = p;
+  ports[p.sender.tab.id].ready = lastActivePort.ready;
+
   switch (p.name) {
     case "main-script":
       isCurrentTab(p.sender.tab.id, result => {
         if (result) {
           setIcon();
           ports[p.sender.tab.id].connected = true;
+          if (ports[p.sender.tab.id].ready) {
+            /** Initialize inspectors if extension activated from Conductor component **/
+            setUpInspectorsScript(p.sender.tab.id);
+            ports[p.sender.tab.id].ready = false;
+          }
         }
       });
       break;
@@ -141,6 +149,9 @@ function handleMessages(data, { sender }) {
   switch (name) {
     case "message":
       console.log(`Message: ${data.message}`);
+      break;
+    case "getReady":
+      ports[sender.tab.id].ready = true;
       break;
     case "token":
       // eslint-disable-next-line no-case-declarations

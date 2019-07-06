@@ -88,7 +88,7 @@ export default {
         });
       });
     },
-    [PROJECT_CREATE_PROJECT]({ commit }, payload) {
+    [PROJECT_CREATE_PROJECT]({ commit, dispatch }, payload) {
       return new Promise((resolve, reject) => {
         createProject(payload, (error, project) => {
           if (error) {
@@ -96,6 +96,10 @@ export default {
           }
           commit(PROJECT_CREATE_PROJECT, project);
           resolve(project);
+          dispatch(PROJECT_SET_SCREENSHOT, {
+            permalink: project.permalink,
+            url: project.url
+          });
         });
       });
     },

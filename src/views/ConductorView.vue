@@ -161,7 +161,8 @@ export default {
     overlayIcon: {
       mode: "feather",
       params: { iconSize: "16px" }
-    }
+    },
+    redirected: false
   }),
   computed: {
     ...mapGetters(["currentProject"]),
@@ -210,6 +211,7 @@ export default {
         .then(() => {
           this.loaded(() => {
             this.accessError = "";
+            this.redirect();
             return (this.authorized = true);
           });
         })
@@ -223,6 +225,7 @@ export default {
     checkExtensionInstalled() {
       this.hasExtension =
         document.querySelector(`[extension-id=${config.extensionId}]`) || false;
+      this.redirect();
     },
     onAuth() {
       this.checkProjectAccess();
@@ -242,6 +245,15 @@ export default {
       setTimeout(() => {
         self.loading = false;
       }, 400);
+    },
+    redirect() {
+      if (this.authorized && this.hasExtension && !this.redirected) {
+        window.postMessage(
+          { setExtensionReady: this.currentProject.url },
+          location.href
+        );
+        this.redirected = true;
+      }
     }
   }
 };
