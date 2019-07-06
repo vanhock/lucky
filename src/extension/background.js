@@ -56,8 +56,26 @@ browser.tabs.onUpdated.addListener((tabId, { status }, { url }) => {
   }
 });
 
+browser.runtime.onInstalled.addListener(installed);
 browser.runtime.onConnect.addListener(connected);
 browser.runtime.onSuspend.addListener(disconnected);
+function installed() {
+  console.log("Extension installed");
+  browser.tabs.query({ currentWindow: true }).then(tabs => {
+    const targetTabs = [];
+    tabs.forEach(tab => {
+      if (tab.url && tab.url.includes(`${config.apiUrl}/i`)) {
+        targetTabs.push(tab.id);
+      }
+    });
+    if (targetTabs.length) {
+      browser.tabs.reload(targetTabs[targetTabs.length - 1]);
+      browser.tabs.update(targetTabs[targetTabs.length - 1], {
+        active: true
+      });
+    }
+  });
+}
 
 function connected(p) {
   if (ports[p.sender.tab.id] && ports[p.sender.tab.id].name === "auth") {

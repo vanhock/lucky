@@ -10,7 +10,6 @@ i18n.locale = localStorage.getItem("locale") || "en";
 
 const ifNotAuthenticated = (to, from, next) => {
   if (!localStorage.getItem("pp-u-t-s") || to.query.redirect === "disabled") {
-    localStorage.removeItem("pp-u-t-s");
     next();
     return;
   }

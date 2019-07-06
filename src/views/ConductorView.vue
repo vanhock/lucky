@@ -43,7 +43,7 @@
           <div class="conductor-auth-title">
             {{ (!notFound && titleText) || "" }}
           </div>
-          <div class="spinner">
+          <div class="spinner" v-if="authorized && hasExtension">
             <div class="bounce1"></div>
             <div class="bounce2"></div>
             <div class="bounce3"></div>
