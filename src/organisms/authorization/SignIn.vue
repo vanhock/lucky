@@ -55,6 +55,7 @@ export default {
         .dispatch(AUTH_REQUEST, fields)
         .then(user => {
           this.$emit("success", user);
+          this.loading = false;
           if (!this.custom) {
             UserLoginSuccess(this, user.name);
             setTimeout(() => {
@@ -64,8 +65,8 @@ export default {
         })
         .catch(error => {
           this.loading = false;
+          this.$emit("error", error);
           if (!this.custom) {
-            this.$emit("error", error);
             UserLoginError(this, error);
           }
         });

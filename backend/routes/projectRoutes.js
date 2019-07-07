@@ -9,6 +9,7 @@ const {
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
 const sequelize = require("sequelize");
+const Op = sequelize.Op;
 const isReachable = require("is-reachable");
 const config = require("../config/config");
 const fs = require("fs");
@@ -303,36 +304,56 @@ module.exports = function(app) {
       return res.error("Id did not provide!");
     }
     getUserByToken(req, res, user => {
-      user.getProjects({ id: req.fields.id }).then(projects => {
-        if (!projects.length) {
-          return res.status(200).send(JSON.stringify([]));
-        }
-
-        projects.forEach(project => {
-          if (
-            config.rights.edit.includes(project.user_project.dataValues.role)
-          ) {
-            project.destroy();
-            Page.destroy({
-              where: {
-                projectId: project.id
-              }
-            });
-            req.fields.projectId = project.id;
-            deleteDesigns(req, res);
-            removeFolder(
-              config.upload.projectsFolderFullPath + project.permalink,
-              () => {}
-            );
-            return res.status(200).send("Project deleted!");
-          } else {
-            return res.error({
-              title: "You don't have rights for delete this project!",
-              code: 403
-            });
+      user
+        .getProjects({
+          where: {
+            id: req.fields.id,
+            trashId: { [Op.not]: null }
+          }
+        })
+        .then(projects => {
+          if (!projects.length) {
+            return res.error("Projects not found");
+          }
+          let deletedProjectsCount = 0;
+          let projectsCount = projects.length;
+          projects.forEach(project => {
+            if (
+              config.rights.edit.includes(project.user_project.dataValues.role)
+            ) {
+              project.destroy();
+              Page.destroy({
+                where: {
+                  projectId: project.id
+                }
+              });
+              req.fields.projectId = project.id;
+              deleteDesigns(req, res, () => {});
+              removeFolder(
+                config.upload.projectsFolderFullPath + project.permalink,
+                () => {}
+              );
+              ++deletedProjectsCount;
+            }
+          });
+          if (projectsCount === 1) {
+            return deletedProjectsCount === projectsCount
+              ? res.status(200).send("Project deleted")
+              : res.error("Error with delete");
+          }
+          if (projectsCount === 0) {
+            return res.error("Projects not found");
+          }
+          if (projectsCount > 1) {
+            return deletedProjectsCount === 0
+              ? res.error("Error with delete")
+              : res
+                  .status(200)
+                  .send(
+                    `Deleted projects: ${deletedProjectsCount} of ${projectsCount}`
+                  );
           }
         });
-      });
     });
   });
 };

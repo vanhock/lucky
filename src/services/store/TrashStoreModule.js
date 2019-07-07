@@ -31,10 +31,15 @@ export default {
   },
   mutations: {
     [TRASH_RESTORE_PROJECT](state, payload) {
-      removeTrashElement(state, payload, "projects");
+      removeTrashElement(state, payload.id, "projects");
     },
     [TRASH_DELETE_PROJECT](state, payload) {
-      removeTrashElement(state, payload, "projects");
+      if (!payload.id) {
+        return;
+      }
+      payload.id.forEach(id => {
+        removeTrashElement(state, id, "projects");
+      });
     },
     [TRASH_GET_PROJECTS_TRASH](state, projects) {
       state.projectsTrash = projects;
@@ -133,9 +138,9 @@ export default {
   }
 };
 
-function removeTrashElement(state, payload, trashType) {
+function removeTrashElement(state, id, trashType) {
   state[`${trashType}Trash`].some((item, index) => {
-    if (item.id === payload.id) {
+    if (item.id === id) {
       return state[`${trashType}Trash`].splice(index, 1);
     }
   });

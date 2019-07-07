@@ -123,6 +123,16 @@ function connected(p) {
 }
 
 function disconnected(p) {
+  ports.forEach(port => {
+    browser.tabs.reload(port.inspectorTabId);
+  });
+  browser.tabs.query({ currentWindow: true }).then(tabs => {
+    tabs.forEach(tab => {
+      if (tab.url && tab.url.includes(`${config.apiUrl}/i`)) {
+        browser.tabs.reload(tab.url);
+      }
+    });
+  });
   switch (p.name) {
     case "content-script":
       // eslint-disable-next-line no-case-declarations

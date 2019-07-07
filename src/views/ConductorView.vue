@@ -79,7 +79,7 @@
                   >
                     {{ currentAccessError }}
                   </div>
-                  <sign-in @success="onAuth" custom />
+                  <sign-in @success="onAuth" @error="onAuthError" custom />
                 </template>
               </div>
             </div>
@@ -141,6 +141,9 @@ export default {
         self.hasExtension = event.data.extensionInstalled;
         self.hasExtension ? self.redirect() : "";
       }
+      if (event.data.hasOwnProperty("extensionUninstalled")) {
+        self.hasExtension = false;
+      }
     });
   },
   mounted() {
@@ -148,7 +151,7 @@ export default {
       this.checkExtensionInstalled();
     });
 
-    setInterval(() => {
+    this.extensionCheckInterval = setInterval(() => {
       this.checkExtensionInstalled();
     }, 2000);
   },
@@ -170,7 +173,8 @@ export default {
       mode: "feather",
       params: { iconSize: "16px" }
     },
-    redirected: false
+    redirected: false,
+    extensionCheckInterval: null
   }),
   computed: {
     ...mapGetters(["currentProject"]),
@@ -217,17 +221,14 @@ export default {
       return this.$store
         .dispatch(PROJECT_CHECK_ACCESS, { permalink: this.permalink })
         .then(() => {
-          this.loaded(() => {
-            this.accessError = "";
-            this.redirect();
-            return (this.authorized = true);
-          });
+          this.loading = false;
+          this.accessError = "";
+          return (this.authorized = true);
         })
         .catch(error => {
-          this.loaded(() => {
-            this.accessError = error;
-            return (this.authorized = false);
-          });
+          this.loading = false;
+          this.accessError = error;
+          return (this.authorized = false);
         });
     },
     checkExtensionInstalled() {
@@ -240,6 +241,10 @@ export default {
     onAuth() {
       this.checkProjectAccess();
       this.showAuthError = true;
+    },
+    onAuthError(e) {
+      this.showAuthError = true;
+      this.accessError = e
     },
     stepStyle(state) {
       return (

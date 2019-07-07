@@ -11,7 +11,12 @@ module.exports = function(app) {
   });
 
   app.post("/delete-designs", (req, res) => {
-    return deleteDesigns(req, res);
+    return deleteDesigns(req, res, (error, success) => {
+      if (error) {
+        return res.error(error);
+      }
+      res.status(200).send(success);
+    });
   });
 
   app.get("/get-figma-designs", (req, res) => {
