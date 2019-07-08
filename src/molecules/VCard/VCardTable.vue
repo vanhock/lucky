@@ -33,15 +33,24 @@ export default {
 </script>
 
 <style lang="scss">
-.v-card.v-card-table {
+.v-card-table {
+  .v-card-image-container {
+    height: 70px;
+  }
   .v-card-text-container {
     flex-direction: row;
     height: 70px;
     padding: 0 20px;
     align-items: center;
     .name {
-      margin-top: -10px;
+      width: 40%;
+      margin: 0;
       color: $color-b3;
+    }
+  }
+  .v-card-content {
+    .caption {
+      margin: 0;
     }
   }
   .v-card-actions {

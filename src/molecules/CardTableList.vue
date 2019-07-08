@@ -52,12 +52,6 @@ export default {
       }
       .v-card-content {
         cursor: default;
-        .caption {
-          position: absolute;
-          bottom: 18px;
-          margin: 0;
-          padding: 0;
-        }
         &:active {
           top: 0;
         }
