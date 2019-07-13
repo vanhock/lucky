@@ -214,5 +214,6 @@ export default {
   display: grid;
   grid-template-columns: 1auto 1auto;
   grid-template-areas: ". .";
+  margin-bottom: 30px;
 }
 </style>

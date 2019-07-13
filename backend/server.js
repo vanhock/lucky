@@ -1,5 +1,6 @@
-const config = require("./config/config");
+"use strict";
 const express = require("express");
+const serverLess = require("serverless-http");
 const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
@@ -17,6 +18,5 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 require("./routes")(app);
 
-app.listen(config.server.port, () => {
-  console.log("We are live on " + config.server.port);
-});
+module.exports = app;
+module.exports.handler = serverLess(app);
