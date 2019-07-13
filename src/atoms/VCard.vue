@@ -8,6 +8,7 @@
           :style="{ backgroundImage: `url(${image})` }"
           :alt="name"
         ></div>
+        <div class="v-card-badge" v-if="badge">{{badge}}</div>
       </div>
       <div class="v-card-text-container" @click="onclick">
         <div class="name">{{ name }}</div>
@@ -47,6 +48,7 @@ export default {
     image: String,
     caption: String,
     text: String,
+    badge: String,
     selectingMode: Boolean,
     showMenu: Boolean
   },
@@ -148,6 +150,23 @@ export default {
       font-weight: 500;
       color: $color-b3;
     }
+  }
+  &-badge {
+    height: 28px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    background-color: $color-w3;
+    margin-right: 5px;
+    padding: 0 20px;
+    border-radius: 22px;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: bold;
   }
   &-menu {
     position: absolute;

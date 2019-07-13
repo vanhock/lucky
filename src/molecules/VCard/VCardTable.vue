@@ -1,5 +1,11 @@
 <template>
-  <v-card class="v-card-table" :name="name" :caption="caption" :text="text">
+  <v-card
+    class="v-card-table"
+    :name="name"
+    :caption="caption"
+    :text="text"
+    :badge="badge"
+  >
     <template v-if="actions && actions.length">
       <v-button-inline
         v-for="(action, index) in actions"

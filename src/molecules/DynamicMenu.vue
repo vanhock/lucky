@@ -21,7 +21,7 @@
             text-size="14px"
           />
         </router-link>
-        <v-menu class="submenu" v-if="item.children">
+        <v-menu class="submenu" v-if="submenu && item.children">
           <menu-item
             v-for="(child, index) in $store.getters[item.children]"
             :key="index"
@@ -48,6 +48,9 @@ import VToggle from "../atoms/VToggle";
 export default {
   name: "DynamicMenu",
   components: { VToggle, VMenu, MenuItem },
+  data: () => ({
+    submenu: false
+  }),
   props: {
     items: {
       type: Array,

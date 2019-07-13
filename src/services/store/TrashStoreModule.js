@@ -37,9 +37,13 @@ export default {
       if (!payload.id) {
         return;
       }
-      payload.id.forEach(id => {
-        removeTrashElement(state, id, "projects");
-      });
+      if (Array.isArray(payload.id)) {
+        payload.id.forEach(id => {
+          removeTrashElement(state, id, "projects");
+        });
+      } else {
+        removeTrashElement(state, payload.id, "projects");
+      }
     },
     [TRASH_GET_PROJECTS_TRASH](state, projects) {
       state.projectsTrash = projects;

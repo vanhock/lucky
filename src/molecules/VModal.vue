@@ -75,7 +75,6 @@ export default {
   &-container {
     position: fixed;
     background-color: #fff;
-    padding: 30px;
     min-width: 400px;
     max-width: 500px;
     max-height: 150vh;
@@ -96,7 +95,7 @@ export default {
     display: flex;
     flex-direction: column;
     min-height: 32px;
-    margin-bottom: 30px;
+    padding: 30px;
   }
 
   &-title {
@@ -126,6 +125,7 @@ export default {
   }
 
   &-content {
+    padding: 0 30px 30px;
     margin-bottom: 1rem;
     line-height: 1.5;
     color: rgba(0, 0, 0, 0.8);

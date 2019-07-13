@@ -4,6 +4,7 @@
       :name="name"
       :image="image"
       :caption="caption"
+      :badge="badge"
       :text="text"
       @click="$emit('click')"
     >

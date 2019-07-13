@@ -5,7 +5,8 @@ const {
   updateProjectUser,
   checkProjectAccess,
   getUrlData,
-  removeFolder
+  removeFolder,
+  extractHostname
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
 const sequelize = require("sequelize");
@@ -41,6 +42,7 @@ module.exports = function(app) {
               Project.create({
                 name: title,
                 url: targetUrl,
+                host: extractHostname(targetUrl).replace("www.", ""),
                 permalink: permalink
               }).then(project => {
                 updateProjectUser(
@@ -189,7 +191,7 @@ module.exports = function(app) {
     const setQuery = () => {
       const params = {
         trashId: null,
-        ...filterObject(req.query, ["url", "name"])
+        ...filterObject(req.query, ["url", "name", "host"])
       };
       const query = {
         where: params,
@@ -336,22 +338,11 @@ module.exports = function(app) {
               ++deletedProjectsCount;
             }
           });
-          if (projectsCount === 1) {
-            return deletedProjectsCount === projectsCount
-              ? res.status(200).send("Project deleted")
-              : res.error("Error with delete");
+          if (projectsCount >= 1) {
+            return res.status(200).send(projects);
           }
           if (projectsCount === 0) {
             return res.error("Projects not found");
-          }
-          if (projectsCount > 1) {
-            return deletedProjectsCount === 0
-              ? res.error("Error with delete")
-              : res
-                  .status(200)
-                  .send(
-                    `Deleted projects: ${deletedProjectsCount} of ${projectsCount}`
-                  );
           }
         });
     });

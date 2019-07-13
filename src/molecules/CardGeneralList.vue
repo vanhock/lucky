@@ -51,7 +51,6 @@ export default {
 <style lang="scss" scoped>
 .card-general-list {
   .header {
-    margin-top: 30px;
     display: flex;
   }
   .title {

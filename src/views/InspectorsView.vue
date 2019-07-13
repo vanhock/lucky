@@ -20,12 +20,18 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { simplifyDom, addToLocal, getParameterByName } from "../utils";
+import {
+  simplifyDom,
+  addToLocal,
+  getParameterByName,
+  extractHostname
+} from "../utils";
 import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
   AUTH_CHECK_AUTH,
+  AUTH_LOGOUT,
   PAGE_CREATE_PAGE,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGE,
@@ -81,7 +87,8 @@ export default {
             unsaved: true
           });
           break;
-        case "reloadPage":
+        case "resetAuth":
+          this.$store.dispatch(AUTH_LOGOUT);
           break;
       }
     });
@@ -134,7 +141,9 @@ export default {
               });
           } else {
             this.$store
-              .dispatch(PROJECT_GET_PROJECTS, { url: location.href })
+              .dispatch(PROJECT_GET_PROJECTS, {
+                host: extractHostname(location.href).replace("www.", "")
+              })
               .then(projects => {
                 if (projects.length === 1) {
                   this.$store.dispatch(
@@ -170,8 +179,10 @@ export default {
         })
         .catch(message => {
           console.log("Check auth fail: " + message);
-          sessionStorage.removeItem("pp-u-t-s");
-          return this.port.postMessage({ resetToken: true });
+          this.$store.dispatch(AUTH_LOGOUT).then(() => {
+            sessionStorage.removeItem("pp-u-t-s");
+            return this.port.postMessage({ resetToken: true });
+          });
         });
     },
     getFoundNodes() {

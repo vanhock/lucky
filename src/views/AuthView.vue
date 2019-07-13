@@ -18,8 +18,17 @@
 </template>
 
 <script>
+import { AUTH_CHECK_AUTH } from "../services/store/mutation-types";
+
 export default {
-  name: "AuthView"
+  name: "AuthView",
+  created() {
+    if (localStorage.getItem("pp-u-t-s")) {
+      this.$store.dispatch(AUTH_CHECK_AUTH).then(() => {
+        window.postMessage({ authorized: true }, location.href);
+      });
+    }
+  }
 };
 </script>
 

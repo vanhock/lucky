@@ -1,10 +1,5 @@
 console.log("AuthScript loaded");
 const port = browser.runtime.connect({ name: "auth" });
-port.onMessage.addListener(response => {
-  if (Object.keys(response)[0] === "getToken") {
-    getToken();
-  }
-});
 
 window.addEventListener("message", function(event) {
   // We only accept messages from ourselves

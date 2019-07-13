@@ -213,6 +213,7 @@ const moveFile = function(sourceName, targetName, cb) {
   }
 };
 
+
 const getUrlDomain = url => {
   const urlDomain = url.match(
     /([^\/]+:)?\/\/[^\/]*?\.?([^\/.]+)\.[^\/.]+(?::\d+)?\//g
@@ -253,5 +254,5 @@ module.exports = {
   removeFolder,
   moveFile,
   getUrlData,
-  getUrlDomain
+  getUrlDomain,
 };

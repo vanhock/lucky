@@ -1,25 +1,28 @@
 <template>
   <v-modal
-    :class="{ 'popup-wide': !showPageCreation }"
+    class="pp-select-project popup-wide"
     ref="operationalModal"
-    :title="pageModalTitle"
-    :description="pageModalDescription"
+    :title="$t('Select Project or create new')"
+    :description="projectModalDescription"
     @reload="closeExtension"
     unable-closing
   >
-    <template v-if="sameProjects">
-      <card-general-list class="pp-pages-list">
+    <template v-if="projects && projects.length > 1">
+      <card-general-list class="pp-projects-list" :title="$t('Projects')">
         <v-card-clear
-          v-for="project in sameProjects"
+          v-for="(project, index) in projects"
           :key="project.id"
           :name="project.name"
+          :text="`${$t('Pages')}: 0`"
+          :image="imgUrl(project.image)"
+          :badge="index === 0 ? $t('Recently used') : null"
           :caption="normalizeDate(project.updatedAt)"
           @click="selectProject(project)"
         />
       </card-general-list>
-      <div class="pp-pages-selector-action">
+      <div class="pp-projects-selector-action">
         <span>{{ $t("Or you can ") }}</span>
-        <v-button-inline @click="toggleCreate = true">{{
+        <v-button-inline @click="createProject">{{
           $t("create new page")
         }}</v-button-inline>
       </div>
@@ -33,26 +36,20 @@ import VModal from "../molecules/VModal";
 import VCardClear from "../molecules/VCard/VCardClear";
 import CardGeneralList from "../molecules/CardGeneralList";
 import VButtonInline from "../molecules/VButton/VButtonInline";
-import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
-import VInputBordered from "../molecules/VInput/VInputBordered";
-import FormGroup from "../molecules/FormGroup";
-import { notification } from "../services/notification";
+import config from "../config";
 import {
   PAGE_CREATE_PAGE,
   PAGE_GET_PAGES,
-  PAGE_SET_CURRENT_PAGE,
+  PROJECT_CREATE_PROJECT,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
-import { extractHostname, normalizeDate } from "../utils";
+import { normalizeDate } from "../utils";
 
 export default {
   name: "CreateOrSelectPage",
   components: {
     VCardClear,
     VModal,
-    FormGroup,
-    VInputBordered,
-    VButtonPrimary,
     VButtonInline,
     CardGeneralList
   },
@@ -66,24 +63,7 @@ export default {
   }),
   computed: {
     ...mapGetters(["projects", "hasProjects", "port"]),
-    currentHostname() {
-      return this.currentUrl && extractHostname(this.currentUrl);
-    },
-    sameProjects() {
-      return (
-        this.projects &&
-        this.projects.filter(project =>
-          project.url.includes(this.currentHostname)
-        )
-      );
-    },
-    pageModalTitle() {
-      return (
-        (!this.showPageCreation && this.$t("Select page")) ||
-        this.$t("Create new page")
-      );
-    },
-    pageModalDescription() {
+    projectModalDescription() {
       return (
         (!this.showPageCreation &&
           this.$t("We found pages, associated with this URL:")) ||
@@ -95,24 +75,19 @@ export default {
     }
   },
   methods: {
-    createPage() {
-      this.$store
-        .dispatch(PAGE_CREATE_PAGE, {
-          ...this.$refs.operationalForm.getFormChangedFields()
+    createProject() {
+      return this.$store
+        .dispatch(PROJECT_CREATE_PROJECT, {
+          url: location.href
         })
-        .then(page => {
-          this.$refs.operationalModal.showModal = false;
-          this.$store.dispatch(PAGE_SET_CURRENT_PAGE, page);
-          this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, {
-            projectId: page.projectId
+        .then(project => {
+          this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, project);
+          this.$store.dispatch(PAGE_CREATE_PAGE, {
+            projectId: project.id,
+            url: project.url
           });
-          return notification(
-            this,
-            "success",
-            `Page "${page.name}" successfully created!`
-          );
-        })
-        .catch(error => notification(this, "error", error));
+          this.$refs.operationalModal.showModal = false;
+        });
     },
     selectProject(project) {
       this.$store.dispatch(PROJECT_SET_CURRENT_PROJECT, project);
@@ -137,6 +112,9 @@ export default {
     },
     closeExtension() {
       this.port.postMessage({ closeExtension: true });
+    },
+    imgUrl(url = "") {
+      return `${config.apiUrl}/${url}`;
     }
   }
 };
@@ -147,19 +125,30 @@ export default {
   .pp-modal-container {
     max-width: 844px;
     width: 90%;
+    max-height: 90%;
+  }
+  .pp-modal-content {
+    padding: 0;
   }
 }
 
-.pp-pages-list {
-  background-color: $color-b5;
-  padding: 0 20px 20px;
-  border-radius: 5px;
+.pp-projects-list {
+  padding: 0 30px 90px;
+  .card-general-list-container {
+    grid-template-columns: 1fr 1fr;
+  }
 }
-.pp-pages-selector-action {
+.pp-projects-selector-action {
   display: flex;
   flex-direction: column;
   margin-top: 25px;
   text-align: center;
   align-items: center;
+  position: sticky;
+  background-color: #fff;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 30px 0;
 }
 </style>

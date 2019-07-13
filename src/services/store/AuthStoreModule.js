@@ -39,7 +39,6 @@ export default {
     [AUTH_LOGOUT]: state => {
       state.user = {};
       state.userToken = null;
-      localStorage.removeItem("pp-u-t-s");
     },
     [AUTH_CHECK_AUTH]: (state, payload = null) => {
       state.user = payload;
@@ -69,6 +68,7 @@ export default {
     [AUTH_LOGOUT]: ({ commit }) => {
       return new Promise(resolve => {
         commit(AUTH_LOGOUT);
+        localStorage.removeItem("pp-u-t-s");
         SetAuthToken("");
         resolve();
       });

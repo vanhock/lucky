@@ -117,6 +117,9 @@ export default {
     },
     projectsTrashIds() {
       return this.projectsTrash && this.projectsTrash.map(p => p.id);
+    },
+    modal() {
+      return this.$refs.operationalModal;
     }
   },
   methods: {
@@ -137,8 +140,7 @@ export default {
           id: this.dataForOperations.id
         })
         .then(() => {
-          notification(this, "success", `${target} deleted permanently`);
-          this.$refs.operationalModal.showModal = false;
+          this.modal ? (this.modal.showModal = false) : "";
         })
         .catch(error => {
           notification(this, "error", error);

@@ -214,6 +214,7 @@ function checkTokenBeforeStart(tabId, cb) {
     if (token) {
       cb(token);
     } else {
+      ports[tabId].postMessage({ resetAuth: true });
       console.log("Token not found. Running auth script...");
       runAuthScript(tabId);
     }
