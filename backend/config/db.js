@@ -1,14 +1,6 @@
 module.exports = {
-  local: {
-    host: "localhost",
-    dbName: "pixel",
-    userName: "root",
-    userPassword: "root"
-  },
-  remote: {
-    host: "localhost",
-    dbName: "2HyCuPaH4o",
-    userName: "2HyCuPaH4o",
-    userPassword: "wvA5i6IEIs"
-  }
+  host: process.env.DB_HOST,
+  dbName: process.env.DB_NAME,
+  userName: process.env.DB_USER,
+  userPassword: process.env.DB_PASSWORD
 };
