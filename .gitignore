@@ -3,9 +3,11 @@ node_modules
 /dist
 /backend/log
 /backend/public
+/backend/app
 *hot-update.*
 .env
 .env.*
+!/backend/.env.example
 
 /src/assets/styles/_sprites.scss
 
