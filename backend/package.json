@@ -58,6 +58,7 @@
     "zombie": "^6.1.4"
   },
   "dependencies": {
+    "dotenv": "^8.0.0",
     "puppeteer": "^1.17.0",
     "puppeteer-core": "^1.17.0"
   }

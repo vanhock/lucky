@@ -2,7 +2,7 @@ const path = require("path");
 module.exports = {
   server: {
     address: "http://localhost",
-    port: 3000
+    port: process.env.SERVER_PORT
   },
   authorization: {
     token_out_of_date: 604800 /** 1 week **/,
