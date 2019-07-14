@@ -7,13 +7,13 @@ const CommentModel = require("./models/commentModel");
 const DesignModel = require("./models/designModel");
 const TaskModel = require("./models/taskModel");
 const TrashModel = require("./models/trashModel");
-
+const mode = "remote";
 const sequelize = new Sequelize(
-  config.dbName,
-  config.userName,
-  config.userPassword,
+  config[mode].dbName,
+  config[mode].userName,
+  config[mode].userPassword,
   {
-    host: config.host,
+    host: config[mode].host,
     dialect: "mysql",
     pool: {
       max: 10,
