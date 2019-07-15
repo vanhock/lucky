@@ -72,7 +72,7 @@ Trash.belongsToMany(Project, { through: "projects_trash" });
 Trash.belongsToMany(Task, { through: "tasks_trash" });
 Trash.belongsToMany(Comment, { through: "comments_trash" });
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: false }).then(() => {
   console.log(`Database & tables created!`);
 });
 
