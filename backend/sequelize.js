@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const config = require("./config/db");
 const Sequelize = require("sequelize");
 const UserModel = require("./models/userModel");
@@ -72,7 +72,7 @@ Trash.belongsToMany(Project, { through: "projects_trash" });
 Trash.belongsToMany(Task, { through: "tasks_trash" });
 Trash.belongsToMany(Comment, { through: "comments_trash" });
 
-sequelize.sync({ force: false }).then(() => {
+sequelize.sync({ force: true }).then(() => {
   console.log(`Database & tables created!`);
 });
 

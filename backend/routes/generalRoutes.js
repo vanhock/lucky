@@ -32,19 +32,10 @@ module.exports = function(app) {
     )
   );
 
-  app.use(express.static("app"));
   app.use(express.static("public"));
-  const staticFileMiddleware = express.static(path.join(__dirname));
-
-  app.use(staticFileMiddleware);
-  //app.use(history());
-  app.use(
-    history({
-      index: path.resolve(__dirname, "../app/index.html"),
-      verbose: true
-    })
-  );
-  app.use(staticFileMiddleware);
+  app.use(express.static("app"));
+  app.use(history({ verbose: true }));
+  app.use(express.static("app"));
   app.get("/projects/*", (req, res) => {
     res.sendFile(req.url);
   });
