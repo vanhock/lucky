@@ -1,9 +1,8 @@
 const errorHandlerMiddleware = require("express-json-errors");
 const formidableMiddleware = require("express-formidable");
 const express = require("express");
-const path = require("path");
 const config = require("../config/config");
-const history = require("connect-history-api-fallback");
+const fallback = require("express-history-api-fallback");
 
 module.exports = function(app) {
   app.use(errorHandlerMiddleware());
@@ -32,12 +31,8 @@ module.exports = function(app) {
 
   app.use(express.static("app"));
   app.use(express.static("public"));
-  app.use(
-    history({
-      index: path.resolve(__dirname, "../app/index.html"),
-      verbose: true
-    })
-  );
+
+  app.use(fallback("index.html", { root: "app" }));
   app.get("/projects/*", (req, res) => {
     res.sendFile(req.url);
   });
