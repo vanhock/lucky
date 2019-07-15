@@ -205,7 +205,7 @@ module.exports = function(app) {
           "createdAt",
           [
             sequelize.literal(
-              "(SELECT COUNT(*) FROM Pages WHERE Pages.projectId = Project.id AND Pages.trashId IS NULL)"
+              "(SELECT COUNT(*) FROM pages WHERE pages.projectId = project.id AND pages.trashId IS NULL)"
             ),
             "pagesCount"
           ]
