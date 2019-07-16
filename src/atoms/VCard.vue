@@ -8,7 +8,7 @@
           :style="{ backgroundImage: `url(${image})` }"
           :alt="name"
         ></div>
-        <div class="v-card-badge" v-if="badge">{{badge}}</div>
+        <div class="v-card-badge" v-if="badge">{{ badge }}</div>
       </div>
       <div class="v-card-text-container" @click="onclick">
         <div class="name">{{ name }}</div>
@@ -16,7 +16,7 @@
         <div class="caption">{{ caption }}</div>
       </div>
     </div>
-    <div class="v-card-menu" v-if="showMenu">
+    <div class="v-card-menu" v-if="showMenu" :class="menuPosition">
       <panel-control v-if="!selectingMode" dropdown>
         <v-toggle icon="navigation-more" :params="{ iconSize: '25px' }" />
         <template v-slot:dropdown>
@@ -25,7 +25,9 @@
       </panel-control>
     </div>
 
-    <div class="v-card-actions"><slot></slot></div>
+    <div class="v-card-actions" :class="{ 'with-menu': showMenu }">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -50,7 +52,11 @@ export default {
     text: String,
     badge: String,
     selectingMode: Boolean,
-    showMenu: Boolean
+    showMenu: Boolean,
+    menuPosition: {
+      type: String,
+      default: "top"
+    }
   },
   methods: {
     onclick(e) {
@@ -171,14 +177,34 @@ export default {
   &-menu {
     position: absolute;
     right: 0;
-    top: 0;
+    &.top {
+      top: 0;
+      .panel-control {
+        .panel-control-content > .v-toggle {
+          top: 0;
+        }
+        .dropdown {
+          position: absolute;
+        }
+      }
+    }
+    &.bottom {
+      bottom: 0;
+      .panel-control {
+        .panel-control-content > .v-toggle {
+          bottom: 0;
+        }
+        .dropdown {
+          position: relative;
+        }
+      }
+    }
     .panel-control {
       .panel-control-content {
         & > .v-toggle {
           position: absolute;
           display: flex;
           z-index: 12;
-          top: 0;
           right: 0;
           padding: 5px;
           height: 34px;
@@ -190,7 +216,6 @@ export default {
         }
       }
       .dropdown {
-        position: absolute;
         z-index: 11;
         left: auto;
         right: 0;
@@ -227,6 +252,9 @@ export default {
     display: flex;
     margin-top: auto;
     margin-left: auto;
+    &.with-menu {
+      right: 40px;
+    }
 
     & > * {
       cursor: pointer;

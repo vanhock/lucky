@@ -38,7 +38,22 @@ export default {
   methods: {
     normalizeDate(date) {
       return normalizeDate(date);
-    }
+    },
+    handleTaskSelected() {
+      this.$nextTick(() => {
+        let hasSelected = false;
+        this.$children.some(child => {
+          if (child.$children.length && child.$children[0].selected) {
+            return (hasSelected = true);
+          }
+        });
+        this.tasksSelected = hasSelected;
+      });
+    },
+    setSelected(index) {
+      this.$children[index + 1].$children[0].selected = true;
+      this.tasksSelected = true;
+    },
   }
 };
 </script>
