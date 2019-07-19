@@ -13,6 +13,7 @@
       :validation-message="validationMessage"
       :disabled="disabled"
       :theme="theme"
+      autofocus
       @onchange="onchange"
     />
     <v-button-inline
@@ -21,6 +22,7 @@
       @click="onclick"
     >
       <v-icon
+        v-if="!noIcon"
         mode="feather"
         :icon="buttonIcon"
         :params="{ iconSize: '28px' }"
@@ -66,6 +68,7 @@ export default {
       type: String,
       default: "arrow-right-circle"
     },
+    noIcon: Boolean,
     tagsMode: Boolean
   },
   methods: {

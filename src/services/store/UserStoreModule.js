@@ -84,7 +84,7 @@ export default {
         resolve();
       });
     },
-    AUTH_CHECK_AUTH({ commit }, payload) {
+    USER_CHECK_AUTH({ commit }, payload) {
       console.log("auth check init");
       return new Promise((resolve, reject) => {
         AuthByToken(payload, (error, user) => {

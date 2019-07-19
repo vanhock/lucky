@@ -36,11 +36,16 @@
           :label="$t('Project name')"
           required
         />
-        <invite-to-project v-if="selectedModal === 'invite'" />
+        <invite-to-project
+          v-if="selectedModal === 'invite'"
+          :project="dataForOperations"
+        />
       </form-group>
-      <v-button-primary @click="currentAction">{{
-        currentModalButtonName
-      }}</v-button-primary>
+      <v-button-primary
+        v-if="selectedModal !== 'invite'"
+        @click="currentAction"
+        >{{ currentModalButtonName }}</v-button-primary
+      >
     </v-modal>
   </div>
 </template>
@@ -130,9 +135,8 @@ export default {
           buttonName: this.$t("save")
         },
         invite: {
-          title: this.$t("Invite to Project"),
-          action: "inviteToProject",
-          buttonName: this.$t("Invite")
+          title: this.$t("Project members"),
+          action: "inviteToProject"
         }
       };
     },
