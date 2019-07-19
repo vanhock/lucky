@@ -16,7 +16,7 @@ import SideBar from "../organisms/SideBar";
 import { mapGetters } from "vuex";
 import Breadcrumbs from "../molecules/Breadcrumbs";
 import {
-  AUTH_CHECK_AUTH,
+  USER_CHECK_AUTH,
   PROJECT_GET_PROJECTS
 } from "../services/store/mutation-types";
 export default {
@@ -39,7 +39,7 @@ export default {
       });
     },
     getUser: async function() {
-      await this.$store.dispatch(AUTH_CHECK_AUTH);
+      await this.$store.dispatch(USER_CHECK_AUTH);
     },
     fillMenu() {
       this.menu = [

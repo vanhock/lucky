@@ -30,8 +30,8 @@ import TopPanel from "../organisms/TopPanel";
 import WebsiteInspector from "../organisms/inspectors/WebsiteInspector";
 import DesignInspector from "../organisms/inspectors/DesignInspector";
 import {
-  AUTH_CHECK_AUTH,
-  AUTH_LOGOUT,
+  USER_CHECK_AUTH,
+  USER_LOGOUT,
   PAGE_CREATE_PAGE,
   PAGE_EDIT_PAGE,
   PAGE_GET_PAGE,
@@ -88,7 +88,7 @@ export default {
           });
           break;
         case "resetAuth":
-          this.$store.dispatch(AUTH_LOGOUT);
+          this.$store.dispatch(USER_LOGOUT);
           break;
       }
     });
@@ -124,7 +124,7 @@ export default {
   methods: {
     initView(token) {
       this.$store
-        .dispatch(AUTH_CHECK_AUTH, token)
+        .dispatch(USER_CHECK_AUTH, token)
         .then(() => {
           console.log("Check auth success");
           const permalink =
@@ -179,7 +179,7 @@ export default {
         })
         .catch(message => {
           console.log("Check auth fail: " + message);
-          this.$store.dispatch(AUTH_LOGOUT).then(() => {
+          this.$store.dispatch(USER_LOGOUT).then(() => {
             sessionStorage.removeItem("pp-u-t-s");
             return this.port.postMessage({ resetToken: true });
           });

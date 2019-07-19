@@ -52,8 +52,8 @@ module.exports = function(sequelize, DataTypes) {
           this.token = User.options.classMethods.generateToken();
         }
       },
-      tempPassword: {
-        type: DataTypes.STRING
+      oneTimePassword: {
+        type: DataTypes.BOOLEAN
       },
       status: {
         type: DataTypes.ENUM("new", "confirmed", "active", "disabled"),
@@ -123,8 +123,8 @@ module.exports = function(sequelize, DataTypes) {
                 company: req.company,
                 email: req.email,
                 role: req.role,
-                password: req.password,
-                tempPassword: this.generatePassword()
+                password: req.password || this.generatePassword(),
+                oneTimePassword: !req.password
               }).then(user => {
                 done(null, user);
               });
@@ -166,6 +166,12 @@ module.exports = function(sequelize, DataTypes) {
             }
             const token = User.options.classMethods.generateToken();
             foundUser.update({ token: token });
+            if (foundUser.dataValues.oneTimePassword) {
+              foundUser.update({
+                password: this.generatePassword()
+              });
+              /** Todo: Need to send password on email here **/
+            }
             return done(null, {
               ...foundUser.dataValues
             });

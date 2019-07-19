@@ -46,3 +46,9 @@ export function checkAccessToProject(payload, cb) {
     generalCallback(status, data, cb);
   });
 }
+
+export function inviteToProject(payload, cb) {
+  PixelApi.post("/invite-to-project", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}

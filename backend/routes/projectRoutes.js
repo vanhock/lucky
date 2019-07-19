@@ -317,7 +317,6 @@ module.exports = function(app) {
           if (!projects.length) {
             return res.error("Projects not found");
           }
-          let deletedProjectsCount = 0;
           let projectsCount = projects.length;
           projects.forEach(project => {
             if (

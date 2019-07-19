@@ -13,7 +13,7 @@
       :validation-message="validationMessage"
       :disabled="disabled"
       :theme="theme"
-      @onchange="$emit('onchange')"
+      @onchange="onchange"
     />
     <v-button-inline
       class="v-input-search-submit"
@@ -22,7 +22,7 @@
     >
       <v-icon
         mode="feather"
-        icon="arrow-right-circle"
+        :icon="buttonIcon"
         :params="{ iconSize: '28px' }"
       />
       <span>{{ buttonText }}</span>
@@ -30,6 +30,7 @@
     <div class="v-input-select" v-if="showSelect">
       <slot></slot>
     </div>
+    <div class="v-input-tags" v-if="tagsMode && tags"></div>
   </div>
 </template>
 
@@ -44,14 +45,15 @@ export default {
     const self = this;
     this.$refs.input.$on("onchange", data => {
       self.currentValue = data.value;
-      self.isValid = data.valid;
+      self.isValid = !self.tagsMode ? data.valid : self.tags.length;
       self.$emit("onchange", data);
     });
   },
   data: () => ({
     showSelect: false,
     currentValue: "",
-    isValid: false
+    isValid: false,
+    tags: []
   }),
   extends: VInput,
   props: {
@@ -59,11 +61,24 @@ export default {
       type: Array,
       default: () => []
     },
-    buttonText: String
+    buttonText: String,
+    buttonIcon: {
+      type: String,
+      default: "arrow-right-circle"
+    },
+    tagsMode: Boolean
   },
   methods: {
     onclick() {
       this.$emit("onclick");
+    },
+    onchange(value, valid, event) {
+      console.log(event);
+      this.$emit("onchange");
+    },
+    clearTags() {
+      this.tags = [];
+      this.$refs.input.clearValue();
     }
   }
 };

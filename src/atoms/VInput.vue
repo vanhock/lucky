@@ -16,7 +16,7 @@
         v-bind="$listeners"
         v-model="inputValue"
         :class="{ valid: changed && valid, invalid: changed && !valid }"
-        @keyup="onChange"
+        @keyup="onChange($event)"
         @past="onChange"
         @focus="onFocus"
         @blur="onBlur"
@@ -57,8 +57,12 @@ export default {
     theme: String
   },
   methods: {
-    onChange: _.debounce(function() {
-      this.$emit("onchange", { value: this.inputValue, valid: this.valid });
+    onChange: _.debounce(function(event = null) {
+      this.$emit("onchange", {
+        value: this.inputValue,
+        valid: this.valid,
+        event: event
+      });
     }, 300),
     onFocus() {
       this.focus = true;

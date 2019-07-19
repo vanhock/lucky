@@ -64,6 +64,34 @@ module.exports = function(app) {
     );
   });
 
+  app.get("/check-user-exist", (req, res) => {
+    if (!req.fields.email) {
+      return res.error("Email did not provide!");
+    }
+    User.findOne({
+      where: {
+        email: req.fields.email
+      }
+    })
+      .then(user => {
+        if (!user) {
+          return res
+            .status(200)
+            .send(JSON.stringify({ message: "User not found" }));
+        }
+        if (user.dataValues.oneTimePassword) {
+          return res.status(200).send(
+            JSON.stringify({
+              message: "Password sent on your email!",
+              oneTimePassword: true
+            })
+          );
+        }
+        return res.status(200);
+      })
+      .catch(error => res.error(error));
+  });
+
   app.post("/change-user-info", (req, res) => {
     if (!Object.keys(req.fields).length) {
       return res.error("Fields are empty!");

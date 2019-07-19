@@ -14,6 +14,7 @@
         :text="`Pages: ${project.pagesCount || 0}`"
         @delete="$emit('delete', project)"
         @edit="$emit('edit', project)"
+        @invite="$emit('invite', project)"
         @click="$router.push(`/i/p/${project.permalink}/`)"
       />
     </card-general-list>

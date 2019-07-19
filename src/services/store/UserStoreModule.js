@@ -1,15 +1,16 @@
 import {
-  AUTH_REQUEST,
-  AUTH_SUCCESS,
-  AUTH_ERROR,
-  AUTH_LOGOUT,
-  AUTH_CHECK_AUTH
+  USER_LOGIN,
+  USER_AUTH_SUCCESS,
+  USER_AUTH_ERROR,
+  USER_LOGOUT,
+  USER_CHECK_AUTH,
+  USER_REGISTER
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
-  AuthAsClient,
   AuthByToken,
   Authorization,
+  Registration,
   SetAuthToken
 } from "../api/UserApi";
 export default {
@@ -25,33 +26,33 @@ export default {
     userName: state => state.user && state.user.name
   },
   mutations: {
-    [AUTH_REQUEST]: state => {
+    [USER_LOGIN]: state => {
       state.status = "loading";
     },
-    [AUTH_SUCCESS]: (state, user) => {
+    [USER_AUTH_SUCCESS]: (state, user) => {
       state.status = "success";
       state.user = user;
       state.userToken = user.token;
     },
-    [AUTH_ERROR]: state => {
+    [USER_AUTH_ERROR]: state => {
       state.status = "error";
     },
-    [AUTH_LOGOUT]: state => {
+    [USER_LOGOUT]: state => {
       state.user = {};
       state.userToken = null;
     },
-    [AUTH_CHECK_AUTH]: (state, payload = null) => {
+    [USER_CHECK_AUTH]: (state, payload = null) => {
       state.user = payload;
       state.userToken = payload.token;
     }
   },
   actions: {
-    [AUTH_REQUEST]: ({ commit }, payload) => {
+    [USER_LOGIN]: ({ commit }, payload) => {
       return new Promise((resolve, reject) => {
-        commit(AUTH_REQUEST);
+        commit(USER_LOGIN);
         Authorization(payload, (error, user) => {
           if (error) {
-            commit(AUTH_ERROR, error);
+            commit(USER_AUTH_ERROR, error);
             localStorage.removeItem("pp-u-t-s");
             return reject(error);
           }
@@ -59,15 +60,25 @@ export default {
           PixelApi.setToken(user.token, () => {
             SetAuthToken(user.token);
             window.postMessage({ authorized: true }, location.href);
-            commit(AUTH_SUCCESS, user);
+            commit(USER_AUTH_SUCCESS, user);
             resolve(user);
           });
         });
       });
     },
-    [AUTH_LOGOUT]: ({ commit }) => {
+    [USER_REGISTER]: (undefined, payload) => {
+      return new Promise((resolve, reject) => {
+        Registration(payload, (error, success) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(success);
+        });
+      });
+    },
+    [USER_LOGOUT]: ({ commit }) => {
       return new Promise(resolve => {
-        commit(AUTH_LOGOUT);
+        commit(USER_LOGOUT);
         localStorage.removeItem("pp-u-t-s");
         SetAuthToken("");
         resolve();
@@ -78,13 +89,13 @@ export default {
       return new Promise((resolve, reject) => {
         AuthByToken(payload, (error, user) => {
           if (error || !user) {
-            commit(AUTH_CHECK_AUTH);
+            commit(USER_CHECK_AUTH);
             SetAuthToken("");
             localStorage.removeItem("pp-u-t-s");
             postMessage({ resetToken: true });
             return reject(error);
           }
-          commit(AUTH_CHECK_AUTH, user);
+          commit(USER_CHECK_AUTH, user);
           resolve(user);
         });
       });

@@ -2,6 +2,7 @@
   <div
     class="empty-placeholder"
     :class="[{ transparent: transparent }, alignment]"
+    :style="{ minHeight: minHeight }"
   >
     <div class="image" v-if="icon">
       <v-icon :icon="icon" :params="{ iconSize: iconSize }" />
@@ -34,7 +35,8 @@ export default {
       type: String,
       default: "center"
     },
-    transparent: Boolean
+    transparent: Boolean,
+    minHeight: String
   }
 };
 </script>

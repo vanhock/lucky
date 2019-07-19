@@ -10,6 +10,7 @@
         :sort="sort"
         @delete="deleteProject($event)"
         @edit="openModal('edit', $event)"
+        @invite="openModal('invite', $event)"
         @filtersChange="getAllProjects($event)"
       />
     </template>
@@ -28,12 +29,14 @@
     >
       <form-group ref="operationalForm">
         <v-input-clear
+          v-if="selectedModal !== 'invite'"
           id="projectName"
           name="name"
           :value="selectedName"
           :label="$t('Project name')"
           required
         />
+        <invite-to-project v-if="selectedModal === 'invite'" />
       </form-group>
       <v-button-primary @click="currentAction">{{
         currentModalButtonName
@@ -74,6 +77,7 @@ import { notification } from "../services/notification";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import ModalMixin from "../mixins/ModalMixin.js";
 import WebsiteSelector from "../organisms/WebsiteSelector";
+import InviteToProject from "../organisms/InviteToProject";
 
 export default {
   name: "ProjectsView",
@@ -82,6 +86,7 @@ export default {
   },
   mixins: [ModalMixin],
   components: {
+    InviteToProject,
     WebsiteSelector,
     EmptyPlaceholder,
     VInputClear,
@@ -123,6 +128,11 @@ export default {
           title: this.$t("editProject"),
           action: "editProject",
           buttonName: this.$t("save")
+        },
+        invite: {
+          title: this.$t("Invite to Project"),
+          action: "inviteToProject",
+          buttonName: this.$t("Invite")
         }
       };
     },
@@ -199,11 +209,13 @@ export default {
         })
         .then(error => notification(this, "error", error));
     },
-    updateProject(project) {
-      downloadProjectResources(
-        { folder: project.permalink, url: project.url },
-        () => {}
-      );
+    inviteToProject(project) {
+      if (!project || !this.$refs.operationalForm.itemsCount) {
+        return;
+      }
+      this.$refs.operationalForm.emails.forEach(email => {
+        this.$store.dispatch();
+      });
     }
   }
 };

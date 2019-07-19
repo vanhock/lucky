@@ -29,7 +29,7 @@ import _ from "lodash";
 import VInputBordered from "../../molecules/VInput/VInputBordered";
 import FormGroup from "../../molecules/FormGroup";
 import { UserLoginError, UserLoginSuccess } from "../../services/notification";
-import { AUTH_REQUEST } from "../../services/store/mutation-types";
+import { USER_LOGIN } from "../../services/store/mutation-types";
 import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
 
 export default {
@@ -52,7 +52,7 @@ export default {
       }
       this.loading = true;
       this.$store
-        .dispatch(AUTH_REQUEST, fields)
+        .dispatch(USER_LOGIN, fields)
         .then(user => {
           this.$emit("success", user);
           this.loading = false;

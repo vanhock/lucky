@@ -1,11 +1,7 @@
 <template>
-  <div class="sign-up" @keydown.enter="registration">
+  <div class="sign-up">
     <form-group ref="form" :loading="loading">
-      <v-input-bordered
-        name="name"
-        :label="$t('name')"
-        required
-      />
+      <v-input-bordered name="name" :label="$t('name')" required />
       <v-input-bordered
         name="email"
         :label="$t('email')"
@@ -31,12 +27,12 @@
 import _ from "lodash";
 import VInputBordered from "../../molecules/VInput/VInputBordered";
 import FormGroup from "../../molecules/FormGroup";
-import { Registration } from "../../services/api/UserApi";
 import {
   UserRegistrationError,
   UserRegistrationSuccess
 } from "../../services/notification";
 import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
+import { USER_REGISTER } from "../../services/store/mutation-types";
 
 export default {
   name: "SignUp",
@@ -56,14 +52,19 @@ export default {
         return UserRegistrationError(this, "Form not valid!");
       }
       this.loading = true;
-      Registration(fields, (error, success) => {
-        this.loading = false;
-        if (error) {
-          return UserRegistrationError(this, error);
-        }
-        this.$router.push("/sign-in");
-        UserRegistrationSuccess(this, success.message);
-      });
+      this.$store
+        .dispatch(USER_REGISTER, fields)
+        .then(success => {
+          UserRegistrationSuccess(this, success.message);
+          this.loading = false;
+          this.$router.push("/sign-in");
+        })
+        .catch(error => {
+          this.loading = false;
+          if (error) {
+            return UserRegistrationError(this, error);
+          }
+        });
     }, 300)
   }
 };

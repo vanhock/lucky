@@ -53,6 +53,9 @@ export default {
         this.changedItemsArray.length ===
         this.changedItemsArray.filter(item => item.valid).length
       );
+    },
+    itemsCount() {
+      return this.allItems && Object.keys(this.allItems).length;
     }
   },
   methods: {

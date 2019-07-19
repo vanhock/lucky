@@ -6,17 +6,18 @@ import {
   PROJECT_GET_PROJECTS,
   PROJECT_MOVE_TO_TRASH,
   PROJECT_SET_SCREENSHOT,
-  PROJECT_CHECK_ACCESS
+  PROJECT_CHECK_ACCESS,
+  PROJECT_INVITE_TO_PROJECT
 } from "./mutation-types";
 import {
   createProject,
-  downloadProjectResources,
   editProject,
   getAllProjects,
   getProject,
   moveProjectToTrash,
   checkAccessToProject,
-  projectSetScreenshot
+  projectSetScreenshot,
+  inviteToProject
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -156,6 +157,16 @@ export default {
             return reject(error);
           }
           resolve(project);
+        });
+      });
+    },
+    [PROJECT_INVITE_TO_PROJECT](undefined, payload) {
+      return new Promise((resolve, reject) => {
+        inviteToProject(payload, (error, success) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(success);
         });
       });
     }

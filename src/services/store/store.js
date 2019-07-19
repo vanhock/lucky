@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import AuthStoreModule from "./AuthStoreModule";
+import UserStoreModule from "./UserStoreModule";
 import InspectorsStoreModule from "./InspectorsStoreModule";
 import ProjectsStoreModule from "./ProjectsStoreModule";
 import TrashStoreModule from "./TrashStoreModule";
@@ -18,7 +18,7 @@ export default new Vuex.Store({
   },
   modules: {
     extension: ExtensionStoreModule,
-    auth: AuthStoreModule,
+    user: UserStoreModule,
     inspectors: InspectorsStoreModule,
     projects: ProjectsStoreModule,
     pages: PagesStoreModule,
