@@ -14,17 +14,17 @@
     </div>
     <div class="invite-to-project-title">{{ $t("Invite to Project") }}</div>
     <v-input-search
-      name="invite"
+      name="email"
       class="invite-by-email"
       ref="emailField"
+      required
       :placeholder="$t('Enter email for invite')"
-      @onclick="inviteUser"
     ></v-input-search>
 
     <div class="users-in-project">
       <card-table-list
         v-if="projectUsers.length"
-        :title="$t('Users in project')"
+        :title="$t('Members of this Project:')"
       >
         <v-card-table
           v-for="user in projectUsers"
@@ -41,6 +41,16 @@
               :disabled="user.role === 'owner'"
             />
           </div>
+
+          <v-toggle
+            class="revoke-access"
+            :disabled="user.role === 'owner'"
+            mode="feather"
+            icon="x-circle"
+            :text="$t('Revoke access')"
+            hide-text
+            :params="{ iconSize: '18px', stroke: '#333' }"
+          />
         </v-card-table>
       </card-table-list>
       <empty-placeholder
@@ -70,10 +80,12 @@ import {
 import VInputClear from "../molecules/VInput/VInputClear";
 import VIcon from "../atoms/VIcon/VIcon";
 import VSelectClear from "../molecules/VSelectClear";
+import VToggle from "../atoms/VToggle";
 
 export default {
   name: "InviteToProject",
   components: {
+    VToggle,
     VSelectClear,
     VIcon,
     VInputClear,
@@ -91,6 +103,12 @@ export default {
 
     config.projectRoles.forEach(role => {
       this.roles.push({ name: this.$t(role), value: role });
+    });
+  },
+  mounted() {
+    const self = this;
+    this.emails.$on("onclick", () => {
+      self.inviteUser();
     });
   },
   props: {
@@ -124,11 +142,15 @@ export default {
   },
   methods: {
     inviteUser() {
-      if (!this.emails || !this.emails.valid) {
+      if (!this.emails || !this.emails.isValid) {
         return notification(this, "error", this.$t("Email not valid"));
       }
       this.$store
-        .dispatch(PROJECT_INVITE_TO_PROJECT, { email: this.emails })
+        .dispatch(PROJECT_INVITE_TO_PROJECT, {
+          email: this.emails.currentValue,
+          id: this.project.id,
+          role: "client"
+        })
         .then(() => {
           this.emails.clearTags();
           return notification(this, "error", this.$t("Invited successfully!"));
@@ -159,7 +181,7 @@ export default {
 .invite-to-project {
   &-title {
     font-weight: bold;
-    margin: 35px 0 10px;
+    margin: 45px 0 10px;
     color: $color-b3;
     font-size: 14px;
   }
@@ -215,6 +237,17 @@ export default {
       height: 50px;
     }
 
+    .card-table-list {
+      .title {
+        text-align: center;
+        color: $color-b3;
+      }
+    }
+
+    .card-table-list-container {
+      margin-top: 15px;
+    }
+
     .v-card-text-container {
       & > * {
         color: $color-b2;
@@ -229,6 +262,12 @@ export default {
       display: flex;
       align-items: center;
       cursor: default;
+    }
+    .revoke-access {
+      opacity: 0.5;
+      &[disabled] {
+        opacity: 0.2;
+      }
     }
   }
 }

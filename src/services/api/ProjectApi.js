@@ -53,6 +53,16 @@ export function inviteToProject(payload, cb) {
   });
 }
 
+export function revokeAccessToProject(payload, cb) {
+  PixelApi.post(
+    "/revoke-access-to-project",
+    { data: payload },
+    (status, data) => {
+      generalCallback(status, data, cb);
+    }
+  );
+}
+
 export function getProjectUsers(payload, cb) {
   PixelApi.get(`/get-project-users?${payload}`, (status, data) => {
     generalCallback(status, data, cb);

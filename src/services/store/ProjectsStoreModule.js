@@ -8,7 +8,8 @@ import {
   PROJECT_SET_SCREENSHOT,
   PROJECT_CHECK_ACCESS,
   PROJECT_INVITE_TO_PROJECT,
-  PROJECT_GET_PROJECT_USERS
+  PROJECT_GET_PROJECT_USERS,
+  PROJECT_REVOKE_USER_ACCESS
 } from "./mutation-types";
 import {
   createProject,
@@ -19,7 +20,8 @@ import {
   checkAccessToProject,
   projectSetScreenshot,
   inviteToProject,
-  getProjectUsers
+  getProjectUsers,
+  revokeAccessToProject
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -74,6 +76,17 @@ export default {
     [PROJECT_GET_PROJECTS](state, payload) {
       state.projects = payload;
     },
+    [PROJECT_REVOKE_USER_ACCESS](state, payload) {
+      state.projects.forEach(project => {
+        if (project.id === payload.id) {
+          project.users.some((user, key) => {
+            if (user.id === payload.userId) {
+              project.users.splice(key, 1);
+            }
+          });
+        }
+      });
+    }
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]({ commit }, payload) {
@@ -180,6 +193,17 @@ export default {
           }
           resolve(users);
           commit(PROJECT_EDIT_PROJECT, { id: payload.id, users: users });
+        });
+      });
+    },
+    [PROJECT_REVOKE_USER_ACCESS]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        revokeAccessToProject(payload, error => {
+          if (error) {
+            return reject(error);
+          }
+          resolve();
+          commit(PROJECT_REVOKE_USER_ACCESS, payload);
         });
       });
     }

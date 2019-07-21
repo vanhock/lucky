@@ -271,33 +271,69 @@ module.exports = function(app) {
           if (error) {
             return res.error(error);
           }
-          const emails = JSON.parse(req.fields.email);
-          const invitedUsers = [];
-          emails.forEach(email => {
-            User.options.classMethods.createNewUser(
-              { email: email },
-              (error, user) => {
-                if (error) {
-                  return res.error(error);
-                }
-                updateProjectUser(
-                  req,
-                  res,
-                  project,
-                  user,
-                  { role: req.fields.role },
-                  () => {
-                    invitedUsers.push(user);
+          const email = req.fields.email;
+          User.findOne({
+            where: {
+              email: email
+            }
+          })
+            .then(foundUser => {
+              addUser(project, foundUser);
+            })
+            .catch(() => {
+              User.options.classMethods.createNewUser(
+                { email: email },
+                (error, foundUser) => {
+                  if (error) {
+                    return res.error(error);
                   }
-                );
-              }
+                  addUser(project, foundUser);
+                }
+              );
+            });
+          function addUser(project, targetUser) {
+            updateProjectUser(
+              req,
+              res,
+              project,
+              targetUser,
+              { role: req.fields.role },
+              () => {}
             );
-          });
-          res.status(200).send(JSON.stringify(invitedUsers));
+          }
+          res.status(200).send({ message: "User invited" });
         }
-      ).catch(error => {
-        res.error(error);
-      });
+      );
+    });
+  });
+
+  app.post("/revoke-access-to-project", (req, res) => {
+    if (!req.fields.id || !req.fields.userId) {
+      return res.error("Required fields didn't provide!");
+    }
+    getUserByToken(req, res, user => {
+      checkProjectAccess(
+        { id: req.fields.id },
+        user,
+        config.rights.edit,
+        (error, project) => {
+          if (error) {
+            return res.error(error);
+          }
+          project
+            .removeUser({
+              where: {
+                id: req.fields.userId
+              }
+            })
+            .then(() => {
+              return req.status(200);
+            })
+            .catch(error => {
+              return res.error(error);
+            });
+        }
+      );
     });
   });
 
