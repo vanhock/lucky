@@ -29,7 +29,6 @@
 </i18n>
 
 <script>
-import { normalizeDate } from "../utils";
 import VCardTable from "../molecules/VCard/VCardTable";
 import CardTableList from "../molecules/CardTableList";
 export default {
@@ -56,11 +55,6 @@ export default {
       default: () => []
     },
     title: String
-  },
-  methods: {
-    normalizeData(date) {
-      return normalizeDate(date);
-    }
   }
 };
 </script>

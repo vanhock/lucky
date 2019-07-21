@@ -16,7 +16,7 @@
           :text="`${$t('Pages')}: 0`"
           :image="imgUrl(project.image)"
           :badge="index === 0 ? $t('Recently used') : null"
-          :caption="normalizeDate(project.updatedAt)"
+          :caption="project.updatedAt | normalizeDate"
           @click="selectProject(project)"
         />
       </card-general-list>
@@ -43,7 +43,6 @@ import {
   PROJECT_CREATE_PROJECT,
   PROJECT_SET_CURRENT_PROJECT
 } from "../services/store/mutation-types";
-import { normalizeDate } from "../utils";
 
 export default {
   name: "CreateOrSelectPage",
@@ -106,9 +105,6 @@ export default {
           nameField.select();
         }, 400);
       });
-    },
-    normalizeDate(date) {
-      return normalizeDate(date);
     },
     closeExtension() {
       this.port.postMessage({ closeExtension: true });

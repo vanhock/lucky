@@ -3,7 +3,7 @@
     <v-card
       :name="name"
       :image="image"
-      :caption="caption"
+      :caption="caption | normalizeDate"
       :badge="badge"
       :text="text"
       @click="$emit('click')"

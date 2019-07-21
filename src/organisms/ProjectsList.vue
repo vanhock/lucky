@@ -10,7 +10,7 @@
         :key="project.id"
         :name="project.name"
         :image="project.image"
-        :caption="normalizeDate(project.updatedAt)"
+        :caption="project.updatedAt"
         :text="`Pages: ${project.pagesCount || 0}`"
         @delete="$emit('delete', project)"
         @edit="$emit('edit', project)"
@@ -24,7 +24,6 @@
 <script>
 import CardGeneralList from "../molecules/CardGeneralList";
 import VCardGeneral from "../molecules/VCard/VCardGeneral";
-import { normalizeDate } from "../utils";
 export default {
   name: "ProjectsList",
   components: { VCardGeneral, CardGeneralList },
@@ -37,9 +36,6 @@ export default {
     sort: Array
   },
   methods: {
-    normalizeDate(date) {
-      return normalizeDate(date);
-    },
     handleTaskSelected() {
       this.$nextTick(() => {
         let hasSelected = false;
@@ -54,7 +50,7 @@ export default {
     setSelected(index) {
       this.$children[index + 1].$children[0].selected = true;
       this.tasksSelected = true;
-    },
+    }
   }
 };
 </script>

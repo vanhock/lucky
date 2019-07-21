@@ -301,6 +301,37 @@ module.exports = function(app) {
     });
   });
 
+  app.get("/get-project-users", (req, res) => {
+    if (!req.query.id) {
+      return res.error("Id did not provide!");
+    }
+    getUserByToken(req, res, user => {
+      Project.findOne({
+        where: { id: req.query.id }
+      })
+        .then(project => {
+          project.getUsers().then(users => {
+            if (!users.length) {
+              return res.error("Users not found");
+            }
+            const result = users.map(user => ({
+              id: user.dataValues.id,
+              email: user.dataValues.email,
+              name: user.dataValues.name,
+              company: user.dataValues.company,
+              role: user.user_project.dataValues.role,
+              invitedAt: user.user_project.dataValues.createdAt,
+              updatedAt: user.user_project.dataValues.updatedAt
+            }));
+            return res.status(200).send(JSON.stringify(result));
+          });
+        })
+        .catch(() => {
+          res.error("Project not found");
+        });
+    });
+  });
+
   app.post("/delete-project", (req, res) => {
     if (!req.fields.id) {
       return res.error("Id did not provide!");

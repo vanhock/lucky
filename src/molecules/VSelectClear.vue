@@ -5,6 +5,7 @@
       :name="name"
       :label="label"
       :options="options"
+      :disabled="disabled"
       @change="$emit('change', $event)"
     />
   </div>

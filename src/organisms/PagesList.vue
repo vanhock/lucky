@@ -5,7 +5,7 @@
         v-for="page in pages"
         :key="page.id"
         :name="page.name"
-        :caption="normalizeData(page.updatedAt)"
+        :caption="page.updatedAt"
         :text="`Tasks: ${page.tasks || 0}`"
         @delete="$emit('delete', page)"
         @edit="$emit('edit', page)"
@@ -17,7 +17,7 @@
 <script>
 import CardGeneralList from "../molecules/CardGeneralList";
 import VCardGeneral from "../molecules/VCard/VCardGeneral";
-import { normalizeDate } from "../utils";
+
 export default {
   name: "PagesList",
   components: { VCardGeneral, CardGeneralList },
@@ -27,11 +27,6 @@ export default {
       default: () => []
     },
     title: String
-  },
-  methods: {
-    normalizeData(date) {
-      return normalizeDate(date);
-    }
   }
 };
 </script>

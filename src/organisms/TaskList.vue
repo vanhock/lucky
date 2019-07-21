@@ -7,7 +7,7 @@
         :key="task.id"
         :name="task.name"
         :text="task.text"
-        :caption="normalizeDate(task.updatedAt)"
+        :caption="task.updatedAt | normalizeDate"
         :selecting-mode="tasksSelected"
         @select="handleTaskSelected"
         show-menu
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { normalizeDate, scrollTo } from "../utils";
+import { scrollTo } from "../utils";
 import { mapGetters } from "vuex";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import VCardClear from "../molecules/VCard/VCardClear";
@@ -154,9 +154,6 @@ export default {
       } else {
         this.noScroll = false;
       }
-    },
-    normalizeDate(date) {
-      return normalizeDate(date);
     },
     handleTaskSelected() {
       this.$nextTick(() => {

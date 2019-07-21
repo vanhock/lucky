@@ -3,11 +3,11 @@
     <div class="label" v-if="label">
       <label :for="`select-${name}`">{{ label }}</label>
     </div>
-    <div class="value">
-      <div class="selected">{{ selected.name }}</div>
+    <div class="value" :class="{ disabled: disabled }">
+      <div class="selected">{{ selectedItem.name }}</div>
       <select
-        @change="$emit('change', { [name]: selected.value })"
-        v-model="selected"
+        @change="$emit('change', { [name]: selectedItem.value })"
+        v-model="selectedItem"
         :id="id || `select-${name}`"
         :ref="`select-${name}`"
         :disabled="disabled"
@@ -17,7 +17,7 @@
           :key="index"
           :value="option"
           :data-index="index"
-          :selected="index === 0"
+          :class="{ 'selected-option': option.value === selectedItem.value }"
         >
           {{ option.name }}</option
         >
@@ -30,10 +30,16 @@
 export default {
   name: "VSelect",
   created() {
-    this.selected = this.options && this.options[0];
+    const self = this;
+    this.selectedItem =
+      (this.options &&
+        this.options.length &&
+        (this.options.filter(item => item.value === self.value)[0] ||
+          this.options[0])) ||
+      {};
   },
   data: () => ({
-    selected: ""
+    selectedItem: ""
   }),
   props: {
     name: {
@@ -68,20 +74,29 @@ export default {
   .value {
     position: relative;
     padding-right: 10px;
-    cursor: pointer;
-    &:after {
-      content: "";
-      position: absolute;
-      width: 0;
-      height: 0;
-      right: 0;
-      @include valign();
-      border-left: 4px solid transparent;
-      border-right: 4px solid transparent;
-      border-top: 4px solid $color-b2;
+    &:not(.disabled) {
+      cursor: pointer;
+      &:after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        right: 0;
+        @include valign();
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid $color-b2;
+      }
     }
+    &.disabled {
+      pointer-events: none;
+    }
+
     .selected {
       visibility: hidden;
+    }
+    .selected-option {
+      display: none;
     }
     select {
       position: absolute;

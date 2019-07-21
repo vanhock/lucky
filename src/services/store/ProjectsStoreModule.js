@@ -7,7 +7,8 @@ import {
   PROJECT_MOVE_TO_TRASH,
   PROJECT_SET_SCREENSHOT,
   PROJECT_CHECK_ACCESS,
-  PROJECT_INVITE_TO_PROJECT
+  PROJECT_INVITE_TO_PROJECT,
+  PROJECT_GET_PROJECT_USERS
 } from "./mutation-types";
 import {
   createProject,
@@ -17,7 +18,8 @@ import {
   moveProjectToTrash,
   checkAccessToProject,
   projectSetScreenshot,
-  inviteToProject
+  inviteToProject,
+  getProjectUsers
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -71,7 +73,7 @@ export default {
     },
     [PROJECT_GET_PROJECTS](state, payload) {
       state.projects = payload;
-    }
+    },
   },
   actions: {
     [PROJECT_SET_CURRENT_PROJECT]({ commit }, payload) {
@@ -167,6 +169,17 @@ export default {
             return reject(error);
           }
           resolve(success);
+        });
+      });
+    },
+    [PROJECT_GET_PROJECT_USERS]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        getProjectUsers(serializeObject(payload), (error, users) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(users);
+          commit(PROJECT_EDIT_PROJECT, { id: payload.id, users: users });
         });
       });
     }

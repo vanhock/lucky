@@ -6,10 +6,22 @@
 
 <script>
 import Vue from "vue";
+import { normalizeDate } from "./utils";
 import moment from "moment";
 import VueMoment from "vue-moment";
-Vue.use(VueMoment);
 import "vuejs-noty/dist/vuejs-noty.css";
+
+Vue.use(VueMoment);
+Vue.filter("truncate", (value, length) => {
+  return value && value.length > length
+    ? `${value.substring(0, length)}...`
+    : value;
+});
+
+Vue.filter("normalizeDate", value => {
+  return normalizeDate(value);
+});
+
 export default {
   created() {
     moment.locale(this.$i18n.locale);

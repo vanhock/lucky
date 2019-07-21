@@ -52,3 +52,9 @@ export function inviteToProject(payload, cb) {
     generalCallback(status, data, cb);
   });
 }
+
+export function getProjectUsers(payload, cb) {
+  PixelApi.get(`/get-project-users?${payload}`, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}

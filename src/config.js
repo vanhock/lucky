@@ -5,5 +5,6 @@ export default {
   projectsFolderUrl: `${process.env.VUE_APP_API_URL}/projects`,
   authUrl: "/sign-in?redirect=disabled",
   extensionId: "pniajcifdcfkbcigpipdidnhhjbliglh",
-  iconSizes: [16, 19, 38, 48, 128]
+  iconSizes: [16, 19, 38, 48, 128],
+  projectRoles: ["owner", "admin", "collaborator", "client"]
 };

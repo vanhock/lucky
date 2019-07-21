@@ -27,12 +27,24 @@
         :title="$t('Users in project')"
       >
         <v-card-table
-          :name="projectUsers.name"
-          :caption="projectUsers.invitedAt"
-          :text="projectUsers.role"
-        />
+          v-for="user in projectUsers"
+          :key="user.id"
+          :name="`${user.name} ${user.email}`"
+          :caption="user.invitedAt"
+          clear
+        >
+          <div class="role-toggle">
+            <v-select-clear
+              name="role"
+              :options="roles"
+              :value="user.role"
+              :disabled="user.role === 'owner'"
+            />
+          </div>
+        </v-card-table>
       </card-table-list>
       <empty-placeholder
+        v-if="!projectUsers.length"
         :title="$t('Have no users in the Project yet')"
         icon="users"
         icon-size="50px"
@@ -51,19 +63,35 @@ import CardTableList from "../molecules/CardTableList";
 import VCardTable from "../molecules/VCard/VCardTable";
 import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import { notification } from "../services/notification";
-import { PROJECT_INVITE_TO_PROJECT } from "../services/store/mutation-types";
+import {
+  PROJECT_GET_PROJECT_USERS,
+  PROJECT_INVITE_TO_PROJECT
+} from "../services/store/mutation-types";
 import VInputClear from "../molecules/VInput/VInputClear";
 import VIcon from "../atoms/VIcon/VIcon";
+import VSelectClear from "../molecules/VSelectClear";
 
 export default {
   name: "InviteToProject",
   components: {
+    VSelectClear,
     VIcon,
     VInputClear,
     EmptyPlaceholder,
     VCardTable,
     CardTableList,
     VInputSearch
+  },
+  created() {
+    this.$store
+      .dispatch(PROJECT_GET_PROJECT_USERS, { id: this.project.id })
+      .catch(error => {
+        notification(this, "error", error);
+      });
+
+    config.projectRoles.forEach(role => {
+      this.roles.push({ name: this.$t(role), value: role });
+    });
   },
   props: {
     project: {
@@ -73,11 +101,17 @@ export default {
   },
   data: () => ({
     copied: false,
-    copyTimer: 3000
+    copyTimer: 3000,
+    roles: []
   }),
   computed: {
     projectUsers() {
-      return (this.project && this.project.length && this.project.users) || [];
+      return (
+        (this.project &&
+          Object.keys(this.project).length &&
+          this.project.users) ||
+        []
+      );
     },
     emails() {
       return this.$refs.emailField;
@@ -169,6 +203,32 @@ export default {
     font-size: 14px;
     .input {
       font-size: 18px;
+    }
+  }
+  .users-in-project {
+    .v-card-actions {
+      right: 15px;
+    }
+
+    .v-card-image-container,
+    .v-card-text-container {
+      height: 50px;
+    }
+
+    .v-card-text-container {
+      & > * {
+        color: $color-b2;
+      }
+      .name {
+        font-size: 12px;
+        padding: 0;
+        font-weight: 500;
+      }
+    }
+    .role-toggle {
+      display: flex;
+      align-items: center;
+      cursor: default;
     }
   }
 }

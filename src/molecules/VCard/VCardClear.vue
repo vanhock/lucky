@@ -3,7 +3,7 @@
     class="v-card-clear"
     :name="name"
     :image="image"
-    :caption="caption"
+    :caption="caption | normalizeDate"
     :badge="badge"
     :text="text"
     :selecting-mode="selectingMode"

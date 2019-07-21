@@ -32,13 +32,11 @@
 </template>
 
 <script>
-import Filters from "../mixins/FiltersMixin";
 import VToggle from "./VToggle";
 import PanelControl from "./PanelControl";
 export default {
   name: "VCard",
   components: { PanelControl, VToggle },
-  mixins: [Filters],
   data: () => ({
     selected: false
   }),

@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import "../mixins/FiltersMixin";
 import { mapGetters } from "vuex";
 import {
   simplifyDom,

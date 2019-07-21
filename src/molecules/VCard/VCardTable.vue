@@ -1,8 +1,9 @@
 <template>
   <v-card
     class="v-card-table"
+    :class="{ clear: clear }"
     :name="name"
-    :caption="caption"
+    :caption="caption | normalizeDate"
     :text="text"
     :badge="badge"
   >
@@ -15,6 +16,7 @@
         >{{ action.title }}</v-button-inline
       >
     </template>
+    <slot></slot>
   </v-card>
 </template>
 
@@ -33,7 +35,8 @@ export default {
        */
       type: Array,
       default: () => []
-    }
+    },
+    clear: Boolean
   }
 };
 </script>
@@ -53,6 +56,9 @@ export default {
       margin: 0;
       color: $color-b3;
     }
+    .text {
+      margin: 0;
+    }
   }
   .v-card-content {
     .caption {
@@ -62,6 +68,12 @@ export default {
   .v-card-actions {
     right: 0;
     @include valign();
+  }
+  &.clear {
+    .v-card-content {
+      color: $color-b1;
+      @include box-shadow(normal);
+    }
   }
 }
 </style>
