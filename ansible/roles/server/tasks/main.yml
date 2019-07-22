@@ -1,0 +1,10 @@
+- name: Create web server daemon.
+  template:
+    src=templates/pixel-perfect-web.service.j2
+    dest=/etc/systemd/system/pixel-perfect-web.service
+
+- name: Start web server daemon.
+  systemd:
+    state: started
+    daemon_reload: yes
+    name: pixel-perfect-web

@@ -1,0 +1,13 @@
+---
+- name: Run yarn on project root.
+  yarn:
+    path: '{{ document_root }}/'
+
+- name: Run yarn on backend.
+  yarn:
+    path: '{{ document_root }}/backend'
+
+- name: Build frontend.
+  shell: yarn build
+  args:
+    chdir: '{{ document_root }}'

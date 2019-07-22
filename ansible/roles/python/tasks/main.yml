@@ -1,0 +1,9 @@
+---
+- name: Install pip.
+  apt: name=python-pip state=latest update_cache=true
+
+- name: Install libmysqlclient-dev.
+  apt: name=libmysqlclient-dev state=present update_cache=true
+
+- name: Install the python mysql module.
+  pip: name=MySQL-python

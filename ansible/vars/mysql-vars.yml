@@ -1,0 +1,17 @@
+mysql_host: localhost
+mysql_port: 3306
+
+mysql_db: pixel
+mysql_user: pixel
+mysql_password: pixel
+
+mysql_root_password: "root"
+mysql_databases:
+  - name: "{{ mysql_db }}"
+    encoding: utf8
+    collation: utf8_general_ci
+mysql_users:
+  - name: "{{ mysql_user }}"
+    host: "%"
+    password: "{{ mysql_password }}"
+    priv: "{{ mysql_db }}.*:ALL"
