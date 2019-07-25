@@ -11,16 +11,14 @@
       :required="required"
       :autocomplete="autocomplete"
       :validation-message="validationMessage"
+      :show-validation="showInputValidation"
       :disabled="disabled"
       :theme="theme"
       autofocus
+      validation-show-manual
       @onchange="onchange"
     />
-    <v-button-inline
-      class="v-input-search-submit"
-      :disabled="!isValid"
-      @click="onclick"
-    >
+    <v-button-inline class="v-input-search-submit" @click="onclick">
       <v-icon
         v-if="!noIcon"
         mode="feather"
@@ -54,6 +52,7 @@ export default {
     showSelect: false,
     currentValue: "",
     isValid: false,
+    showInputValidation: false
   }),
   extends: VInput,
   props: {
@@ -70,7 +69,10 @@ export default {
   },
   methods: {
     onclick() {
-      this.$emit("onclick");
+      if (this.isValid) {
+        this.$emit("onclick");
+      }
+      this.showInputValidation = true;
     },
     onchange(value, valid, event) {
       console.log(event);
@@ -78,6 +80,9 @@ export default {
     },
     clear() {
       this.$refs.input.clearValue();
+      this.$nextTick(() => {
+        this.showInputValidation = false;
+      });
     }
   }
 };

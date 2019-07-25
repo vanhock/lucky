@@ -263,6 +263,9 @@ module.exports = function(app) {
     if (!req.fields.id || !req.fields.role || !req.fields.email) {
       return res.error("Required fields didn't provide!");
     }
+    if(req.fields.role === "owner") {
+      return res.error("You can not change owner access to this project! Please, contact with support.");
+    }
     getUserByToken(req, res, user => {
       checkProjectAccess(
         { id: req.fields.id },
@@ -327,23 +330,25 @@ module.exports = function(app) {
           if (error) {
             return res.error(error);
           }
-          project
-            .removeUser({
-              where: {
-                id: req.fields.userId
-              }
-            })
-            .then(() => {
-              getProjectUsers(req.fields.id, (error, users) => {
-                if (error) {
-                  return res.error(error);
-                }
-                return res.status(200).send(users);
+          User.findOne({
+            where: {
+              id: req.fields.userId
+            }
+          }).then(targetUser => {
+            project
+              .removeUser(targetUser)
+              .then(() => {
+                getProjectUsers(req.fields.id, (error, users) => {
+                  if (error) {
+                    return res.error(error);
+                  }
+                  return res.status(200).send(users);
+                });
+              })
+              .catch(error => {
+                return res.error(error);
               });
-            })
-            .catch(error => {
-              return res.error(error);
-            });
+          });
         }
       );
     });

@@ -6,7 +6,7 @@ const emptyProjectStorage = folderName => {
   removeFile(config.upload.projectsFolderFullPath + "/" + folderName);
 };
 
-const getProjectsUsers = (id, cb) => {
+const getProjectUsers = (id, cb) => {
   Project.findOne({
     where: { id: id }
   })
@@ -33,5 +33,5 @@ const getProjectsUsers = (id, cb) => {
 
 module.exports = {
   emptyProjectStorage,
-  getProjectsUsers
+  getProjectUsers
 };

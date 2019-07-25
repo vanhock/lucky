@@ -1,5 +1,12 @@
 export default {
+  props: {
+    validationShowManual: Boolean,
+    showValidation: Boolean, /** Using only if validationShowManual true **/
+  },
   computed: {
+    shouldShowValidation() {
+      return this.validationShowManual ? !this.valid && this.showValidation : !this.valid && this.focused
+    },
     valid() {
       if (!this.required) {
         return true;

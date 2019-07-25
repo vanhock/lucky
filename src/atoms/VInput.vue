@@ -4,7 +4,7 @@
       <label :for="`input-${name}`">{{ label }}</label>
     </div>
     <div class="input">
-      <div class="validation-message" v-if="!valid && focused">
+      <div class="validation-message" v-if="shouldShowValidation">
         {{ validationMessage || $t("required") }}
       </div>
       <input
@@ -44,7 +44,7 @@ export default {
     componentType: "general",
     focus: false,
     focused: false,
-    checkChange: false
+    checkChange: false,
   }),
   computed: {
     ...mapState(["appTheme"]),

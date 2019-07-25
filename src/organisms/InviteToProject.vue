@@ -16,6 +16,7 @@
     <v-input-search
       name="email"
       class="invite-by-email"
+      :validation-message="$t('Type real email')"
       ref="emailField"
       required
       :placeholder="$t('Enter email for invite')"
@@ -48,7 +49,6 @@
             :disabled="user.role === 'owner'"
             mode="feather"
             icon="x-circle"
-            :text="$t('Revoke access')"
             hide-text
             :params="{ iconSize: '18px', stroke: '#333' }"
             @click="revokeUserAccess(user.id)"
@@ -105,7 +105,14 @@ export default {
       });
 
     config.projectRoles.forEach(role => {
-      this.roles.push({ name: this.$t(role), value: role });
+      this.roles.push({
+        name: this.$t(role),
+        value: role,
+        disabled: role === "owner"
+      });
+    });
+    this.roles.sort((x, y) => {
+      return (x.disabled === y.disabled)? 0 : x.disabled? 1 : -1;
     });
   },
   mounted() {
@@ -164,15 +171,15 @@ export default {
           }
         });
     },
-    setUserAccess(userEmail, role) {
-      if (!userEmail || !role) {
+    setUserAccess(userEmail, value) {
+      if (!userEmail || !value) {
         return;
       }
       this.$store
         .dispatch(PROJECT_INVITE_TO_PROJECT, {
           email: userEmail,
           id: this.project.id,
-          role: role
+          role: value.role
         })
         .then(() => {
           return notification(
@@ -278,6 +285,10 @@ export default {
       height: 50px;
     }
 
+    .v-card-content {
+      box-shadow: none;
+    }
+
     .card-table-list {
       .title {
         text-align: center;
@@ -287,6 +298,10 @@ export default {
 
     .card-table-list-container {
       margin-top: 15px;
+      max-height: 200px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      @include scroll();
     }
 
     .v-card-text-container {

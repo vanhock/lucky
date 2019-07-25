@@ -644,6 +644,9 @@ export const simplifyDom = function(dom, currentWindow) {
 };
 
 export const normalizeDate = function(date) {
+  if(!date || typeof date !== "string") {
+    return date
+  }
   if (moment().diff(moment(date), "hours") <= 24) {
     return moment(date).fromNow();
   } else {

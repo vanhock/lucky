@@ -18,6 +18,7 @@
           :value="option"
           :data-index="index"
           :class="{ 'selected-option': option.value === selectedItem.value }"
+          :disabled="option.disabled"
         >
           {{ option.name }}</option
         >
@@ -114,6 +115,12 @@ export default {
       outline: none;
       color: $color-b3;
       cursor: pointer;
+
+      option {
+        &[disabled] {
+          color: $color-b4;
+        }
+      }
     }
   }
 }

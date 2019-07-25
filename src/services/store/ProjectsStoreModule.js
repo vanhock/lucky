@@ -9,7 +9,8 @@ import {
   PROJECT_CHECK_ACCESS,
   PROJECT_INVITE_TO_PROJECT,
   PROJECT_GET_PROJECT_USERS,
-  PROJECT_REVOKE_USER_ACCESS, PROJECT_SET_USER_ACCESS
+  PROJECT_REVOKE_USER_ACCESS,
+  PROJECT_SET_USER_ACCESS
 } from "./mutation-types";
 import {
   createProject,
@@ -164,7 +165,7 @@ export default {
         });
       });
     },
-    [PROJECT_INVITE_TO_PROJECT](undefined, payload) {
+    [PROJECT_INVITE_TO_PROJECT]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         inviteToProject(payload, (error, users) => {
           if (error) {
