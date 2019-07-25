@@ -9,6 +9,7 @@ const {
   extractHostname
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
+const { getProjectUsers } = require("../controllers/projectController");
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
 const isReachable = require("is-reachable");
@@ -278,7 +279,7 @@ module.exports = function(app) {
             }
           })
             .then(foundUser => {
-              addUser(project, foundUser);
+              return addUser(project, foundUser);
             })
             .catch(() => {
               User.options.classMethods.createNewUser(
@@ -287,7 +288,7 @@ module.exports = function(app) {
                   if (error) {
                     return res.error(error);
                   }
-                  addUser(project, foundUser);
+                  return addUser(project, foundUser);
                 }
               );
             });
@@ -298,10 +299,16 @@ module.exports = function(app) {
               project,
               targetUser,
               { role: req.fields.role },
-              () => {}
+              () => {
+                getProjectUsers(req.fields.id, (error, users) => {
+                  if (error) {
+                    return res.error(error);
+                  }
+                  return res.status(200).send(users);
+                });
+              }
             );
           }
-          res.status(200).send({ message: "User invited" });
         }
       );
     });
@@ -327,7 +334,12 @@ module.exports = function(app) {
               }
             })
             .then(() => {
-              return req.status(200);
+              getProjectUsers(req.fields.id, (error, users) => {
+                if (error) {
+                  return res.error(error);
+                }
+                return res.status(200).send(users);
+              });
             })
             .catch(error => {
               return res.error(error);
@@ -341,30 +353,13 @@ module.exports = function(app) {
     if (!req.query.id) {
       return res.error("Id did not provide!");
     }
-    getUserByToken(req, res, user => {
-      Project.findOne({
-        where: { id: req.query.id }
-      })
-        .then(project => {
-          project.getUsers().then(users => {
-            if (!users.length) {
-              return res.error("Users not found");
-            }
-            const result = users.map(user => ({
-              id: user.dataValues.id,
-              email: user.dataValues.email,
-              name: user.dataValues.name,
-              company: user.dataValues.company,
-              role: user.user_project.dataValues.role,
-              invitedAt: user.user_project.dataValues.createdAt,
-              updatedAt: user.user_project.dataValues.updatedAt
-            }));
-            return res.status(200).send(JSON.stringify(result));
-          });
-        })
-        .catch(() => {
-          res.error("Project not found");
-        });
+    getUserByToken(req, res, () => {
+      getProjectUsers(req.query.id, (error, users) => {
+        if (error) {
+          return res.error(error);
+        }
+        res.status(200).send(users);
+      });
     });
   });
 

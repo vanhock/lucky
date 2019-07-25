@@ -71,6 +71,7 @@ function updateProjectUser(req, res, project, user, params = {}, cb) {
   }
 }
 
+
 function checkProjectAccess(
   projectParams = {},
   user,

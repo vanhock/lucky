@@ -9,7 +9,7 @@ import {
   PROJECT_CHECK_ACCESS,
   PROJECT_INVITE_TO_PROJECT,
   PROJECT_GET_PROJECT_USERS,
-  PROJECT_REVOKE_USER_ACCESS
+  PROJECT_REVOKE_USER_ACCESS, PROJECT_SET_USER_ACCESS
 } from "./mutation-types";
 import {
   createProject,
@@ -75,17 +75,6 @@ export default {
     },
     [PROJECT_GET_PROJECTS](state, payload) {
       state.projects = payload;
-    },
-    [PROJECT_REVOKE_USER_ACCESS](state, payload) {
-      state.projects.forEach(project => {
-        if (project.id === payload.id) {
-          project.users.some((user, key) => {
-            if (user.id === payload.userId) {
-              project.users.splice(key, 1);
-            }
-          });
-        }
-      });
     }
   },
   actions: {
@@ -177,11 +166,12 @@ export default {
     },
     [PROJECT_INVITE_TO_PROJECT](undefined, payload) {
       return new Promise((resolve, reject) => {
-        inviteToProject(payload, (error, success) => {
+        inviteToProject(payload, (error, users) => {
           if (error) {
             return reject(error);
           }
-          resolve(success);
+          resolve(users);
+          commit(PROJECT_EDIT_PROJECT, { id: payload.id, users: users });
         });
       });
     },
@@ -198,12 +188,23 @@ export default {
     },
     [PROJECT_REVOKE_USER_ACCESS]({ commit }, payload) {
       return new Promise((resolve, reject) => {
-        revokeAccessToProject(payload, error => {
+        revokeAccessToProject(payload, (error, users) => {
           if (error) {
             return reject(error);
           }
-          resolve();
-          commit(PROJECT_REVOKE_USER_ACCESS, payload);
+          resolve(users);
+          commit(PROJECT_EDIT_PROJECT, { id: payload.id, users: users });
+        });
+      });
+    },
+    [PROJECT_SET_USER_ACCESS]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        inviteToProject(payload, (error, users) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(users);
+          commit(PROJECT_EDIT_PROJECT, { id: payload.id, users: users });
         });
       });
     }

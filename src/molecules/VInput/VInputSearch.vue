@@ -32,7 +32,6 @@
     <div class="v-input-select" v-if="showSelect">
       <slot></slot>
     </div>
-    <div class="v-input-tags" v-if="tagsMode && tags"></div>
   </div>
 </template>
 
@@ -47,7 +46,7 @@ export default {
     const self = this;
     this.$refs.input.$on("onchange", data => {
       self.currentValue = data.value;
-      self.isValid = !self.tagsMode ? data.valid : self.tags.length;
+      self.isValid = data.valid;
       self.$emit("onchange", data);
     });
   },
@@ -55,7 +54,6 @@ export default {
     showSelect: false,
     currentValue: "",
     isValid: false,
-    tags: []
   }),
   extends: VInput,
   props: {
@@ -68,8 +66,7 @@ export default {
       type: String,
       default: "arrow-right-circle"
     },
-    noIcon: Boolean,
-    tagsMode: Boolean
+    noIcon: Boolean
   },
   methods: {
     onclick() {
@@ -79,8 +76,7 @@ export default {
       console.log(event);
       this.$emit("onchange");
     },
-    clearTags() {
-      this.tags = [];
+    clear() {
       this.$refs.input.clearValue();
     }
   }

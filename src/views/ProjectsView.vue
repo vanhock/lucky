@@ -212,14 +212,6 @@ export default {
           );
         })
         .then(error => notification(this, "error", error));
-    },
-    inviteToProject(project) {
-      if (!project || !this.$refs.operationalForm.itemsCount) {
-        return;
-      }
-      this.$refs.operationalForm.emails.forEach(email => {
-        this.$store.dispatch();
-      });
     }
   }
 };

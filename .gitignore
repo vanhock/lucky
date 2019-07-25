@@ -2,8 +2,9 @@
 node_modules
 /dist
 /backend/log
-/backend/public
-/backend/app
+/backend/public/*
+/backend/app/*
+!.gitkeep
 *hot-update.*
 .env
 .env.*

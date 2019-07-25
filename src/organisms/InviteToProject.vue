@@ -29,7 +29,7 @@
         <v-card-table
           v-for="user in projectUsers"
           :key="user.id"
-          :name="`${user.name} ${user.email}`"
+          :name="`${user.name || ''} ${user.email}`"
           :caption="user.invitedAt"
           clear
         >
@@ -39,6 +39,7 @@
               :options="roles"
               :value="user.role"
               :disabled="user.role === 'owner'"
+              @change="setUserAccess(user.email, $event)"
             />
           </div>
 
@@ -50,6 +51,7 @@
             :text="$t('Revoke access')"
             hide-text
             :params="{ iconSize: '18px', stroke: '#333' }"
+            @click="revokeUserAccess(user.id)"
           />
         </v-card-table>
       </card-table-list>
@@ -75,7 +77,8 @@ import EmptyPlaceholder from "../molecules/EmptyPlaceholder";
 import { notification } from "../services/notification";
 import {
   PROJECT_GET_PROJECT_USERS,
-  PROJECT_INVITE_TO_PROJECT
+  PROJECT_INVITE_TO_PROJECT,
+  PROJECT_REVOKE_USER_ACCESS
 } from "../services/store/mutation-types";
 import VInputClear from "../molecules/VInput/VInputClear";
 import VIcon from "../atoms/VIcon/VIcon";
@@ -152,8 +155,46 @@ export default {
           role: "client"
         })
         .then(() => {
-          this.emails.clearTags();
+          this.emails.clear();
           return notification(this, "error", this.$t("Invited successfully!"));
+        })
+        .catch(error => {
+          if (error) {
+            return notification(this, "error", this.$t(error.message));
+          }
+        });
+    },
+    setUserAccess(userEmail, role) {
+      if (!userEmail || !role) {
+        return;
+      }
+      this.$store
+        .dispatch(PROJECT_INVITE_TO_PROJECT, {
+          email: userEmail,
+          id: this.project.id,
+          role: role
+        })
+        .then(() => {
+          return notification(
+            this,
+            "error",
+            this.$t("Access updated successfully!")
+          );
+        })
+        .catch(error => {
+          if (error) {
+            return notification(this, "error", this.$t(error.message));
+          }
+        });
+    },
+    revokeUserAccess(userId) {
+      this.$store
+        .dispatch(PROJECT_REVOKE_USER_ACCESS, {
+          id: this.project.id,
+          userId: userId
+        })
+        .then(() => {
+          return notification(this, "error", this.$t("Access revoked!"));
         })
         .catch(error => {
           if (error) {
