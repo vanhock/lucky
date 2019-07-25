@@ -22,7 +22,8 @@ import {
   projectSetScreenshot,
   inviteToProject,
   getProjectUsers,
-  revokeAccessToProject
+  revokeAccessToProject,
+  checkProjectScreenshot
 } from "../api/ProjectApi";
 import { serializeObject } from "../../utils";
 
@@ -144,12 +145,22 @@ export default {
         });
       });
     },
-    [PROJECT_GET_PROJECTS]({ commit }, payload) {
+    [PROJECT_GET_PROJECTS]({ commit, dispatch }, payload) {
       return new Promise((resolve, reject) => {
         getAllProjects(serializeObject(payload), (error, projects) => {
           if (error) {
             return reject(error);
           }
+          projects.forEach(project => {
+            checkProjectScreenshot(project.image, error => {
+              if (error) {
+                dispatch(PROJECT_SET_SCREENSHOT, {
+                  permalink: project.permalink,
+                  url: project.url
+                });
+              }
+            });
+          });
           commit(PROJECT_GET_PROJECTS, projects);
           resolve(projects);
         });

@@ -195,6 +195,7 @@ const removeFile = function(filePath, cb) {
     cb("File does not exist");
   }
 };
+
 const shell = require("shelljs");
 const removeFolder = function(folderPath, cb) {
   if (fs.existsSync(folderPath)) {
@@ -203,6 +204,11 @@ const removeFolder = function(folderPath, cb) {
     cb("This path does not exist");
   }
 };
+
+const createDirectoryIfNotExist = function (path) {
+  shell.mkdir("-p", path)
+};
+
 
 const moveFile = function(sourceName, targetName, cb) {
   if (fs.existsSync(sourceName)) {
@@ -253,6 +259,7 @@ module.exports = {
   getParentAndChild,
   removeFile,
   removeFolder,
+  createDirectoryIfNotExist,
   moveFile,
   getUrlData,
   getUrlDomain,

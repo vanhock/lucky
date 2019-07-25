@@ -22,7 +22,11 @@ class PixelApi {
   }
 
   handleError = error => {
-    switch (error.response.status) {
+    const resp = error.response;
+    if (!resp) {
+      return;
+    }
+    switch (resp.status) {
       case 401:
         if (location.href.includes(config.apiUrl)) {
           if (!location.href.includes(`${config.apiUrl}/i`)) {
@@ -33,10 +37,13 @@ class PixelApi {
         } else if (store.getters.port) {
           store.getters.port.postMessage({ resetToken: true });
         }
+        break;
+      case 403:
+        break;
     }
     return {
-      status: error.response.status || error.response.code,
-      data: error.response.data.errors[0].title
+      status: resp.status || resp.code,
+      data: (resp.data && resp.data.errors[0].title) || resp.statusText
     };
   };
 

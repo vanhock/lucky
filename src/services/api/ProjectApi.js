@@ -7,6 +7,18 @@ export function createProject(payload, cb) {
   });
 }
 
+export function checkProjectScreenshot(payload, cb) {
+  if(!payload) {
+    return cb("Not found");
+  }
+  PixelApi.get(payload, res => {
+    if(res === 404 || res.status === 404) {
+      return cb("Not found");
+    }
+    cb(null, "ok!")
+  })
+}
+
 export function projectSetScreenshot(payload, cb) {
   PixelApi.post(
     "/project-set-screenshot",

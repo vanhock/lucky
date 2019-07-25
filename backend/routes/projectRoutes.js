@@ -6,6 +6,7 @@ const {
   checkProjectAccess,
   getUrlData,
   removeFolder,
+  createDirectoryIfNotExist,
   extractHostname
 } = require("../libs/helpers");
 const { deleteDesigns } = require("../controllers/designController");
@@ -96,6 +97,7 @@ module.exports = function(app) {
           const resultImg = `${config.upload.projectsFolderPath}${
             project.permalink
           }/shot.png`;
+          createDirectoryIfNotExist(imgFolder);
           const puppeteer = require("puppeteer");
           (async () => {
             const puppeteerConfig = {
@@ -263,8 +265,10 @@ module.exports = function(app) {
     if (!req.fields.id || !req.fields.role || !req.fields.email) {
       return res.error("Required fields didn't provide!");
     }
-    if(req.fields.role === "owner") {
-      return res.error("You can not change owner access to this project! Please, contact with support.");
+    if (req.fields.role === "owner") {
+      return res.error(
+        "You can not change owner access to this project! Please, contact with support."
+      );
     }
     getUserByToken(req, res, user => {
       checkProjectAccess(
