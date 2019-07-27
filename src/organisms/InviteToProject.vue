@@ -12,62 +12,65 @@
         {{ $t("Link copied to clipboard!") }}
       </div>
     </div>
-    <div class="invite-to-project-title">{{ $t("Invite to Project") }}</div>
-    <v-input-search
-      name="email"
-      class="invite-by-email"
-      :validation-message="$t('Type real email')"
-      ref="emailField"
-      required
-      :placeholder="$t('Enter email for invite')"
-    ></v-input-search>
+    <template v-if="allowedInvite">
+      <div class="invite-to-project-title">{{ $t("Invite to Project") }}</div>
+      <v-input-search
+        name="email"
+        class="invite-by-email"
+        :validation-message="$t('Type real email')"
+        ref="emailField"
+        required
+        :placeholder="$t('Enter email for invite')"
+      ></v-input-search>
 
-    <div class="users-in-project">
-      <card-table-list
-        v-if="projectUsers.length"
-        :title="$t('Members of this Project:')"
-      >
-        <v-card-table
-          v-for="user in projectUsers"
-          :key="user.id"
-          :name="`${user.name || ''} ${user.email}`"
-          :caption="user.invitedAt"
-          clear
+      <div class="users-in-project">
+        <card-table-list
+          v-if="projectUsers.length"
+          :title="$t('Members of this Project:')"
         >
-          <div class="role-toggle">
-            <v-select-clear
-              name="role"
-              :options="roles"
-              :value="user.role"
-              :disabled="user.role === 'owner'"
-              @change="setUserAccess(user.email, $event)"
-            />
-          </div>
+          <v-card-table
+            v-for="user in projectUsers"
+            :key="user.id"
+            :name="`${user.name || ''} ${user.email}`"
+            :caption="user.invitedAt"
+            clear
+          >
+            <div class="role-toggle">
+              <v-select-clear
+                name="role"
+                :options="roles"
+                :value="user.role"
+                :disabled="user.role === 'owner'"
+                @change="setUserAccess(user.email, $event)"
+              />
+            </div>
 
-          <v-toggle
-            class="revoke-access"
-            :disabled="user.role === 'owner'"
-            mode="feather"
-            icon="x-circle"
-            hide-text
-            :params="{ iconSize: '18px', stroke: '#333' }"
-            @click="revokeUserAccess(user.id)"
-          />
-        </v-card-table>
-      </card-table-list>
-      <empty-placeholder
-        v-if="!projectUsers.length"
-        :title="$t('Have no users in the Project yet')"
-        icon="users"
-        icon-size="50px"
-        min-height="140px"
-        transparent
-      ></empty-placeholder>
-    </div>
+            <v-toggle
+              class="revoke-access"
+              :disabled="user.role === 'owner'"
+              mode="feather"
+              icon="x-circle"
+              hide-text
+              :params="{ iconSize: '18px', stroke: '#333' }"
+              @click="revokeUserAccess(user.id)"
+            />
+          </v-card-table>
+        </card-table-list>
+        <empty-placeholder
+          v-if="!projectUsers.length"
+          :title="$t('Have no users in the Project yet')"
+          icon="users"
+          icon-size="50px"
+          min-height="140px"
+          transparent
+        ></empty-placeholder>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import config from "../config";
 
 import VInputSearch from "../molecules/VInput/VInputSearch";
@@ -112,7 +115,7 @@ export default {
       });
     });
     this.roles.sort((x, y) => {
-      return (x.disabled === y.disabled)? 0 : x.disabled? 1 : -1;
+      return x.disabled === y.disabled ? 0 : x.disabled ? 1 : -1;
     });
   },
   mounted() {
@@ -133,6 +136,7 @@ export default {
     roles: []
   }),
   computed: {
+    ...mapGetters(["user"]),
     projectUsers() {
       return (
         (this.project &&
@@ -148,6 +152,17 @@ export default {
       return this.project
         ? `${config.apiUrl}/i/p/${this.project.permalink}`
         : "";
+    },
+    allowedInvite() {
+      if (!this.project || !this.project.hasOwnProperty("users")) return;
+      return this.project.users.some(user => {
+        if (
+          user.id === this.user.id &&
+          (user.role === "owner" || user.role === "admin")
+        ) {
+          return true;
+        }
+      });
     }
   },
   methods: {

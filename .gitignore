@@ -8,7 +8,7 @@ node_modules
 *hot-update.*
 .env
 .env.*
-!/backend/.env.example
+!.env.example
 
 /src/assets/styles/_sprites.scss
 
