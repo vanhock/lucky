@@ -4,12 +4,14 @@ import {
   USER_AUTH_ERROR,
   USER_LOGOUT,
   USER_CHECK_AUTH,
-  USER_REGISTER
+  USER_REGISTER,
+  USER_CHECK_USER_EXIST
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
   AuthByToken,
   Authorization,
+  CheckUserExist,
   Registration,
   SetAuthToken
 } from "../api/UserApi";
@@ -47,7 +49,7 @@ export default {
     }
   },
   actions: {
-    [USER_LOGIN]: ({ commit }, payload) => {
+    [USER_LOGIN]({ commit }, payload) {
       return new Promise((resolve, reject) => {
         commit(USER_LOGIN);
         Authorization(payload, (error, user) => {
@@ -66,7 +68,7 @@ export default {
         });
       });
     },
-    [USER_REGISTER]: (undefined, payload) => {
+    [USER_REGISTER](undefined, payload) {
       return new Promise((resolve, reject) => {
         Registration(payload, (error, success) => {
           if (error) {
@@ -76,7 +78,7 @@ export default {
         });
       });
     },
-    [USER_LOGOUT]: ({ commit }) => {
+    [USER_LOGOUT]({ commit }) {
       return new Promise(resolve => {
         commit(USER_LOGOUT);
         localStorage.removeItem("pp-u-t-s");
@@ -84,7 +86,7 @@ export default {
         resolve();
       });
     },
-    USER_CHECK_AUTH({ commit }, payload) {
+    [USER_CHECK_AUTH]({ commit }, payload) {
       console.log("auth check init");
       return new Promise((resolve, reject) => {
         AuthByToken(payload, (error, user) => {
@@ -97,6 +99,16 @@ export default {
           }
           commit(USER_CHECK_AUTH, user);
           resolve(user);
+        });
+      });
+    },
+    [USER_CHECK_USER_EXIST]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        CheckUserExist(payload, error => {
+          if (error) {
+            return reject("User with this email not exist");
+          }
+          resolve();
         });
       });
     }

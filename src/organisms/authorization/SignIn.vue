@@ -1,6 +1,6 @@
 <template>
   <div class="sign-in" @keypress.enter="authorization">
-    <form-group ref="form" :loading="loading">
+    <form-group ref="form" :loading="loading" @change="checkAccountExist">
       <v-input-bordered
         name="email"
         :label="$t('email')"
@@ -29,14 +29,19 @@ import _ from "lodash";
 import VInputBordered from "../../molecules/VInput/VInputBordered";
 import FormGroup from "../../molecules/FormGroup";
 import { UserLoginError, UserLoginSuccess } from "../../services/notification";
-import { USER_LOGIN } from "../../services/store/mutation-types";
+import {
+  USER_CHECK_USER_EXIST,
+  USER_LOGIN
+} from "../../services/store/mutation-types";
 import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
 
 export default {
   name: "SignIn",
   components: { VButtonPrimary, FormGroup, VInputBordered },
   data: () => ({
-    loading: false
+    loading: false,
+    emailExist: false,
+    showEmailExistMessage: false
   }),
   props: {
     custom: Boolean
@@ -70,7 +75,18 @@ export default {
             UserLoginError(this, error);
           }
         });
-    }, 300)
+    }, 300),
+    checkAccountExist: _.debounce(function() {
+      if (!this.$refs.form.$children[0].$children[0].valid) return;
+      this.$store
+        .dispatch(USER_CHECK_USER_EXIST, this.$refs.form.changedItems)
+        .then(() => {
+          this.$emit("error", "");
+        })
+        .catch(error => {
+          this.$emit("error", error);
+        });
+    }, 600)
   }
 };
 </script>

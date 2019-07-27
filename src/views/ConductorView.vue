@@ -2,43 +2,9 @@
   <div class="conductor-view">
     <div>
       <div class="conductor-view-container" v-if="!notFound" v-show="!loading">
-        <div class="conductor-view-project">
-          <div
-            class="project-image"
-            v-if="currentProject.image"
-            :style="{ backgroundImage: `url(${currentProject.image})` }"
-            :alt="currentProject.title"
-          ></div>
-          <div class="project-info-overlay">
-            <div class="project-title">
-              <v-icon
-                :mode="overlayIcon.mode"
-                icon="file"
-                :params="overlayIcon.params"
-              />{{ currentProject.name }}
-            </div>
-            <div class="project-url">
-              <v-icon
-                :mode="overlayIcon.mode"
-                icon="globe"
-                :params="overlayIcon.params"
-              />{{ currentProject.url }}
-            </div>
-            <div class="project-tasks">
-              <v-icon
-                :mode="overlayIcon.mode"
-                icon="check-square"
-                :params="overlayIcon.params"
-              />0
-            </div>
-          </div>
-        </div>
         <div class="conductor-view-auth">
-          <router-link to="/"
-            ><v-icon
-              class="pixel-icon"
-              icon="logo"
-              :params="{ iconSize: '100px' }"
+          <router-link to="/" class="pixel-icon"
+            ><v-icon icon="logo" :params="{ iconSize: '100px' }"
           /></router-link>
           <div class="conductor-auth-title">
             {{ (!notFound && titleText) || "" }}
@@ -73,6 +39,15 @@
                   }}
                 </div>
                 <template v-if="!authorized">
+                  <!--<div class="advice-block">
+                    <v-icon
+                      class="advice-block-icon"
+                      :mode="adviceIcon.mode"
+                      :params="adviceIcon.params"
+                      icon="info"
+                    />
+                    <div class="advice-block-text">{{ advice }}</div>
+                  </div>-->
                   <div
                     class="sign-in-error"
                     v-if="showAuthError && currentAccessError"
@@ -104,6 +79,37 @@
                   $t("Download")
                 }}</v-button-primary>
               </div>
+            </div>
+          </div>
+        </div>
+        <div class="conductor-view-project">
+          <div
+            class="project-image"
+            v-if="currentProject.image"
+            :style="{ backgroundImage: `url(${currentProject.image})` }"
+            :alt="currentProject.title"
+          ></div>
+          <div class="project-info-overlay">
+            <div class="project-title">
+              <v-icon
+                :mode="overlayIcon.mode"
+                icon="file"
+                :params="overlayIcon.params"
+              />{{ currentProject.name }}
+            </div>
+            <div class="project-url">
+              <v-icon
+                :mode="overlayIcon.mode"
+                icon="globe"
+                :params="overlayIcon.params"
+              />{{ currentProject.url }}
+            </div>
+            <div class="project-tasks">
+              <v-icon
+                :mode="overlayIcon.mode"
+                icon="check-square"
+                :params="overlayIcon.params"
+              />0
             </div>
           </div>
         </div>
@@ -173,6 +179,10 @@ export default {
       mode: "feather",
       params: { iconSize: "16px" }
     },
+    adviceIcon: {
+      mode: "feather",
+      params: { iconSize: "22px", stroke: "#8e8d8d" }
+    },
     redirected: false,
     extensionCheckInterval: null
   }),
@@ -195,6 +205,12 @@ export default {
     },
     currentAccessError() {
       return this.accessError && this.$t(this.accessError);
+    },
+    advice() {
+      if (!this.currentProject) {
+        return;
+      }
+      return this.$t("If you just invited to this project, follow by link on your email");
     }
   },
   props: {
@@ -244,7 +260,7 @@ export default {
     },
     onAuthError(e) {
       this.showAuthError = true;
-      this.accessError = e
+      this.accessError = e;
     },
     stepStyle(state) {
       return (
@@ -276,7 +292,7 @@ export default {
 
 <style lang="scss">
 .conductor-view {
-  max-width: 1060px;
+  max-width: 1100px;
   margin: auto;
   height: 100%;
   display: flex;
@@ -284,6 +300,7 @@ export default {
   justify-content: center;
 
   & > div {
+    position: relative;
     display: flex;
     width: 100%;
     height: 100%;
@@ -297,7 +314,13 @@ export default {
     background-color: #fff;
     @include box-shadow(medium);
   }
-
+  .pixel-icon {
+    margin-bottom: 30px;
+    .v-icon-image {
+      width: 100px;
+      height: 40px !important;
+    }
+  }
   .conductor-auth-title {
     margin-top: 0;
     margin-bottom: 20px;
@@ -326,7 +349,7 @@ export default {
       background-repeat: no-repeat;
       background-size: cover;
       background-position: center top;
-      border-radius: 7px 0 0 7px;
+      border-radius: 0 7px 7px 0;
       z-index: 1;
       opacity: 0.8;
     }
@@ -347,7 +370,7 @@ export default {
         rgba(0, 0, 0, 0) 0%,
         rgba(0, 0, 0, 1) 100%
       );
-      border-radius: 0 0 0 7px;
+      border-radius: 0 0 7px 0;
       color: #fff;
       font-weight: 600;
       text-align: left;
@@ -371,7 +394,7 @@ export default {
   }
   &-auth {
     display: flex;
-    flex: 1.5;
+    flex: 2;
     align-items: center;
     justify-content: flex-start;
     flex-direction: column;
@@ -445,8 +468,14 @@ export default {
   }
 }
 .conductor-steps {
-  margin-top: 35px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+  min-height: 30%;
   & > div {
+    position: relative;
     display: flex;
     align-items: flex-start;
     width: 360px;
@@ -459,6 +488,19 @@ export default {
       margin-top: 1px;
       margin-right: 20px;
     }
+
+    .advice-block {
+      box-sizing: border-box;
+      display: flex;
+      margin-top: 15px;
+      background-color: $color-highlight;
+      color: $color-b2;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 18px;
+      border-radius: 5px;
+    }
+
     .cont {
       justify-content: flex-start;
       text-align: left;

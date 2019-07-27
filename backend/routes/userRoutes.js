@@ -65,19 +65,17 @@ module.exports = function(app) {
   });
 
   app.get("/check-user-exist", (req, res) => {
-    if (!req.fields.email) {
+    if (!req.query.email) {
       return res.error("Email did not provide!");
     }
     User.findOne({
       where: {
-        email: req.fields.email
+        email: req.query.email
       }
     })
       .then(user => {
         if (!user) {
-          return res
-            .status(200)
-            .send(JSON.stringify({ message: "User not found" }));
+          return res.error("User not found");
         }
         if (user.dataValues.oneTimePassword) {
           return res.status(200).send(
@@ -87,7 +85,7 @@ module.exports = function(app) {
             })
           );
         }
-        return res.status(200);
+        return res.status(200).send("User exist!");
       })
       .catch(error => res.error(error));
   });

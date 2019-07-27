@@ -32,3 +32,9 @@ export function AuthByToken(payload, cb) {
     generalCallback(status, data, cb);
   });
 }
+
+export function CheckUserExist(payload, cb) {
+  PixelApi.get(`/check-user-exist?email=${payload.email}`, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
