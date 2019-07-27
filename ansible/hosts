@@ -1,0 +1,5 @@
+[local]
+localhost ansible_host=127.0.0.1 ansible_connection=local
+
+[vagrant]
+vagrant ansible_host=192.168.134.143

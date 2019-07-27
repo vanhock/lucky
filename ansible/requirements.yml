@@ -1,0 +1,6 @@
+- src: https://github.com/geerlingguy/ansible-role-mysql
+  name: geerlingguy.mysql
+- src: https://github.com/geerlingguy/ansible-role-nodejs
+  name: geerlingguy.nodejs
+- src: https://github.com/ocha/ansible-role-yarn
+  name: ocha.yarn

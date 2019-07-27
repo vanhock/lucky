@@ -1,0 +1,10 @@
+---
+- name: Create backend .env file.
+  template:
+    src=templates/backend.env.j2
+    dest={{ document_root }}/backend/.env
+
+- name: Create client .env file.
+  template:
+    src=templates/client.env.j2
+    dest={{ document_root }}/.env

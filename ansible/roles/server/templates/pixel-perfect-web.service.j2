@@ -1,0 +1,10 @@
+[Unit]
+Description=PixelPerfect Web Server
+
+[Service]
+WorkingDirectory={{ document_root }}/backend
+ExecStart=/usr/bin/npm start
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
