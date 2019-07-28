@@ -3,3 +3,6 @@ localhost ansible_host=127.0.0.1 ansible_connection=local
 
 [vagrant]
 vagrant ansible_host=192.168.134.143
+
+[stage]
+stage ansible_host=104.248.100.173

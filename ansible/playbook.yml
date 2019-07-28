@@ -3,7 +3,7 @@
   vars:
     server_url: perfect-pixel.local
     document_root: /perfect-pixel-app
-    current_user: vagrant
+    current_user: root
 
     nodejs_version: "12.x"
 
@@ -27,6 +27,29 @@
     server_url: perfect-pixel.local
     document_root: /perfect-pixel-app
     current_user: vagrant
+
+    nodejs_version: "12.x"
+
+  vars_files:
+    - vars/mysql-vars.yml
+
+  become: true
+  remote_user: "{{current_user}}"
+
+  roles:
+    - python
+    - role: geerlingguy.mysql
+    - role: geerlingguy.nodejs
+    - role: ocha.yarn
+    - environment
+    - yarn
+    - server
+
+- hosts: stage
+  vars:
+    server_url: perfectpixel.io
+    document_root: /perfect-pixel-app
+    current_user: root
 
     nodejs_version: "12.x"
 
