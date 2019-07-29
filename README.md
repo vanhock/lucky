@@ -1,1 +1,1 @@
-sudo ansible-playbook --inventory hosts --limit stage --become --private-key ./../temp/ _id_rsa playbook.yml
+sudo ansible-playbook --inventory hosts --limit stage --become --private-key ./../temp/_id_rsa playbook.yml
