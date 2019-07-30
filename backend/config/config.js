@@ -6,6 +6,8 @@ module.exports = {
   },
   authorization: {
     token_out_of_date: 604800 /** 1 week **/,
+    confirmation_code_out_of_date: 3600 /** 1 hour **/,
+    confirmation_code_resend_timeout: 60,
     figmaAccessToken: "11971-5d340a8f-7932-4e2e-9d36-3d193a64abe7"
   },
   upload: {

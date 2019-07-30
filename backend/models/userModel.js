@@ -56,8 +56,8 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.BOOLEAN
       },
       status: {
-        type: DataTypes.ENUM("new", "confirmed", "active", "disabled"),
-        defaultValue: "active"
+        type: DataTypes.ENUM("new", "active", "disabled"),
+        defaultValue: "new"
       },
       role: {
         type: DataTypes.ENUM("owner", "admin", "user"),
@@ -75,6 +75,16 @@ module.exports = function(sequelize, DataTypes) {
       },
       tokenCreatedAt: {
         type: DataTypes.DATE
+      },
+      confirmationCode: {
+        type: DataTypes.STRING,
+        set: function(code) {
+          this.setDataValue("confirmationCode", code);
+          this.confirmationCodeCreatedAt = Date.now();
+        }
+      },
+      confirmationCodeCreatedAt: {
+        type: DataTypes.DATE
       }
     },
     {
@@ -86,20 +96,49 @@ module.exports = function(sequelize, DataTypes) {
             .update(plain)
             .digest("hex");
         },
+        checkOutdated(createdAt, outdatedAt) {
+          const currentDate = new Date(),
+            targetAge = (currentDate - user.tokenCreatedAt) / 1000;
+          return targetAge > config.authorization.token_out_of_date;
+        },
         isTokenOutdated: function(user) {
           if (!user) {
             return;
           }
-          const currentDate = new Date(),
-            tokenAge = (currentDate - user.tokenCreatedAt) / 1000;
-
-          return tokenAge > config.authorization.token_out_of_date;
+          return this.checkOutdated(
+            user.tokenCreatedAt,
+            config.authorization.token_out_of_date
+          );
+        },
+        isConfirmationCodeOutdated(user) {
+          if (!user) {
+            return;
+          }
+          return this.checkOutdated(
+            user.confirmationCodeCreatedAt,
+            config.authorization.authorization.confirmation_code_out_of_date
+          );
+        },
+        isConfirmationCodeResendTimeout(user) {
+          if (!user) {
+            return;
+          }
+          return this.checkOutdated(
+            user.confirmationCodeCreatedAt,
+            config.authorization.authorization.confirmation_code_resend_timeout
+          );
         },
         createToken: function() {
           if (!this.token || this.isTokenOutdated()) {
             this.token = User.options.classMethods.generateToken();
           }
           return this.token;
+        },
+        createConfirmationCode() {
+          if (!this.confirmationCode || this.isConfirmationCodeOutdated()) {
+            this.confirmationCode = User.options.classMethods.generateToken(5);
+          }
+          return this.confirmationCode;
         },
         removeAvatar: function() {
           if (this.avatar) {
@@ -126,6 +165,11 @@ module.exports = function(sequelize, DataTypes) {
                 password: req.password || this.generatePassword(),
                 oneTimePassword: !req.password
               }).then(user => {
+                if (user.oneTimePassword) {
+                  /** No need to sent confirmation code, if password specified **/
+                } else {
+                  this.sendConfirmationCode();
+                }
                 done(null, user);
               });
             })
@@ -136,8 +180,8 @@ module.exports = function(sequelize, DataTypes) {
         generatePassword: function() {
           return crypto.randomBytes(tempPasswordLength).toString("hex");
         },
-        generateToken: function() {
-          return crypto.randomBytes(tokenLength).toString("hex");
+        generateToken: function(length) {
+          return crypto.randomBytes(length || tokenLength).toString("hex");
         },
         authorization: function(email, password, done) {
           User.findOne({
@@ -185,13 +229,41 @@ module.exports = function(sequelize, DataTypes) {
           }).then(function(foundUser) {
             if (!foundUser) {
               return done(null, false);
-            } else if (
-              User.options.instanceMethods.isTokenOutdated(foundUser)
-            ) {
+            } else if (foundUser.isTokenOutdated(foundUser)) {
               return done("tokenOutdated");
             }
             return done(null, foundUser);
           }, done);
+        },
+        confirmAccount(email, code, done) {
+          User.findOne({
+            where: {
+              email: email
+            }
+          })
+            .then(user => {
+              if (user.isConfirmationCodeOutdated(user)) {
+                this.sendConfirmationCode();
+                return done("codeOutdated");
+              }
+              if (user.confirmationCode !== code) {
+                this.sendConfirmationCode();
+                return done("codeIncorrect");
+              }
+              user.update({ status: "active" }).then(resultUser => {
+                return done(null, resultUser);
+              });
+            }, done)
+            .catch(error => {
+              done(error);
+            });
+        },
+        sendConfirmationCode() {
+          if (!this.user.isConfirmationCodeResendTimeout(this.user)) {
+            return "codeResentTimeout";
+          }
+          const code = this.user.createConfirmationCode();
+          return console.log(`Sent code: ${code} on email: ${this.user.email}`);
         }
       },
       hooks: {

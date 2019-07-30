@@ -1,0 +1,10 @@
+---
+- name: Git pull from master
+  git:
+    repo: 'ssh://git@github.com:vanhock/lucky.git'
+    key_file: '/root/.ssh/id_rsa'
+    accept_hostkey: yes
+    dest: '{{ document_root }}'
+    update: yes
+    version: master
+    force: yes

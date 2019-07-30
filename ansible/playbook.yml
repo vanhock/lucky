@@ -60,6 +60,7 @@
   remote_user: "{{current_user}}"
 
   roles:
+    - git
     - python
     - role: geerlingguy.mysql
     - role: geerlingguy.nodejs
