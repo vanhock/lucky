@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <auth-conductor />
     <router-view />
   </div>
 </template>
@@ -10,6 +11,7 @@ import { normalizeDate } from "./utils";
 import moment from "moment";
 import VueMoment from "vue-moment";
 import "vuejs-noty/dist/vuejs-noty.css";
+import AuthConductor from "./organisms/authorization/AuthConductor";
 
 Vue.use(VueMoment);
 Vue.filter("truncate", (value, length) => {
@@ -23,6 +25,7 @@ Vue.filter("normalizeDate", value => {
 });
 
 export default {
+  components: {AuthConductor},
   created() {
     moment.locale(this.$i18n.locale);
   }

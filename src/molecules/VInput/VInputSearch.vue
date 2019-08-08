@@ -12,6 +12,8 @@
       :autocomplete="autocomplete"
       :validation-message="validationMessage"
       :show-validation="showInputValidation"
+      :mask="mask"
+      :mask-pattern="maskPattern"
       :disabled="disabled"
       :theme="theme"
       autofocus
@@ -94,7 +96,6 @@ export default {
   .v-input {
     max-width: calc(100% - 75px);
     .input {
-      width: 80%;
       input {
         border-bottom: 0;
         padding: 10px 20px;

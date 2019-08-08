@@ -10,6 +10,13 @@ module.exports = {
     confirmation_code_resend_timeout: 60,
     figmaAccessToken: "11971-5d340a8f-7932-4e2e-9d36-3d193a64abe7"
   },
+  mailer: {
+    smtpServer: "smtp.gmail.com",
+    smtpPort: 465,
+    userName: "vanhocker@gmail.com",
+    userPassword: "nxfwthowpdazrfuk",
+    from: '"Ivan from Pixel" <vanhocker@gmail.com>'
+  },
   upload: {
     path: path.join(__dirname, "../public/images/"),
     tempPath: path.join(__dirname, "../public/images/temp/"),

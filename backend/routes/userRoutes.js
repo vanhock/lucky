@@ -15,7 +15,10 @@ const allowedParams = [
   "company",
   "token",
   "createdAt",
-  "updatedAt"
+  "updatedAt",
+  "status",
+  "confirmationCodeTimeout",
+  "confirmationCodeCreatedAt"
 ];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
@@ -109,6 +112,14 @@ module.exports = function(app) {
         });
     });
   });
+
+  app.post("/send-confirmation-request", (req, res) => {
+    if (!req.fields.code || !req.fields.email) {
+      return res.error("Required fields did not provide!");
+    }
+    User.options.classMethods.sendConfirmationCode()
+  });
+
   app.post("/set-user-avatar", (req, res) => {
     if (!Object.keys(req.files).length || !req.files.avatar) {
       return res.error("Avatar did not provide!");

@@ -71,7 +71,6 @@ function updateProjectUser(req, res, project, user, params = {}, cb) {
   }
 }
 
-
 function checkProjectAccess(
   projectParams = {},
   user,
@@ -205,10 +204,9 @@ const removeFolder = function(folderPath, cb) {
   }
 };
 
-const createDirectoryIfNotExist = function (path) {
-  shell.mkdir("-p", path)
+const createDirectoryIfNotExist = function(path) {
+  shell.mkdir("-p", path);
 };
-
 
 const moveFile = function(sourceName, targetName, cb) {
   if (fs.existsSync(sourceName)) {
@@ -219,7 +217,6 @@ const moveFile = function(sourceName, targetName, cb) {
     cb("File does not exist");
   }
 };
-
 
 const getUrlDomain = url => {
   const urlDomain = url.match(
@@ -248,6 +245,33 @@ const getUrlData = url => {
   });
 };
 
+const getRandomNumbers = length => {
+  return Math.floor(
+    Math.pow(10, length - 1) + Math.random() * 9 * Math.pow(10, length - 1)
+  );
+};
+
+const nodemailer = require("nodemailer");
+const mailer = nodemailer.createTransport({
+  host: config.mailer.smtpServer,
+  port: config.mailer.smtpPort,
+  secure: true,
+  auth: {
+    user: config.mailer.userName,
+    pass: config.mailer.userPassword
+  }
+});
+
+const sendMail = async function(to, subject, html, text, from) {
+  await mailer.sendMail({
+    from: from || config.mailer.from,
+    to: to,
+    subject: subject || "Hello from PerfectPixel",
+    html: html,
+    text: text
+  });
+};
+
 module.exports = {
   extractHostname,
   getUserByToken,
@@ -263,4 +287,6 @@ module.exports = {
   moveFile,
   getUrlData,
   getUrlDomain,
+  getRandomNumbers,
+  sendMail
 };

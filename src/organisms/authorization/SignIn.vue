@@ -38,6 +38,9 @@ import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
 export default {
   name: "SignIn",
   components: { VButtonPrimary, FormGroup, VInputBordered },
+  mounted() {
+    this.checkAccountExist();
+  },
   data: () => ({
     loading: false,
     emailExist: false,

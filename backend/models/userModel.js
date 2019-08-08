@@ -1,5 +1,5 @@
 const config = require("../config/config");
-const { removeFile } = require("../libs/helpers");
+const { removeFile, getRandomNumbers, sendMail } = require("../libs/helpers");
 const tempPasswordLength = 7;
 const tokenLength = 80;
 const saltLength = 32;
@@ -98,8 +98,8 @@ module.exports = function(sequelize, DataTypes) {
         },
         checkOutdated(createdAt, outdatedAt) {
           const currentDate = new Date(),
-            targetAge = (currentDate - user.tokenCreatedAt) / 1000;
-          return targetAge > config.authorization.token_out_of_date;
+            targetAge = (currentDate - createdAt) / 1000;
+          return targetAge > outdatedAt;
         },
         isTokenOutdated: function(user) {
           if (!user) {
@@ -125,7 +125,7 @@ module.exports = function(sequelize, DataTypes) {
           }
           return this.checkOutdated(
             user.confirmationCodeCreatedAt,
-            config.authorization.authorization.confirmation_code_resend_timeout
+            config.authorization.confirmation_code_resend_timeout
           );
         },
         createToken: function() {
@@ -134,9 +134,9 @@ module.exports = function(sequelize, DataTypes) {
           }
           return this.token;
         },
-        createConfirmationCode() {
-          if (!this.confirmationCode || this.isConfirmationCodeOutdated()) {
-            this.confirmationCode = User.options.classMethods.generateToken(5);
+        createConfirmationCode(user) {
+          if (!this.confirmationCode || this.isConfirmationCodeOutdated(user)) {
+            this.confirmationCode = getRandomNumbers(4);
           }
           return this.confirmationCode;
         },
@@ -167,10 +167,10 @@ module.exports = function(sequelize, DataTypes) {
               }).then(user => {
                 if (user.oneTimePassword) {
                   /** No need to sent confirmation code, if password specified **/
+                  done(null, user);
                 } else {
-                  this.sendConfirmationCode();
+                  this.sendConfirmationCode(user, true, done);
                 }
-                done(null, user);
               });
             })
             .catch(message => {
@@ -203,7 +203,7 @@ module.exports = function(sequelize, DataTypes) {
               return done("Incorrect password");
             }
 
-            if (foundUser.status !== "active") {
+            if (foundUser.status === "disabled") {
               done(
                 "This user isn't confirmed by admin or account has been locked"
               );
@@ -217,7 +217,9 @@ module.exports = function(sequelize, DataTypes) {
               /** Todo: Need to send password on email here **/
             }
             return done(null, {
-              ...foundUser.dataValues
+              ...foundUser.dataValues,
+              confirmationCodeTimeout:
+                config.authorization.confirmation_code_resend_timeout
             });
           }, done);
         },
@@ -229,9 +231,12 @@ module.exports = function(sequelize, DataTypes) {
           }).then(function(foundUser) {
             if (!foundUser) {
               return done(null, false);
-            } else if (foundUser.isTokenOutdated(foundUser)) {
+            } else if (
+              User.options.instanceMethods.isTokenOutdated(foundUser)
+            ) {
               return done("tokenOutdated");
             }
+            foundUser.dataValues.confirmationCodeTimeout = config.authorization.confirmation_code_resend_timeout;
             return done(null, foundUser);
           }, done);
         },
@@ -242,13 +247,16 @@ module.exports = function(sequelize, DataTypes) {
             }
           })
             .then(user => {
-              if (user.isConfirmationCodeOutdated(user)) {
+              user.dataValues.confirmationCodeTimeout = config.authorization.confirmation_code_resend_timeout;
+              if (
+                User.options.instanceMethods.isConfirmationCodeOutdated(user)
+              ) {
                 this.sendConfirmationCode();
-                return done("codeOutdated");
+                return done("codeOutdated", user);
               }
               if (user.confirmationCode !== code) {
                 this.sendConfirmationCode();
-                return done("codeIncorrect");
+                return done("codeIncorrect", user);
               }
               user.update({ status: "active" }).then(resultUser => {
                 return done(null, resultUser);
@@ -258,12 +266,29 @@ module.exports = function(sequelize, DataTypes) {
               done(error);
             });
         },
-        sendConfirmationCode() {
-          if (!this.user.isConfirmationCodeResendTimeout(this.user)) {
+        sendConfirmationCode(user, isNewUser, done) {
+          if (
+            !isNewUser &&
+            !User.options.instanceMethods.isConfirmationCodeResendTimeout(user)
+          ) {
             return "codeResentTimeout";
           }
-          const code = this.user.createConfirmationCode();
-          return console.log(`Sent code: ${code} on email: ${this.user.email}`);
+          const code = User.options.instanceMethods.createConfirmationCode();
+          sendMail(
+            user.email,
+            "Confirm account",
+            `<p>Your activation code is: <b>${code}</b></p>`
+          )
+            .then(success => {
+              console.log(`Sent code: ${code} on email: ${user.email}`);
+              return user.update({ confirmationCode: code }).then(user => {
+                return done(null, user);
+              });
+            })
+            .catch(error => {
+              console.error(error);
+              return done(error);
+            });
         }
       },
       hooks: {
