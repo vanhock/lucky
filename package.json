@@ -50,7 +50,7 @@
     "svg-spritemap-webpack-plugin": "^3.3.0",
     "v-hotkey": "^0.6.0",
     "vue-class-component": "^7.0.2",
-    "vue-cli-plugin-browser-extension": "^0.15.0",
+    "vue-cli-plugin-browser-extension": "^0.22.0",
     "vue-cli-plugin-coffeescript": "^0.0.3",
     "vue-cli-plugin-i18n": "^0.6.0",
     "vue-cli-plugin-style-resources-loader": "^0.1.3",
