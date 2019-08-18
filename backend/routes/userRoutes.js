@@ -113,11 +113,41 @@ module.exports = function(app) {
     });
   });
 
-  app.post("/send-confirmation-request", (req, res) => {
+  app.post("/send-confirmation-code", (req, res) => {
+    if (!req.fields.email) {
+      return res.error("Email did not provide!");
+    }
+    User.options.classMethods.sendConfirmationCode(
+      req.fields.email,
+      req.fields.resend,
+      (error, user) => {
+        if (error) {
+          return res.error(error);
+        }
+        return res
+          .status(200)
+          .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
+      }
+    );
+  });
+
+  app.post("/user-confirmation-request", (req, res) => {
     if (!req.fields.code || !req.fields.email) {
       return res.error("Required fields did not provide!");
     }
-    User.options.classMethods.sendConfirmationCode()
+
+    User.options.classMethods.confirmAccount(
+      req.fields.email,
+      req.fields.code,
+      (error, success) => {
+        if (error) {
+          return res.error(error);
+        }
+        res
+          .status(200)
+          .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
+      }
+    );
   });
 
   app.post("/set-user-avatar", (req, res) => {

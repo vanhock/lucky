@@ -5,15 +5,21 @@ import {
   USER_LOGOUT,
   USER_CHECK_AUTH,
   USER_REGISTER,
-  USER_CHECK_USER_EXIST
+  USER_CHECK_USER_EXIST,
+  USER_CONFIRMATION_REQUEST,
+  USER_SEND_CONFIRMATION_CODE,
+  USER_CHECK_USER_CONFIRMATION_CODE
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
   AuthByToken,
   Authorization,
+  CheckUserConfirmationCode,
   CheckUserExist,
   Registration,
-  SetAuthToken
+  SendConfirmationCode,
+  SetAuthToken,
+  UserConfirmationRequest
 } from "../api/UserApi";
 export default {
   state: {
@@ -31,7 +37,7 @@ export default {
     [USER_LOGIN]: state => {
       state.status = "loading";
     },
-    [USER_AUTH_SUCCESS]: (state, user) => {
+    [USER_AUTH_SUCCESS](state, user) {
       state.status = "success";
       state.user = user;
       state.userToken = user.token;
@@ -43,9 +49,15 @@ export default {
       state.user = {};
       state.userToken = null;
     },
-    [USER_CHECK_AUTH]: (state, payload = null) => {
+    [USER_CHECK_AUTH](state, payload = null) {
       state.user = payload;
       state.userToken = payload.token;
+    },
+    [USER_SEND_CONFIRMATION_CODE](state, payload) {
+      state.user = payload;
+    },
+    [USER_CONFIRMATION_REQUEST](state, payload) {
+      state.user = payload;
     }
   },
   actions: {
@@ -109,6 +121,28 @@ export default {
             return reject("User with this email not exist");
           }
           resolve();
+        });
+      });
+    },
+    [USER_CONFIRMATION_REQUEST]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        UserConfirmationRequest(payload, (error, user) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(USER_CONFIRMATION_REQUEST, user);
+          resolve(user);
+        });
+      });
+    },
+    [USER_SEND_CONFIRMATION_CODE]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        SendConfirmationCode(payload, (error, user) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(USER_SEND_CONFIRMATION_CODE, user);
+          resolve(user);
         });
       });
     }

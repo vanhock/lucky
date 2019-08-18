@@ -1,4 +1,6 @@
 {
+  "min": "мин",
+  "sec": "сек",
   "projects": "Проекты",
   "pages": "Страницы",
   "account": "Аккаунт",
@@ -21,5 +23,7 @@
   "save": "Сохранить",
   "create": "Создать",
   "soon": "скоро",
-  "Have no data here": "Здесь пусто"
+  "Have no data here": "Здесь пусто",
+  "codeAlreadySent": "Код был отправлен",
+  "codeResendingTimeout": "Код уже отправлен, попробуйте позже"
 }

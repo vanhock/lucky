@@ -1,4 +1,6 @@
 {
+  "min": "min",
+  "sec": "sec",
   "projects": "Projects",
   "pages": "Pages",
   "account": "Account",
@@ -21,5 +23,7 @@
   "create": "Create",
   "soon": "soon",
   "Have no data here": "Have no data here",
-  "Page name": "Page name"
+  "Page name": "Page name",
+  "codeAlreadySent": "Code already sent on your email",
+  "codeResendingTimeout": "Code sent, please try again later"
 }

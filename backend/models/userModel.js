@@ -116,7 +116,7 @@ module.exports = function(sequelize, DataTypes) {
           }
           return this.checkOutdated(
             user.confirmationCodeCreatedAt,
-            config.authorization.authorization.confirmation_code_out_of_date
+            config.authorization.confirmation_code_out_of_date
           );
         },
         isConfirmationCodeResendTimeout(user) {
@@ -236,7 +236,8 @@ module.exports = function(sequelize, DataTypes) {
             ) {
               return done("tokenOutdated");
             }
-            foundUser.dataValues.confirmationCodeTimeout = config.authorization.confirmation_code_resend_timeout;
+            foundUser.dataValues.confirmationCodeTimeout =
+              config.authorization.confirmation_code_resend_timeout;
             return done(null, foundUser);
           }, done);
         },
@@ -247,15 +248,14 @@ module.exports = function(sequelize, DataTypes) {
             }
           })
             .then(user => {
-              user.dataValues.confirmationCodeTimeout = config.authorization.confirmation_code_resend_timeout;
               if (
                 User.options.instanceMethods.isConfirmationCodeOutdated(user)
               ) {
-                this.sendConfirmationCode();
+                this.sendConfirmationCode(user.email, () => {});
                 return done("codeOutdated", user);
               }
               if (user.confirmationCode !== code) {
-                this.sendConfirmationCode();
+                this.sendConfirmationCode(user.email, () => {});
                 return done("codeIncorrect", user);
               }
               user.update({ status: "active" }).then(resultUser => {
@@ -266,28 +266,55 @@ module.exports = function(sequelize, DataTypes) {
               done(error);
             });
         },
-        sendConfirmationCode(user, isNewUser, done) {
-          if (
-            !isNewUser &&
-            !User.options.instanceMethods.isConfirmationCodeResendTimeout(user)
-          ) {
-            return "codeResentTimeout";
-          }
-          const code = User.options.instanceMethods.createConfirmationCode();
-          sendMail(
-            user.email,
-            "Confirm account",
-            `<p>Your activation code is: <b>${code}</b></p>`
-          )
-            .then(success => {
-              console.log(`Sent code: ${code} on email: ${user.email}`);
-              return user.update({ confirmationCode: code }).then(user => {
-                return done(null, user);
-              });
+        sendConfirmationCode(email, resend, done) {
+          User.findOne({
+            where: {
+              email: email
+            }
+          })
+            .then(user => {
+              if (!user) {
+                return done("User not found");
+              }
+              if (!user.dataValues.status === "active") {
+                return done("userConfirmed");
+              }
+              if (!user.dataValues.status === "disabled") {
+                return done("userDisabled");
+              }
+              if (
+                !User.options.instanceMethods.isConfirmationCodeResendTimeout(
+                  user
+                )
+              ) {
+                return done("codeResendingTimeout");
+              }
+              if (
+                !resend &&
+                !User.options.instanceMethods.isConfirmationCodeOutdated(user)
+              ) {
+                return done("codeAlreadySent");
+              }
+
+              const code = User.options.instanceMethods.createConfirmationCode();
+              sendMail(
+                user.email,
+                "Confirm account",
+                `<p>Your activation code is: <b>${code}</b></p>`
+              )
+                .then(success => {
+                  console.log(`Sent code: ${code} on email: ${user.email}`);
+                  return user.update({ confirmationCode: code }).then(resultUser => {
+                    return done(null, resultUser);
+                  });
+                })
+                .catch(error => {
+                  console.error(error);
+                  return done(error);
+                });
             })
-            .catch(error => {
-              console.error(error);
-              return done(error);
+            .catch(() => {
+              return done("User not found");
             });
         }
       },
