@@ -13,12 +13,7 @@
         name="code"
         mask="number"
         mask-pattern="99-99"
-        @change="confirmationMessageCode = ''"
-        @click="confirmationRequest"
       />
-      <div class="confirmation-input-message">
-        {{ confirmationCodeErrorMessage }}
-      </div>
     </div>
 
     <div class="confirmation-resend">
@@ -63,18 +58,22 @@ export default {
         mutation.payload.status === "new"
       ) {
         /** Try to send confirmation code if not already sent **/
+        this.initResendTimer(mutation.payload);
         this.sendConfirmationCode();
         this.$refs.modal.showModal = true;
-        this.initResendTimer(mutation.payload);
         this.focusOnField();
+        this.$nextTick(() => {
+          this.$refs.code.$on("onclick", () => {
+            this.confirmationRequest();
+          });
+        });
       }
     });
   },
   data: () => ({
     resendTimerStart: 0,
     resendTimer: 0,
-    resendTimerInterval: null,
-    confirmationMessageCode: ""
+    resendTimerInterval: null
   }),
   computed: {
     ...mapGetters(["user"]),
@@ -85,13 +84,6 @@ export default {
     modalDescription() {
       return this.$t(
         "Confirmation code sent to your email, type it bellow for activate your account"
-      );
-    },
-    confirmationCodeErrorMessage() {
-      return (
-        (this.confirmationMessageCode &&
-          this.$t(this.confirmationMessageCode)) ||
-        ""
       );
     },
     confirmationResendText() {
@@ -128,14 +120,16 @@ export default {
       this.$store
         .dispatch(USER_CONFIRMATION_REQUEST, {
           email: this.user.email,
-          code: this.$refs.code.currentValue
+          code: this.$refs.code.currentValue.replace("-", "")
         })
         .then(() => {
-          console.log("User successfully confirmed!");
+          notification(this, "success", this.$t(`Successfully confirmed`));
+          this.$refs.modal.showModal = false;
         })
         .catch(error => {
           if (error) {
-            return (this.confirmationMessageCode = error);
+            this.sendConfirmationCode();
+            notification(this, "error", this.$t(error));
           }
         });
     },

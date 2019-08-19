@@ -251,17 +251,21 @@ module.exports = function(sequelize, DataTypes) {
               if (
                 User.options.instanceMethods.isConfirmationCodeOutdated(user)
               ) {
-                this.sendConfirmationCode(user.email, () => {});
                 return done("codeOutdated", user);
               }
               if (user.confirmationCode !== code) {
-                this.sendConfirmationCode(user.email, () => {});
                 return done("codeIncorrect", user);
+              }
+              if (user.dataValues.status === "disabled") {
+                return done("userDisabled");
+              }
+              if (user.dataValues.status === "active") {
+                return done(null, user);
               }
               user.update({ status: "active" }).then(resultUser => {
                 return done(null, resultUser);
               });
-            }, done)
+            })
             .catch(error => {
               done(error);
             });
@@ -276,11 +280,11 @@ module.exports = function(sequelize, DataTypes) {
               if (!user) {
                 return done("User not found");
               }
-              if (!user.dataValues.status === "active") {
-                return done("userConfirmed");
-              }
-              if (!user.dataValues.status === "disabled") {
+              if (user.dataValues.status === "disabled") {
                 return done("userDisabled");
+              }
+              if (user.dataValues.status === "active") {
+                return done("userConfirmed");
               }
               if (
                 !User.options.instanceMethods.isConfirmationCodeResendTimeout(

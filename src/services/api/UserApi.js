@@ -40,13 +40,21 @@ export function CheckUserExist(payload, cb) {
 }
 
 export function UserConfirmationRequest(payload, cb) {
-  PixelApi.post("/user-confirmation-request", payload, (status, data) => {
-    generalCallback(status, data, cb);
-  });
+  PixelApi.post(
+    "/user-confirmation-request",
+    { data: payload },
+    (status, data) => {
+      generalCallback(status, data, cb);
+    }
+  );
 }
 
 export function SendConfirmationCode(payload, cb) {
-  PixelApi.post("/send-confirmation-code", {data: payload}, (status, data) => {
-    generalCallback(status, data, cb);
-  });
+  PixelApi.post(
+    "/send-confirmation-code",
+    { data: payload },
+    (status, data) => {
+      generalCallback(status, data, cb);
+    }
+  );
 }

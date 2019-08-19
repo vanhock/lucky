@@ -263,14 +263,13 @@ const mailer = nodemailer.createTransport({
 });
 
 const sendMail = async function(to, subject, html, text, from) {
-  /*await mailer.sendMail({
+  await mailer.sendMail({
     from: from || config.mailer.from,
     to: to,
     subject: subject || "Hello from PerfectPixel",
     html: html,
     text: text
-  });*/
-  return true
+  });
 };
 
 module.exports = {

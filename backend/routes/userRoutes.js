@@ -139,7 +139,7 @@ module.exports = function(app) {
     User.options.classMethods.confirmAccount(
       req.fields.email,
       req.fields.code,
-      (error, success) => {
+      (error, user) => {
         if (error) {
           return res.error(error);
         }
