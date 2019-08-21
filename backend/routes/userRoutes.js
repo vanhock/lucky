@@ -18,7 +18,8 @@ const allowedParams = [
   "updatedAt",
   "status",
   "confirmationCodeTimeout",
-  "confirmationCodeCreatedAt"
+  "confirmationCodeCreatedAt",
+  "oneTimePassword"
 ];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {

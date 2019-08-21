@@ -31,7 +31,9 @@ export default {
     isAuthenticated: state => state.userToken,
     status: state => state.status,
     user: state => state.user,
-    userName: state => state.user && state.user.name
+    userName: state => state.user && state.user.name,
+    userStatus: state => state.user && state.user.status,
+    userHasOneTimePassword: state => state.user && state.user.oneTimePassword
   },
   mutations: {
     [USER_LOGIN]: state => {
