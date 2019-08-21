@@ -8,12 +8,14 @@ import {
   USER_CHECK_USER_EXIST,
   USER_CONFIRMATION_REQUEST,
   USER_SEND_CONFIRMATION_CODE,
-  USER_CHECK_USER_CONFIRMATION_CODE
+  USER_CHECK_USER_CONFIRMATION_CODE,
+  USER_CHANGE_USER_INFO
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
   AuthByToken,
   Authorization,
+  ChangeUserInfo,
   CheckUserConfirmationCode,
   CheckUserExist,
   Registration,
@@ -59,6 +61,9 @@ export default {
       state.user = payload;
     },
     [USER_CONFIRMATION_REQUEST](state, payload) {
+      state.user = payload;
+    },
+    [USER_CHANGE_USER_INFO](state, payload) {
       state.user = payload;
     }
   },
@@ -144,6 +149,17 @@ export default {
             return reject(error);
           }
           commit(USER_SEND_CONFIRMATION_CODE, user);
+          resolve(user);
+        });
+      });
+    },
+    [USER_CHANGE_USER_INFO]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        ChangeUserInfo(payload, (error, user) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(USER_CHANGE_USER_INFO, user);
           resolve(user);
         });
       });

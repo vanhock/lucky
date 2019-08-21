@@ -21,6 +21,7 @@ const allowedParams = [
   "confirmationCodeCreatedAt",
   "oneTimePassword"
 ];
+const allowedToEditParams = ["name", "company", "oneTimePassword"];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
     if (!req.fields.email || !req.fields.password) {
@@ -98,11 +99,13 @@ module.exports = function(app) {
     if (!Object.keys(req.fields).length) {
       return res.error("Fields are empty!");
     }
-    const fields = req.fields;
-
+    const allowedFields = filterObject(req.fields, allowedToEditParams);
+    if (!Object.keys(allowedFields).length) {
+      return res.error("Have no allowed fields for edit");
+    }
     getUserByToken(req, res, user => {
       user
-        .update(fields)
+        .update(allowedFields)
         .then(user => {
           res
             .status(200)
