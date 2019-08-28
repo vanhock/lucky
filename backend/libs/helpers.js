@@ -33,7 +33,12 @@ const getUserByToken = function(req, res, cb) {
       if (!user) {
         return res.error({ title: "User not found", code: 401 });
       }
-
+      if (user.dataValues.status === "new") {
+        return res.error({ title: "User not confirmed", code: 401 });
+      }
+      if (user.dataValues.status === "disabled") {
+        return res.error({ title: "User disabled", code: 401 });
+      }
       cb(user);
     }
   );

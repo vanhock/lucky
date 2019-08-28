@@ -21,7 +21,7 @@ import VButtonPrimary from "../../molecules/VButton/VButtonPrimary";
 import { notification } from "../../services/notification";
 import { USER_CHANGE_USER_INFO } from "../../services/store/mutation-types";
 export default {
-  name: "AuthConductorIntroducing",
+  name: "WelcomeIntroducing",
   components: { VButtonPrimary, VInputBordered, FormGroup },
   methods: {
     saveUserData() {

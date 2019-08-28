@@ -216,11 +216,7 @@ module.exports = function(sequelize, DataTypes) {
               });
               /** Todo: Need to send password on email here **/
             }
-            return done(null, {
-              ...foundUser.dataValues,
-              confirmationCodeTimeout:
-                config.authorization.confirmation_code_resend_timeout
-            });
+            return done(null, foundUser.dataValues);
           }, done);
         },
         authByToken: function(token, done) {
@@ -235,9 +231,11 @@ module.exports = function(sequelize, DataTypes) {
               User.options.instanceMethods.isTokenOutdated(foundUser)
             ) {
               return done("tokenOutdated");
+            } else if (foundUser.dataValues.oneTimePassword) {
+              foundUser.update({
+                token: User.options.instanceMethods.generateToken()
+              });
             }
-            foundUser.dataValues.confirmationCodeTimeout =
-              config.authorization.confirmation_code_resend_timeout;
             return done(null, foundUser);
           }, done);
         },
@@ -308,9 +306,11 @@ module.exports = function(sequelize, DataTypes) {
               )
                 .then(success => {
                   console.log(`Sent code: ${code} on email: ${user.email}`);
-                  return user.update({ confirmationCode: code }).then(resultUser => {
-                    return done(null, resultUser);
-                  });
+                  return user
+                    .update({ confirmationCode: code })
+                    .then(resultUser => {
+                      return done(null, resultUser);
+                    });
                 })
                 .catch(error => {
                   console.error(error);

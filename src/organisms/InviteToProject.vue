@@ -12,7 +12,7 @@
         {{ $t("Link copied to clipboard!") }}
       </div>
     </div>
-    <template v-if="allowedInvite">
+    <template v-show="allowedInvite">
       <div class="invite-to-project-title">{{ $t("Invite to Project") }}</div>
       <v-input-search
         name="email"
@@ -120,8 +120,10 @@ export default {
   },
   mounted() {
     const self = this;
-    this.emails.$on("onclick", () => {
-      self.inviteUser();
+    this.$nextTick(() => {
+      this.emails.$on("onclick", () => {
+        self.inviteUser();
+      });
     });
   },
   props: {
@@ -182,7 +184,7 @@ export default {
         })
         .catch(error => {
           if (error) {
-            return notification(this, "error", this.$t(error.message));
+            return notification(this, "error", this.$t(error));
           }
         });
     },

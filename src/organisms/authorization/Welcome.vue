@@ -1,17 +1,17 @@
 <template>
   <v-modal
-    class="auth-conductor-modal"
+    class="welcome-modal"
     ref="modal"
     :title="modalTitle"
     :description="modalDescription"
     wide
     unable-closing
   >
-    <auth-conductor-confirmation
+    <welcome-confirmation
       v-show="!userHasOneTimePassword"
       @success="closeModal"
     />
-    <auth-conductor-introducing
+    <welcome-introducing
       v-show="userHasOneTimePassword"
       @success="closeModal"
     />
@@ -21,12 +21,12 @@
 <script>
 import VModal from "../../molecules/VModal";
 import { mapGetters } from "vuex";
-import AuthConductorConfirmation from "./AuthConductorConfirmation";
-import AuthConductorIntroducing from "./AuthConductorIntroducing";
+import WelcomeConfirmation from "./WelcomeConfirmation";
+import WelcomeIntroducing from "./WelcomeIntroducing";
 
 export default {
-  name: "AuthConductor",
-  components: { AuthConductorIntroducing, AuthConductorConfirmation, VModal },
+  name: "Welcome",
+  components: { WelcomeIntroducing, WelcomeConfirmation, VModal },
   mounted() {},
   data: () => ({}),
   computed: {
@@ -44,7 +44,9 @@ export default {
     }
   },
   watch: {
-    userStatus: this.toggleModal()
+    userStatus: function () {
+      this.toggleModal()
+    }
   },
   methods: {
     closeModal() {
@@ -59,7 +61,7 @@ export default {
 </script>
 
 <style lang="scss">
-.auth-conductor-modal {
+.welcome-modal {
   .pp-modal-close {
     display: none;
   }
