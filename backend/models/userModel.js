@@ -231,10 +231,6 @@ module.exports = function(sequelize, DataTypes) {
               User.options.instanceMethods.isTokenOutdated(foundUser)
             ) {
               return done("tokenOutdated");
-            } else if (foundUser.dataValues.oneTimePassword) {
-              foundUser.update({
-                token: User.options.instanceMethods.generateToken()
-              });
             }
             return done(null, foundUser);
           }, done);
@@ -323,8 +319,19 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
       hooks: {
-        beforeDestroy: function(user) {
+        beforeDestroy(user) {
           user.removeAvatar();
+        },
+        beforeUpdate(user, options) {
+          /** Set status confirmed after add Name and Password **/
+          if (
+            user.dataValues.name &&
+            user.dataValues.password &&
+            user.dataValues.status === "new" &&
+            !user.dataValues.oneTimePassword
+          ) {
+            user.update({ status: "active" });
+          }
         }
       }
     }

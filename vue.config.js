@@ -43,13 +43,13 @@ module.exports = {
         },
         contentScripts: {
           entries: {
-            "content_scripts/inspectors-script": [
+            "/content_scripts/inspectors-script": [
               "src/extension/content_scripts/inspectors-script.js"
             ],
-            "content_scripts/main-script": [
+            "/content_scripts/main-script": [
               "src/extension/content_scripts/main-script.js"
             ],
-            "content_scripts/auth-script": [
+            "/content_scripts/auth-script": [
               "src/extension/content_scripts/auth-script.js"
             ]
           }

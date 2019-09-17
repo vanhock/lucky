@@ -305,7 +305,7 @@ module.exports = function(app) {
               .getUsers({ where: { email: foundUser.dataValues.email } })
               .then(projects => {
                 if (!projects || !projects.length) {
-                  return addUserToProject(project, foundUser);
+                  return addUserToProject(project, foundUser, foundUser.dataValues.token);
                 }
                 return res.error("This user already invited");
               });
@@ -334,7 +334,8 @@ module.exports = function(app) {
           }
           function sendInviteToEmail(user, project, token) {
             let projectLink = `${config.websiteUrl}/i/p/${project.permalink}`;
-            if (token) projectLink = `${projectLink}/${token}`;
+            if (token) projectLink = `${projectLink}?token=${token}`;
+
             const userName = (user.name && ` ${user.name}`) || "";
             const buttonStyles = `
                   background-color: #7012e5;

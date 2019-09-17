@@ -4,7 +4,7 @@
     ref="modal"
     :title="modalTitle"
     :description="modalDescription"
-    wide
+    :wide="!userHasOneTimePassword"
     unable-closing
   >
     <welcome-confirmation
@@ -32,12 +32,12 @@ export default {
   computed: {
     ...mapGetters(["user", "userStatus", "userHasOneTimePassword"]),
     modalTitle() {
-      return `${this.$t("Hello")} ${this.user.name}!`;
+      return `${this.$t("Welcome")}${this.user && this.user.name ? ' ' + this.user.name : ''}!`;
     },
     modalDescription() {
-      return this.$t(
+      return !this.userHasOneTimePassword ? this.$t(
         "Confirmation code sent to your email, type it bellow for activate your account"
-      );
+      ) : this.$t(`Introduce yourself`);
     },
     confirmationResendText() {
       return this.$t("You could send code again after:");

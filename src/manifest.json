@@ -13,13 +13,13 @@
   },
   "permissions": ["activeTab", "<all_urls>", "*://*/*", "storage"],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["js/background.js"],
     "persistent": false
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["/content_scripts/main-script.js"]
+      "js": ["js/content_scripts/main-script.js"]
     }
   ],
   "browser_action": {

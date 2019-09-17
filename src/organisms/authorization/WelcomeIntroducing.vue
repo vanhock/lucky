@@ -1,16 +1,22 @@
 <template>
   <div class="introducing">
     <form-group ref="form">
-      <v-input-bordered name="name" :label="$t('Your Name')" required />
+      <v-input-bordered
+        name="name"
+        :label="$t('Your Name')"
+        autocomplete="off"
+        required
+      />
       <v-input-bordered
         name="password"
+        type="password"
         :label="$t('Create password')"
         required
       />
-      <v-button-primary class="introducing-post" @click="saveUserData">{{
-        $t("Save and start")
-      }}</v-button-primary>
     </form-group>
+    <v-button-primary class="introducing-post" @click="saveUserData">{{
+      $t("Continue")
+    }}</v-button-primary>
   </div>
 </template>
 
@@ -29,7 +35,10 @@ export default {
         return notification(this, "error", this.$t("Form not valid"));
       }
       this.$store
-        .dispatch(USER_CHANGE_USER_INFO, this.$refs.form.changedItems)
+        .dispatch(USER_CHANGE_USER_INFO, {
+          ...this.$refs.form.changedItems,
+          oneTimePassword: false
+        })
         .then(() => {
           notification(this, "success", this.$t("You ready to go"));
           this.$emit("success");
@@ -42,4 +51,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.introducing-post {
+  margin-top: 20px;
+}
+</style>

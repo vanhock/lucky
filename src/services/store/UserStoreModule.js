@@ -55,7 +55,7 @@ export default {
     },
     [USER_CHECK_AUTH](state, payload = null) {
       state.user = payload;
-      state.userToken = payload.token;
+      state.userToken = payload && payload.token;
     },
     [USER_SEND_CONFIRMATION_CODE](state, payload) {
       state.user = payload;

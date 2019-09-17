@@ -128,18 +128,21 @@
 <script>
 import {
   PROJECT_CHECK_ACCESS,
-  PROJECT_SET_CURRENT_PROJECT
+  PROJECT_SET_CURRENT_PROJECT,
+  USER_CHECK_AUTH
 } from "../services/store/mutation-types";
 import config from "../config";
 import VIcon from "../atoms/VIcon/VIcon";
 import VButtonPrimary from "../molecules/VButton/VButtonPrimary";
 import SignIn from "../organisms/authorization/SignIn";
 import { mapGetters } from "vuex";
+import { getParameterByName } from "../utils";
 export default {
   name: "ConductorView",
   components: { SignIn, VButtonPrimary, VIcon },
   created() {
     this.getProject();
+    this.tryToAuthByUrlToken();
     const self = this;
     window.addEventListener("message", event => {
       if (event.source !== window) return;
@@ -187,7 +190,7 @@ export default {
     extensionCheckInterval: null
   }),
   computed: {
-    ...mapGetters(["currentProject"]),
+    ...mapGetters(["currentProject", "isAuthenticated"]),
     titleText() {
       return !this.authorized && !this.hasExtension
         ? this.$t("Two steps to open page")
@@ -210,7 +213,9 @@ export default {
       if (!this.currentProject) {
         return;
       }
-      return this.$t("If you just invited to this project, follow by link on your email");
+      return this.$t(
+        "If you just invited to this project, follow by link on your email"
+      );
     }
   },
   props: {
@@ -223,6 +228,12 @@ export default {
       this.$store
         .dispatch(PROJECT_SET_CURRENT_PROJECT, { permalink: this.permalink })
         .then(() => {
+          if (!this.isAuthenticated) {
+            this.loaded(() => {
+              this.authorized = false;
+            });
+            return;
+          }
           return this.checkProjectAccess();
         })
         .catch(error => {
@@ -237,14 +248,16 @@ export default {
       return this.$store
         .dispatch(PROJECT_CHECK_ACCESS, { permalink: this.permalink })
         .then(() => {
-          this.loading = false;
-          this.accessError = "";
-          return (this.authorized = true);
+          this.loaded(() => {
+            this.accessError = "";
+            return (this.authorized = true);
+          });
         })
         .catch(error => {
-          this.loading = false;
-          this.accessError = error;
-          return (this.authorized = false);
+          this.loaded(() => {
+            this.accessError = error;
+            return (this.authorized = false);
+          });
         });
     },
     checkExtensionInstalled() {
@@ -253,6 +266,15 @@ export default {
       } catch (e) {
         this.hasExtension = false;
       }
+    },
+    tryToAuthByUrlToken() {
+      const token = getParameterByName("token");
+      if (!token || this.isAuthenticated) {
+        return;
+      }
+      this.$store.dispatch(USER_CHECK_AUTH, token).then(() => {
+        this.checkProjectAccess();
+      });
     },
     onAuth() {
       this.checkProjectAccess();
@@ -292,8 +314,6 @@ export default {
 
 <style lang="scss">
 .conductor-view {
-  max-width: 1100px;
-  margin: auto;
   height: 100%;
   display: flex;
   align-items: center;
@@ -304,18 +324,16 @@ export default {
     display: flex;
     width: 100%;
     height: 100%;
-    max-height: 80%;
     min-height: 583px;
     margin: 0 auto;
     align-items: center;
     flex-direction: column;
     text-align: center;
-    border-radius: 7px;
     background-color: #fff;
     @include box-shadow(medium);
   }
   .pixel-icon {
-    margin-bottom: 30px;
+    margin: 30px 0;
     .v-icon-image {
       width: 100px;
       height: 40px !important;
@@ -349,7 +367,6 @@ export default {
       background-repeat: no-repeat;
       background-size: cover;
       background-position: center top;
-      border-radius: 0 7px 7px 0;
       z-index: 1;
       opacity: 0.8;
     }
@@ -368,9 +385,8 @@ export default {
       background: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0) 0%,
-        rgba(0, 0, 0, 1) 100%
+        rgba(0, 0, 0, 0.58) 100%
       );
-      border-radius: 0 0 7px 0;
       color: #fff;
       font-weight: 600;
       text-align: left;
@@ -394,7 +410,7 @@ export default {
   }
   &-auth {
     display: flex;
-    flex: 2;
+    flex: 1.5;
     align-items: center;
     justify-content: flex-start;
     flex-direction: column;

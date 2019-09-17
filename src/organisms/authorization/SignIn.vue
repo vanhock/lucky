@@ -5,6 +5,7 @@
         name="email"
         :label="$t('email')"
         autocomplete="username"
+        autofocus
         required
       />
       <v-input-bordered
