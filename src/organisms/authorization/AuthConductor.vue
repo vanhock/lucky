@@ -1,50 +1,65 @@
 <template>
-  <v-modal
-    class="auth-conductor-modal"
-    ref="modal"
-    :title="modalTitle"
-    :description="modalDescription"
-    wide
-    unable-closing
-  >
-    <auth-conductor-confirmation
-      v-show="!userHasOneTimePassword"
-      @success="closeModal"
-    />
-    <auth-conductor-introducing
-      v-show="userHasOneTimePassword"
-      @success="closeModal"
-    />
-  </v-modal>
+  <div>
+    <v-modal
+      class="welcome-modal"
+      ref="modal"
+      :title="modalTitle"
+      :description="modalDescription"
+      :wide="!userHasOneTimePassword"
+      unable-closing
+    >
+      <auth-conductor-confirm
+        v-show="!userHasOneTimePassword"
+        @success="closeModal"
+      />
+      <auth-conductor-set
+        v-show="userHasOneTimePassword"
+        @success="closeModal"
+      />
+    </v-modal>
+    <auth-conductor-reset-password />
+  </div>
 </template>
 
 <script>
 import VModal from "../../molecules/VModal";
 import { mapGetters } from "vuex";
-import AuthConductorConfirmation from "./AuthConductorConfirmation";
-import AuthConductorIntroducing from "./AuthConductorIntroducing";
+import AuthConductorConfirm from "./AuthConductorConfirm";
+import AuthConductorSet from "./AuthConductorSet";
+import AuthConductorResetPassword from "./AuthConductorResetPassword";
 
 export default {
   name: "AuthConductor",
-  components: { AuthConductorIntroducing, AuthConductorConfirmation, VModal },
+  components: {
+    AuthConductorResetPassword,
+    AuthConductorSet,
+    AuthConductorConfirm,
+    VModal
+  },
   mounted() {},
   data: () => ({}),
   computed: {
     ...mapGetters(["user", "userStatus", "userHasOneTimePassword"]),
     modalTitle() {
-      return `${this.$t("Hello")} ${this.user.name}!`;
+      return `${this.$t("Welcome")}${
+        this.user && this.user.name ? " " + this.user.name : ""
+      }!`;
     },
     modalDescription() {
-      return this.$t(
-        "Confirmation code sent to your email, type it bellow for activate your account"
-      );
+      return !this.userHasOneTimePassword
+        ? this.$t(
+            "Confirmation code sent to your email, type it bellow for activate your account"
+          )
+        : this.$t(`Introduce yourself`);
     },
     confirmationResendText() {
       return this.$t("You could send code again after:");
     }
   },
   watch: {
-    userStatus: this.toggleModal()
+    userStatus: function() {
+      this.toggleModal();
+    }
   },
   methods: {
     closeModal() {
@@ -59,7 +74,7 @@ export default {
 </script>
 
 <style lang="scss">
-.auth-conductor-modal {
+.welcome-modal {
   .pp-modal-close {
     display: none;
   }

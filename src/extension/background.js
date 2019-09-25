@@ -155,7 +155,7 @@ function disconnected(p) {
 function setUpInspectorsScript(tabId) {
   ports[tabId].postMessage({ clear: true });
   browser.tabs.executeScript(tabId, {
-    file: "content_scripts/inspectors-script.js"
+    file: "js/content_scripts/inspectors-script.js"
   });
 }
 
@@ -228,7 +228,7 @@ function runAuthScript(tabId = null) {
       .create({ url: config.apiUrl + config.authUrl })
       .then(tab => {
         browser.tabs.executeScript(tab.id, {
-          file: "content_scripts/auth-script.js"
+          file: "js/content_scripts/auth-script.js"
         });
         ports[tabId].authTabId = tab.id;
       })

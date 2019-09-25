@@ -2,6 +2,7 @@ import axios from "axios";
 import config from "../../config";
 import store from "../store/store";
 import { USER_LOGOUT } from "../store/mutation-types";
+import { getParameterByName } from "../../utils";
 class PixelApi {
   constructor() {
     let api = axios.create({
@@ -29,7 +30,10 @@ class PixelApi {
     switch (resp.status) {
       case 401:
         if (location.href.includes(config.apiUrl)) {
-          if (!location.href.includes(`${config.apiUrl}/i`)) {
+          if (
+            !location.href.includes(`${config.apiUrl}/i`) &&
+            !getParameterByName("resetPassword")
+          ) {
             store.dispatch(USER_LOGOUT).then(() => {
               document.location = "/sign-in";
             });

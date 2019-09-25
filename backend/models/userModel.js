@@ -216,11 +216,7 @@ module.exports = function(sequelize, DataTypes) {
               });
               /** Todo: Need to send password on email here **/
             }
-            return done(null, {
-              ...foundUser.dataValues,
-              confirmationCodeTimeout:
-                config.authorization.confirmation_code_resend_timeout
-            });
+            return done(null, foundUser.dataValues);
           }, done);
         },
         authByToken: function(token, done) {
@@ -236,8 +232,6 @@ module.exports = function(sequelize, DataTypes) {
             ) {
               return done("tokenOutdated");
             }
-            foundUser.dataValues.confirmationCodeTimeout =
-              config.authorization.confirmation_code_resend_timeout;
             return done(null, foundUser);
           }, done);
         },
@@ -308,9 +302,11 @@ module.exports = function(sequelize, DataTypes) {
               )
                 .then(success => {
                   console.log(`Sent code: ${code} on email: ${user.email}`);
-                  return user.update({ confirmationCode: code }).then(resultUser => {
-                    return done(null, resultUser);
-                  });
+                  return user
+                    .update({ confirmationCode: code })
+                    .then(resultUser => {
+                      return done(null, resultUser);
+                    });
                 })
                 .catch(error => {
                   console.error(error);
@@ -323,8 +319,19 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
       hooks: {
-        beforeDestroy: function(user) {
+        beforeDestroy(user) {
           user.removeAvatar();
+        },
+        beforeUpdate(user, options) {
+          /** Set status confirmed after add Name and Password **/
+          if (
+            user.dataValues.name &&
+            user.dataValues.password &&
+            user.dataValues.status === "new" &&
+            !user.dataValues.oneTimePassword
+          ) {
+            user.update({ status: "active" });
+          }
         }
       }
     }

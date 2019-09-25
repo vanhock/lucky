@@ -4,6 +4,7 @@ module.exports = {
     address: "http://localhost",
     port: process.env.SERVER_PORT
   },
+  websiteUrl: process.env.WEBSITE_URL,
   authorization: {
     token_out_of_date: 604800 /** 1 week **/,
     confirmation_code_out_of_date: 3600 /**  1 hour **/,

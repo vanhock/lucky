@@ -48,7 +48,8 @@ export default {
     params: {
       type: Object,
       default: () => {}
-    }
+    },
+    textSize: { type: String, default: "12px" }
   }
 };
 </script>

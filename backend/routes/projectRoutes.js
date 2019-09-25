@@ -7,8 +7,10 @@ const {
   getUrlData,
   removeFolder,
   createDirectoryIfNotExist,
-  extractHostname
+  extractHostname,
+  sendMail
 } = require("../libs/helpers");
+const {defaultMailTemplate} = require("../libs/mailTemplates");
 const { deleteDesigns } = require("../controllers/designController");
 const { getProjectUsers } = require("../controllers/projectController");
 const sequelize = require("sequelize");
@@ -284,22 +286,32 @@ module.exports = function(app) {
             where: {
               email: email
             }
-          })
-            .then(foundUser => {
-              return addUser(project, foundUser);
-            })
-            .catch(() => {
-              User.options.classMethods.createNewUser(
+          }).then(foundUser => {
+            if (!foundUser) {
+              return User.options.classMethods.createNewUser(
                 { email: email },
                 (error, foundUser) => {
                   if (error) {
                     return res.error(error);
                   }
-                  return addUser(project, foundUser);
+                  return addUserToProject(
+                    project,
+                    foundUser,
+                    foundUser.dataValues.token
+                  );
                 }
               );
-            });
-          function addUser(project, targetUser) {
+            }
+            project
+              .getUsers({ where: { email: foundUser.dataValues.email } })
+              .then(projects => {
+                if (!projects || !projects.length) {
+                  return addUserToProject(project, foundUser, foundUser.dataValues.token);
+                }
+                return res.error("This user already invited");
+              });
+          });
+          function addUserToProject(project, targetUser, token) {
             updateProjectUser(
               req,
               res,
@@ -311,10 +323,29 @@ module.exports = function(app) {
                   if (error) {
                     return res.error(error);
                   }
+                  sendInviteToEmail(
+                    targetUser.dataValues,
+                    project.dataValues,
+                    token
+                  );
                   return res.status(200).send(users);
                 });
               }
             );
+          }
+          function sendInviteToEmail(user, project, token) {
+            let projectLink = `${config.websiteUrl}/i/p/${project.permalink}`;
+            if (token) projectLink = `${projectLink}?token=${token}`;
+
+            const userName = (user.name && ` ${user.name}`) || "";
+            const mailBody =
+              defaultMailTemplate(
+                `Hi${userName}!`,
+                `<p>You invited to project: "${project.name}".</p><p>To join follow this link bellow: </p>`,
+                "Join Project",
+                projectLink
+              );
+            sendMail(user.email, "You invited to Project", mailBody);
           }
         }
       );

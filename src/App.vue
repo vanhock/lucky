@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <auth-conductor />
+    <AuthConductor />
     <router-view />
   </div>
 </template>

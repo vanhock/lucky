@@ -4,8 +4,10 @@ const {
   getUserByToken,
   filterObject,
   removeFile,
-  moveFile
+  moveFile,
+  sendMail
 } = require("../libs/helpers");
+const { defaultMailTemplate } = require("../libs/mailTemplates");
 
 const allowedParams = [
   "id",
@@ -21,6 +23,7 @@ const allowedParams = [
   "confirmationCodeCreatedAt",
   "oneTimePassword"
 ];
+const allowedToEditParams = ["name", "company", "oneTimePassword"];
 module.exports = function(app) {
   app.post("/registration", (req, res) => {
     if (!req.fields.email || !req.fields.password) {
@@ -98,11 +101,13 @@ module.exports = function(app) {
     if (!Object.keys(req.fields).length) {
       return res.error("Fields are empty!");
     }
-    const fields = req.fields;
-
+    const allowedFields = filterObject(req.fields, allowedToEditParams);
+    if (!Object.keys(allowedFields).length) {
+      return res.error("Have no allowed fields for edit");
+    }
     getUserByToken(req, res, user => {
       user
-        .update(fields)
+        .update(allowedFields)
         .then(user => {
           res
             .status(200)
@@ -149,6 +154,62 @@ module.exports = function(app) {
           .send(JSON.stringify(filterObject(user.dataValues, allowedParams)));
       }
     );
+  });
+
+  app.post("/reset-password-request", (req, res) => {
+    if (!req.fields.email) {
+      return res.error("Required field did not provide!");
+    }
+    User.findOne({
+      where: {
+        email: req.fields.email
+      }
+    })
+      .then(user => {
+        if (!user) {
+          return res.error("User does not exist!");
+        }
+        const token = User.options.classMethods.generateToken();
+        user.update({ token: token });
+        const mailBody = defaultMailTemplate(
+          "Reset password link",
+          `<p>Follow this link for reset your password</p>`,
+          "Reset password",
+          `${config.websiteUrl}?token=${token}&resetPassword=true`
+        );
+        sendMail(req.fields.email, "Reset password link", mailBody).then(() => {
+          res
+            .status(200)
+            .send({ message: `Reset link sent to ${user.dataValues.email}` });
+        });
+      })
+      .catch(error => {
+        return res.error(error);
+      });
+  });
+
+  app.post("/reset-account-credentials", (req, res) => {
+    getUserByToken(req, res, user => {
+      if (user.dataValues.status === "disabled") {
+        res.error("User disabled");
+      }
+      if (user.dataValues.status !== "new")
+        user
+          .update({
+            oneTimePassword: true,
+            status: "new"
+          })
+          .then(user => {
+            res
+              .status(200)
+              .send(
+                JSON.stringify(filterObject(user.dataValues, allowedParams))
+              );
+          })
+          .catch(error => {
+            console.log(`Error with update: ${error}`);
+          });
+    });
   });
 
   app.post("/set-user-avatar", (req, res) => {
