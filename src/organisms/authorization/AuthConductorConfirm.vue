@@ -40,7 +40,7 @@ import VIcon from "../../atoms/VIcon/VIcon";
 import { notification } from "../../services/notification";
 import BackendConfig from "../../../backend/config/config";
 export default {
-  name: "WelcomeConfirmation",
+  name: "AuthConductorConfirm",
   components: { VIcon, VButtonInline, VInputSearch, VModal },
   mounted() {
     this.$store.subscribe(mutation => {

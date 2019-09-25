@@ -10,6 +10,7 @@ const {
   extractHostname,
   sendMail
 } = require("../libs/helpers");
+const {defaultMailTemplate} = require("../libs/mailTemplates");
 const { deleteDesigns } = require("../controllers/designController");
 const { getProjectUsers } = require("../controllers/projectController");
 const sequelize = require("sequelize");
@@ -337,32 +338,13 @@ module.exports = function(app) {
             if (token) projectLink = `${projectLink}?token=${token}`;
 
             const userName = (user.name && ` ${user.name}`) || "";
-            const buttonStyles = `
-                  background-color: #7012e5;
-                  margin-left: auto;
-                  margin-right: auto;
-                  display: -webkit-box;
-                  display: -ms-flexbox;
-                  display: inline-flex;
-                  padding: 8px 38px;
-                  font-weight: 600;
-                  border-radius: 26px;
-                  font-size: 14px;
-                  color: #fff;
-                  line-height: initial;
-                  text-decoration: none;
-            `;
-            const mailBody = `
-              <h1>Hi${userName}!</h1>
-              <p>You invited to project: "${project.name}".</p>
-              <p>To join follow this link bellow: </p>
-              <div>
-                <a 
-                  style="${buttonStyles}" 
-                  target="_blank" 
-                  href="${projectLink}">Join Project</a>
-              </div>
-            `;
+            const mailBody =
+              defaultMailTemplate(
+                `Hi${userName}!`,
+                `<p>You invited to project: "${project.name}".</p><p>To join follow this link bellow: </p>`,
+                "Join Project",
+                projectLink
+              );
             sendMail(user.email, "You invited to Project", mailBody);
           }
         }

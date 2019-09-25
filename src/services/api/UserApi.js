@@ -60,11 +60,23 @@ export function SendConfirmationCode(payload, cb) {
 }
 
 export function ChangeUserInfo(payload, cb) {
+  PixelApi.post("/change-user-info", { data: payload }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
+}
+
+export function ResetPasswordRequest(payload, cb) {
   PixelApi.post(
-    "/change-user-info",
-    {data: payload},
+    "/reset-password-request",
+    { data: payload },
     (status, data) => {
       generalCallback(status, data, cb);
     }
-  )
+  );
+}
+
+export function ResetAccountCredentials(cb) {
+  PixelApi.post("/reset-account-credentials", { data: {} }, (status, data) => {
+    generalCallback(status, data, cb);
+  });
 }

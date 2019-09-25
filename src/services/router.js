@@ -4,6 +4,7 @@ import Router from "vue-router";
 import AuthView from "../views/AuthView";
 
 import UserPanelView from "../views/UserPanelView";
+import { getParameterByName } from "../utils";
 Vue.use(Router);
 
 i18n.locale = localStorage.getItem("locale") || "en";
@@ -17,7 +18,7 @@ const ifNotAuthenticated = (to, from, next) => {
 };
 
 const ifAuthenticated = (to, from, next) => {
-  if (localStorage.getItem("pp-u-t-s")) {
+  if (localStorage.getItem("pp-u-t-s") || getParameterByName("resetPassword")) {
     next();
     return;
   }
@@ -58,7 +59,7 @@ export default new Router({
       name: "Conductor",
       props: true,
       component: () =>
-        import(/* webpackChunkName: "ConductorView" */ "../views/ConductorView"),
+        import(/* webpackChunkName: "ProjectConductorView" */ "../views/ProjectConductorView"),
       meta: {
         title: i18n.t("Conductor")
       }
@@ -84,6 +85,12 @@ export default new Router({
           name: "SignUp",
           component: () =>
             import(/* webpackChunkName: "SignUp" */ "../organisms/authorization/SignUp")
+        },
+        {
+          path: "/reset-password",
+          name: "ResetPassword",
+          component: () =>
+            import(/* webpackChunkName: "ResetPassword" */ "../organisms/authorization/ResetPassword")
         }
       ]
     },

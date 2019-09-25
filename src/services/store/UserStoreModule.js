@@ -8,17 +8,19 @@ import {
   USER_CHECK_USER_EXIST,
   USER_CONFIRMATION_REQUEST,
   USER_SEND_CONFIRMATION_CODE,
-  USER_CHECK_USER_CONFIRMATION_CODE,
-  USER_CHANGE_USER_INFO
+  USER_CHANGE_USER_INFO,
+  USER_RESET_PASSWORD,
+  USER_RESET_ACCOUNT_CREDENTIALS
 } from "./mutation-types";
 import PixelApi from "../api/api";
 import {
   AuthByToken,
   Authorization,
   ChangeUserInfo,
-  CheckUserConfirmationCode,
   CheckUserExist,
   Registration,
+  ResetAccountCredentials,
+  ResetPasswordRequest,
   SendConfirmationCode,
   SetAuthToken,
   UserConfirmationRequest
@@ -65,6 +67,11 @@ export default {
     },
     [USER_CHANGE_USER_INFO](state, payload) {
       state.user = payload;
+    },
+    [USER_RESET_ACCOUNT_CREDENTIALS](state, payload) {
+      if (!payload) return;
+      state.user = payload;
+      state.userToken = payload.user.token;
     }
   },
   actions: {
@@ -106,7 +113,6 @@ export default {
       });
     },
     [USER_CHECK_AUTH]({ commit }, payload) {
-      console.log("auth check init");
       return new Promise((resolve, reject) => {
         AuthByToken(payload, (error, user) => {
           if (error || !user) {
@@ -116,6 +122,7 @@ export default {
             postMessage({ resetToken: true });
             return reject(error);
           }
+          localStorage.setItem("pp-u-t-s", user.token);
           commit(USER_CHECK_AUTH, user);
           resolve(user);
         });
@@ -161,6 +168,27 @@ export default {
           }
           commit(USER_CHANGE_USER_INFO, user);
           resolve(user);
+        });
+      });
+    },
+    [USER_RESET_PASSWORD]({ commit }, payload) {
+      return new Promise((resolve, reject) => {
+        ResetPasswordRequest(payload, (error, message) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(message);
+        });
+      });
+    },
+    [USER_RESET_ACCOUNT_CREDENTIALS]({ commit }) {
+      return new Promise((resolve, reject) => {
+        ResetAccountCredentials((error, user) => {
+          if (error) {
+            return reject(error);
+          }
+          commit(USER_RESET_ACCOUNT_CREDENTIALS, user);
+          resolve();
         });
       });
     }

@@ -138,7 +138,7 @@ import SignIn from "../organisms/authorization/SignIn";
 import { mapGetters } from "vuex";
 import { getParameterByName } from "../utils";
 export default {
-  name: "ConductorView",
+  name: "ProjectConductorView",
   components: { SignIn, VButtonPrimary, VIcon },
   created() {
     this.getProject();
