@@ -16,7 +16,7 @@
         required
       />
     </form-group>
-    <div class="forgot-password">
+    <div class="forgot-password" :disabled="loading">
       <p>{{ $t("Forgot password? You can ") }} <router-link :to="{ name: 'ResetPassword' }">{{
         $t("reset password")
         }}</router-link></p>
@@ -69,20 +69,19 @@ export default {
         .dispatch(USER_LOGIN, fields)
         .then(user => {
           this.$emit("success", user);
-          this.loading = false;
           if (!this.custom) {
             UserLoginSuccess(this, user.name);
-            setTimeout(() => {
+            return setTimeout(() => {
               self.$router.push("/");
             }, 2000);
           }
         })
         .catch(error => {
-          this.loading = false;
           this.$emit("error", error);
           if (!this.custom) {
             UserLoginError(this, error);
           }
+          this.loading = false;
         });
     }, 300),
     checkAccountExist: _.debounce(function() {

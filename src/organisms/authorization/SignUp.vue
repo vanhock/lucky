@@ -56,8 +56,8 @@ export default {
         .dispatch(USER_REGISTER, fields)
         .then(success => {
           UserRegistrationSuccess(this, success.message);
-          this.loading = false;
           this.$router.push("/sign-in");
+          this.loading = false;
         })
         .catch(error => {
           this.loading = false;
