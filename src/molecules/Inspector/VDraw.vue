@@ -36,5 +36,8 @@ export default {
   top: 0;
   width: 100%;
   height: 100%;
+  border: 5px solid #bafd37;
+  box-sizing: border-box;
+  transition: border linear 0.2s;
 }
 </style>

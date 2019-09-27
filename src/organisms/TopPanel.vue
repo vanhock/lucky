@@ -4,7 +4,7 @@
       <v-toggle class="left" icon="menu" :params="{ iconSize: iconSize }" />
       <design-params v-if="hasDesign" />
       <panel-control v-show="inspectingState">
-        <v-toggle class="left" icon="upload" text="Compare with design" />
+        <v-toggle class="left" icon="bug" :text="$t('Find bugs on the page')" />
       </panel-control>
       <div
         style="flex-grow: 1;
@@ -20,7 +20,7 @@
         :text="$t('New task')"
         :params="{ iconSize: iconSize }"
         @click="setCreatingTaskState"
-        v-hotkey.prevent="{ 'ctrl+space': setCreatingTaskState }"
+        v-hotkey="{ 'ctrl+space': setCreatingTaskState }"
         background
       ></v-toggle>
       <v-toggle
@@ -29,7 +29,6 @@
         :icon-hover="showTasksList ? 'arrow-thin-right' : ''"
         :text="$t('Tasks')"
         :params="{ iconSize: iconSize }"
-        hide-text
         :label="tasksCount"
         :active="showTasksList"
         @click="toggleTasksList"
@@ -40,6 +39,7 @@
 </template>
 
 <script>
+import Vue from "vue";
 import TaskList from "./TaskList";
 import { mapGetters } from "vuex";
 import ViewParams from "../molecules/Toolbars/ViewToolbar";
@@ -47,6 +47,8 @@ import VToggle from "../atoms/VToggle";
 import DesignParams from "../molecules/Toolbars/DesignToolbar";
 import CenterToolbar from "../molecules/Toolbars/CenterToolbar";
 import config from "../config";
+import VHotkey from "v-hotkey";
+Vue.use(VHotkey);
 import {
   INSPECTOR_SET_STATE,
   INSPECTOR_SET_TOOL

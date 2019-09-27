@@ -5,7 +5,7 @@
       icon="cheveron-outline-left"
       :text="$t('Back')"
       @click="cancelCreating"
-      v-hotkey.prevent="{ esc: cancelCreating }"
+      v-hotkey="{ esc: cancelCreating }"
     ></v-toggle>
     <div class="task-creator-tools">
       <v-toggle-selector>
@@ -45,12 +45,6 @@
       </v-toggle-selector>
     </div>
     <div class="task-creator-block">
-      <v-toggle
-        class="task-creator-all"
-        icon="cheveron-down"
-        :text="$t('More')"
-        @click="showAllFields"
-      />
       <form-group
         ref="quickCreateForm"
         class="task-form"
@@ -70,29 +64,38 @@
       <v-modal
         ref="operationalModal"
         class="task-creator-modal"
-        :title="$t('Share')"
+        :title="$t('Create task - editor')"
         @open="updateCurrentForm"
-        @close="updateCurrentForm"
-      >
-        <form-group ref="allFieldsForm">
-          <v-input-bordered
-            name="name"
-            ref="createInputName"
-            :value="currentFormName"
-            :label="$t('Task name')"
-          />
-          <v-textarea-clear
-            name="text"
-            :value="currentFormText"
-            :label="$t('Task description')"
-          />
-        </form-group>
+        @close="
+          updateCurrentForm();
+          allFieldsModalOpen = false;
+        "
+        wide>
+        <content-with-sidebar>
+          <div slot="sidebar">
+            test
+          </div>
+          <form-group ref="allFieldsForm">
+            <v-input-bordered
+              name="name"
+              ref="createInputName"
+              :value="currentFormName"
+              :label="$t('Task name')"
+            />
+            <v-textarea-clear
+              name="text"
+              :value="currentFormText"
+              :label="$t('Task description')"
+            />
+          </form-group>
+        </content-with-sidebar>
+
         <div class="task-creator-modal-buttons">
           <v-button-inline @click="closeAllFieldsModal">{{
             $t("Back")
           }}</v-button-inline>
           <v-button-primary @click="createTask">{{
-            $t("Save task")
+            $t("Create task")
           }}</v-button-primary>
         </div>
       </v-modal>
@@ -115,9 +118,18 @@
       </div>
       <v-toggle
         class="task-creator-create-task"
-        :text="$t('Share')"
+        mode="feather"
+        :text="$t('Create task')"
+        text-size="10px"
+        icon="corner-down-left"
         @click="createTask"
         background
+      />
+      <v-toggle
+          class="task-creator-all"
+          icon="cheveron-down"
+          :text="$t('Editor')"
+          @click="showAllFields"
       />
     </div>
   </div>
@@ -140,9 +152,11 @@ import VButtonInline from "../VButton/VButtonInline";
 import VTextareaClear from "../VTextareaClear";
 import { INSPECTOR_STATE_INSPECTING } from "../../services/store/InspectorsStoreModule";
 import VToggleSelector from "../VToggleSelector";
+import ContentWithSidebar from "../../layouts/ContentWithSidebar";
 export default {
   name: "TaskCreator",
   components: {
+    ContentWithSidebar,
     VToggleSelector,
     VTextareaClear,
     VButtonInline,
@@ -169,7 +183,8 @@ export default {
     toolParams: {
       stroke: "#fff",
       iconSize: "24px"
-    }
+    },
+    allFieldsModalOpen: false
   }),
   computed: {
     ...mapGetters(["taskCreatorState", "currentPage"]),
@@ -188,6 +203,14 @@ export default {
       this.$store.dispatch(INSPECTOR_SET_TOOL, state);
     },
     createTask() {
+      if (
+        (!this.allFieldsModalOpen && !this.currentPage) ||
+        !this.currentPage.id
+      ) {
+        this.showAllFields();
+        return;
+      }
+
       const fields = this.$refs.operationalModal.showModal
         ? this.$refs.allFieldsForm.getFormFields()
         : this.$refs.quickCreateForm.getFormFields();
@@ -208,6 +231,7 @@ export default {
     },
     showAllFields() {
       this.$refs.operationalModal.showModal = true;
+      this.allFieldsModalOpen = true;
     },
     closeAllFieldsModal() {
       this.$refs.operationalModal.showModal = false;
@@ -223,7 +247,12 @@ export default {
       }
     },
     onChangeName() {
-      this.currentForm = this.$refs.quickCreateForm.allItems;
+      if (!Object.keys(this.$refs.quickCreateForm.allItems).length) {
+        return;
+      }
+      for (item in this.$refs.quickCreateForm.allItems) {
+        this.currentForm[item] = this.$refs.quickCreateForm.allItems[item];
+      }
     }
   }
 };
@@ -272,13 +301,13 @@ export default {
     }
   }
   &-create-task.v-toggle {
-    width: 80px;
+    width: 62px;
     height: 34px;
     border-radius: 4px;
   }
   &-modal {
     .pp-modal-container {
-      min-width: 500px;
+      min-width: 700px;
     }
     .pp-modal-content .v-button-primary {
       margin: 0;

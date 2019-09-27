@@ -63,7 +63,10 @@ export default {
     },
     params: {
       type: Object,
-      default: () => {}
+      default: {
+        iconSize: "16px",
+        textSize: "12px"
+      }
     }
   }
 };

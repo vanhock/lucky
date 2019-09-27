@@ -79,7 +79,7 @@ module.exports = function(app) {
     getUserByToken(req, res, user => {
       const params = { trashId: null, projectId: req.query.projectId };
       if (req.query.url) params.url = req.query.url;
-      checkProjectAccess(req.query.projectId, user, error => {
+      checkProjectAccess(req.query.projectId, user, undefined, error => {
         if (error) {
           return res.error({
             title: "You don't have rights to get this pages!",

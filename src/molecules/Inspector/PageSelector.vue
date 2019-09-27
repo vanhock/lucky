@@ -90,7 +90,7 @@ export default {
   }
   &-project-name {
     color: $color-b4;
-    font-size: 13px;
+    font-size: 12px;
     cursor: default;
   }
   &-page-rename {

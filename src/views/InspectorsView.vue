@@ -14,7 +14,6 @@
       @setViewParams="setViewParams"
       @websiteScrollTop="scrollDesign"
     />
-    <create-or-select-page ref="projectModal" />
   </div>
 </template>
 
@@ -43,10 +42,7 @@ import {
   PROJECT_SET_CURRENT_PROJECT,
   TASK_SET_CURRENT_TASK
 } from "../services/store/mutation-types";
-import CreateOrSelectPage from "../organisms/SelectProjectModal";
-import VueHotkey from "v-hotkey";
 import Vue from "vue";
-Vue.use(VueHotkey);
 Vue.directive("clickoutside", {
   bind(el, binding) {
     el._handler = evt => {
@@ -64,7 +60,6 @@ Vue.directive("clickoutside", {
 export default {
   name: "ViewScreen",
   components: {
-    CreateOrSelectPage,
     DesignInspector,
     WebsiteInspector,
     TopPanel
@@ -170,11 +165,11 @@ export default {
                       });
                     });
                 } else {
-                  this.$refs.projectModal.toggleModal(true);
+                  //
                 }
               })
               .catch(() => {
-                this.$refs.projectModal.toggleModal(true);
+               //
               });
           }
         })
