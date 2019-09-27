@@ -17,9 +17,12 @@
       />
     </form-group>
     <div class="forgot-password" :disabled="loading">
-      <p>{{ $t("Forgot password? You can ") }} <router-link :to="{ name: 'ResetPassword' }">{{
-        $t("reset password")
-        }}</router-link></p>
+      <p>
+        {{ $t("Forgot password? You can ") }}
+        <router-link :to="{ name: 'ResetPassword' }">{{
+          $t("reset password")
+        }}</router-link>
+      </p>
     </div>
     <v-button-primary
       class="submit"
@@ -100,11 +103,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .forgot-password {
-    font-size: 12px;
-    color: $color-b3;
-    .router-link {
-      opacity: 0.7;
-    }
+.forgot-password {
+  font-size: 12px;
+  color: $color-b3;
+  .router-link {
+    opacity: 0.7;
   }
+}
 </style>
