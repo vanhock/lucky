@@ -1,6 +1,6 @@
 <template>
   <div class="log-out">
-    We log out from account ...
+    {{$t("We are log out from account")}}...
   </div>
 </template>
 
