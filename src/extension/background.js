@@ -84,18 +84,18 @@ function connected(p) {
   const lastActivePort = { ...ports[p.sender.tab.id] };
   p.onMessage.addListener(handleMessages);
   ports[p.sender.tab.id] = p;
-  ports[p.sender.tab.id].ready = lastActivePort.ready;
-
+  ports[p.sender.tab.id].open = lastActivePort.open;
+  ports[p.sender.tab.id].params = lastActivePort.params;
   switch (p.name) {
     case "main-script":
       isCurrentTab(p.sender.tab.id, result => {
         if (result) {
           setIcon();
           ports[p.sender.tab.id].connected = true;
-          if (ports[p.sender.tab.id].ready) {
+          if (ports[p.sender.tab.id].open) {
             /** Initialize inspectors if extension activated from Conductor component **/
             setUpInspectorsScript(p.sender.tab.id);
-            ports[p.sender.tab.id].ready = false;
+            ports[p.sender.tab.id].open = false;
           }
         }
       });
@@ -161,7 +161,9 @@ function setUpInspectorsScript(tabId) {
 
 function initInspectors(tabId) {
   if (!ports[tabId].inspectorsActive) {
-    ports[tabId].postMessage({ initVue: true });
+    const params =
+      (ports[tabId].params && { params: ports[tabId].params }) || true;
+    ports[tabId].postMessage({ initVue: params });
   }
   checkTokenBeforeStart(tabId, token => {
     ports[tabId].postMessage({ initInspectors: token });
@@ -178,8 +180,9 @@ function handleMessages(data, { sender }) {
     case "message":
       console.log(`Message: ${data.message}`);
       break;
-    case "getReady":
-      ports[sender.tab.id].ready = true;
+    case "openExtension":
+      ports[sender.tab.id].params = data["openExtension"].params;
+      ports[sender.tab.id].open = true;
       break;
     case "checkExtension":
       ports[sender.tab.id].postMessage({ extensionInstalled: true });

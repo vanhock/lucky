@@ -21,10 +21,13 @@ port.onMessage.addListener(response => {
 window.addEventListener("message", event => {
   // We only accept messages from ourselves
   if (event.source !== window) return;
-  if (event.data.setExtensionReady) {
+  if (event.data.redirectToInspection) {
+    const inspector = event.data.redirectToInspection;
     console.log("Extension ready call!");
-    port.postMessage({ getReady: true });
-    location.href = event.data.setExtensionReady;
+    port.postMessage({
+      openExtension: { params: inspector.params }
+    }); /** Activate extension before page loaded **/
+    location.href = inspector.url;
   }
   if (event.data.checkExtension) {
     try {

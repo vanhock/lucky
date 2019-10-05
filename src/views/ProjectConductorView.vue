@@ -302,7 +302,12 @@ export default {
     redirect() {
       if (this.authorized && this.hasExtension && !this.redirected) {
         window.postMessage(
-          { setExtensionReady: this.currentProject.url },
+          {
+            redirectToInspection: {
+              url: this.currentProject.url,
+              params: { projectId: this.currentProject.id }
+            }
+          },
           location.href
         );
         this.redirected = true;

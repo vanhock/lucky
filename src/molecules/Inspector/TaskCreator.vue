@@ -70,10 +70,11 @@
           updateCurrentForm();
           allFieldsModalOpen = false;
         "
-        wide>
+        wide
+      >
         <content-with-sidebar>
           <div slot="sidebar">
-            test
+            {{ currentProject && currentProject.name }}
           </div>
           <form-group ref="allFieldsForm">
             <v-input-bordered
@@ -126,10 +127,10 @@
         background
       />
       <v-toggle
-          class="task-creator-all"
-          icon="cheveron-down"
-          :text="$t('Editor')"
-          @click="showAllFields"
+        class="task-creator-all"
+        icon="cheveron-down"
+        :text="$t('Editor')"
+        @click="showAllFields"
       />
     </div>
   </div>
@@ -187,7 +188,7 @@ export default {
     allFieldsModalOpen: false
   }),
   computed: {
-    ...mapGetters(["taskCreatorState", "currentPage"]),
+    ...mapGetters(["taskCreatorState", "currentPage", "currentProject"]),
     currentFormFilled() {
       return this.currentForm && Object.keys(this.currentForm).length;
     },
@@ -204,8 +205,8 @@ export default {
     },
     createTask() {
       if (
-        (!this.allFieldsModalOpen && !this.currentPage) ||
-        !this.currentPage.id
+        (!this.allFieldsModalOpen && !this.currentProject) ||
+        !this.currentProject.id
       ) {
         this.showAllFields();
         return;
