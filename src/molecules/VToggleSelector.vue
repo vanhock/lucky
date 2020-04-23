@@ -14,6 +14,7 @@
 
 <script>
 export default {
+  /** Tool-selector with bottom dropdown **/
   name: "VToggleSelector",
   created() {
     this.sortSlot();
