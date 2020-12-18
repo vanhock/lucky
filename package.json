@@ -48,7 +48,7 @@
     "sass-loader": "^8.0.0",
     "style-resources-loader": "^1.2.1",
     "svg-spritemap-webpack-plugin": "^3.3.0",
-    "v-hotkey": "^0.6.0",
+    "v-hotkey": "^0.9.0",
     "vue-class-component": "^7.0.2",
     "vue-cli-plugin-browser-extension": "^0.22.4",
     "vue-cli-plugin-coffeescript": "^0.0.3",
