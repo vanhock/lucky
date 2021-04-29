@@ -1,0 +1,37 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    timezone: Europe/Moscow
+  open-pull-requests-limit: 10
+  target-branch: develop
+  ignore:
+  - dependency-name: eslint-plugin-vue
+    versions:
+    - 6.2.2
+    - 7.6.0
+    - 7.7.0
+    - 7.8.0
+  - dependency-name: "@vue/cli-plugin-unit-mocha"
+    versions:
+    - 4.5.11
+  - dependency-name: "@vue/cli-service"
+    versions:
+    - 4.5.11
+  - dependency-name: "@vue/cli-plugin-eslint"
+    versions:
+    - 4.5.11
+  - dependency-name: "@vue/cli-plugin-e2e-cypress"
+    versions:
+    - 4.5.11
+  - dependency-name: "@vue/cli-plugin-babel"
+    versions:
+    - 4.5.11
+  - dependency-name: webextension-polyfill
+    versions:
+    - 0.7.0
+  - dependency-name: vue-cli-plugin-browser-extension
+    versions:
+    - 0.25.1
